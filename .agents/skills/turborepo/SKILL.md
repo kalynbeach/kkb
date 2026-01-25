@@ -305,10 +305,10 @@ Scripts like `prebuild` that manually build other packages bypass Turborepo's de
 
 **However, the fix depends on whether workspace dependencies are declared:**
 
-1. **If dependencies ARE declared** (e.g., `"@repo/types": "workspace:*"` in package.json), remove the `prebuild` script. Turbo's `dependsOn: ["^build"]` handles this automatically.
+1. **If dependencies ARE declared** (e.g., `"@kkb/types": "workspace:*"` in package.json), remove the `prebuild` script. Turbo's `dependsOn: ["^build"]` handles this automatically.
 
 2. **If dependencies are NOT declared**, the `prebuild` exists because `^build` won't trigger without a dependency relationship. The fix is to:
-   - Add the dependency to package.json: `"@repo/types": "workspace:*"`
+   - Add the dependency to package.json: `"@kkb/types": "workspace:*"`
    - Then remove the `prebuild` script
 
 ```json
@@ -316,8 +316,8 @@ Scripts like `prebuild` that manually build other packages bypass Turborepo's de
 // package.json
 {
   "dependencies": {
-    "@repo/types": "workspace:*",
-    "@repo/utils": "workspace:*"
+    "@kkb/types": "workspace:*",
+    "@kkb/utils": "workspace:*"
   },
   "scripts": {
     "build": "next build"
@@ -429,11 +429,11 @@ When multiple packages need different task configurations, use **Package Configu
 {
   "tasks": {
     "test": { "dependsOn": ["build"] },
-    "@repo/web#test": { "outputs": ["coverage/**"] },
-    "@repo/api#test": { "outputs": ["coverage/**"] },
-    "@repo/utils#test": { "outputs": [] },
-    "@repo/cli#test": { "outputs": [] },
-    "@repo/core#test": { "outputs": [] }
+    "@kkb/web#test": { "outputs": ["coverage/**"] },
+    "@kkb/api#test": { "outputs": ["coverage/**"] },
+    "@kkb/utils#test": { "outputs": [] },
+    "@kkb/cli#test": { "outputs": [] },
+    "@kkb/core#test": { "outputs": [] }
   }
 }
 
@@ -694,7 +694,7 @@ packages/
 import { Button } from "../../packages/ui/src/button";
 
 // CORRECT: Install and import properly
-import { Button } from "@repo/ui/button";
+import { Button } from "@kkb/ui/button";
 ```
 
 ### Too Many Root Dependencies
