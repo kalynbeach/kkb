@@ -1,4 +1,4 @@
-import { type JSX } from "react";
+import type { JSX } from "react";
 
 export function Card({
   className = "",
@@ -20,9 +20,7 @@ export function Card({
     >
       <h2 className="mb-2 text-lg font-semibold">
         {title}{" "}
-        <span className="inline-block transition-transform group-hover:translate-x-1">
-          -&gt;
-        </span>
+        <span className="inline-block transition-transform group-hover:translate-x-1">-&gt;</span>
       </h2>
       <p className="m-0 text-sm opacity-60">{children}</p>
     </a>
