@@ -25,7 +25,7 @@
 
 - [ ] Update dependencies across all workspace packages
 - [ ] Add and configure Biome (in a new `@kkb/biome-config` package), remove ESlint (`@kkb/eslint-config`) and Prettier
-- [ ] Add and configure Tailwind CSS, remove existing CSS modules and styling config
+- [x] Add and configure Tailwind CSS, remove existing CSS modules and styling config
 - [ ] Add and setup shadcn/ui in `@kkb/ui` (`packages/ui`)
 - [ ] Update `@kkb/ui` directory naming and structure
 

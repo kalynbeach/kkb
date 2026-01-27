@@ -18,7 +18,10 @@
   },
   "devDependencies": {
     "@kkb/eslint-config": "workspace:*",
+    "@kkb/tailwind-config": "workspace:*",
     "@kkb/typescript-config": "workspace:*",
+    "@tailwindcss/postcss": "^4.1.0",
+    "postcss": "^8.5.0",
     "@types/node": "^22.15.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",

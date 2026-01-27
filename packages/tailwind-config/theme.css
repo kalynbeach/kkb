@@ -1,0 +1,30 @@
+@theme {
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-gray-alpha-100: var(--gray-a1);
+  --color-gray-alpha-200: var(--gray-a2);
+  --color-button-primary-hover: var(--btn-primary-hover);
+  --color-button-secondary-hover: var(--btn-secondary-hover);
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), monospace;
+}
+
+:root {
+  --bg: #ffffff;
+  --fg: #171717;
+  --gray-a1: rgba(0, 0, 0, 0.05);
+  --gray-a2: rgba(0, 0, 0, 0.08);
+  --btn-primary-hover: #383838;
+  --btn-secondary-hover: #f2f2f2;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0a0a0a;
+    --fg: #ededed;
+    --gray-a1: rgba(255, 255, 255, 0.06);
+    --gray-a2: rgba(255, 255, 255, 0.145);
+    --btn-primary-hover: #ccc;
+    --btn-secondary-hover: #1a1a1a;
+  }
+}
