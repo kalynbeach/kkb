@@ -10,8 +10,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.13",
-    "turbo": "^2.7.6",
-    "typescript": "5.9.2"
+    "turbo": "^2.8.0",
+    "typescript": "5.9.3"
   },
   "engines": {
     "node": ">=18"
@@ -20,5 +20,8 @@
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@types/node": "^25.1.0"
+  }
 }
