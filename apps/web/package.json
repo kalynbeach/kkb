@@ -11,18 +11,18 @@
   },
   "dependencies": {
     "@kkb/ui": "workspace:*",
-    "next": "^16.1.0",
+    "next": "^16.1.6",
     "react": "^19.2.4",
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
     "@kkb/tailwind-config": "workspace:*",
     "@kkb/typescript-config": "workspace:*",
-    "@tailwindcss/postcss": "^4.1.0",
-    "@types/node": "^25.1.0",
-    "@types/react": "^19.2.2",
-    "@types/react-dom": "^19.2.2",
-    "postcss": "^8.5.0",
-    "typescript": "^5.9.2"
+    "@tailwindcss/postcss": "^4.2.0",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "postcss": "^8.5.6",
+    "typescript": "^5.9.3"
   }
 }
