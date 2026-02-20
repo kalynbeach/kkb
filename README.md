@@ -1,142 +1,62 @@
 # KKB
 
-> KKB Monorepo (Turborepo)
-
-(work in progress)
+> Kalyn Beach's core monorepo
 
 ## Overview
 
-## Workspaces & Packages
+Turborepo monorepo built with Bun, Next.js 16, React 19, TypeScript 5.9, Biome, and Tailwind CSS v4.
 
-- `apps`
-  - `admin`
-  - `docs`
-  - `registry`
-  - `web`
-- `packages`
-  - `config-biome`
-  - `config-typescript`
-  - `ai`
-  - `audio`
-  - `ui`
-  - `workflows`
+## Workspaces
+
+### Apps
+
+- `apps/web` (`@kkb/web`) — Next.js 16 app (port 3000)
+- `apps/docs` (`@kkb/docs`) — Next.js 16 docs site (port 3001)
+- _Planned:_ `admin`, `cli`, `registry`
+
+### Packages
+
+- `packages/ui` (`@kkb/ui`) — React 19 component library
+- `packages/typescript-config` (`@kkb/typescript-config`) — shared TypeScript configs
+- `packages/tailwind-config` (`@kkb/tailwind-config`) — shared Tailwind CSS config
+- _Planned:_ `ai`, `audio`, `workflows`
+
+## Development
+
+```bash
+bun install                    # install dependencies
+bun run dev                    # start all dev servers (web:3000, docs:3001)
+bun run build                  # build all packages
+bun run format-and-lint        # biome check (CI)
+bun run format-and-lint:fix    # biome auto-fix (dev)
+bun run check-types            # typescript check
+```
+
+Filter to a specific workspace:
+
+```bash
+turbo dev --filter=@kkb/web
+turbo build --filter=@kkb/docs
+```
+
+## Architecture
+
+Internal package namespace: `@kkb/*` (use `workspace:*` protocol)
+
+Dependency flow:
+
+```
+apps/web, apps/docs
+    ↓
+packages/ui
+    ↓
+packages/typescript-config, packages/tailwind-config
+```
 
 ## TODOs
 
-- [ ] Update dependencies across all workspace packages
-- [ ] Add and configure Biome (in a new `@kkb/biome-config` package), remove ESlint (`@kkb/eslint-config`) and Prettier
-- [x] Add and configure Tailwind CSS, remove existing CSS modules and styling config
-- [ ] Add and setup shadcn/ui in `@kkb/ui` (`packages/ui`)
+- [x] Add and configure Biome, remove ESLint and Prettier
+- [x] Add and configure Tailwind CSS v4 with shared config package
+- [ ] Add and setup shadcn/ui in `@kkb/ui`
 - [ ] Update `@kkb/ui` directory naming and structure
-
----
-
-## What's inside?
-
-This Turborepo includes the following packages/apps:
-
-### Apps and Packages
-
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@kkb/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@kkb/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@kkb/typescript-config`: `tsconfig.json`s used throughout the monorepo
-
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
-
-### Utilities
-
-This Turborepo has some additional tools already setup for you:
-
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```sh
-bun run build
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-bunx turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-```sh
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-bunx turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```sh
-bun run dev
-
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-bunx turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-```sh
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-bunx turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```sh
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-bunx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```sh
-# With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation), use your package manager
-bunx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+- [ ] Add and setup [json-render](https://github.com/vercel-labs/json-render) in `@kkb/ui`
