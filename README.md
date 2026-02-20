@@ -16,7 +16,7 @@ Turborepo monorepo built with Bun, Next.js 16, React 19, TypeScript 5.9, Biome, 
 
 ### Packages
 
-- `packages/ui` (`@kkb/ui`) — React 19 component library
+- `packages/ui` (`@kkb/ui`) — React 19 component library (shadcn/ui)
 - `packages/typescript-config` (`@kkb/typescript-config`) — shared TypeScript configs
 - `packages/tailwind-config` (`@kkb/tailwind-config`) — shared Tailwind CSS config
 - _Planned:_ `ai`, `audio`, `workflows`
@@ -57,6 +57,6 @@ packages/typescript-config, packages/tailwind-config
 
 - [x] Add and configure Biome, remove ESLint and Prettier
 - [x] Add and configure Tailwind CSS v4 with shared config package
-- [ ] Add and setup shadcn/ui in `@kkb/ui`
-- [ ] Update `@kkb/ui` directory naming and structure
+- [x] Add and setup shadcn/ui in `@kkb/ui`
+- [x] Update `@kkb/ui` directory naming and structure
 - [ ] Add and setup [json-render](https://github.com/vercel-labs/json-render) in `@kkb/ui`

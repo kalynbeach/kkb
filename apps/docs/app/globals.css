@@ -1,4 +1,4 @@
-@import "@kkb/tailwind-config/base.css";
+@import "@kkb/ui/styles/globals.css";
 
 .imgDark {
   display: none;

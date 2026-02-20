@@ -3,18 +3,25 @@
   "version": "0.0.0",
   "private": true,
   "exports": {
-    "./*": "./src/*.tsx"
+    "./components/*": "./src/components/*.tsx",
+    "./hooks/*": "./src/hooks/*.ts",
+    "./lib/*": "./src/lib/*.ts",
+    "./styles/*.css": "./src/styles/*.css"
   },
   "scripts": {
-    "generate:component": "turbo gen react-component",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.511.0",
+    "radix-ui": "^1.4.3",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "tailwind-merge": "^3.3.0",
+    "tailwindcss": "^4.1.0"
   },
   "devDependencies": {
-    "@kkb/tailwind-config": "workspace:*",
     "@kkb/typescript-config": "workspace:*",
     "@types/node": "^25.1.0",
     "@types/react": "^19.2.2",

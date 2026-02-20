@@ -26,7 +26,7 @@ Turborepo monorepo with Bun as package manager/runtime.
 **Workspaces:**
 - `apps/web` - Next.js 16 app (port 3000)
 - `apps/docs` - Next.js 16 docs site (port 3001)
-- `packages/ui` - React 19 component library
+- `packages/ui` - React 19 component library (shadcn/ui, Tailwind CSS v4, neutral theme)
 - `packages/typescript-config` - shared TS configs
 - `packages/tailwind-config` - shared Tailwind CSS config
 
@@ -49,6 +49,25 @@ packages/typescript-config, packages/tailwind-config
 **TypeScript:** Strict mode enabled
 - `@kkb/typescript-config` exports: `base.json`, `nextjs.json`, `react-library.json`
 - Apps extend `nextjs.json`, libraries extend `react-library.json`
+
+## shadcn/ui
+
+Components live in `packages/ui/src/components/`. Add new components:
+```bash
+cd apps/web && bunx shadcn@latest add <component>  # routes shared components to @kkb/ui
+cd packages/ui && bunx shadcn@latest add <component>  # add directly
+```
+
+Import in apps:
+```tsx
+import { Button } from "@kkb/ui/components/button"
+import { cn } from "@kkb/ui/lib/utils"
+```
+
+- `components.json` exists in `packages/ui`, `apps/web`, and `apps/docs`
+- Aliases use `@kkb/ui/` prefix so imports resolve in both the UI package and consuming apps
+- CSS theme variables in `packages/ui/src/styles/globals.css` (neutral base, class-based dark mode)
+- Apps import styles via `@import "@kkb/ui/styles/globals.css"` in their `globals.css`
 
 ## Code Standards
 
