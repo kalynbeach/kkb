@@ -33,13 +33,22 @@ Turborepo monorepo with Bun as package manager/runtime.
 **Dependency flow:**
 ```
 apps/web, apps/docs
-    ↓
-packages/ui
-    ↓
-packages/typescript-config, packages/tailwind-config
+    ↓ depends on all three
+packages/ui  →  packages/typescript-config
+packages/tailwind-config (used by apps directly, not by ui)
 ```
 
 **Internal package namespace:** `@kkb/*` (use `workspace:*` protocol)
+
+**`@kkb/ui` exports:**
+```
+./components/*  →  src/components/*.tsx
+./hooks/*       →  src/hooks/*.ts
+./lib/*         →  src/lib/*.ts
+./styles/*.css  →  src/styles/*.css
+```
+
+**`@kkb/tailwind-config` exports:** `base.css`, `theme.css`, `postcss` (postcss.config.mjs)
 
 ## Configuration Patterns
 
@@ -66,7 +75,8 @@ import { cn } from "@kkb/ui/lib/utils"
 
 - `components.json` exists in `packages/ui`, `apps/web`, and `apps/docs`
 - Aliases use `@kkb/ui/` prefix so imports resolve in both the UI package and consuming apps
-- CSS theme variables in `packages/ui/src/styles/globals.css` (neutral base, class-based dark mode)
+- CSS theme variables in `packages/ui/src/styles/globals.css` (neutral base, oklch colors, class-based dark mode)
+- Dark mode via `next-themes`: `ThemeProvider` wraps app layout, `ModeToggle` dropdown for switching
 - Apps import styles via `@import "@kkb/ui/styles/globals.css"` in their `globals.css`
 
 ## Code Standards
