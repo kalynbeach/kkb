@@ -31,8 +31,8 @@ export default function JsonRenderPage() {
         <section className="space-y-4">
           <h2 className="text-xl font-semibold">Interactive Form</h2>
           <p className="text-sm text-muted-foreground">
-            Two-way state bindings with $bindState, $template expressions, and
-            visibility conditions.
+            Two-way state bindings with $bindState, $template expressions, and visibility
+            conditions.
           </p>
           <JsonRenderDemo spec={formSpec} />
         </section>

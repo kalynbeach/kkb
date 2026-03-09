@@ -1,7 +1,7 @@
 "use client";
 
 import type { Spec } from "@kkb/ui/json-render";
-import { Renderer, JSONUIProvider, registry } from "@kkb/ui/json-render";
+import { JSONUIProvider, Renderer, registry } from "@kkb/ui/json-render";
 
 export function JsonRenderDemo({
   spec,

@@ -218,6 +218,7 @@ export const formSpec: Spec = {
       type: "Alert",
       props: {
         title: "Submitted!",
+        // biome-ignore lint/suspicious/noTemplateCurlyInString: json-render $template syntax
         message: { $template: "Thanks, ${/form/name}. We'll reach out at ${/form/email}." },
         type: "success",
       },
@@ -299,9 +300,18 @@ export const tabsSpec: Spec = {
       props: {
         type: "single",
         items: [
-          { title: "What is json-render?", content: "A framework for rendering JSON specs as React component trees." },
-          { title: "How does state work?", content: "State is managed via JSON Pointer paths. Use $bindState for two-way binding." },
-          { title: "Can I add custom components?", content: "Yes! Define them in your catalog alongside the standard shadcn components." },
+          {
+            title: "What is json-render?",
+            content: "A framework for rendering JSON specs as React component trees.",
+          },
+          {
+            title: "How does state work?",
+            content: "State is managed via JSON Pointer paths. Use $bindState for two-way binding.",
+          },
+          {
+            title: "Can I add custom components?",
+            content: "Yes! Define them in your catalog alongside the standard shadcn components.",
+          },
         ],
       },
       children: [],
