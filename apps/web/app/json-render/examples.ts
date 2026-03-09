@@ -1,4 +1,4 @@
-import type { Spec } from "@json-render/core";
+import type { Spec } from "@kkb/ui/json-render";
 
 /** Simple card with heading and text */
 export const cardSpec: Spec = {
@@ -232,6 +232,8 @@ export const tabsSpec: Spec = {
   root: "root",
   state: {
     activeTab: "overview",
+    darkMode: false,
+    compact: false,
   },
   elements: {
     root: {
@@ -278,12 +280,12 @@ export const tabsSpec: Spec = {
     },
     dark_mode_toggle: {
       type: "Switch",
-      props: { label: "Dark mode", name: "darkMode", checked: false },
+      props: { label: "Dark mode", name: "darkMode", checked: { $bindState: "/darkMode" } },
       children: [],
     },
     compact_toggle: {
       type: "Switch",
-      props: { label: "Compact layout", name: "compact", checked: false },
+      props: { label: "Compact layout", name: "compact", checked: { $bindState: "/compact" } },
       children: [],
     },
     help_content: {
