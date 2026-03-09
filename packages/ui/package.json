@@ -6,7 +6,10 @@
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
     "./lib/*": "./src/lib/*.ts",
-    "./styles/*.css": "./src/styles/*.css"
+    "./styles/*.css": "./src/styles/*.css",
+    "./json-render": "./src/json-render/index.ts",
+    "./json-render/catalog": "./src/json-render/catalog.ts",
+    "./json-render/registry": "./src/json-render/registry.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit"
@@ -14,6 +17,9 @@
   "dependencies": {
     "@base-ui/react": "^1.2.0",
     "@hookform/resolvers": "^5.2.2",
+    "@json-render/core": "^0.11.0",
+    "@json-render/react": "^0.11.0",
+    "@json-render/shadcn": "^0.11.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
