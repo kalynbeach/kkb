@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
 
 import { AudioEngine } from "../engine";
+import { createFallbackSource } from "../../sources/fallback-source";
+import { createWorkletPCMSource } from "../../sources/worklet-pcm-source";
 
 describe("AudioEngine recovery", () => {
   test("falls back to the next source when the first source fails to load", async () => {
@@ -89,5 +91,71 @@ describe("AudioEngine recovery", () => {
 
     expect(engine.getSnapshot().currentTime).toBe(24);
     expect(engine.getSnapshot().status).toBe("ready");
+  });
+
+  test("prefers WorkletPCMSource over fallback when worklet transport is available", async () => {
+    const fallback = createFallbackSource({
+      currentTime: 0,
+      duration: 180,
+      src: "",
+      play: async () => {},
+      pause: () => {},
+      load: () => {},
+      removeAttribute: () => {},
+    });
+    const worklet = createWorkletPCMSource({
+      transport: {
+        available: true,
+        postMessage: () => {},
+      },
+      timeline: {
+        currentTime: 0,
+        duration: 180,
+      },
+    });
+
+    const engine = new AudioEngine({
+      sources: [fallback, worklet],
+    });
+
+    await engine.load({
+      src: "/audio/test-tone-opus.webm",
+      mimeType: "audio/webm; codecs=opus",
+    });
+
+    expect(engine.getSnapshot().sourceId).toBe("worklet-pcm");
+  });
+
+  test("falls through to fallback when worklet transport is unavailable", async () => {
+    const fallback = createFallbackSource({
+      currentTime: 0,
+      duration: 180,
+      src: "",
+      play: async () => {},
+      pause: () => {},
+      load: () => {},
+      removeAttribute: () => {},
+    });
+    const worklet = createWorkletPCMSource({
+      transport: {
+        available: false,
+        postMessage: () => {},
+      },
+      timeline: {
+        currentTime: 0,
+        duration: 180,
+      },
+    });
+
+    const engine = new AudioEngine({
+      sources: [fallback, worklet],
+    });
+
+    await engine.load({
+      src: "/audio/test-tone-opus.webm",
+      mimeType: "audio/webm; codecs=opus",
+    });
+
+    expect(engine.getSnapshot().sourceId).toBe("fallback");
   });
 });
