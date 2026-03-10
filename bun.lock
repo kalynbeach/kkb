@@ -63,6 +63,14 @@
         "typescript": "^5.9.3",
       },
     },
+    "packages/audio": {
+      "name": "@kkb/audio",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@kkb/typescript-config": "workspace:*",
+        "typescript": "^5.9.3",
+      },
+    },
     "packages/tailwind-config": {
       "name": "@kkb/tailwind-config",
       "version": "0.0.0",
@@ -223,6 +231,8 @@
     "@json-render/react": ["@json-render/react@0.12.0", "", { "dependencies": { "@json-render/core": "0.12.0" }, "peerDependencies": { "react": "^19.2.3" } }, "sha512-sxsSRk0iozrz2bZwpqIPayH+fN4opDsFwjmwgwJOJTcD0ZobLKGyW4d45zx/LYVWmSpbUkRQWGOhJ5cXANtcWw=="],
 
     "@json-render/shadcn": ["@json-render/shadcn@0.12.0", "", { "dependencies": { "@json-render/core": "0.12.0", "@json-render/react": "0.12.0", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "lucide-react": "^0.564.0", "radix-ui": "^1.4.3", "tailwind-merge": "^3.4.1", "vaul": "^1.1.2" }, "peerDependencies": { "react": "^19.0.0", "react-dom": "^19.0.0", "tailwindcss": "^4.0.0", "zod": "^4.0.0" } }, "sha512-mc/5Yo5Bu1gyTf8Kv7gR8UoxpkwdFlKSyDCAla1s319AABFojzWzsZmVT9fTsEeGeIIwO10MbFh1fENMnXHtjQ=="],
+
+    "@kkb/audio": ["@kkb/audio@workspace:packages/audio"],
 
     "@kkb/docs": ["@kkb/docs@workspace:apps/docs"],
 
