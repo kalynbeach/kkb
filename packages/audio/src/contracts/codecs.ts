@@ -1,4 +1,4 @@
-import type { TrackInput } from "./types.js";
+import type { TrackInput } from "./types";
 
 const WEB_CODECS_MIME_TYPES = new Set([
   "audio/webm; codecs=opus",

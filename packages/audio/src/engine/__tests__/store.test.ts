@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { createPlayerStore } from "../store.js";
+import { createPlayerStore } from "../store";
 
 describe("createPlayerStore", () => {
   test("transitions idle to loading to ready", () => {

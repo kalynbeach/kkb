@@ -4,12 +4,11 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./contracts": "./src/contracts/index.ts",
-    "./engine": "./src/engine/index.ts",
-    "./sources": "./src/sources/index.ts",
-    "./worklet": "./src/worklet/index.ts",
-    "./metrics": "./src/metrics/index.ts"
+    "./contracts/*": "./src/contracts/*.ts",
+    "./engine/*": "./src/engine/*.ts",
+    "./sources/*": "./src/sources/*.ts",
+    "./worklet/*": "./src/worklet/*.ts",
+    "./metrics/*": "./src/metrics/*.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",

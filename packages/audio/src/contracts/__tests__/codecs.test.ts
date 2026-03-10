@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 
-import { isWebCodecsEligibleInput } from "../codecs.js";
+import { isWebCodecsEligibleInput } from "../codecs";
 
 describe("isWebCodecsEligibleInput", () => {
   test("returns true for opus in webm", () => {

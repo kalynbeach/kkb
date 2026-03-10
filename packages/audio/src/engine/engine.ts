@@ -1,6 +1,6 @@
-import type { SourceScoreContext, TimelineSnapshot, TrackInput } from "../contracts/types.js";
-import { createPlaybackCheckpoint } from "./checkpoint.js";
-import { createPlayerStore } from "./store.js";
+import type { SourceScoreContext, TimelineSnapshot, TrackInput } from "../contracts/types";
+import { createPlaybackCheckpoint } from "./checkpoint";
+import { createPlayerStore } from "./store";
 
 type EngineSource = {
   id: string;
