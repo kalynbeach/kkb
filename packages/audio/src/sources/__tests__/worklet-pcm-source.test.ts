@@ -25,10 +25,6 @@ describe("createWorkletPCMSource", () => {
     expect(source.capabilities.sampleAccurateSeek).toBe(true);
     expect(source.capabilities.gapless).toBe(true);
     expect(source.getTimeline()).toEqual({ currentTime: 24, duration: 180 });
-    expect(messages).toEqual([
-      { type: "play" },
-      { type: "pause" },
-      { type: "seek", seconds: 24 },
-    ]);
+    expect(messages).toEqual([{ type: "play" }, { type: "pause" }, { type: "seek", seconds: 24 }]);
   });
 });

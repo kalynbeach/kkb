@@ -1,10 +1,9 @@
 import { describe, expect, test } from "bun:test";
-
-import { AudioEngine } from "../engine";
 import { createFallbackSource } from "../../sources/fallback-source";
 import { createMediaElementSource } from "../../sources/media-element-source";
 import { createWebCodecsSource } from "../../sources/webcodecs-source";
 import { createWorkletPCMSource } from "../../sources/worklet-pcm-source";
+import { AudioEngine } from "../engine";
 
 describe("AudioEngine recovery", () => {
   test("falls back to the next source when the first source fails to load", async () => {

@@ -1,7 +1,7 @@
 import { isWebCodecsEligibleInput } from "../contracts/codecs";
 import type { TimelineSnapshot, TrackInput } from "../contracts/types";
 
-type DemuxResult = Partial<TimelineSnapshot> | void;
+type DemuxResult = Partial<TimelineSnapshot> | undefined;
 
 export type WebCodecsDemuxer = {
   supports(input: TrackInput): boolean;
@@ -11,5 +11,5 @@ export type WebCodecsDemuxer = {
 
 export const createWebCodecsDemuxer = (): WebCodecsDemuxer => ({
   supports: (input) => isWebCodecsEligibleInput(input),
-  load: async () => {},
+  load: async () => undefined,
 });

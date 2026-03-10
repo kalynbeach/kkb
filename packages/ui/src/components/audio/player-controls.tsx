@@ -1,9 +1,8 @@
-"use client"
-
-import { Pause, Play } from "lucide-react";
+"use client";
 
 import { Button } from "@kkb/ui/components/button";
 import { cn } from "@kkb/ui/lib/utils";
+import { Pause, Play } from "lucide-react";
 
 type PlayerControlsProps = {
   title: string;
@@ -83,4 +82,4 @@ function PlayerControls({
   );
 }
 
-export { PlayerControls }
+export { PlayerControls };

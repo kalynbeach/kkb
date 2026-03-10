@@ -56,7 +56,8 @@ function PlayerShell({
                 High-fidelity web playback
               </h1>
               <p className="max-w-2xl text-sm leading-6 text-slate-600">
-                Repo-owned controls and waveform components, with runtime selection and fallback handled by the audio engine.
+                Repo-owned controls and waveform components, with runtime selection and fallback
+                handled by the audio engine.
               </p>
             </div>
             <div className="rounded-full border border-slate-300/80 bg-white/80 px-3 py-1 text-xs font-medium text-slate-600">
@@ -88,9 +89,13 @@ function PlayerShell({
           <p className="mt-2 text-lg font-semibold text-slate-950">{status}</p>
         </div>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">Buffered</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+            Buffered
+          </p>
           <p className="mt-2 text-lg font-semibold text-slate-950">
-            {presenter.bufferedSegments.length > 0 ? `${Math.round(presenter.bufferedSegments.at(-1)?.leftPercent ?? 0)}%+` : "0%"}
+            {presenter.bufferedSegments.length > 0
+              ? `${Math.round(presenter.bufferedSegments.at(-1)?.leftPercent ?? 0)}%+`
+              : "0%"}
           </p>
         </div>
         <div>

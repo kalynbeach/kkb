@@ -6,8 +6,7 @@ const WEB_CODECS_MIME_TYPES = new Set([
   "audio/m4a; codecs=mp4a.40.2",
 ]);
 
-export const normalizeMimeType = (input: TrackInput) =>
-  input.mimeType?.trim().toLowerCase() ?? "";
+export const normalizeMimeType = (input: TrackInput) => input.mimeType?.trim().toLowerCase() ?? "";
 
 export const isWebCodecsEligibleInput = (input: TrackInput) =>
   WEB_CODECS_MIME_TYPES.has(normalizeMimeType(input));

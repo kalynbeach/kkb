@@ -37,7 +37,8 @@ export const createPlayerPresenter = ({
 }: PlayerPresenterInput) => {
   const safeDuration = duration > 0 ? duration : 1;
   const isPlaying = status === "playing";
-  const canControl = status !== "idle" && status !== "loading" && status !== "recovering" && status !== "error";
+  const canControl =
+    status !== "idle" && status !== "loading" && status !== "recovering" && status !== "error";
 
   return {
     isPlaying,

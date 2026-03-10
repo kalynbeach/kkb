@@ -1,5 +1,10 @@
 import { isWebCodecsEligibleInput } from "../contracts/codecs";
-import type { SourceCapabilities, SourceScoreContext, TimelineSnapshot, TrackInput } from "../contracts/types";
+import type {
+  SourceCapabilities,
+  SourceScoreContext,
+  TimelineSnapshot,
+  TrackInput,
+} from "../contracts/types";
 import type { WebCodecsDemuxer } from "./webcodecs-demux";
 
 type WebCodecsGlobals = {

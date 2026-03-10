@@ -1,10 +1,10 @@
+import type { TrackInput } from "@kkb/audio/contracts/types";
 import { AudioEngine } from "@kkb/audio/engine/engine";
 import { createFallbackSource } from "@kkb/audio/sources/fallback-source";
 import { createMediaElementSource } from "@kkb/audio/sources/media-element-source";
 import { createWebCodecsDemuxer } from "@kkb/audio/sources/webcodecs-demux";
 import { createWebCodecsSource } from "@kkb/audio/sources/webcodecs-source";
 import { createWorkletPCMSource } from "@kkb/audio/sources/worklet-pcm-source";
-import type { TrackInput } from "@kkb/audio/contracts/types";
 
 type BufferedRange = {
   start: number;
@@ -120,7 +120,8 @@ export const createWebPlayer = (options: CreateWebPlayerOptions = {}) => {
     },
     getBufferedRanges: () => {
       const snapshot = engine.getSnapshot();
-      const buffered = snapshot.sourceId === "fallback" ? fallbackElement.buffered : mediaElement.buffered;
+      const buffered =
+        snapshot.sourceId === "fallback" ? fallbackElement.buffered : mediaElement.buffered;
       return toBufferedRanges(buffered);
     },
   };

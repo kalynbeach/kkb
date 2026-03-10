@@ -1,4 +1,9 @@
-import type { SourceCapabilities, SourceScoreContext, TimelineSnapshot, TrackInput } from "../contracts/types";
+import type {
+  SourceCapabilities,
+  SourceScoreContext,
+  TimelineSnapshot,
+  TrackInput,
+} from "../contracts/types";
 
 type AudioElementLike = {
   currentTime: number;
