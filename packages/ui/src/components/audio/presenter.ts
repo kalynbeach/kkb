@@ -20,14 +20,24 @@ export type PlayerPresenterInput = {
 };
 
 const formatTime = (value: number) => {
-  const totalSeconds = Math.max(0, Math.floor(value));
+  const totalSeconds = Math.max(0, Math.floor(Number.isFinite(value) ? value : 0));
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
 
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 };
 
-const clampPercent = (value: number) => Math.min(100, Math.max(0, value));
+const sanitizeNumber = (value: number) => (Number.isFinite(value) && value > 0 ? value : 0);
+
+const sanitizeOffset = (value: number) => (Number.isFinite(value) && value >= 0 ? value : 0);
+
+const clampPercent = (value: number) => {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.min(100, Math.max(0, value));
+};
 
 export const createPlayerPresenter = ({
   status,
@@ -35,7 +45,9 @@ export const createPlayerPresenter = ({
   duration,
   bufferedRanges,
 }: PlayerPresenterInput) => {
-  const safeDuration = duration > 0 ? duration : 1;
+  const safeCurrentTime = sanitizeOffset(currentTime);
+  const safeDurationValue = sanitizeNumber(duration);
+  const safeDuration = safeDurationValue > 0 ? safeDurationValue : 1;
   const isPlaying = status === "playing";
   const canControl =
     status !== "idle" && status !== "loading" && status !== "recovering" && status !== "error";
@@ -44,12 +56,14 @@ export const createPlayerPresenter = ({
     isPlaying,
     isPlayDisabled: !canControl || isPlaying,
     isPauseDisabled: !canControl || !isPlaying,
-    currentTimeLabel: formatTime(currentTime),
-    durationLabel: formatTime(duration),
-    progressPercent: clampPercent((currentTime / safeDuration) * 100),
+    currentTimeLabel: formatTime(safeCurrentTime),
+    durationLabel: formatTime(safeDurationValue),
+    progressPercent: clampPercent((safeCurrentTime / safeDuration) * 100),
     bufferedSegments: bufferedRanges.map((range) => ({
-      leftPercent: clampPercent((range.start / safeDuration) * 100),
-      widthPercent: clampPercent(((range.end - range.start) / safeDuration) * 100),
+      leftPercent: clampPercent((sanitizeOffset(range.start) / safeDuration) * 100),
+      widthPercent: clampPercent(
+        ((sanitizeOffset(range.end) - sanitizeOffset(range.start)) / safeDuration) * 100,
+      ),
     })),
   };
 };

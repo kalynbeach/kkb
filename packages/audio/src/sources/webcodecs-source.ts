@@ -1,10 +1,6 @@
 import { isWebCodecsEligibleInput } from "../contracts/codecs";
-import type {
-  SourceCapabilities,
-  SourceScoreContext,
-  TimelineSnapshot,
-  TrackInput,
-} from "../contracts/types";
+import type { SourceCapabilities, TimelineSnapshot } from "../contracts/types";
+import type { AudioSource } from "./audio-source";
 import type { WebCodecsDemuxer } from "./webcodecs-demux";
 
 type WebCodecsGlobals = {
@@ -15,19 +11,6 @@ type WebCodecsSourceOptions = {
   globals: WebCodecsGlobals;
   demuxer: WebCodecsDemuxer;
   timeline: TimelineSnapshot;
-};
-
-type AudioSource = {
-  id: string;
-  capabilities: SourceCapabilities;
-  canPlay(input: TrackInput): Promise<boolean>;
-  score(context: SourceScoreContext): number;
-  load(input: TrackInput): Promise<void>;
-  play(): Promise<void>;
-  pause(): Promise<void>;
-  seek(seconds: number): Promise<void>;
-  getTimeline(): TimelineSnapshot;
-  destroy(): Promise<void>;
 };
 
 const WEB_CODECS_CAPABILITIES: SourceCapabilities = {

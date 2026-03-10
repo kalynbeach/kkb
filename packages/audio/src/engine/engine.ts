@@ -1,21 +1,10 @@
 import type { SourceScoreContext, TimelineSnapshot, TrackInput } from "../contracts/types";
+import type { AudioSource, PlaybackEvent } from "../sources/audio-source";
 import { createPlaybackCheckpoint } from "./checkpoint";
 import { createPlayerStore } from "./store";
 
-type EngineSource = {
-  id: string;
-  canPlay(input: TrackInput): Promise<boolean>;
-  score(context: SourceScoreContext): number;
-  load(input: TrackInput): Promise<void>;
-  play(): Promise<void>;
-  pause(): Promise<void>;
-  seek(seconds: number): Promise<void>;
-  getTimeline(): TimelineSnapshot;
-  destroy(): Promise<void>;
-};
-
 type AudioEngineOptions = {
-  sources: EngineSource[];
+  sources: AudioSource[];
   scoreContext?: Partial<SourceScoreContext>;
 };
 
@@ -27,9 +16,10 @@ const DEFAULT_SCORE_CONTEXT: SourceScoreContext = {
 export class AudioEngine {
   private readonly store = createPlayerStore();
   private readonly checkpoint = createPlaybackCheckpoint();
-  private readonly sources: EngineSource[];
+  private readonly sources: AudioSource[];
   private readonly scoreContext: SourceScoreContext;
-  private activeSource: EngineSource | null = null;
+  private activeSource: AudioSource | null = null;
+  private unsubscribeActivePlayback: (() => void) | null = null;
 
   constructor(options: AudioEngineOptions) {
     this.sources = options.sources;
@@ -45,9 +35,20 @@ export class AudioEngine {
   }
 
   async load(input: TrackInput) {
-    this.store.setState({ status: "loading", error: null });
+    const hadActiveSource = this.activeSource !== null;
+    await this.teardownActiveSource();
+    if (hadActiveSource) {
+      this.checkpoint.update({ currentTime: 0 });
+    }
+    this.store.setState({
+      status: "loading",
+      currentTime: 0,
+      duration: 0,
+      sourceId: null,
+      error: null,
+    });
 
-    const playableSources: EngineSource[] = [];
+    const playableSources: AudioSource[] = [];
     for (const source of this.sources) {
       if (await source.canPlay(input)) {
         playableSources.push(source);
@@ -75,6 +76,7 @@ export class AudioEngine {
 
         const timeline = source.getTimeline();
         this.activeSource = source;
+        this.subscribeToActiveSource(source);
         this.store.setState({
           status: "ready",
           currentTime: checkpoint.currentTime || timeline.currentTime,
@@ -88,9 +90,13 @@ export class AudioEngine {
       }
     }
 
+    this.unsubscribeFromActiveSource();
     this.activeSource = null;
     this.store.setState({
       status: "error",
+      currentTime: 0,
+      duration: 0,
+      sourceId: null,
       error: lastError?.message ?? "Unable to load audio source",
     });
 
@@ -132,5 +138,63 @@ export class AudioEngine {
 
   async setVolume(volume: number) {
     this.checkpoint.update({ volume });
+  }
+
+  private subscribeToActiveSource(source: AudioSource) {
+    this.unsubscribeFromActiveSource();
+    this.unsubscribeActivePlayback =
+      source.subscribePlayback?.((event) => {
+        void this.handlePlaybackEvent(source, event);
+      }) ?? null;
+  }
+
+  private unsubscribeFromActiveSource() {
+    this.unsubscribeActivePlayback?.();
+    this.unsubscribeActivePlayback = null;
+  }
+
+  private async teardownActiveSource() {
+    const source = this.activeSource;
+
+    this.unsubscribeFromActiveSource();
+    this.activeSource = null;
+
+    if (!source) {
+      return;
+    }
+
+    await source.pause();
+    await source.destroy();
+  }
+
+  private async handlePlaybackEvent(source: AudioSource, event: PlaybackEvent) {
+    if (this.activeSource !== source) {
+      return;
+    }
+
+    if (event === "play") {
+      this.store.setState({ status: "playing" });
+      return;
+    }
+
+    if (event === "ended") {
+      this.checkpoint.update({ currentTime: 0 });
+      this.store.setState({
+        status: "paused",
+        currentTime: 0,
+        duration: source.getTimeline().duration,
+      });
+      await source.seek(0);
+      return;
+    }
+
+    if (event === "pause") {
+      const timeline: TimelineSnapshot = source.getTimeline();
+      this.store.setState({
+        status: "paused",
+        currentTime: timeline.currentTime,
+        duration: timeline.duration,
+      });
+    }
   }
 }

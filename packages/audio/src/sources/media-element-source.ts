@@ -1,9 +1,5 @@
-import type {
-  SourceCapabilities,
-  SourceScoreContext,
-  TimelineSnapshot,
-  TrackInput,
-} from "../contracts/types";
+import type { SourceCapabilities } from "../contracts/types";
+import type { AudioSource, PlaybackEvent } from "./audio-source";
 
 type AudioElementLike = {
   currentTime: number;
@@ -14,19 +10,8 @@ type AudioElementLike = {
   pause(): void;
   load(): void;
   removeAttribute(name: string): void;
-};
-
-type AudioSource = {
-  id: string;
-  capabilities: SourceCapabilities;
-  canPlay(input: TrackInput): Promise<boolean>;
-  score(context: SourceScoreContext): number;
-  load(input: TrackInput): Promise<void>;
-  play(): Promise<void>;
-  pause(): Promise<void>;
-  seek(seconds: number): Promise<void>;
-  getTimeline(): TimelineSnapshot;
-  destroy(): Promise<void>;
+  addEventListener(type: PlaybackEvent, listener: () => void): void;
+  removeEventListener(type: PlaybackEvent, listener: () => void): void;
 };
 
 const MEDIA_ELEMENT_CAPABILITIES: SourceCapabilities = {
@@ -63,5 +48,26 @@ export const createMediaElementSource = (audio: AudioElementLike): AudioSource =
   destroy: async () => {
     audio.removeAttribute("src");
     audio.load();
+  },
+  subscribePlayback: (listener) => {
+    const play = () => {
+      listener("play");
+    };
+    const pause = () => {
+      listener("pause");
+    };
+    const ended = () => {
+      listener("ended");
+    };
+
+    audio.addEventListener("play", play);
+    audio.addEventListener("pause", pause);
+    audio.addEventListener("ended", ended);
+
+    return () => {
+      audio.removeEventListener("play", play);
+      audio.removeEventListener("pause", pause);
+      audio.removeEventListener("ended", ended);
+    };
   },
 });

@@ -1,31 +1,17 @@
-import type {
-  SourceCapabilities,
-  SourceScoreContext,
-  TimelineSnapshot,
-  TrackInput,
-} from "../contracts/types";
+import type { SourceCapabilities } from "../contracts/types";
+import type { AudioSource, PlaybackEvent } from "./audio-source";
 
 type AudioElementLike = {
   currentTime: number;
   duration: number;
   src: string;
+  canPlayType(mimeType: string): string;
   play(): Promise<void>;
   pause(): void;
   load(): void;
   removeAttribute(name: string): void;
-};
-
-type AudioSource = {
-  id: string;
-  capabilities: SourceCapabilities;
-  canPlay(input: TrackInput): Promise<boolean>;
-  score(context: SourceScoreContext): number;
-  load(input: TrackInput): Promise<void>;
-  play(): Promise<void>;
-  pause(): Promise<void>;
-  seek(seconds: number): Promise<void>;
-  getTimeline(): TimelineSnapshot;
-  destroy(): Promise<void>;
+  addEventListener(type: PlaybackEvent, listener: () => void): void;
+  removeEventListener(type: PlaybackEvent, listener: () => void): void;
 };
 
 const FALLBACK_CAPABILITIES: SourceCapabilities = {
@@ -40,7 +26,7 @@ const FALLBACK_CAPABILITIES: SourceCapabilities = {
 export const createFallbackSource = (audio: AudioElementLike): AudioSource => ({
   id: "fallback",
   capabilities: FALLBACK_CAPABILITIES,
-  canPlay: async (_input) => true,
+  canPlay: async (input) => audio.canPlayType(input.mimeType ?? "") !== "",
   score: (_context) => 1,
   load: async (input) => {
     audio.src = input.src;
@@ -61,5 +47,26 @@ export const createFallbackSource = (audio: AudioElementLike): AudioSource => ({
   destroy: async () => {
     audio.removeAttribute("src");
     audio.load();
+  },
+  subscribePlayback: (listener) => {
+    const play = () => {
+      listener("play");
+    };
+    const pause = () => {
+      listener("pause");
+    };
+    const ended = () => {
+      listener("ended");
+    };
+
+    audio.addEventListener("play", play);
+    audio.addEventListener("pause", pause);
+    audio.addEventListener("ended", ended);
+
+    return () => {
+      audio.removeEventListener("play", play);
+      audio.removeEventListener("pause", pause);
+      audio.removeEventListener("ended", ended);
+    };
   },
 });

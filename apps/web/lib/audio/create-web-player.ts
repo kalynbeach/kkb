@@ -1,5 +1,6 @@
 import type { TrackInput } from "@kkb/audio/contracts/types";
 import { AudioEngine } from "@kkb/audio/engine/engine";
+import type { PlaybackEvent } from "@kkb/audio/sources/audio-source";
 import { createFallbackSource } from "@kkb/audio/sources/fallback-source";
 import { createMediaElementSource } from "@kkb/audio/sources/media-element-source";
 import { createWebCodecsDemuxer } from "@kkb/audio/sources/webcodecs-demux";
@@ -27,6 +28,8 @@ type AudioElementLike = {
   pause(): void;
   load(): void;
   removeAttribute(name: string): void;
+  addEventListener(type: PlaybackEvent, listener: () => void): void;
+  removeEventListener(type: PlaybackEvent, listener: () => void): void;
 };
 
 type CreateWebPlayerOptions = {

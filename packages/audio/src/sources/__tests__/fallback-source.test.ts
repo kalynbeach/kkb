@@ -5,6 +5,7 @@ import { createMediaElementSource } from "../media-element-source";
 
 const createAudioStub = () => {
   let src = "";
+  const listeners = new Map<string, Set<() => void>>();
 
   return {
     currentTime: 0,
@@ -16,6 +17,19 @@ const createAudioStub = () => {
     removeAttribute: (name: string) => {
       if (name === "src") {
         src = "";
+      }
+    },
+    addEventListener: (type: string, listener: () => void) => {
+      const nextListeners = listeners.get(type) ?? new Set();
+      nextListeners.add(listener);
+      listeners.set(type, nextListeners);
+    },
+    removeEventListener: (type: string, listener: () => void) => {
+      listeners.get(type)?.delete(listener);
+    },
+    emit: (type: string) => {
+      for (const listener of listeners.get(type) ?? []) {
+        listener();
       }
     },
     set src(value: string) {
@@ -56,5 +70,36 @@ describe("createFallbackSource", () => {
 
     expect(audio.src).toBe("/audio/test-tone-opus.webm");
     expect(playCalls).toBe(1);
+  });
+
+  test("rejects unsupported mime types during source selection", async () => {
+    const source = createFallbackSource({
+      ...createAudioStub(),
+      canPlayType: () => "",
+    });
+
+    await expect(
+      source.canPlay({
+        src: "/audio/test-tone.flac",
+        mimeType: "audio/flac",
+      }),
+    ).resolves.toBe(false);
+  });
+
+  test("subscribes to native playback events", () => {
+    const audio = createAudioStub();
+    const source = createFallbackSource(audio);
+    const events: string[] = [];
+
+    const unsubscribe = source.subscribePlayback?.((event) => {
+      events.push(event);
+    });
+
+    audio.emit("play");
+    audio.emit("pause");
+    unsubscribe?.();
+    audio.emit("ended");
+
+    expect(events).toEqual(["play", "pause"]);
   });
 });

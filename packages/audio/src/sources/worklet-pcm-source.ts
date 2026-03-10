@@ -1,9 +1,5 @@
-import type {
-  SourceCapabilities,
-  SourceScoreContext,
-  TimelineSnapshot,
-  TrackInput,
-} from "../contracts/types";
+import type { SourceCapabilities, TimelineSnapshot } from "../contracts/types";
+import type { AudioSource } from "./audio-source";
 
 type WorkletTransport = {
   available: boolean;
@@ -13,19 +9,6 @@ type WorkletTransport = {
 type WorkletPCMSourceOptions = {
   transport: WorkletTransport;
   timeline: TimelineSnapshot;
-};
-
-type AudioSource = {
-  id: string;
-  capabilities: SourceCapabilities;
-  canPlay(input: TrackInput): Promise<boolean>;
-  score(context: SourceScoreContext): number;
-  load(input: TrackInput): Promise<void>;
-  play(): Promise<void>;
-  pause(): Promise<void>;
-  seek(seconds: number): Promise<void>;
-  getTimeline(): TimelineSnapshot;
-  destroy(): Promise<void>;
 };
 
 const WORKLET_PCM_CAPABILITIES: SourceCapabilities = {

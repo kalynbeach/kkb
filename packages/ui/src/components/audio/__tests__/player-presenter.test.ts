@@ -51,4 +51,18 @@ describe("createPlayerPresenter", () => {
       { leftPercent: 50, widthPercent: 25 },
     ]);
   });
+
+  test("sanitizes non-finite timeline values", () => {
+    const presenter = createPlayerPresenter({
+      status: "ready",
+      currentTime: Number.NaN,
+      duration: Number.POSITIVE_INFINITY,
+      bufferedRanges: [{ start: Number.NaN, end: Number.POSITIVE_INFINITY }],
+    });
+
+    expect(presenter.currentTimeLabel).toBe("0:00");
+    expect(presenter.durationLabel).toBe("0:00");
+    expect(presenter.progressPercent).toBe(0);
+    expect(presenter.bufferedSegments).toEqual([{ leftPercent: 0, widthPercent: 0 }]);
+  });
 });

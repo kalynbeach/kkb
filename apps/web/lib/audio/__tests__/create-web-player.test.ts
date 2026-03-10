@@ -4,6 +4,7 @@ import { createWebPlayer } from "../create-web-player";
 
 const createAudioStub = () => {
   let src = "";
+  const listeners = new Map<string, Set<() => void>>();
 
   return {
     currentTime: 0,
@@ -21,6 +22,14 @@ const createAudioStub = () => {
       if (name === "src") {
         src = "";
       }
+    },
+    addEventListener: (type: string, listener: () => void) => {
+      const nextListeners = listeners.get(type) ?? new Set();
+      nextListeners.add(listener);
+      listeners.set(type, nextListeners);
+    },
+    removeEventListener: (type: string, listener: () => void) => {
+      listeners.get(type)?.delete(listener);
     },
     set src(value: string) {
       src = value;
