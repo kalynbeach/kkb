@@ -1,8 +1,7 @@
 "use client";
 
-import { Button } from "@kkb/ui/components/button";
 import { cn } from "@kkb/ui/lib/utils";
-import { Pause, Play } from "lucide-react";
+import { Pause, Play, SkipBack, SkipForward, Square } from "lucide-react";
 
 type PlayerControlsProps = {
   title: string;
@@ -17,67 +16,74 @@ type PlayerControlsProps = {
   onPause?: () => void;
 };
 
+function TransportButton({
+  children,
+  disabled = false,
+  onClick,
+  label,
+}: {
+  children: React.ReactNode;
+  disabled?: boolean;
+  onClick?: () => void;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      onClick={onClick}
+      aria-label={label}
+      className={cn(
+        "flex h-7 w-8 items-center justify-center rounded-sm",
+        "border border-[#b0b8d0] bg-[linear-gradient(180deg,#d0d8ee_0%,#b0b8d0_40%,#a0a8c0_100%)]",
+        "shadow-[0_1px_0_rgba(255,255,255,0.5),inset_0_1px_0_rgba(255,255,255,0.4),0_1px_2px_rgba(0,0,0,0.12)]",
+        "transition-shadow duration-75 cursor-pointer",
+        "active:bg-[linear-gradient(180deg,#a0a8c0_0%,#b0b8d0_60%,#b8c0d8_100%)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_0_1px_rgba(0,0,0,0.1)]",
+        "disabled:opacity-35 disabled:cursor-default disabled:active:bg-[linear-gradient(180deg,#d0d8ee_0%,#b0b8d0_40%,#a0a8c0_100%)] disabled:active:shadow-[0_1px_0_rgba(255,255,255,0.5),inset_0_1px_0_rgba(255,255,255,0.4),0_1px_2px_rgba(0,0,0,0.12)]",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
 function PlayerControls({
-  title,
-  subtitle,
   isPlaying,
   isPlayDisabled = false,
   isPauseDisabled = false,
-  currentTimeLabel,
-  durationLabel,
   className,
   onPlay,
   onPause,
 }: PlayerControlsProps) {
   return (
-    <div
-      className={cn(
-        "flex flex-col gap-5 rounded-[1.75rem] border border-slate-200/80 bg-white/95 p-6 shadow-[0_22px_70px_-36px_rgba(15,23,42,0.38)] dark:border-slate-800 dark:bg-slate-950",
-        className,
-      )}
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-sky-700 dark:text-sky-400">
-            Web Audio Player
-          </p>
-          <h2 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white">
-            {title}
-          </h2>
-          {subtitle ? (
-            <p className="text-sm text-slate-600 dark:text-slate-300">{subtitle}</p>
-          ) : null}
-        </div>
-        <div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
-          {currentTimeLabel} / {durationLabel}
-        </div>
-      </div>
-      <div className="flex items-center gap-3">
-        <Button
-          type="button"
-          size="icon-lg"
-          className="rounded-full bg-slate-950 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
-          disabled={isPlayDisabled}
-          onClick={onPlay}
-        >
-          <Play className="size-5 fill-current" />
-          <span className="sr-only">Play</span>
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          size="icon-lg"
-          className="rounded-full border-slate-300 bg-white hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:hover:bg-slate-900"
-          disabled={isPauseDisabled}
-          onClick={onPause}
-        >
-          <Pause className="size-5 fill-current" />
-          <span className="sr-only">Pause</span>
-        </Button>
-        <div className="ml-auto text-sm font-medium text-slate-600 dark:text-slate-300">
-          {isPlaying ? "Playing" : "Paused"}
-        </div>
-      </div>
+    <div className={cn("flex items-center justify-center gap-[3px] py-1.5", className)}>
+      <TransportButton disabled label="Previous">
+        <SkipBack className="size-[11px] fill-[#7880a0] text-[#7880a0]" />
+      </TransportButton>
+
+      <TransportButton
+        disabled={isPlayDisabled}
+        onClick={onPlay}
+        label="Play"
+      >
+        <Play className="size-3 fill-[#48507a] text-[#48507a]" />
+      </TransportButton>
+
+      <TransportButton
+        disabled={isPauseDisabled}
+        onClick={onPause}
+        label="Pause"
+      >
+        <Pause className="size-3 fill-[#48507a] text-[#48507a]" />
+      </TransportButton>
+
+      <TransportButton disabled label="Stop">
+        <Square className="size-2.5 fill-[#7880a0] text-[#7880a0]" />
+      </TransportButton>
+
+      <TransportButton disabled label="Next">
+        <SkipForward className="size-[11px] fill-[#7880a0] text-[#7880a0]" />
+      </TransportButton>
     </div>
   );
 }

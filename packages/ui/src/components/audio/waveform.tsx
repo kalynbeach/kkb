@@ -58,7 +58,7 @@ function Waveform({
   const progressPercent =
     duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
 
-  const handleSeek = (event: React.PointerEvent<HTMLButtonElement>) => {
+  const handleSeek = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!onSeek || duration <= 0) {
       return;
     }
@@ -69,15 +69,17 @@ function Waveform({
   };
 
   return (
-    <button
-      type="button"
+    <div
+      role="slider"
+      tabIndex={0}
+      aria-valuenow={Math.round(currentTime)}
+      aria-valuemin={0}
+      aria-valuemax={Math.round(duration)}
+      aria-label="Seek"
       onPointerDown={handleSeek}
-      className={cn(
-        "group relative flex h-28 w-full items-end gap-1 overflow-hidden rounded-[1.75rem] border border-slate-200/80 bg-[linear-gradient(180deg,rgba(248,250,252,0.98),rgba(226,232,240,0.94))] px-4 py-5 text-left shadow-[0_24px_80px_-40px_rgba(15,23,42,0.45)] transition-colors hover:border-slate-300/90 dark:border-slate-700 dark:bg-slate-900",
-        className,
-      )}
+      className={cn("group relative h-14 w-full cursor-pointer", className)}
     >
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.18),transparent_42%),radial-gradient(circle_at_bottom,rgba(249,115,22,0.14),transparent_38%)] opacity-90" />
+      {/* Buffered ranges */}
       {bufferedRanges.map((range) => {
         const left = duration > 0 ? (range.start / duration) * 100 : 0;
         const width = duration > 0 ? ((range.end - range.start) / duration) * 100 : 0;
@@ -86,27 +88,42 @@ function Waveform({
           <div
             key={`${range.start}-${range.end}`}
             aria-hidden="true"
-            className="absolute inset-y-0 rounded-[1.5rem] bg-slate-900/8 dark:bg-white/10"
+            className="absolute inset-y-0 bg-[rgba(120,184,255,0.06)]"
             style={{ left: `${left}%`, width: `${width}%` }}
           />
         );
       })}
+
+      {/* Progress overlay */}
       <div
         aria-hidden="true"
-        className="absolute inset-y-0 left-0 rounded-[1.5rem] bg-[linear-gradient(90deg,rgba(14,165,233,0.18),rgba(249,115,22,0.24))]"
+        className="absolute inset-y-0 left-0 bg-[linear-gradient(90deg,rgba(120,184,255,0.06),rgba(100,160,255,0.12))]"
         style={{ width: `${progressPercent}%` }}
       />
-      <div className="relative z-10 flex w-full items-end gap-1">
-        {DEFAULT_BARS.map((bar) => (
-          <div
-            key={bar.id}
-            className="min-w-0 flex-1 rounded-full bg-slate-500/55 transition-colors group-hover:bg-slate-600/60 dark:bg-slate-300/55 dark:group-hover:bg-slate-200/70"
-            style={{ height: `${Math.round(bar.height * 100)}%` }}
-          />
-        ))}
+
+      {/* EQ bars */}
+      <div className="absolute inset-0 flex items-end gap-[3px] px-1 py-0.5">
+        {DEFAULT_BARS.map((bar, index) => {
+          const barPosition = (index / DEFAULT_BARS.length) * 100;
+          const isPlayed = barPosition < progressPercent;
+
+          return (
+            <div
+              key={bar.id}
+              className={cn(
+                "flex-1 rounded-[2px] transition-colors duration-100",
+                isPlayed
+                  ? "bg-[rgba(130,190,255,0.95)] shadow-[0_0_8px_rgba(120,184,255,0.6)]"
+                  : "bg-[rgba(100,160,220,0.25)] group-hover:bg-[rgba(100,160,220,0.35)]",
+              )}
+              style={{ height: `${Math.max(12, Math.round(bar.height * 100))}%` }}
+            />
+          );
+        })}
       </div>
+
       <Playhead progressPercent={progressPercent} />
-    </button>
+    </div>
   );
 }
 
