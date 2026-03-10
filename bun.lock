@@ -46,6 +46,7 @@
       "name": "@kkb/web",
       "version": "0.1.0",
       "dependencies": {
+        "@kkb/audio": "workspace:*",
         "@kkb/ui": "workspace:*",
         "next": "^16.1.6",
         "radix-ui": "^1.4.3",
