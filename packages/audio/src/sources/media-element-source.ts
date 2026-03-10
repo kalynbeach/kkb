@@ -40,6 +40,7 @@ export const createMediaElementSource = (audio: AudioElementLike): AudioSource =
   score: (_context) => 70,
   load: async (input) => {
     audio.src = input.src;
+    audio.load();
   },
   play: async () => {
     await audio.play();
