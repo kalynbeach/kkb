@@ -94,6 +94,7 @@ export const createWebPlayer = (options: CreateWebPlayerOptions = {}) => {
   });
 
   const sources = [fallbackSource, workletSource, mediaElementSource, webCodecsSource];
+  const sourcesById = new Map(sources.map((source) => [source.id, source]));
   const engine = new AudioEngine({ sources });
 
   return {
@@ -108,24 +109,25 @@ export const createWebPlayer = (options: CreateWebPlayerOptions = {}) => {
     seek: (seconds: number) => engine.seek(seconds),
     getTimeline: () => {
       const snapshot = engine.getSnapshot();
-
-      if (snapshot.sourceId === "fallback") {
-        return {
-          currentTime: fallbackElement.currentTime,
-          duration: fallbackElement.duration,
-        };
-      }
-
-      return {
-        currentTime: mediaElement.currentTime,
-        duration: mediaElement.duration,
-      };
+      return (
+        (snapshot.sourceId ? sourcesById.get(snapshot.sourceId)?.getTimeline() : null) ?? {
+          currentTime: snapshot.currentTime,
+          duration: snapshot.duration,
+        }
+      );
     },
     getBufferedRanges: () => {
       const snapshot = engine.getSnapshot();
-      const buffered =
-        snapshot.sourceId === "fallback" ? fallbackElement.buffered : mediaElement.buffered;
-      return toBufferedRanges(buffered);
+
+      if (snapshot.sourceId === "fallback") {
+        return toBufferedRanges(fallbackElement.buffered);
+      }
+
+      if (snapshot.sourceId === "media-element") {
+        return toBufferedRanges(mediaElement.buffered);
+      }
+
+      return [];
     },
   };
 };

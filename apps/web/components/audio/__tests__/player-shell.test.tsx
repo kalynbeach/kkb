@@ -45,4 +45,52 @@ describe("PlayerShell", () => {
       ),
     ).not.toThrow();
   });
+
+  test("shows buffered progress using the buffered extent", () => {
+    const html = renderToString(
+      <PlayerShell
+        player={{
+          ...createPlayerStub(),
+          getBufferedRanges: () => [{ start: 10, end: 30 }],
+          getTimeline: () => ({ currentTime: 0, duration: 100 }),
+        }}
+        title="Test Tone"
+        subtitle="Local AAC fixture routed through the current media-element path."
+        status="ready"
+        duration={100}
+        sourceId="media-element"
+        error={null}
+        onPlay={() => {}}
+        onPause={() => {}}
+        onSeek={() => {}}
+      />,
+    );
+    const normalizedHtml = html.replaceAll("<!-- -->", "");
+
+    expect(normalizedHtml).toContain("buf 30%");
+  });
+
+  test("clamps buffered progress display to 100 percent", () => {
+    const html = renderToString(
+      <PlayerShell
+        player={{
+          ...createPlayerStub(),
+          getBufferedRanges: () => [{ start: 80, end: 140 }],
+          getTimeline: () => ({ currentTime: 0, duration: 100 }),
+        }}
+        title="Test Tone"
+        subtitle="Local AAC fixture routed through the current media-element path."
+        status="ready"
+        duration={100}
+        sourceId="media-element"
+        error={null}
+        onPlay={() => {}}
+        onPause={() => {}}
+        onSeek={() => {}}
+      />,
+    );
+    const normalizedHtml = html.replaceAll("<!-- -->", "");
+
+    expect(normalizedHtml).toContain("buf 100%");
+  });
 });

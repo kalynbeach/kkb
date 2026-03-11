@@ -2,7 +2,11 @@ import { describe, expect, test } from "bun:test";
 
 import { createWebPlayer } from "../create-web-player";
 
-const createAudioStub = () => {
+const createAudioStub = ({
+  canPlayType = () => "probably",
+}: {
+  canPlayType?: (mimeType: string) => string;
+} = {}) => {
   let src = "";
   const listeners = new Map<string, Set<() => void>>();
 
@@ -14,7 +18,7 @@ const createAudioStub = () => {
       start: () => 0,
       end: () => 30,
     },
-    canPlayType: () => "probably",
+    canPlayType,
     play: async () => {},
     pause: () => {},
     load: () => {},
@@ -52,5 +56,51 @@ describe("createWebPlayer", () => {
     expect(player.sources).toHaveLength(4);
     expect(typeof player.getSnapshot).toBe("function");
     expect(typeof player.subscribe).toBe("function");
+  });
+
+  test("reports timeline updates from the active worklet source", async () => {
+    const player = createWebPlayer({
+      createMediaElement: () =>
+        createAudioStub({
+          canPlayType: () => "",
+        }),
+      createFallbackElement: () =>
+        createAudioStub({
+          canPlayType: () => "",
+        }),
+      enableWorkletPCM: true,
+    });
+
+    await player.loadTrack({
+      src: "/audio/test-tone-opus.webm",
+      mimeType: "audio/webm; codecs=opus",
+    });
+    await player.seek(12);
+
+    expect(player.getSnapshot().sourceId).toBe("worklet-pcm");
+    expect(player.getTimeline().currentTime).toBe(12);
+    expect(player.getBufferedRanges()).toEqual([]);
+  });
+
+  test("reports timeline updates from the active webcodecs source", async () => {
+    const originalAudioDecoder = globalThis.AudioDecoder;
+    globalThis.AudioDecoder = class AudioDecoder {};
+
+    try {
+      const player = createWebPlayer({
+        createMediaElement: createAudioStub,
+        createFallbackElement: createAudioStub,
+        enableWebCodecs: true,
+      });
+
+      await player.loadTrack(player.defaultTrack);
+      await player.seek(18);
+
+      expect(player.getSnapshot().sourceId).toBe("webcodecs");
+      expect(player.getTimeline().currentTime).toBe(18);
+      expect(player.getBufferedRanges()).toEqual([]);
+    } finally {
+      globalThis.AudioDecoder = originalAudioDecoder;
+    }
   });
 });

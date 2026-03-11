@@ -23,8 +23,24 @@ type PlayerShellProps = {
 
 const formatBufferedLabel = (
   bufferedSegments: ReturnType<typeof createPlayerPresenter>["bufferedSegments"],
-) =>
-  bufferedSegments.length > 0 ? `${Math.round(bufferedSegments.at(-1)?.leftPercent ?? 0)}%` : "0%";
+) => `${Math.round(getBufferedExtentPercent(bufferedSegments))}%`;
+
+const getBufferedExtentPercent = (
+  bufferedSegments: ReturnType<typeof createPlayerPresenter>["bufferedSegments"],
+) => {
+  if (bufferedSegments.length === 0) {
+    return 0;
+  }
+
+  return Math.min(
+    100,
+    bufferedSegments.reduce(
+      (maxBufferedPercent, segment) =>
+        Math.max(maxBufferedPercent, segment.leftPercent + segment.widthPercent),
+      0,
+    ),
+  );
+};
 
 const syncBufferedRanges = (
   container: HTMLDivElement | null,
