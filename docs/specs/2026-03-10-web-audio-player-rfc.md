@@ -141,6 +141,9 @@ The engine must preserve enough state to resume after source or graph reconstruc
 7. Normalization mode
 8. Last selected source id
 
+V1 implementation note: the current runtime only persists `currentTime`, `rate`, and `volume`.
+The remaining checkpoint fields stay as follow-up work and should not be assumed to exist yet.
+
 ## 8. Source Strategy
 
 The runtime architecture includes four source types inside `@kkb/audio`:

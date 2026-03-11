@@ -22,6 +22,7 @@ const createPlayerStub = () => ({
   play: async () => {},
   pause: async () => {},
   seek: async () => {},
+  destroy: async () => {},
   getTimeline: () => ({ currentTime: 0, duration: 180 }),
   getBufferedRanges: () => [{ start: 0, end: 30 }],
 });

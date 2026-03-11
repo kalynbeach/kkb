@@ -37,6 +37,7 @@ export const createWebCodecsSource = ({
     capabilities: WEB_CODECS_CAPABILITIES,
     canPlay: async (input) =>
       supportsWebCodecsSource(globals) &&
+      demuxer.isConfigured() &&
       isWebCodecsEligibleInput(input) &&
       demuxer.supports(input),
     score: (_context) => 100,

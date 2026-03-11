@@ -1,6 +1,6 @@
 import type { TrackInput } from "@kkb/audio/contracts/types";
 import { AudioEngine } from "@kkb/audio/engine/engine";
-import type { PlaybackEvent } from "@kkb/audio/sources/audio-source";
+import type { PlaybackEventName } from "@kkb/audio/sources/audio-source";
 import { createFallbackSource } from "@kkb/audio/sources/fallback-source";
 import { createMediaElementSource } from "@kkb/audio/sources/media-element-source";
 import { createWebCodecsDemuxer } from "@kkb/audio/sources/webcodecs-demux";
@@ -28,8 +28,8 @@ type AudioElementLike = {
   pause(): void;
   load(): void;
   removeAttribute(name: string): void;
-  addEventListener(type: PlaybackEvent, listener: () => void): void;
-  removeEventListener(type: PlaybackEvent, listener: () => void): void;
+  addEventListener(type: PlaybackEventName, listener: () => void): void;
+  removeEventListener(type: PlaybackEventName, listener: () => void): void;
 };
 
 type CreateWebPlayerOptions = {
@@ -107,6 +107,7 @@ export const createWebPlayer = (options: CreateWebPlayerOptions = {}) => {
     play: () => engine.play(),
     pause: () => engine.pause(),
     seek: (seconds: number) => engine.seek(seconds),
+    destroy: () => engine.destroy(),
     getTimeline: () => {
       const snapshot = engine.getSnapshot();
       return (

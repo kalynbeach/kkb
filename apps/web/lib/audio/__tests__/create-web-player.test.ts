@@ -82,7 +82,7 @@ describe("createWebPlayer", () => {
     expect(player.getBufferedRanges()).toEqual([]);
   });
 
-  test("reports timeline updates from the active webcodecs source", async () => {
+  test("keeps the stub webcodecs path ineligible until a real demuxer is wired", async () => {
     const originalAudioDecoder = globalThis.AudioDecoder;
     globalThis.AudioDecoder = class AudioDecoder {};
 
@@ -96,11 +96,29 @@ describe("createWebPlayer", () => {
       await player.loadTrack(player.defaultTrack);
       await player.seek(18);
 
-      expect(player.getSnapshot().sourceId).toBe("webcodecs");
+      expect(player.getSnapshot().sourceId).toBe("media-element");
       expect(player.getTimeline().currentTime).toBe(18);
-      expect(player.getBufferedRanges()).toEqual([]);
+      expect(player.getBufferedRanges()).toEqual([{ start: 0, end: 30 }]);
     } finally {
       globalThis.AudioDecoder = originalAudioDecoder;
     }
+  });
+
+  test("destroys the active source through the public player facade", async () => {
+    const mediaElement = createAudioStub();
+    const player = createWebPlayer({
+      createMediaElement: () => mediaElement,
+      createFallbackElement: createAudioStub,
+    });
+
+    await player.loadTrack(player.defaultTrack);
+    await player.destroy();
+
+    expect(mediaElement.src).toBe("");
+    expect(player.getSnapshot()).toMatchObject({
+      status: "idle",
+      sourceId: null,
+      error: null,
+    });
   });
 });

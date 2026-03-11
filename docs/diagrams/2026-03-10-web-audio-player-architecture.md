@@ -51,7 +51,7 @@ flowchart TB
 
     CWP -->|"creates"| Engine
     UPS -->|"useSyncExternalStore"| Store
-    UPS -->|"rAF loop"| CWP
+    PS -->|"rAF loop"| CWP
     PS --> Presenter
     PS --> Controls
     PS --> Waveform
@@ -113,7 +113,7 @@ classDiagram
         +streaming = true
         +sampleAccurateSeek = true
         +gapless = true
-        +requiresUserGesture = false
+        +requiresUserGesture = true
         +requiresSAB = false
     }
 
@@ -123,7 +123,7 @@ classDiagram
         +streaming = true
         +sampleAccurateSeek = true
         +gapless = true
-        +requiresUserGesture = false
+        +requiresUserGesture = true
         +requiresSAB = false
     }
 

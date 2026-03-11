@@ -5,7 +5,14 @@ import type {
   TrackInput,
 } from "../contracts/types";
 
-export type PlaybackEvent = "play" | "pause" | "ended";
+export type PlaybackEventName = "play" | "pause" | "ended" | "error";
+
+export type PlaybackErrorEvent = {
+  type: "error";
+  error: Error;
+};
+
+export type PlaybackEvent = "play" | "pause" | "ended" | PlaybackErrorEvent;
 
 export type PlaybackListener = (event: PlaybackEvent) => void;
 

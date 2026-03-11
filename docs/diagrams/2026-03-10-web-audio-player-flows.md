@@ -141,6 +141,9 @@ flowchart TB
 
     subgraph Hook["usePlayerStore(player)"]
         USES["useSyncExternalStore()<br/>→ snapshot"]
+    end
+
+    subgraph ShellLoop["PlayerShell"]
         RAF["requestAnimationFrame loop<br/>→ timeline, bufferedRanges"]
     end
 

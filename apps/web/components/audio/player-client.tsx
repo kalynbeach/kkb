@@ -48,7 +48,7 @@ function PlayerClient() {
     setPlayer(nextPlayer);
 
     return () => {
-      nextPlayer.pause().catch(logActionError("pause"));
+      nextPlayer.destroy().catch(logActionError("destroy"));
     };
   }, []);
 

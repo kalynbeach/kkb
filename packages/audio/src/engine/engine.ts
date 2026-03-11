@@ -115,8 +115,14 @@ export class AudioEngine {
       return;
     }
 
-    await this.activeSource.play();
-    this.store.setState({ status: "playing" });
+    try {
+      await this.activeSource.play();
+      this.store.setState({ status: "playing", error: null });
+    } catch (error) {
+      const nextError = toError(error, "Unable to start playback");
+      this.handleRuntimeError(nextError);
+      throw nextError;
+    }
   }
 
   async pause() {
@@ -124,8 +130,14 @@ export class AudioEngine {
       return;
     }
 
-    await this.activeSource.pause();
-    this.store.setState({ status: "paused" });
+    try {
+      await this.activeSource.pause();
+      this.store.setState({ status: "paused", error: null });
+    } catch (error) {
+      const nextError = toError(error, "Unable to pause playback");
+      this.handleRuntimeError(nextError);
+      throw nextError;
+    }
   }
 
   async seek(seconds: number) {
@@ -147,11 +159,25 @@ export class AudioEngine {
     this.checkpoint.update({ volume });
   }
 
+  async destroy() {
+    await this.teardownActiveSource();
+    this.checkpoint.update({ currentTime: 0 });
+    this.store.setState({
+      status: "idle",
+      currentTime: 0,
+      duration: 0,
+      sourceId: null,
+      error: null,
+    });
+  }
+
   private subscribeToActiveSource(source: AudioSource) {
     this.unsubscribeFromActiveSource();
     this.unsubscribeActivePlayback =
       source.subscribePlayback?.((event) => {
-        void this.handlePlaybackEvent(source, event);
+        this.handlePlaybackEvent(source, event).catch((error) => {
+          this.handleRuntimeError(toError(error, "Playback event handling failed"));
+        });
       }) ?? null;
   }
 
@@ -191,8 +217,13 @@ export class AudioEngine {
       return;
     }
 
+    if (typeof event !== "string") {
+      this.handleRuntimeError(event.error);
+      return;
+    }
+
     if (event === "play") {
-      this.store.setState({ status: "playing" });
+      this.store.setState({ status: "playing", error: null });
       return;
     }
 
@@ -213,7 +244,21 @@ export class AudioEngine {
         status: "paused",
         currentTime: timeline.currentTime,
         duration: timeline.duration,
+        error: null,
       });
     }
+  }
+
+  private handleRuntimeError(error: Error) {
+    const snapshot = this.store.getSnapshot();
+    this.store.setState({
+      status: "error",
+      currentTime: this.activeSource
+        ? this.activeSource.getTimeline().currentTime
+        : snapshot.currentTime,
+      duration: this.activeSource ? this.activeSource.getTimeline().duration : snapshot.duration,
+      sourceId: this.activeSource?.id ?? snapshot.sourceId,
+      error: error.message,
+    });
   }
 }

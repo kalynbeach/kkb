@@ -74,7 +74,7 @@ describe("createMediaElementSource", () => {
   test("subscribes to native playback events", () => {
     const audio = createAudioStub();
     const source = createMediaElementSource(audio);
-    const events: string[] = [];
+    const events: Array<string | { type: string; error: Error }> = [];
 
     const unsubscribe = source.subscribePlayback?.((event) => {
       events.push(event);
@@ -87,5 +87,23 @@ describe("createMediaElementSource", () => {
     audio.emit("pause");
 
     expect(events).toEqual(["play", "pause", "ended"]);
+  });
+
+  test("forwards native error events to playback subscribers", () => {
+    const audio = createAudioStub();
+    const source = createMediaElementSource(audio);
+    const events: Array<string | { type: string; error: Error }> = [];
+
+    source.subscribePlayback?.((event) => {
+      events.push(event);
+    });
+
+    audio.emit("error");
+
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({
+      type: "error",
+      error: expect.any(Error),
+    });
   });
 });

@@ -294,6 +294,7 @@ describe("AudioEngine recovery", () => {
     const webCodecs = createWebCodecsSource({
       globals: { AudioDecoder: class AudioDecoder {} },
       demuxer: {
+        isConfigured: () => true,
         supports: () => true,
         load: async () => {},
       },
@@ -334,6 +335,7 @@ describe("AudioEngine recovery", () => {
     const webCodecs = createWebCodecsSource({
       globals: { AudioDecoder: class AudioDecoder {} },
       demuxer: {
+        isConfigured: () => true,
         supports: () => true,
         load: async () => {
           throw new Error("decoder init failed");

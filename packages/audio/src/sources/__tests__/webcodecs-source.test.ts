@@ -13,6 +13,7 @@ describe("createWebCodecsSource", () => {
     const source = createWebCodecsSource({
       globals: { AudioDecoder: class AudioDecoder {} },
       demuxer: {
+        isConfigured: () => true,
         supports: () => true,
         load: async () => {},
       },
@@ -34,6 +35,7 @@ describe("createWebCodecsSource", () => {
     const source = createWebCodecsSource({
       globals: { AudioDecoder: class AudioDecoder {} },
       demuxer: {
+        isConfigured: () => true,
         supports: () => true,
         load: async () => {},
       },
