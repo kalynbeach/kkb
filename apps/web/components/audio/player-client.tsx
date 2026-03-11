@@ -7,31 +7,34 @@ import type { WebPlayer } from "@/lib/audio/create-web-player";
 import { createWebPlayer } from "@/lib/audio/create-web-player";
 import { usePlayerStore } from "@/lib/audio/use-player-store";
 
+const logActionError = (action: string) => (error: unknown) => {
+  console.error(`[web-player] ${action} failed`, error);
+};
+
 function MountedPlayer({ player }: { player: WebPlayer }) {
-  const { snapshot, timeline, bufferedRanges } = usePlayerStore(player);
+  const { snapshot } = usePlayerStore(player);
 
   useEffect(() => {
-    void player.loadTrack(player.defaultTrack);
+    player.loadTrack(player.defaultTrack).catch(logActionError("loadTrack"));
   }, [player]);
 
   return (
     <PlayerShell
+      player={player}
       title="Test Tone"
       subtitle="Local AAC fixture routed through the current media-element path."
       status={snapshot.status}
-      currentTime={timeline.currentTime}
-      duration={timeline.duration || snapshot.duration}
-      bufferedRanges={bufferedRanges}
+      duration={snapshot.duration}
       sourceId={snapshot.sourceId}
       error={snapshot.error}
       onPlay={() => {
-        void player.play();
+        player.play().catch(logActionError("play"));
       }}
       onPause={() => {
-        void player.pause();
+        player.pause().catch(logActionError("pause"));
       }}
       onSeek={(seconds) => {
-        void player.seek(seconds);
+        player.seek(seconds).catch(logActionError("seek"));
       }}
     />
   );
@@ -45,19 +48,18 @@ function PlayerClient() {
     setPlayer(nextPlayer);
 
     return () => {
-      void nextPlayer.pause();
+      nextPlayer.pause().catch(logActionError("pause"));
     };
   }, []);
 
   if (!player) {
     return (
       <PlayerShell
+        player={null}
         title="Test Tone"
         subtitle="Local AAC fixture routed through the current media-element path."
         status="idle"
-        currentTime={0}
         duration={0}
-        bufferedRanges={[]}
         sourceId={null}
         error={null}
         onPlay={() => {}}

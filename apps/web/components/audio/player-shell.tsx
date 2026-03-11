@@ -1,22 +1,19 @@
 "use client";
 
-import { cn } from "@kkb/ui/lib/utils";
 import { PlayerControls } from "@kkb/ui/components/audio/player-controls";
 import { createPlayerPresenter } from "@kkb/ui/components/audio/presenter";
 import { Waveform } from "@kkb/ui/components/audio/waveform";
+import { cn } from "@kkb/ui/lib/utils";
+import { useEffect, useEffectEvent, useRef } from "react";
 
-type BufferedRange = {
-  start: number;
-  end: number;
-};
+import type { WebPlayer } from "@/lib/audio/create-web-player";
 
 type PlayerShellProps = {
+  player: WebPlayer | null;
   title: string;
   subtitle: string;
   status: "idle" | "loading" | "ready" | "playing" | "paused" | "recovering" | "error";
-  currentTime: number;
   duration: number;
-  bufferedRanges: BufferedRange[];
   sourceId: string | null;
   error: string | null;
   onPlay: () => void;
@@ -24,31 +21,138 @@ type PlayerShellProps = {
   onSeek: (seconds: number) => void;
 };
 
+const formatBufferedLabel = (
+  bufferedSegments: ReturnType<typeof createPlayerPresenter>["bufferedSegments"],
+) =>
+  bufferedSegments.length > 0 ? `${Math.round(bufferedSegments.at(-1)?.leftPercent ?? 0)}%` : "0%";
+
+const syncBufferedRanges = (
+  container: HTMLDivElement | null,
+  duration: number,
+  bufferedRanges: ReturnType<WebPlayer["getBufferedRanges"]>,
+) => {
+  if (!container) {
+    return;
+  }
+
+  const signature = `${duration}:${bufferedRanges.map((range) => `${range.start}-${range.end}`).join("|")}`;
+  if (container.dataset.signature === signature) {
+    return;
+  }
+
+  container.dataset.signature = signature;
+  container.replaceChildren(
+    ...bufferedRanges.map((range) => {
+      const left = duration > 0 ? (range.start / duration) * 100 : 0;
+      const width = duration > 0 ? ((range.end - range.start) / duration) * 100 : 0;
+      const segment = document.createElement("div");
+      segment.setAttribute("aria-hidden", "true");
+      segment.className = "absolute inset-y-0 bg-[rgba(120,184,255,0.06)]";
+      segment.style.left = `${left}%`;
+      segment.style.width = `${width}%`;
+      return segment;
+    }),
+  );
+};
+
 function PlayerShell({
+  player,
   title,
   subtitle,
   status,
-  currentTime,
   duration,
-  bufferedRanges,
   sourceId,
   error,
   onPlay,
   onPause,
   onSeek,
 }: PlayerShellProps) {
+  const timeDisplayRef = useRef<HTMLDivElement>(null);
+  const durationDisplayRef = useRef<HTMLSpanElement>(null);
+  const progressFillRef = useRef<HTMLDivElement>(null);
+  const bufferedLabelRef = useRef<HTMLSpanElement>(null);
+  const waveformRootRef = useRef<HTMLDivElement>(null);
+  const waveformProgressRef = useRef<HTMLDivElement>(null);
+  const waveformPlayheadRef = useRef<HTMLDivElement>(null);
+  const waveformBufferedRangesRef = useRef<HTMLDivElement>(null);
+  const initialTimeline = player?.getTimeline() ?? { currentTime: 0, duration };
+  const initialBufferedRanges = player?.getBufferedRanges() ?? [];
   const presenter = createPlayerPresenter({
     status,
-    currentTime,
-    duration,
-    bufferedRanges,
+    currentTime: initialTimeline.currentTime,
+    duration: initialTimeline.duration || duration,
+    bufferedRanges: initialBufferedRanges,
   });
+
+  const syncLiveTimeline = useEffectEvent(() => {
+    if (!player) {
+      return;
+    }
+
+    const timeline = player.getTimeline();
+    const bufferedRanges = player.getBufferedRanges();
+    const effectiveDuration = timeline.duration || duration;
+    const nextPresenter = createPlayerPresenter({
+      status,
+      currentTime: timeline.currentTime,
+      duration: effectiveDuration,
+      bufferedRanges,
+    });
+
+    if (timeDisplayRef.current) {
+      timeDisplayRef.current.textContent = nextPresenter.currentTimeLabel;
+    }
+
+    if (durationDisplayRef.current) {
+      durationDisplayRef.current.textContent = nextPresenter.durationLabel;
+    }
+
+    if (progressFillRef.current) {
+      progressFillRef.current.style.width = `${nextPresenter.progressPercent}%`;
+    }
+
+    if (bufferedLabelRef.current) {
+      bufferedLabelRef.current.textContent = `buf ${formatBufferedLabel(nextPresenter.bufferedSegments)}`;
+    }
+
+    if (waveformRootRef.current) {
+      waveformRootRef.current.setAttribute("aria-valuenow", `${Math.round(timeline.currentTime)}`);
+      waveformRootRef.current.setAttribute("aria-valuemax", `${Math.round(effectiveDuration)}`);
+    }
+
+    if (waveformProgressRef.current) {
+      waveformProgressRef.current.style.width = `${nextPresenter.progressPercent}%`;
+    }
+
+    if (waveformPlayheadRef.current) {
+      waveformPlayheadRef.current.style.left = `${nextPresenter.progressPercent}%`;
+    }
+
+    syncBufferedRanges(waveformBufferedRangesRef.current, effectiveDuration, bufferedRanges);
+  });
+
+  useEffect(() => {
+    if (!player) {
+      return;
+    }
+
+    let frame = 0;
+
+    const update = () => {
+      syncLiveTimeline();
+      frame = requestAnimationFrame(update);
+    };
+
+    update();
+
+    return () => {
+      cancelAnimationFrame(frame);
+    };
+  }, [player]);
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col">
-      {/* Main chassis — silver/steel body */}
       <div className="rounded-lg border border-[#8890a0] bg-[linear-gradient(180deg,#b8c0d0_0%,#9098a8_8%,#a0a8b8_40%,#8890a0_92%,#707880_100%)] p-1 shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.3)]">
-        {/* Title bar — metallic strip */}
         <div className="flex items-center justify-between rounded-t border-b border-[#505880] bg-[linear-gradient(90deg,#6870a0,#8088b8,#6870a0)] px-3 py-1.5">
           <div className="flex items-center gap-2">
             <div className="flex gap-1">
@@ -65,33 +169,38 @@ function PlayerShell({
           </span>
         </div>
 
-        {/* LCD display panel — deep navy with blue text */}
         <div className="relative mx-1 mt-1 overflow-hidden rounded border-2 border-[#303850] bg-[linear-gradient(180deg,#0a1028_0%,#0e1630_50%,#0a1028_100%)] p-4 shadow-[inset_0_2px_8px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(255,255,255,0.02)]">
-          {/* Scanline overlay */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 z-30 opacity-[0.04] [background-image:repeating-linear-gradient(0deg,transparent,transparent_1px,rgba(120,160,255,0.15)_1px,rgba(120,160,255,0.15)_2px)]"
           />
 
-          {/* Time display */}
           <div className="flex items-baseline justify-between">
-            <div className="font-mono text-3xl font-bold tracking-wider text-[#78b8ff] drop-shadow-[0_0_10px_rgba(120,184,255,0.5)]">
+            <div
+              ref={timeDisplayRef}
+              className="font-mono text-3xl font-bold tracking-wider text-[#78b8ff] drop-shadow-[0_0_10px_rgba(120,184,255,0.5)]"
+            >
               {presenter.currentTimeLabel}
             </div>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
-                <span className="font-mono text-[9px] uppercase text-[rgba(120,184,255,0.4)]">kbps</span>
-                <span className="font-mono text-xs font-bold text-[rgba(120,184,255,0.6)]">128</span>
+                <span className="font-mono text-[9px] uppercase text-[rgba(120,184,255,0.4)]">
+                  kbps
+                </span>
+                <span className="font-mono text-xs font-bold text-[rgba(120,184,255,0.6)]">
+                  128
+                </span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="font-mono text-[9px] uppercase text-[rgba(120,184,255,0.4)]">khz</span>
+                <span className="font-mono text-[9px] uppercase text-[rgba(120,184,255,0.4)]">
+                  khz
+                </span>
                 <span className="font-mono text-xs font-bold text-[rgba(120,184,255,0.6)]">44</span>
               </div>
               <StatusLed status={status} />
             </div>
           </div>
 
-          {/* Track title marquee */}
           <div className="mt-2 h-5 overflow-hidden">
             <p
               className={cn(
@@ -104,31 +213,37 @@ function PlayerShell({
             </p>
           </div>
 
-          {/* EQ visualization / seek bar */}
           <div className="mt-2">
             <Waveform
-              duration={duration}
-              currentTime={currentTime}
-              bufferedRanges={bufferedRanges}
+              rootRef={waveformRootRef}
+              progressOverlayRef={waveformProgressRef}
+              playheadRef={waveformPlayheadRef}
+              bufferedRangesRef={waveformBufferedRangesRef}
+              duration={initialTimeline.duration || duration}
+              currentTime={initialTimeline.currentTime}
+              bufferedRanges={initialBufferedRanges}
+              getTimeline={player?.getTimeline}
               onSeek={onSeek}
             />
           </div>
 
-          {/* Seek progress line + duration */}
           <div className="mt-1.5 flex items-center gap-2">
             <div className="relative h-1 flex-1 overflow-hidden rounded-full bg-[rgba(120,184,255,0.08)]">
               <div
+                ref={progressFillRef}
                 className="absolute inset-y-0 left-0 rounded-full bg-[linear-gradient(90deg,rgba(120,184,255,0.5),rgba(160,200,255,0.7))] shadow-[0_0_4px_rgba(120,184,255,0.3)]"
                 style={{ width: `${presenter.progressPercent}%` }}
               />
             </div>
-            <span className="font-mono text-[10px] text-[rgba(120,184,255,0.35)]">
+            <span
+              ref={durationDisplayRef}
+              className="font-mono text-[10px] text-[rgba(120,184,255,0.35)]"
+            >
               {presenter.durationLabel}
             </span>
           </div>
         </div>
 
-        {/* Transport controls */}
         <div className="mx-1 mt-1 mb-1">
           <PlayerControls
             title={title}
@@ -142,7 +257,6 @@ function PlayerShell({
           />
         </div>
 
-        {/* Status bar — metallic footer */}
         <div className="flex items-center justify-between border-t border-[#707890] px-3 py-1.5">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
@@ -150,8 +264,12 @@ function PlayerShell({
                 className={cn(
                   "size-1.5 rounded-full",
                   status === "error" && "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.6)]",
-                  (status === "loading" || status === "recovering") && "bg-amber-400 shadow-[0_0_4px_rgba(251,191,36,0.6)]",
-                  status !== "error" && status !== "loading" && status !== "recovering" && "bg-[#60a0ff] shadow-[0_0_4px_rgba(96,160,255,0.6)]",
+                  (status === "loading" || status === "recovering") &&
+                    "bg-amber-400 shadow-[0_0_4px_rgba(251,191,36,0.6)]",
+                  status !== "error" &&
+                    status !== "loading" &&
+                    status !== "recovering" &&
+                    "bg-[#60a0ff] shadow-[0_0_4px_rgba(96,160,255,0.6)]",
                 )}
               />
               <span className="font-mono text-[10px] uppercase tracking-wider text-[#505870]">
@@ -159,11 +277,8 @@ function PlayerShell({
               </span>
             </div>
             <span className="font-mono text-[10px] text-[#404860]">|</span>
-            <span className="font-mono text-[10px] text-[#505870]">
-              buf{" "}
-              {presenter.bufferedSegments.length > 0
-                ? `${Math.round(presenter.bufferedSegments.at(-1)?.leftPercent ?? 0)}%`
-                : "0%"}
+            <span ref={bufferedLabelRef} className="font-mono text-[10px] text-[#505870]">
+              buf {formatBufferedLabel(presenter.bufferedSegments)}
             </span>
           </div>
           {error ? (
@@ -175,11 +290,7 @@ function PlayerShell({
   );
 }
 
-function StatusLed({
-  status,
-}: {
-  status: PlayerShellProps["status"];
-}) {
+function StatusLed({ status }: { status: PlayerShellProps["status"] }) {
   const isActive = status === "playing";
   return (
     <div className="flex items-center gap-1">

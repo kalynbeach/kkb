@@ -117,6 +117,52 @@ describe("AudioEngine recovery", () => {
     expect(engine.getSnapshot().sourceId).toBe("media-element");
   });
 
+  test("skips sources whose canPlay check throws", async () => {
+    let secondAttempts = 0;
+
+    const firstSource = {
+      id: "broken-source",
+      capabilities: TEST_CAPABILITIES,
+      canPlay: async () => {
+        throw new Error("capability probe failed");
+      },
+      score: () => 100,
+      load: async () => {},
+      play: async () => {},
+      pause: async () => {},
+      seek: async () => {},
+      getTimeline: () => ({ currentTime: 0, duration: 180 }),
+      destroy: async () => {},
+    };
+
+    const secondSource = {
+      id: "media-element",
+      capabilities: TEST_CAPABILITIES,
+      canPlay: async () => true,
+      score: () => 50,
+      load: async () => {
+        secondAttempts += 1;
+      },
+      play: async () => {},
+      pause: async () => {},
+      seek: async () => {},
+      getTimeline: () => ({ currentTime: 12, duration: 180 }),
+      destroy: async () => {},
+    };
+
+    const engine = new AudioEngine({
+      sources: [firstSource, secondSource],
+    });
+
+    await engine.load({
+      src: "/audio/test-tone-aac.m4a",
+      mimeType: "audio/mp4; codecs=mp4a.40.2",
+    });
+
+    expect(secondAttempts).toBe(1);
+    expect(engine.getSnapshot().sourceId).toBe("media-element");
+  });
+
   test("preserves checkpoint time when recovery succeeds", async () => {
     const firstSource = {
       id: "webcodecs",
@@ -364,6 +410,60 @@ describe("AudioEngine recovery", () => {
       play: async () => {},
       pause: async () => {
         pauseCalls += 1;
+      },
+      seek: async () => {},
+      getTimeline: () => ({ currentTime: 0, duration: 180 }),
+      destroy: async () => {
+        destroyCalls += 1;
+      },
+    };
+
+    const secondSource = {
+      id: "second",
+      capabilities: TEST_CAPABILITIES,
+      canPlay: async (input: { src: string }) => input.src === "/audio/second.m4a",
+      score: () => 100,
+      load: async () => {},
+      play: async () => {},
+      pause: async () => {},
+      seek: async () => {},
+      getTimeline: () => ({ currentTime: 0, duration: 120 }),
+      destroy: async () => {},
+    };
+
+    const engine = new AudioEngine({
+      sources: [firstSource, secondSource],
+    });
+
+    await engine.load({
+      src: "/audio/first.m4a",
+      mimeType: "audio/mp4; codecs=mp4a.40.2",
+    });
+    await engine.play();
+    await engine.load({
+      src: "/audio/second.m4a",
+      mimeType: "audio/mp4; codecs=mp4a.40.2",
+    });
+
+    expect(pauseCalls).toBe(1);
+    expect(destroyCalls).toBe(1);
+    expect(engine.getSnapshot().sourceId).toBe("second");
+  });
+
+  test("continues teardown when pause fails before loading a replacement track", async () => {
+    let pauseCalls = 0;
+    let destroyCalls = 0;
+
+    const firstSource = {
+      id: "first",
+      capabilities: TEST_CAPABILITIES,
+      canPlay: async (input: { src: string }) => input.src === "/audio/first.m4a",
+      score: () => 100,
+      load: async () => {},
+      play: async () => {},
+      pause: async () => {
+        pauseCalls += 1;
+        throw new Error("pause failed");
       },
       seek: async () => {},
       getTimeline: () => ({ currentTime: 0, duration: 180 }),

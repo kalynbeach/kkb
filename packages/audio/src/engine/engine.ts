@@ -13,6 +13,9 @@ const DEFAULT_SCORE_CONTEXT: SourceScoreContext = {
   lowPowerModeLikely: false,
 };
 
+const toError = (error: unknown, fallbackMessage: string) =>
+  error instanceof Error ? error : new Error(fallbackMessage);
+
 export class AudioEngine {
   private readonly store = createPlayerStore();
   private readonly checkpoint = createPlaybackCheckpoint();
@@ -50,8 +53,12 @@ export class AudioEngine {
 
     const playableSources: AudioSource[] = [];
     for (const source of this.sources) {
-      if (await source.canPlay(input)) {
-        playableSources.push(source);
+      try {
+        if (await source.canPlay(input)) {
+          playableSources.push(source);
+        }
+      } catch (error) {
+        console.error(`[audio-engine] canPlay failed for source "${source.id}"`, error);
       }
     }
 
@@ -86,7 +93,7 @@ export class AudioEngine {
         });
         return;
       } catch (error) {
-        lastError = error instanceof Error ? error : new Error("Unknown load failure");
+        lastError = toError(error, "Unknown load failure");
       }
     }
 
@@ -163,8 +170,20 @@ export class AudioEngine {
       return;
     }
 
-    await source.pause();
-    await source.destroy();
+    try {
+      await source.pause();
+    } catch (error) {
+      console.error(`[audio-engine] pause failed during teardown for source "${source.id}"`, error);
+    }
+
+    try {
+      await source.destroy();
+    } catch (error) {
+      console.error(
+        `[audio-engine] destroy failed during teardown for source "${source.id}"`,
+        error,
+      );
+    }
   }
 
   private async handlePlaybackEvent(source: AudioSource, event: PlaybackEvent) {

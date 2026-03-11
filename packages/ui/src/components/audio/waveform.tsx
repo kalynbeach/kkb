@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@kkb/ui/lib/utils";
+import type { Ref } from "react";
 
 import { Playhead } from "./playhead";
 import type { BufferedRange } from "./presenter";
@@ -46,6 +47,65 @@ type WaveformProps = {
   bufferedRanges?: BufferedRange[];
   className?: string;
   onSeek?: (seconds: number) => void;
+  getTimeline?: () => { currentTime: number; duration: number };
+  rootRef?: Ref<HTMLDivElement>;
+  progressOverlayRef?: Ref<HTMLDivElement>;
+  playheadRef?: Ref<HTMLDivElement>;
+  bufferedRangesRef?: Ref<HTMLDivElement>;
+};
+
+const SEEK_STEP_SECONDS = 5;
+
+const clampTime = (value: number, duration: number) => Math.min(duration, Math.max(0, value));
+
+const getLiveTimeline = ({
+  currentTime,
+  duration,
+  getTimeline,
+}: {
+  currentTime: number;
+  duration: number;
+  getTimeline?: () => { currentTime: number; duration: number };
+}) => {
+  const timeline = getTimeline?.();
+  return {
+    currentTime: timeline?.currentTime ?? currentTime,
+    duration: timeline?.duration ?? duration,
+  };
+};
+
+const getNextSeekTimeForKey = ({
+  key,
+  currentTime,
+  duration,
+}: {
+  key: string;
+  currentTime: number;
+  duration: number;
+}) => {
+  if (!Number.isFinite(duration) || duration <= 0) {
+    return null;
+  }
+
+  const safeCurrentTime = Number.isFinite(currentTime) ? currentTime : 0;
+
+  if (key === "ArrowLeft") {
+    return clampTime(safeCurrentTime - SEEK_STEP_SECONDS, duration);
+  }
+
+  if (key === "ArrowRight") {
+    return clampTime(safeCurrentTime + SEEK_STEP_SECONDS, duration);
+  }
+
+  if (key === "Home") {
+    return 0;
+  }
+
+  if (key === "End") {
+    return duration;
+  }
+
+  return null;
 };
 
 function Waveform({
@@ -54,22 +114,58 @@ function Waveform({
   bufferedRanges = [],
   className,
   onSeek,
+  getTimeline,
+  rootRef,
+  progressOverlayRef,
+  playheadRef,
+  bufferedRangesRef,
 }: WaveformProps) {
   const progressPercent =
     duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
 
   const handleSeek = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!onSeek || duration <= 0) {
+    const timeline = getLiveTimeline({
+      currentTime,
+      duration,
+      getTimeline,
+    });
+
+    if (!onSeek || timeline.duration <= 0) {
       return;
     }
 
     const bounds = event.currentTarget.getBoundingClientRect();
     const ratio = (event.clientX - bounds.left) / bounds.width;
-    onSeek(Math.min(duration, Math.max(0, ratio * duration)));
+    onSeek(clampTime(ratio * timeline.duration, timeline.duration));
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (!onSeek) {
+      return;
+    }
+
+    const timeline = getLiveTimeline({
+      currentTime,
+      duration,
+      getTimeline,
+    });
+    const nextTime = getNextSeekTimeForKey({
+      key: event.key,
+      currentTime: timeline.currentTime,
+      duration: timeline.duration,
+    });
+
+    if (nextTime === null) {
+      return;
+    }
+
+    event.preventDefault();
+    onSeek(nextTime);
   };
 
   return (
     <div
+      ref={rootRef}
       role="slider"
       tabIndex={0}
       aria-valuenow={Math.round(currentTime)}
@@ -77,31 +173,32 @@ function Waveform({
       aria-valuemax={Math.round(duration)}
       aria-label="Seek"
       onPointerDown={handleSeek}
+      onKeyDown={handleKeyDown}
       className={cn("group relative h-14 w-full cursor-pointer", className)}
     >
-      {/* Buffered ranges */}
-      {bufferedRanges.map((range) => {
-        const left = duration > 0 ? (range.start / duration) * 100 : 0;
-        const width = duration > 0 ? ((range.end - range.start) / duration) * 100 : 0;
+      <div ref={bufferedRangesRef} className="absolute inset-0">
+        {bufferedRanges.map((range) => {
+          const left = duration > 0 ? (range.start / duration) * 100 : 0;
+          const width = duration > 0 ? ((range.end - range.start) / duration) * 100 : 0;
 
-        return (
-          <div
-            key={`${range.start}-${range.end}`}
-            aria-hidden="true"
-            className="absolute inset-y-0 bg-[rgba(120,184,255,0.06)]"
-            style={{ left: `${left}%`, width: `${width}%` }}
-          />
-        );
-      })}
+          return (
+            <div
+              key={`${range.start}-${range.end}`}
+              aria-hidden="true"
+              className="absolute inset-y-0 bg-[rgba(120,184,255,0.06)]"
+              style={{ left: `${left}%`, width: `${width}%` }}
+            />
+          );
+        })}
+      </div>
 
-      {/* Progress overlay */}
       <div
+        ref={progressOverlayRef}
         aria-hidden="true"
         className="absolute inset-y-0 left-0 bg-[linear-gradient(90deg,rgba(120,184,255,0.06),rgba(100,160,255,0.12))]"
         style={{ width: `${progressPercent}%` }}
       />
 
-      {/* EQ bars */}
       <div className="absolute inset-0 flex items-end gap-[3px] px-1 py-0.5">
         {DEFAULT_BARS.map((bar, index) => {
           const barPosition = (index / DEFAULT_BARS.length) * 100;
@@ -122,9 +219,9 @@ function Waveform({
         })}
       </div>
 
-      <Playhead progressPercent={progressPercent} />
+      <Playhead nodeRef={playheadRef} progressPercent={progressPercent} />
     </div>
   );
 }
 
-export { Waveform };
+export { Waveform, getNextSeekTimeForKey };
