@@ -49,14 +49,7 @@ function MountedPlayer({
   const selectedAsset = snapshot.asset ?? selectTrackAsset(selectedTrack);
 
   return (
-    <div className="flex w-full flex-col items-center">
-      <TrackSelector
-        tracks={tracks}
-        selectedTrackId={snapshot.selectedTrackId ?? defaultTrackId}
-        onSelectTrack={(trackId) => {
-          controller.selectTrack(trackId).catch(logActionError("selectTrack"));
-        }}
-      />
+    <div className="mx-auto flex w-full max-w-lg flex-col">
       <PlayerShell
         player={player}
         title={selectedTrack?.title ?? "Unknown Track"}
@@ -65,6 +58,7 @@ function MountedPlayer({
         duration={snapshot.runtime.duration}
         sourceId={snapshot.runtime.sourceId}
         error={snapshot.runtime.error ?? snapshot.error}
+        className="rounded-b-none border-b-0"
         onPlay={() => {
           controller.play().catch(logActionError("play"));
         }}
@@ -75,6 +69,15 @@ function MountedPlayer({
           controller.seek(seconds).catch(logActionError("seek"));
         }}
       />
+      <div className="rounded-b-lg border border-t-0 border-[#8890a0] bg-[linear-gradient(180deg,#9098a8_0%,#a0a8b8_40%,#8890a0_92%,#707880_100%)] p-1 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+        <TrackSelector
+          tracks={tracks}
+          selectedTrackId={snapshot.selectedTrackId ?? defaultTrackId}
+          onSelectTrack={(trackId) => {
+            controller.selectTrack(trackId).catch(logActionError("selectTrack"));
+          }}
+        />
+      </div>
     </div>
   );
 }
@@ -118,8 +121,7 @@ function PlayerClient({
 
   if (!runtime) {
     return (
-      <div className="flex w-full flex-col items-center">
-        <TrackSelector tracks={tracks} selectedTrackId={defaultTrackId} onSelectTrack={() => {}} />
+      <div className="mx-auto flex w-full max-w-lg flex-col">
         <PlayerShell
           player={null}
           title={defaultTrack?.title ?? "Unknown Track"}
@@ -128,10 +130,14 @@ function PlayerClient({
           duration={defaultTrack?.duration ?? 0}
           sourceId={null}
           error={null}
+          className="rounded-b-none border-b-0"
           onPlay={() => {}}
           onPause={() => {}}
           onSeek={() => {}}
         />
+        <div className="rounded-b-lg border border-t-0 border-[#8890a0] bg-[linear-gradient(180deg,#9098a8_0%,#a0a8b8_40%,#8890a0_92%,#707880_100%)] p-1 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+          <TrackSelector tracks={tracks} selectedTrackId={defaultTrackId} onSelectTrack={() => {}} />
+        </div>
       </div>
     );
   }

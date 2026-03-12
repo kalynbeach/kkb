@@ -3,32 +3,36 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import { TrackSelector } from "../track-selector";
 
-const findSelectElement = (
-  node: unknown,
-): { props: { onChange: (event: { currentTarget: { value: string } }) => void } } | null => {
-  if (!node || typeof node !== "object") {
-    return null;
-  }
+type ButtonNode = {
+  type: "button";
+  props: {
+    onClick: () => void;
+    "aria-selected": boolean;
+    children: unknown;
+  };
+};
 
-  if ("type" in node && node.type === "select" && "props" in node) {
-    return node as { props: { onChange: (event: { currentTarget: { value: string } }) => void } };
-  }
+const findButtons = (node: unknown): ButtonNode[] => {
+  const buttons: ButtonNode[] = [];
 
-  if (!("props" in node)) {
-    return null;
-  }
-
-  const children = Array.isArray(node.props.children) ? node.props.children : [node.props.children];
-
-  for (const child of children) {
-    const match = findSelectElement(child);
-
-    if (match) {
-      return match;
+  const walk = (n: unknown) => {
+    if (!n || typeof n !== "object") return;
+    if (Array.isArray(n)) {
+      for (const child of n) walk(child);
+      return;
     }
-  }
+    if ("type" in n && n.type === "button" && "props" in n) {
+      buttons.push(n as ButtonNode);
+    }
+    if ("props" in n) {
+      const p = n as { props: { children?: unknown } };
+      const children = Array.isArray(p.props.children) ? p.props.children : [p.props.children];
+      for (const child of children) walk(child);
+    }
+  };
 
-  return null;
+  walk(node);
+  return buttons;
 };
 
 describe("TrackSelector", () => {
@@ -44,12 +48,13 @@ describe("TrackSelector", () => {
       />,
     );
 
-    expect(html).toContain(">AAC Track</option>");
-    expect(html).toContain(">Opus Track</option>");
-    expect(html).toContain('value="test-tone-opus"');
+    expect(html).toContain("AAC Track");
+    expect(html).toContain("Opus Track");
+    expect(html).toContain('aria-selected="true"');
+    expect(html).toContain('role="listbox"');
   });
 
-  test("calls onSelectTrack when the selected option changes", () => {
+  test("calls onSelectTrack when a track is clicked", () => {
     const onSelectTrack = mock((_trackId: string) => {});
     const element = TrackSelector({
       tracks: [
@@ -59,15 +64,11 @@ describe("TrackSelector", () => {
       selectedTrackId: "test-tone-aac",
       onSelectTrack,
     });
-    const select = findSelectElement(element);
+    const buttons = findButtons(element);
 
-    expect(select).not.toBeNull();
+    expect(buttons).toHaveLength(2);
 
-    select?.props.onChange({
-      currentTarget: {
-        value: "test-tone-opus",
-      },
-    });
+    buttons[1].props.onClick();
 
     expect(onSelectTrack).toHaveBeenCalledWith("test-tone-opus");
   });

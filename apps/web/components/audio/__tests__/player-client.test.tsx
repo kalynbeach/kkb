@@ -17,6 +17,6 @@ describe("PlayerClient", () => {
     const html = renderToString(<PlayerClient />);
 
     expect(html).toContain("Test Tone (AAC)");
-    expect(html).toContain("test-tone-aac");
+    expect(html).toContain("Playlist");
   });
 });

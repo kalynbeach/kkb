@@ -19,6 +19,7 @@ type PlayerShellProps = {
   onPlay: () => void;
   onPause: () => void;
   onSeek: (seconds: number) => void;
+  className?: string;
 };
 
 const formatBufferedLabel = (
@@ -82,6 +83,7 @@ function PlayerShell({
   onPlay,
   onPause,
   onSeek,
+  className,
 }: PlayerShellProps) {
   const timeDisplayRef = useRef<HTMLDivElement>(null);
   const durationDisplayRef = useRef<HTMLSpanElement>(null);
@@ -167,8 +169,8 @@ function PlayerShell({
   }, [player]);
 
   return (
-    <div className="mx-auto flex w-full max-w-lg flex-col">
-      <div className="rounded-lg border border-[#8890a0] bg-[linear-gradient(180deg,#b8c0d0_0%,#9098a8_8%,#a0a8b8_40%,#8890a0_92%,#707880_100%)] p-1 shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.3)]">
+    <div className="flex w-full flex-col">
+      <div className={cn("rounded-lg border border-[#8890a0] bg-[linear-gradient(180deg,#b8c0d0_0%,#9098a8_8%,#a0a8b8_40%,#8890a0_92%,#707880_100%)] p-1 shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.3)]", className)}>
         <div className="flex items-center justify-between rounded-t border-b border-[#505880] bg-[linear-gradient(90deg,#6870a0,#8088b8,#6870a0)] px-3 py-1.5">
           <div className="flex items-center gap-2">
             <div className="flex gap-1">
