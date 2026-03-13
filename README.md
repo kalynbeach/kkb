@@ -16,10 +16,11 @@ Turborepo monorepo built with Bun, Next.js 16, React 19, TypeScript 5.9, Biome, 
 
 ### Packages
 
+- `packages/audio` (`@kkb/audio`) — core audio runtime (engine, sources, worklet transport, metrics)
 - `packages/ui` (`@kkb/ui`) — React 19 component library (shadcn/ui)
 - `packages/typescript-config` (`@kkb/typescript-config`) — shared TypeScript configs
 - `packages/tailwind-config` (`@kkb/tailwind-config`) — shared Tailwind CSS config
-- _Planned:_ `ai`, `audio`, `workflows`
+- _Planned:_ `ai`, `workflows`
 
 ## Development
 
@@ -30,13 +31,15 @@ bun run build                  # build all packages
 bun run format-and-lint        # biome check (CI)
 bun run format-and-lint:fix    # biome auto-fix (dev)
 bun run check-types            # typescript check
+bun run test                   # workspace tests
 ```
 
 Filter to a specific workspace:
 
 ```bash
-turbo dev --filter=@kkb/web
-turbo build --filter=@kkb/docs
+bunx turbo run dev --filter=@kkb/web
+bunx turbo run build --filter=@kkb/docs
+bunx turbo run test --filter=@kkb/audio
 ```
 
 ## Architecture

@@ -1,0 +1,21 @@
+{
+  "name": "@kkb/audio",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./contracts/*": "./src/contracts/*.ts",
+    "./engine/*": "./src/engine/*.ts",
+    "./sources/*": "./src/sources/*.ts",
+    "./worklet/*": "./src/worklet/*.ts",
+    "./metrics/*": "./src/metrics/*.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "test": "bun test --pass-with-no-tests"
+  },
+  "devDependencies": {
+    "@kkb/typescript-config": "workspace:*",
+    "typescript": "^5.9.3"
+  }
+}

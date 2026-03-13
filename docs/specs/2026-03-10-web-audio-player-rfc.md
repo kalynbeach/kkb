@@ -86,12 +86,11 @@ Recommended exports:
 {
   "name": "@kkb/audio",
   "exports": {
-    ".": "./src/index.ts",
-    "./contracts": "./src/contracts/index.ts",
-    "./engine": "./src/engine/index.ts",
-    "./sources": "./src/sources/index.ts",
-    "./worklet": "./src/worklet/index.ts",
-    "./metrics": "./src/metrics/index.ts"
+    "./contracts/*": "./src/contracts/*.ts",
+    "./engine/*": "./src/engine/*.ts",
+    "./sources/*": "./src/sources/*.ts",
+    "./worklet/*": "./src/worklet/*.ts",
+    "./metrics/*": "./src/metrics/*.ts"
   }
 }
 ```
@@ -141,6 +140,9 @@ The engine must preserve enough state to resume after source or graph reconstruc
 6. `loop`
 7. Normalization mode
 8. Last selected source id
+
+V1 implementation note: the current runtime only persists `currentTime`, `rate`, and `volume`.
+The remaining checkpoint fields stay as follow-up work and should not be assumed to exist yet.
 
 ## 8. Source Strategy
 

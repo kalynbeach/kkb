@@ -7,9 +7,11 @@
     "dev": "next dev --port 3000",
     "build": "next build",
     "start": "next start",
-    "check-types": "next typegen && tsc --noEmit"
+    "check-types": "next typegen && tsc --noEmit",
+    "test": "bun test --pass-with-no-tests"
   },
   "dependencies": {
+    "@kkb/audio": "workspace:*",
     "@kkb/ui": "workspace:*",
     "next": "^16.1.6",
     "radix-ui": "^1.4.3",
