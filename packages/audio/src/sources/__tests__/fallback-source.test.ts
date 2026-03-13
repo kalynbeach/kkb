@@ -54,10 +54,14 @@ describe("createFallbackSource", () => {
 
   test("can still load and play a compatible input", async () => {
     let playCalls = 0;
+    let loadCalls = 0;
     const audio = {
       ...createAudioStub(),
       play: async () => {
         playCalls += 1;
+      },
+      load: () => {
+        loadCalls += 1;
       },
     };
     const source = createFallbackSource(audio);
@@ -69,6 +73,7 @@ describe("createFallbackSource", () => {
     await source.play();
 
     expect(audio.src).toBe("/audio/test-tone-opus.webm");
+    expect(loadCalls).toBe(1);
     expect(playCalls).toBe(1);
   });
 

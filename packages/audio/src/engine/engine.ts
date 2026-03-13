@@ -69,32 +69,43 @@ export class AudioEngine {
     let lastError: Error | null = null;
 
     for (const [index, source] of rankedSources.entries()) {
+      if (index > 0) {
+        this.store.setState({ status: "recovering" });
+      }
+
       try {
-        if (index > 0) {
-          this.store.setState({ status: "recovering" });
-        }
-
         await source.load(input);
-
-        const checkpoint = this.checkpoint.get();
-        if (checkpoint.currentTime > 0) {
-          await source.seek(checkpoint.currentTime);
-        }
-
-        const timeline = source.getTimeline();
-        this.activeSource = source;
-        this.subscribeToActiveSource(source);
-        this.store.setState({
-          status: "ready",
-          currentTime: checkpoint.currentTime || timeline.currentTime,
-          duration: timeline.duration,
-          sourceId: source.id,
-          error: null,
-        });
-        return;
       } catch (error) {
         lastError = toError(error, "Unknown load failure");
+        console.error(`[audio-engine] load failed for source "${source.id}"`, lastError);
+        continue;
       }
+
+      const checkpoint = this.checkpoint.get();
+      if (checkpoint.currentTime > 0) {
+        try {
+          await source.seek(checkpoint.currentTime);
+        } catch (error) {
+          lastError = toError(error, "Unknown seek restore failure");
+          console.error(
+            `[audio-engine] checkpoint restore seek failed for source "${source.id}"`,
+            lastError,
+          );
+          continue;
+        }
+      }
+
+      const timeline = source.getTimeline();
+      this.activeSource = source;
+      this.subscribeToActiveSource(source);
+      this.store.setState({
+        status: "ready",
+        currentTime: checkpoint.currentTime || timeline.currentTime,
+        duration: timeline.duration,
+        sourceId: source.id,
+        error: null,
+      });
+      return;
     }
 
     this.unsubscribeFromActiveSource();
@@ -141,6 +152,9 @@ export class AudioEngine {
   }
 
   async seek(seconds: number) {
+    const previousCheckpoint = this.checkpoint.get().currentTime;
+    const previousSnapshotTime = this.store.getSnapshot().currentTime;
+
     this.checkpoint.update({ currentTime: seconds });
     this.store.setState({ currentTime: seconds });
 
@@ -148,7 +162,15 @@ export class AudioEngine {
       return;
     }
 
-    await this.activeSource.seek(seconds);
+    try {
+      await this.activeSource.seek(seconds);
+    } catch (error) {
+      const nextError = toError(error, "Unable to seek playback");
+      this.handleRuntimeError(nextError);
+      this.checkpoint.update({ currentTime: previousCheckpoint });
+      this.store.setState({ currentTime: previousSnapshotTime });
+      throw nextError;
+    }
   }
 
   async setRate(rate: number) {

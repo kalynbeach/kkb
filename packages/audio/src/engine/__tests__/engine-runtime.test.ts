@@ -7,10 +7,12 @@ const createSource = ({
   play,
   pause,
   seek,
+  getTimeline,
 }: {
   play?: () => Promise<void>;
   pause?: () => Promise<void>;
   seek?: (seconds: number) => Promise<void>;
+  getTimeline?: () => { currentTime: number; duration: number };
 } = {}) => {
   let listener: ((event: PlaybackEvent) => void) | undefined;
 
@@ -31,7 +33,7 @@ const createSource = ({
       play: play ?? (async () => {}),
       pause: pause ?? (async () => {}),
       seek: seek ?? (async () => {}),
-      getTimeline: () => ({ currentTime: 12, duration: 180 }),
+      getTimeline: getTimeline ?? (() => ({ currentTime: 12, duration: 180 })),
       destroy: async () => {},
       subscribePlayback: (nextListener: (event: PlaybackEvent) => void) => {
         listener = nextListener;
@@ -123,5 +125,32 @@ describe("AudioEngine runtime behavior", () => {
     await expect(engine.pause()).resolves.toBeUndefined();
 
     expect(engine.getSnapshot().status).toBe("idle");
+  });
+
+  test("rolls back optimistic state when active-source seek fails", async () => {
+    let timelineCurrentTime = 12;
+    const { source } = createSource({
+      seek: async () => {
+        throw new Error("seek failed");
+      },
+      getTimeline: () => ({ currentTime: timelineCurrentTime, duration: 180 }),
+    });
+    const engine = new AudioEngine({ sources: [source] });
+
+    await engine.load({
+      src: "/audio/test-tone-aac.m4a",
+      mimeType: "audio/mp4; codecs=mp4a.40.2",
+    });
+
+    timelineCurrentTime = 999;
+
+    await expect(engine.seek(42)).rejects.toThrow("seek failed");
+    expect(engine.getSnapshot()).toMatchObject({
+      status: "error",
+      currentTime: 12,
+      duration: 180,
+      sourceId: "media-element",
+      error: "seek failed",
+    });
   });
 });

@@ -1,4 +1,4 @@
-import { describe, expect, test } from "bun:test";
+import { describe, expect, mock, test } from "bun:test";
 import type { AudioSource } from "../../sources/audio-source";
 import { createFallbackSource } from "../../sources/fallback-source";
 import { createMediaElementSource } from "../../sources/media-element-source";
@@ -204,6 +204,106 @@ describe("AudioEngine recovery", () => {
 
     expect(engine.getSnapshot().currentTime).toBe(24);
     expect(engine.getSnapshot().status).toBe("ready");
+  });
+
+  test("logs failed recovery attempts before falling through to the next source", async () => {
+    const consoleError = mock((_message: string, _error: unknown) => {});
+    const originalConsoleError = console.error;
+    console.error = consoleError as typeof console.error;
+
+    try {
+      const firstSource = {
+        id: "webcodecs",
+        capabilities: TEST_CAPABILITIES,
+        canPlay: async () => true,
+        score: () => 100,
+        load: async () => {
+          throw new Error("decode failed");
+        },
+        play: async () => {},
+        pause: async () => {},
+        seek: async () => {},
+        getTimeline: () => ({ currentTime: 0, duration: 180 }),
+        destroy: async () => {},
+      };
+
+      const secondSource = {
+        id: "media-element",
+        capabilities: TEST_CAPABILITIES,
+        canPlay: async () => true,
+        score: () => 50,
+        load: async () => {},
+        play: async () => {},
+        pause: async () => {},
+        seek: async () => {},
+        getTimeline: () => ({ currentTime: 0, duration: 180 }),
+        destroy: async () => {},
+      };
+
+      const engine = new AudioEngine({
+        sources: [firstSource, secondSource],
+      });
+
+      await engine.load({
+        src: "/audio/test-tone-aac.m4a",
+        mimeType: "audio/mp4; codecs=mp4a.40.2",
+      });
+
+      expect(consoleError).toHaveBeenCalledTimes(1);
+      expect(consoleError).toHaveBeenCalledWith(
+        '[audio-engine] load failed for source "webcodecs"',
+        expect.any(Error),
+      );
+      expect(engine.getSnapshot().sourceId).toBe("media-element");
+    } finally {
+      console.error = originalConsoleError;
+    }
+  });
+
+  test("falls through when checkpoint restore seek fails on a source", async () => {
+    const firstSource = {
+      id: "webcodecs",
+      capabilities: TEST_CAPABILITIES,
+      canPlay: async () => true,
+      score: () => 100,
+      load: async () => {},
+      play: async () => {},
+      pause: async () => {},
+      seek: async () => {
+        throw new Error("restore seek failed");
+      },
+      getTimeline: () => ({ currentTime: 0, duration: 180 }),
+      destroy: async () => {},
+    };
+
+    const secondSource = {
+      id: "media-element",
+      capabilities: TEST_CAPABILITIES,
+      canPlay: async () => true,
+      score: () => 50,
+      load: async () => {},
+      play: async () => {},
+      pause: async () => {},
+      seek: async () => {},
+      getTimeline: () => ({ currentTime: 24, duration: 180 }),
+      destroy: async () => {},
+    };
+
+    const engine = new AudioEngine({
+      sources: [firstSource, secondSource],
+    });
+
+    await engine.seek(24);
+    await engine.load({
+      src: "/audio/test-tone-aac.m4a",
+      mimeType: "audio/mp4; codecs=mp4a.40.2",
+    });
+
+    expect(engine.getSnapshot()).toMatchObject({
+      status: "ready",
+      currentTime: 24,
+      sourceId: "media-element",
+    });
   });
 
   test("prefers WorkletPCMSource over fallback when worklet transport is available", async () => {

@@ -43,6 +43,7 @@ export const createFallbackSource = (audio: AudioElementLike): AudioSource => ({
   score: (_context) => 1,
   load: async (input) => {
     audio.src = input.src;
+    audio.load();
   },
   play: async () => {
     await audio.play();

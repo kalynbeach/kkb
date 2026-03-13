@@ -86,7 +86,8 @@ sequenceDiagram
     participant User
     participant Shell as PlayerShell
     participant Presenter as createPlayerPresenter()
-    participant Hook as usePlayerStore()
+    participant ControllerHook as usePlayerController()
+    participant Mounted as MountedPlayer
     participant WP as WebPlayer
     participant Engine as AudioEngine
     participant Source as MediaElementSource
@@ -101,9 +102,9 @@ sequenceDiagram
     Audio-->>Source: "play" event
     Source-->>Engine: playbackListener("play")
     Engine->>Engine: store.setState({ status: "playing" })
-    Engine-->>Hook: snapshot change notification
-    Hook->>WP: getSnapshot()
-    Hook->>Presenter: { status: "playing", ... }
+    Engine-->>ControllerHook: snapshot change notification
+    ControllerHook->>Mounted: controller snapshot
+    Mounted->>Presenter: { status: "playing", ... }
     Presenter-->>Shell: { isPlaying: true, ... }
     Shell-->>User: UI updates (LED, button states)
 
@@ -119,11 +120,11 @@ sequenceDiagram
 
     Note over User,Audio: Timeline updates (continuous)
     loop requestAnimationFrame
-        Hook->>WP: getTimeline()
+        Shell->>WP: getTimeline()
         WP->>Audio: read currentTime, duration
-        Hook->>WP: getBufferedRanges()
+        Shell->>WP: getBufferedRanges()
         WP->>Audio: read buffered
-        Hook->>Presenter: updated timeline + ranges
+        Shell->>Presenter: updated timeline + ranges
         Presenter-->>Shell: progressPercent, bufferedSegments
     end
 ```
@@ -139,7 +140,7 @@ flowchart TB
         AE["Audio Element<br/>currentTime, duration, buffered"]
     end
 
-    subgraph Hook["usePlayerStore(player)"]
+    subgraph Hook["usePlayerController(controller)"]
         USES["useSyncExternalStore()<br/>→ snapshot"]
     end
 
@@ -181,38 +182,29 @@ flowchart TB
 
 ## Checkpoint Recovery on Source Switch
 
-How playback position persists when the engine falls back to a different source.
+How checkpointed time behaves when a new `load()` replaces an existing source.
 
 ```mermaid
 sequenceDiagram
     participant Engine as AudioEngine
     participant CP as Checkpoint
-    participant S1 as Source A (primary)
-    participant S2 as Source B (fallback)
+    participant S1 as Source A (active)
+    participant S2 as Source B (replacement)
 
-    Note over Engine: User is playing at 45s
+    Note over Engine,CP: A prior seek stored currentTime: 45 in the checkpoint
 
-    Engine->>S1: getTimeline()
-    S1-->>Engine: { currentTime: 45, duration: 120 }
-
-    Note over Engine: Source A fails mid-playback
-
+    Note over Engine: User selects a new track while Source A is active
+    Engine->>Engine: load(newTrack)
+    Engine->>Engine: hadActiveSource = true
     Engine->>Engine: teardownActiveSource()
     Engine->>S1: pause()
     Engine->>S1: destroy()
-
-    Note over Engine: Checkpoint retains currentTime: 45
-
-    Engine->>Engine: load(sameTrack) — recovery path
+    Engine->>CP: update({ currentTime: 0 })
+    Note over Engine: Replacing an active source clears resume time
     Engine->>S2: load(input)
     S2-->>Engine: resolved
-
     Engine->>CP: get()
-    CP-->>Engine: { currentTime: 45, rate: 1, volume: 1 }
-
-    Note over Engine: currentTime > 0, restore position
-    Engine->>S2: seek(45)
-    Engine->>Engine: store.setState({ status: "ready", sourceId: S2.id })
-
-    Note over Engine: Playback resumes at 45s on Source B
+    CP-->>Engine: { currentTime: 0, rate: 1, volume: 1 }
+    Note over Engine: No checkpoint seek runs because currentTime is 0
+    Engine->>Engine: store.setState({ status: "ready", currentTime: 0, sourceId: S2.id })
 ```

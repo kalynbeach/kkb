@@ -61,6 +61,8 @@ const createPlayerController = ({
   let snapshot = getInitialSnapshot(player);
   let initPromise: Promise<void> | null = null;
   let initialized = false;
+  let disposed = false;
+  let lifecycleToken = 0;
   const listeners = new Set<() => void>();
 
   const emit = () => {
@@ -70,6 +72,10 @@ const createPlayerController = ({
   };
 
   const setSnapshot = (patch: Partial<PlayerControllerSnapshot>) => {
+    if (disposed) {
+      return;
+    }
+
     snapshot = {
       ...snapshot,
       ...patch,
@@ -84,9 +90,14 @@ const createPlayerController = ({
     });
   };
 
+  const isStale = (token: number) => disposed || token !== lifecycleToken;
+
+  const toErrorMessage = (error: unknown, fallbackMessage: string) =>
+    error instanceof Error ? error.message : fallbackMessage;
+
   const unsubscribePlayer = player.subscribe(syncRuntimeSnapshot);
 
-  const loadTrack = async (track: TrackRecord) => {
+  const loadTrack = async (track: TrackRecord, token: number) => {
     const asset = selectTrackAsset(track);
 
     if (!asset) {
@@ -108,7 +119,13 @@ const createPlayerController = ({
       src: asset.src,
       mimeType: asset.mimeType,
     });
+
+    if (isStale(token)) {
+      return false;
+    }
+
     syncRuntimeSnapshot();
+    return true;
   };
 
   const ensureCatalogReady = () => {
@@ -156,6 +173,7 @@ const createPlayerController = ({
       }
 
       initPromise = (async () => {
+        const token = lifecycleToken;
         ensureCatalogReady();
         const defaultTrack = catalog.getTrack(catalog.getDefaultTrackId());
 
@@ -163,13 +181,25 @@ const createPlayerController = ({
           throw new Error("Default track is missing from the catalog");
         }
 
-        await loadTrack(defaultTrack);
+        const completed = await loadTrack(defaultTrack, token);
+        if (!completed || isStale(token)) {
+          return;
+        }
+
         initialized = true;
         setSnapshot({ restoreStatus: "complete" });
       })();
 
       try {
         await initPromise;
+      } catch (error) {
+        if (!isStale(lifecycleToken)) {
+          setSnapshot({
+            restoreStatus: "error",
+            error: toErrorMessage(error, "Unable to initialize player"),
+          });
+        }
+        throw error;
       } finally {
         initPromise = null;
       }
@@ -185,7 +215,12 @@ const createPlayerController = ({
         throw new Error(`Track "${trackId}" is missing from the catalog`);
       }
 
-      await loadTrack(track);
+      const token = lifecycleToken;
+      await loadTrack(track, token);
+      if (isStale(token)) {
+        return;
+      }
+
       if (!initialized) {
         initialized = true;
         setSnapshot({ restoreStatus: "complete" });
@@ -195,6 +230,8 @@ const createPlayerController = ({
     pause: () => player.pause(),
     seek: (seconds) => player.seek(seconds),
     destroy: async () => {
+      disposed = true;
+      lifecycleToken += 1;
       unsubscribePlayer();
       listeners.clear();
       await player.destroy();

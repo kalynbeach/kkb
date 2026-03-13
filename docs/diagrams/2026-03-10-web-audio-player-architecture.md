@@ -14,7 +14,7 @@ flowchart TB
         MS["MountedPlayer"]
         PS["PlayerShell<br/>(WinAmp UI)"]
         CWP["createWebPlayer()"]
-        UPS["usePlayerStore()"]
+        UPS["usePlayerController()"]
 
         Route --> PC
         PC -->|"useEffect mount"| CWP

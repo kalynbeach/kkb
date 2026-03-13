@@ -63,6 +63,21 @@ const createPlayerStub = () => {
   };
 };
 
+const createDeferred = <T>() => {
+  let resolvePromise: (value: T | PromiseLike<T>) => void = () => {};
+  let rejectPromise: (reason?: unknown) => void = () => {};
+  const promise = new Promise<T>((resolve, reject) => {
+    resolvePromise = resolve;
+    rejectPromise = reject;
+  });
+
+  return {
+    promise,
+    resolve: resolvePromise,
+    reject: rejectPromise,
+  };
+};
+
 describe("createPlayerController", () => {
   test("loads the default track on init and composes runtime snapshot state", async () => {
     const catalog = createCatalogStub();
@@ -115,6 +130,54 @@ describe("createPlayerController", () => {
     expect(controller.getSnapshot()).toMatchObject({
       selectedTrackId: "test-tone-opus",
       selectedTrack: { id: "test-tone-opus", title: "Opus Track" },
+    });
+  });
+
+  test("marks restore as error when init fails", async () => {
+    const catalog = createCatalogStub();
+    const { player } = createPlayerStub();
+    const controller = createPlayerController({
+      catalog,
+      player: {
+        ...player,
+        loadTrack: async () => {
+          throw new Error("load failed");
+        },
+      },
+    });
+
+    await expect(controller.init()).rejects.toThrow("load failed");
+    expect(controller.getSnapshot()).toMatchObject({
+      catalogStatus: "ready",
+      restoreStatus: "error",
+      error: "load failed",
+    });
+  });
+
+  test("ignores stale init completion after destroy", async () => {
+    const catalog = createCatalogStub();
+    const deferred = createDeferred<void>();
+    const { player, destroy } = createPlayerStub();
+    const controller = createPlayerController({
+      catalog,
+      player: {
+        ...player,
+        loadTrack: () => deferred.promise,
+      },
+    });
+
+    const initPromise = controller.init();
+    await Promise.resolve();
+    await controller.destroy();
+    deferred.resolve();
+
+    await initPromise;
+    expect(destroy).toHaveBeenCalledTimes(1);
+    expect(controller.getSnapshot()).toMatchObject({
+      restoreStatus: "restoring",
+      selectedTrackId: "test-tone-aac",
+      selectedTrack: { id: "test-tone-aac", title: "AAC Track" },
+      error: null,
     });
   });
 });
