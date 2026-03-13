@@ -22,6 +22,8 @@ type PlayerShellProps = {
   className?: string;
 };
 
+const shouldPollPlayerTimeline = (status: PlayerShellProps["status"]) => status === "playing";
+
 const formatBufferedLabel = (
   bufferedSegments: ReturnType<typeof createPlayerPresenter>["bufferedSegments"],
 ) => `${Math.round(getBufferedExtentPercent(bufferedSegments))}%`;
@@ -154,6 +156,12 @@ function PlayerShell({
       return;
     }
 
+    syncLiveTimeline();
+
+    if (!shouldPollPlayerTimeline(status)) {
+      return;
+    }
+
     let frame = 0;
 
     const update = () => {
@@ -166,7 +174,7 @@ function PlayerShell({
     return () => {
       cancelAnimationFrame(frame);
     };
-  }, [player]);
+  }, [duration, player, status]);
 
   return (
     <div className="flex w-full flex-col">
@@ -328,3 +336,4 @@ function StatusLed({ status }: { status: PlayerShellProps["status"] }) {
 }
 
 export { PlayerShell };
+export { shouldPollPlayerTimeline };

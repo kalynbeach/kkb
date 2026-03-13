@@ -13,6 +13,10 @@ export const createChunkQueue = () => {
         return;
       }
 
+      if (chunk.seq >= maxSeq) {
+        chunks.length = 0;
+      }
+
       maxSeq = chunk.seq;
       chunks.push(chunk);
     },

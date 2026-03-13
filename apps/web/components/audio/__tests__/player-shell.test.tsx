@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { renderToString } from "react-dom/server";
 
-import { PlayerShell } from "../player-shell";
+import { PlayerShell, shouldPollPlayerTimeline } from "../player-shell";
 
 const createPlayerStub = () => ({
   defaultTrack: {
@@ -28,6 +28,13 @@ const createPlayerStub = () => ({
 });
 
 describe("PlayerShell", () => {
+  test("polls the live timeline only while playback is active", () => {
+    expect(shouldPollPlayerTimeline("playing")).toBe(true);
+    expect(shouldPollPlayerTimeline("ready")).toBe(false);
+    expect(shouldPollPlayerTimeline("paused")).toBe(false);
+    expect(shouldPollPlayerTimeline("error")).toBe(false);
+  });
+
   test("does not create the browser audio runtime during server render", () => {
     expect(() =>
       renderToString(
