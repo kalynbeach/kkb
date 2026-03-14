@@ -122,6 +122,7 @@ function Waveform({
 }: WaveformProps) {
   const progressPercent =
     duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
+  const hasLiveBufferedRangesLayer = bufferedRangesRef !== undefined;
 
   const handleSeek = (event: React.PointerEvent<HTMLDivElement>) => {
     const timeline = getLiveTimeline({
@@ -176,20 +177,26 @@ function Waveform({
       onKeyDown={handleKeyDown}
       className={cn("group relative h-14 w-full cursor-pointer", className)}
     >
-      <div ref={bufferedRangesRef} className="absolute inset-0">
-        {bufferedRanges.map((range) => {
-          const left = duration > 0 ? (range.start / duration) * 100 : 0;
-          const width = duration > 0 ? ((range.end - range.start) / duration) * 100 : 0;
+      <div
+        ref={bufferedRangesRef}
+        data-buffered-layer={hasLiveBufferedRangesLayer ? "live" : "static"}
+        className="absolute inset-0"
+      >
+        {hasLiveBufferedRangesLayer
+          ? null
+          : bufferedRanges.map((range) => {
+              const left = duration > 0 ? (range.start / duration) * 100 : 0;
+              const width = duration > 0 ? ((range.end - range.start) / duration) * 100 : 0;
 
-          return (
-            <div
-              key={`${range.start}-${range.end}`}
-              aria-hidden="true"
-              className="absolute inset-y-0 bg-[rgba(120,184,255,0.06)]"
-              style={{ left: `${left}%`, width: `${width}%` }}
-            />
-          );
-        })}
+              return (
+                <div
+                  key={`${range.start}-${range.end}`}
+                  aria-hidden="true"
+                  className="absolute inset-y-0 bg-[rgba(120,184,255,0.06)]"
+                  style={{ left: `${left}%`, width: `${width}%` }}
+                />
+              );
+            })}
       </div>
 
       <div

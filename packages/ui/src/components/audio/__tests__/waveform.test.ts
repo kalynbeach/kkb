@@ -1,8 +1,24 @@
 import { describe, expect, test } from "bun:test";
+import { createElement, createRef } from "react";
+import { renderToString } from "react-dom/server";
 
-import { getNextSeekTimeForKey } from "../waveform";
+import { Waveform, getNextSeekTimeForKey } from "../waveform";
 
 describe("Waveform keyboard seeking", () => {
+  test("does not server-render buffered segments into the live-updated layer", () => {
+    const html = renderToString(
+      createElement(Waveform, {
+        duration: 100,
+        currentTime: 0,
+        bufferedRanges: [{ start: 0, end: 30 }],
+        bufferedRangesRef: createRef<HTMLDivElement>(),
+      }),
+    ).replaceAll("<!-- -->", "");
+
+    expect(html).toContain('data-buffered-layer="live"');
+    expect(html).not.toContain("width:30%");
+  });
+
   test("seeks backward five seconds on ArrowLeft", () => {
     expect(
       getNextSeekTimeForKey({
