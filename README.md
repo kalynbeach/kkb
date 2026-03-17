@@ -2,62 +2,49 @@
 
 > Kalyn Beach's core monorepo
 
-## Overview
+## Current state
 
-Turborepo monorepo built with Bun, Next.js 16, React 19, TypeScript 5.9, Biome, and Tailwind CSS v4.
+- Monorepo scaffold managed with Bun + Turborepo + Next.js 16 + React 19.
+- `apps/docs` is still a lightweight shell, while substantive project docs already live under `docs/` and core feature work is currently centered in `apps/web`.
 
-## Workspaces
+## Workspace inventory
 
-### Apps
+- `apps/web` (`@kkb/web`) — Demo/sandbox host for `@kkb/audio` and `@kkb/ui` feature work.
+- `apps/docs` (`@kkb/docs`) — Early-stage docs shell / placeholder docs app.
+- `packages/audio` (`@kkb/audio`) — Headless browser audio runtime used by `apps/web`.
+- `packages/ui` (`@kkb/ui`) — Shared React UI library plus json-render and audio presentation surfaces.
+- `packages/typescript-config` (`@kkb/typescript-config`) — Shared TypeScript configs used by all workspaces.
 
-- `apps/web` (`@kkb/web`) — Next.js 16 app (port 3000)
-- `apps/docs` (`@kkb/docs`) — Next.js 16 docs site (port 3001)
-- _Planned:_ `admin`, `cli`, `registry`
+## Quick commands
 
-### Packages
-
-- `packages/audio` (`@kkb/audio`) — core audio runtime (engine, sources, worklet transport, metrics)
-- `packages/ui` (`@kkb/ui`) — React 19 component library (shadcn/ui, json-render, audio presenter)
-- `packages/typescript-config` (`@kkb/typescript-config`) — shared TypeScript configs
-- _Planned:_ `ai`, `workflows`
-
-## Development
+Use Bun for all direct entrypoint scripts.
 
 ```bash
-bun install                    # install dependencies
-bun run dev                    # start all dev servers (web:3000, docs:3001)
-bun run build                  # build all packages
-bun run format-and-lint        # biome check (CI)
-bun run format-and-lint:fix    # biome auto-fix (dev)
-bun run check-types            # typescript check
-bun run test                   # workspace tests
+bun install
+bun run dev                  # starts web and docs dev servers
+bun run build                # delegates to turbo; builds only workspaces with build scripts
+bun run check-types           # delegates to turbo for check-types
+bun run test                 # delegates to turbo; runs only workspaces with test scripts
+bun run format-and-lint       # root Biome check
+bun run format-and-lint:fix   # root Biome auto-fix
 ```
 
-Filter to a specific workspace:
+Filter a task to one workspace:
 
 ```bash
-turbo dev --filter=@kkb/web
-turbo build --filter=@kkb/docs
-turbo test --filter=@kkb/audio
+turbo run dev --filter=@kkb/web
+turbo run build --filter=@kkb/docs
+turbo run check-types --filter=@kkb/ui
 ```
 
-## Architecture
+## Notes
 
-Internal package namespace: `@kkb/*` (use `workspace:*` protocol)
+- Internal namespace: `@kkb/*` with `workspace:*` dependencies.
+- Project docs live under `docs/` for plans, specs, research, reports, and diagrams.
+- For quick orientation, `apps/web/app/page.tsx` is the current demo entry and `apps/docs/app/page.tsx` is the docs shell.
 
-Dependency flow:
+## Roadmap / future
 
-```
-apps/web ──→ packages/ui, packages/audio
-apps/docs ─→ packages/ui
-                ↓
-packages/typescript-config
-```
-
-## TODOs
-
-- [x] Add and configure Biome, remove ESLint and Prettier
-- [x] Add and configure Tailwind CSS v4 with shared UI styles
-- [x] Add and setup shadcn/ui in `@kkb/ui`
-- [x] Update `@kkb/ui` directory naming and structure
-- [x] Add and setup [json-render](https://github.com/vercel-labs/json-render) in `@kkb/ui`
+- Add and refine docs content beyond the current shell.
+- Expand `@kkb/audio` capabilities and surface-level examples in web demos.
+- Add new apps (for example: `admin`, `cli`, `registry`) as needed.
