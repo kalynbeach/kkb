@@ -7,7 +7,6 @@ This is a Turborepo monorepo using Bun workspaces.
 - `apps/docs`: Next.js 16 docs site (port 3001)
 - `packages/ui`: shared React 19 component library
 - `packages/typescript-config`: shared TS configs
-- `packages/tailwind-config`: shared Tailwind CSS v4 config
 
 Internal packages use the `@kkb/*` namespace and the `workspace:*` protocol.
 

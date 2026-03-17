@@ -33,7 +33,6 @@
         "react-dom": "^19.2.4",
       },
       "devDependencies": {
-        "@kkb/tailwind-config": "workspace:*",
         "@kkb/typescript-config": "workspace:*",
         "@tailwindcss/postcss": "^4.2.0",
         "@types/node": "^25.3.0",
@@ -55,7 +54,6 @@
         "react-dom": "^19.2.4",
       },
       "devDependencies": {
-        "@kkb/tailwind-config": "workspace:*",
         "@kkb/typescript-config": "workspace:*",
         "@tailwindcss/postcss": "^4.2.0",
         "@types/node": "^25.3.0",
@@ -71,17 +69,6 @@
       "devDependencies": {
         "@kkb/typescript-config": "workspace:*",
         "typescript": "^5.9.3",
-      },
-    },
-    "packages/tailwind-config": {
-      "name": "@kkb/tailwind-config",
-      "version": "0.0.0",
-      "dependencies": {
-        "tailwindcss": "^4.1.0",
-      },
-      "devDependencies": {
-        "@tailwindcss/postcss": "^4.1.0",
-        "postcss": "^8.5.0",
       },
     },
     "packages/typescript-config": {
@@ -237,8 +224,6 @@
     "@kkb/audio": ["@kkb/audio@workspace:packages/audio"],
 
     "@kkb/docs": ["@kkb/docs@workspace:apps/docs"],
-
-    "@kkb/tailwind-config": ["@kkb/tailwind-config@workspace:packages/tailwind-config"],
 
     "@kkb/typescript-config": ["@kkb/typescript-config@workspace:packages/typescript-config"],
 

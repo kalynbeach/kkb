@@ -16,7 +16,6 @@
     "react-dom": "^19.2.4"
   },
   "devDependencies": {
-    "@kkb/tailwind-config": "workspace:*",
     "@kkb/typescript-config": "workspace:*",
     "@tailwindcss/postcss": "^4.2.0",
     "@types/node": "^25.3.0",

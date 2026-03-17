@@ -11,7 +11,7 @@ The monorepo is currently a clean Turborepo + Bun baseline:
 
 1. `apps/web` and `apps/docs` are Next.js 16 apps on React 19.2.
 2. Shared UI lives in `@kkb/ui`.
-3. Shared TS and Tailwind config live in `@kkb/typescript-config` and `@kkb/tailwind-config`.
+3. Shared TS config lives in `@kkb/typescript-config`, and shared UI styles live in `@kkb/ui`.
 4. Workspace tasks are currently `dev`, `build`, and `check-types` (plus root-only lint tasks).
 5. No dedicated test runner/task is wired in Turborepo yet.
 
