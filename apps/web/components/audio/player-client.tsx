@@ -69,7 +69,7 @@ function MountedPlayer({
           controller.seek(seconds).catch(logActionError("seek"));
         }}
       />
-      <div className="rounded-b-lg border border-t-0 border-[#8890a0] bg-[linear-gradient(180deg,#9098a8_0%,#a0a8b8_40%,#8890a0_92%,#707880_100%)] p-1 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
+      <div className="audio-subshell">
         <TrackSelector
           tracks={tracks}
           selectedTrackId={snapshot.selectedTrackId ?? defaultTrackId}
@@ -135,8 +135,12 @@ function PlayerClient({
           onPause={() => {}}
           onSeek={() => {}}
         />
-        <div className="rounded-b-lg border border-t-0 border-[#8890a0] bg-[linear-gradient(180deg,#9098a8_0%,#a0a8b8_40%,#8890a0_92%,#707880_100%)] p-1 shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
-          <TrackSelector tracks={tracks} selectedTrackId={defaultTrackId} onSelectTrack={() => {}} />
+        <div className="audio-subshell">
+          <TrackSelector
+            tracks={tracks}
+            selectedTrackId={defaultTrackId}
+            onSelectTrack={() => {}}
+          />
         </div>
       </div>
     );

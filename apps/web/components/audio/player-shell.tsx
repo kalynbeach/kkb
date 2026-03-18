@@ -2,6 +2,10 @@
 
 import { PlayerControls } from "@kkb/ui/components/audio/player-controls";
 import { createPlayerPresenter } from "@kkb/ui/components/audio/presenter";
+import {
+  AUDIO_BUFFERED_SEGMENT_CLASS_NAME,
+  AUDIO_SCANLINES_CLASS_NAME,
+} from "@kkb/ui/components/audio/theme";
 import { Waveform } from "@kkb/ui/components/audio/waveform";
 import { cn } from "@kkb/ui/lib/utils";
 import { useEffect, useEffectEvent, useRef } from "react";
@@ -66,7 +70,7 @@ const syncBufferedRanges = (
       const width = duration > 0 ? ((range.end - range.start) / duration) * 100 : 0;
       const segment = document.createElement("div");
       segment.setAttribute("aria-hidden", "true");
-      segment.className = "absolute inset-y-0 bg-[rgba(120,184,255,0.06)]";
+      segment.className = AUDIO_BUFFERED_SEGMENT_CLASS_NAME;
       segment.style.left = `${left}%`;
       segment.style.width = `${width}%`;
       return segment;
@@ -174,54 +178,48 @@ function PlayerShell({
     return () => {
       cancelAnimationFrame(frame);
     };
-  }, [duration, player, status]);
+  }, [player, status]);
 
   return (
     <div className="flex w-full flex-col">
-      <div className={cn("rounded-lg border border-[#8890a0] bg-[linear-gradient(180deg,#b8c0d0_0%,#9098a8_8%,#a0a8b8_40%,#8890a0_92%,#707880_100%)] p-1 shadow-[0_8px_32px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.3)]", className)}>
-        <div className="flex items-center justify-between rounded-t border-b border-[#505880] bg-[linear-gradient(90deg,#6870a0,#8088b8,#6870a0)] px-3 py-1.5">
+      <div className={cn("audio-shell", className)}>
+        <div className="audio-titlebar rounded-t">
           <div className="flex items-center gap-2">
             <div className="flex gap-1">
-              <div className="size-2 rounded-full bg-[#a0c0ff]" />
-              <div className="size-2 rounded-full bg-[rgba(160,192,255,0.5)]" />
-              <div className="size-2 rounded-full bg-[rgba(160,192,255,0.3)]" />
+              <div className="size-2 rounded-full bg-audio-window-dot" />
+              <div className="size-2 rounded-full bg-audio-window-dot-muted" />
+              <div className="size-2 rounded-full bg-audio-window-dot-faint" />
             </div>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-[#d0d8e8]">
+            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-audio-title">
               KKB Audio
             </span>
           </div>
-          <span className="font-mono text-[10px] uppercase tracking-wider text-[#a0a8c0]">
+          <span className="font-mono text-[10px] uppercase tracking-wider text-audio-meta">
             {sourceId ?? "—"}
           </span>
         </div>
 
-        <div className="relative mx-1 mt-1 overflow-hidden rounded border-2 border-[#303850] bg-[linear-gradient(180deg,#0a1028_0%,#0e1630_50%,#0a1028_100%)] p-4 shadow-[inset_0_2px_8px_rgba(0,0,0,0.6),inset_0_-1px_0_rgba(255,255,255,0.02)]">
+        <div className="audio-panel mx-1 mt-1 rounded p-4">
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 z-30 opacity-[0.04] [background-image:repeating-linear-gradient(0deg,transparent,transparent_1px,rgba(120,160,255,0.15)_1px,rgba(120,160,255,0.15)_2px)]"
+            className={cn(AUDIO_SCANLINES_CLASS_NAME, "z-30 opacity-[0.04]")}
           />
 
           <div className="flex items-baseline justify-between">
             <div
               ref={timeDisplayRef}
-              className="font-mono text-3xl font-bold tracking-wider text-[#78b8ff] drop-shadow-[0_0_10px_rgba(120,184,255,0.5)]"
+              className="font-mono text-3xl font-bold tracking-wider text-audio-accent drop-shadow-[0_0_10px_var(--audio-accent-glow)]"
             >
               {presenter.currentTimeLabel}
             </div>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
-                <span className="font-mono text-[9px] uppercase text-[rgba(120,184,255,0.4)]">
-                  kbps
-                </span>
-                <span className="font-mono text-xs font-bold text-[rgba(120,184,255,0.6)]">
-                  128
-                </span>
+                <span className="font-mono text-[9px] uppercase text-audio-accent-faint">kbps</span>
+                <span className="font-mono text-xs font-bold text-audio-accent-muted">128</span>
               </div>
               <div className="flex items-center gap-1.5">
-                <span className="font-mono text-[9px] uppercase text-[rgba(120,184,255,0.4)]">
-                  khz
-                </span>
-                <span className="font-mono text-xs font-bold text-[rgba(120,184,255,0.6)]">44</span>
+                <span className="font-mono text-[9px] uppercase text-audio-accent-faint">khz</span>
+                <span className="font-mono text-xs font-bold text-audio-accent-muted">44</span>
               </div>
               <StatusLed status={status} />
             </div>
@@ -230,7 +228,7 @@ function PlayerShell({
           <div className="mt-2 h-5 overflow-hidden">
             <p
               className={cn(
-                "whitespace-nowrap font-mono text-sm leading-5 tracking-wide text-[rgba(120,184,255,0.75)]",
+                "whitespace-nowrap font-mono text-sm leading-5 tracking-wide text-audio-accent-muted",
                 presenter.isPlaying ? "animate-marquee" : "truncate",
               )}
             >
@@ -254,17 +252,14 @@ function PlayerShell({
           </div>
 
           <div className="mt-1.5 flex items-center gap-2">
-            <div className="relative h-1 flex-1 overflow-hidden rounded-full bg-[rgba(120,184,255,0.08)]">
+            <div className="relative h-1 flex-1 overflow-hidden rounded-full bg-audio-accent-softer">
               <div
                 ref={progressFillRef}
-                className="absolute inset-y-0 left-0 rounded-full bg-[linear-gradient(90deg,rgba(120,184,255,0.5),rgba(160,200,255,0.7))] shadow-[0_0_4px_rgba(120,184,255,0.3)]"
+                className="absolute inset-y-0 left-0 rounded-full bg-[linear-gradient(90deg,var(--audio-accent-soft),var(--audio-progress-end))] shadow-[0_0_4px_var(--audio-accent-dim)]"
                 style={{ width: `${presenter.progressPercent}%` }}
               />
             </div>
-            <span
-              ref={durationDisplayRef}
-              className="font-mono text-[10px] text-[rgba(120,184,255,0.35)]"
-            >
+            <span ref={durationDisplayRef} className="font-mono text-[10px] text-audio-accent-dim">
               {presenter.durationLabel}
             </span>
           </div>
@@ -283,32 +278,35 @@ function PlayerShell({
           />
         </div>
 
-        <div className="flex items-center justify-between border-t border-[#707890] px-3 py-1.5">
+        <div className="flex items-center justify-between border-t border-audio-shell-border px-3 py-1.5">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5">
               <div
                 className={cn(
                   "size-1.5 rounded-full",
-                  status === "error" && "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.6)]",
+                  status === "error" &&
+                    "bg-audio-status-error shadow-[0_0_4px_var(--audio-status-error-glow)]",
                   (status === "loading" || status === "recovering") &&
-                    "bg-amber-400 shadow-[0_0_4px_rgba(251,191,36,0.6)]",
+                    "bg-audio-status-warning shadow-[0_0_4px_var(--audio-status-warning-glow)]",
                   status !== "error" &&
                     status !== "loading" &&
                     status !== "recovering" &&
-                    "bg-[#60a0ff] shadow-[0_0_4px_rgba(96,160,255,0.6)]",
+                    "bg-audio-status-info shadow-[0_0_4px_var(--audio-status-info-glow)]",
                 )}
               />
-              <span className="font-mono text-[10px] uppercase tracking-wider text-[#505870]">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-audio-label">
                 {status}
               </span>
             </div>
-            <span className="font-mono text-[10px] text-[#404860]">|</span>
-            <span ref={bufferedLabelRef} className="font-mono text-[10px] text-[#505870]">
+            <span className="font-mono text-[10px] text-audio-divider">|</span>
+            <span ref={bufferedLabelRef} className="font-mono text-[10px] text-audio-label">
               buf {formatBufferedLabel(presenter.bufferedSegments)}
             </span>
           </div>
           {error ? (
-            <span className="max-w-48 truncate font-mono text-[10px] text-red-400/80">{error}</span>
+            <span className="max-w-48 truncate font-mono text-[10px] text-audio-error-text">
+              {error}
+            </span>
           ) : null}
         </div>
       </div>
@@ -324,16 +322,15 @@ function StatusLed({ status }: { status: PlayerShellProps["status"] }) {
         className={cn(
           "size-1.5 rounded-full transition-colors",
           isActive
-            ? "bg-[#78b8ff] shadow-[0_0_6px_rgba(120,184,255,0.6)]"
-            : "bg-[rgba(120,184,255,0.2)]",
+            ? "bg-audio-accent shadow-[0_0_6px_var(--audio-accent-glow)]"
+            : "bg-audio-accent-soft",
         )}
       />
-      <span className="font-mono text-[9px] uppercase text-[rgba(120,184,255,0.4)]">
+      <span className="font-mono text-[9px] uppercase text-audio-accent-faint">
         {status === "playing" ? "stereo" : "—"}
       </span>
     </div>
   );
 }
 
-export { PlayerShell };
-export { shouldPollPlayerTimeline };
+export { PlayerShell, shouldPollPlayerTimeline };

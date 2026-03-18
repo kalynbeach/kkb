@@ -4,6 +4,7 @@
   "private": true,
   "exports": {
     "./components/audio/presenter": "./src/components/audio/presenter.ts",
+    "./components/audio/theme": "./src/components/audio/theme.ts",
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
     "./lib/*": "./src/lib/*.ts",

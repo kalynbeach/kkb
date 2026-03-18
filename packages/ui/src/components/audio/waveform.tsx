@@ -5,6 +5,7 @@ import type { Ref } from "react";
 
 import { Playhead } from "./playhead";
 import type { BufferedRange } from "./presenter";
+import { AUDIO_BUFFERED_SEGMENT_CLASS_NAME } from "./theme";
 
 const DEFAULT_BARS = [
   { id: "bar-01", height: 0.34 },
@@ -192,7 +193,7 @@ function Waveform({
                 <div
                   key={`${range.start}-${range.end}`}
                   aria-hidden="true"
-                  className="absolute inset-y-0 bg-[rgba(120,184,255,0.06)]"
+                  className={AUDIO_BUFFERED_SEGMENT_CLASS_NAME}
                   style={{ left: `${left}%`, width: `${width}%` }}
                 />
               );
@@ -202,7 +203,7 @@ function Waveform({
       <div
         ref={progressOverlayRef}
         aria-hidden="true"
-        className="absolute inset-y-0 left-0 bg-[linear-gradient(90deg,rgba(120,184,255,0.06),rgba(100,160,255,0.12))]"
+        className="absolute inset-y-0 left-0 bg-[linear-gradient(90deg,var(--audio-buffered),var(--audio-waveform-progress-end))]"
         style={{ width: `${progressPercent}%` }}
       />
 
@@ -217,8 +218,8 @@ function Waveform({
               className={cn(
                 "flex-1 rounded-[2px] transition-colors duration-100",
                 isPlayed
-                  ? "bg-[rgba(130,190,255,0.95)] shadow-[0_0_8px_rgba(120,184,255,0.6)]"
-                  : "bg-[rgba(100,160,220,0.25)] group-hover:bg-[rgba(100,160,220,0.35)]",
+                  ? "bg-audio-waveform-played shadow-[0_0_8px_var(--audio-accent-glow)]"
+                  : "bg-audio-waveform-idle group-hover:bg-audio-waveform-idle-hover",
               )}
               style={{ height: `${Math.max(12, Math.round(bar.height * 100))}%` }}
             />
@@ -231,4 +232,4 @@ function Waveform({
   );
 }
 
-export { Waveform, getNextSeekTimeForKey };
+export { getNextSeekTimeForKey, Waveform };

@@ -49,6 +49,33 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-audio-shell-border: var(--audio-shell-border);
+  --color-audio-titlebar-border: var(--audio-titlebar-border);
+  --color-audio-panel-border: var(--audio-panel-border);
+  --color-audio-title: var(--audio-title);
+  --color-audio-meta: var(--audio-meta);
+  --color-audio-label: var(--audio-label);
+  --color-audio-divider: var(--audio-divider);
+  --color-audio-accent: var(--audio-accent);
+  --color-audio-accent-muted: var(--audio-accent-muted);
+  --color-audio-accent-faint: var(--audio-accent-faint);
+  --color-audio-accent-dim: var(--audio-accent-dim);
+  --color-audio-accent-soft: var(--audio-accent-soft);
+  --color-audio-accent-softer: var(--audio-accent-softer);
+  --color-audio-window-dot: var(--audio-window-dot);
+  --color-audio-window-dot-muted: var(--audio-window-dot-muted);
+  --color-audio-window-dot-faint: var(--audio-window-dot-faint);
+  --color-audio-buffered: var(--audio-buffered);
+  --color-audio-waveform-played: var(--audio-waveform-played);
+  --color-audio-waveform-idle: var(--audio-waveform-idle);
+  --color-audio-waveform-idle-hover: var(--audio-waveform-idle-hover);
+  --color-audio-control-border: var(--audio-control-border);
+  --color-audio-control-icon: var(--audio-control-icon);
+  --color-audio-control-icon-muted: var(--audio-control-icon-muted);
+  --color-audio-status-info: var(--audio-status-info);
+  --color-audio-status-warning: var(--audio-status-warning);
+  --color-audio-status-error: var(--audio-status-error);
+  --color-audio-error-text: var(--audio-error-text);
 }
 
 :root {
@@ -85,6 +112,57 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --audio-shell-border: oklch(0.652 0.026 264.382);
+  --audio-shell-top: oklch(0.809 0.035 270.957);
+  --audio-shell-upper: oklch(0.678 0.025 264.392);
+  --audio-shell-mid: oklch(0.73 0.025 264.41);
+  --audio-shell-lower: oklch(0.652 0.026 264.382);
+  --audio-shell-bottom: oklch(0.575 0.038 270.671);
+  --audio-titlebar-border: oklch(0.471 0.066 274.924);
+  --audio-titlebar-start: oklch(0.558 0.075 276.408);
+  --audio-titlebar-mid: oklch(0.638 0.073 276.818);
+  --audio-titlebar-end: oklch(0.558 0.075 276.408);
+  --audio-window-dot: oklch(0.807 0.096 263.53);
+  --audio-window-dot-muted: oklch(0.807 0.096 263.53 / 0.5);
+  --audio-window-dot-faint: oklch(0.807 0.096 263.53 / 0.3);
+  --audio-title: oklch(0.881 0.024 264.446);
+  --audio-meta: oklch(0.733 0.036 270.889);
+  --audio-label: oklch(0.463 0.04 270.395);
+  --audio-divider: oklch(0.405 0.042 270.17);
+  --audio-panel-border: oklch(0.344 0.044 269.831);
+  --audio-panel-start: oklch(0.183 0.05 270.309);
+  --audio-panel-mid: oklch(0.209 0.053 268.661);
+  --audio-panel-end: oklch(0.183 0.05 270.309);
+  --audio-grid-line: oklch(0.768 0.122 252.001 / 0.15);
+  --audio-accent: oklch(0.768 0.122 252.001);
+  --audio-accent-glow: oklch(0.768 0.122 252.001 / 0.6);
+  --audio-accent-muted: oklch(0.768 0.122 252.001 / 0.75);
+  --audio-accent-faint: oklch(0.768 0.122 252.001 / 0.4);
+  --audio-accent-dim: oklch(0.768 0.122 252.001 / 0.35);
+  --audio-accent-soft: oklch(0.768 0.122 252.001 / 0.12);
+  --audio-accent-softer: oklch(0.768 0.122 252.001 / 0.08);
+  --audio-buffered: oklch(0.768 0.122 252.001 / 0.06);
+  --audio-waveform-progress-end: oklch(0.69 0.109 249.664 / 0.12);
+  --audio-waveform-played: oklch(0.786 0.112 251.282 / 0.95);
+  --audio-waveform-idle: oklch(0.69 0.109 249.664 / 0.25);
+  --audio-waveform-idle-hover: oklch(0.69 0.109 249.664 / 0.35);
+  --audio-progress-end: oklch(0.807 0.096 263.53 / 0.7);
+  --audio-control-border: oklch(0.784 0.035 270.937);
+  --audio-control-start: oklch(0.883 0.032 269.793);
+  --audio-control-mid: oklch(0.784 0.035 270.937);
+  --audio-control-end: oklch(0.733 0.036 270.889);
+  --audio-control-active-start: oklch(0.733 0.036 270.889);
+  --audio-control-active-mid: oklch(0.784 0.035 270.937);
+  --audio-control-active-end: oklch(0.809 0.035 270.957);
+  --audio-control-icon: oklch(0.443 0.07 274.957);
+  --audio-control-icon-muted: oklch(0.605 0.05 273.873);
+  --audio-status-info: oklch(0.706 0.155 258.133);
+  --audio-status-info-glow: oklch(0.706 0.155 258.133 / 0.6);
+  --audio-status-warning: oklch(0.837 0.164 84.429);
+  --audio-status-warning-glow: oklch(0.837 0.164 84.429 / 0.6);
+  --audio-status-error: oklch(0.637 0.208 25.331);
+  --audio-status-error-glow: oklch(0.637 0.208 25.331 / 0.6);
+  --audio-error-text: oklch(0.704 0.191 22.216 / 0.8);
 }
 
 .dark {
@@ -120,6 +198,167 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.439 0 0);
+  --audio-shell-border: oklch(0.432 0.026 264.382);
+  --audio-shell-top: oklch(0.53 0.044 271.2);
+  --audio-shell-upper: oklch(0.482 0.034 267.8);
+  --audio-shell-mid: oklch(0.44 0.03 265.8);
+  --audio-shell-lower: oklch(0.39 0.028 265.4);
+  --audio-shell-bottom: oklch(0.33 0.024 266.1);
+  --audio-titlebar-border: oklch(0.412 0.062 274.2);
+  --audio-titlebar-start: oklch(0.47 0.079 275.1);
+  --audio-titlebar-mid: oklch(0.56 0.074 274.1);
+  --audio-titlebar-end: oklch(0.47 0.079 275.1);
+  --audio-window-dot: oklch(0.82 0.102 254.3);
+  --audio-window-dot-muted: oklch(0.82 0.102 254.3 / 0.5);
+  --audio-window-dot-faint: oklch(0.82 0.102 254.3 / 0.3);
+  --audio-title: oklch(0.93 0.02 264.4);
+  --audio-meta: oklch(0.79 0.022 267.2);
+  --audio-label: oklch(0.67 0.019 266.3);
+  --audio-divider: oklch(0.6 0.02 266.5);
+  --audio-panel-border: oklch(0.305 0.034 267.8);
+  --audio-panel-start: oklch(0.205 0.04 265.8);
+  --audio-panel-mid: oklch(0.24 0.043 261.5);
+  --audio-panel-end: oklch(0.205 0.04 265.8);
+  --audio-grid-line: oklch(0.8 0.122 252.001 / 0.16);
+  --audio-accent: oklch(0.8 0.122 252.001);
+  --audio-accent-glow: oklch(0.8 0.122 252.001 / 0.65);
+  --audio-accent-muted: oklch(0.8 0.122 252.001 / 0.78);
+  --audio-accent-faint: oklch(0.8 0.122 252.001 / 0.45);
+  --audio-accent-dim: oklch(0.8 0.122 252.001 / 0.4);
+  --audio-accent-soft: oklch(0.8 0.122 252.001 / 0.15);
+  --audio-accent-softer: oklch(0.8 0.122 252.001 / 0.1);
+  --audio-buffered: oklch(0.8 0.122 252.001 / 0.08);
+  --audio-waveform-progress-end: oklch(0.75 0.11 249.664 / 0.16);
+  --audio-waveform-played: oklch(0.82 0.11 251.282 / 0.97);
+  --audio-waveform-idle: oklch(0.73 0.108 249.664 / 0.3);
+  --audio-waveform-idle-hover: oklch(0.73 0.108 249.664 / 0.4);
+  --audio-progress-end: oklch(0.84 0.096 263.53 / 0.76);
+  --audio-control-border: oklch(0.55 0.027 268.8);
+  --audio-control-start: oklch(0.66 0.03 268.4);
+  --audio-control-mid: oklch(0.58 0.029 268.8);
+  --audio-control-end: oklch(0.5 0.028 269.1);
+  --audio-control-active-start: oklch(0.47 0.029 268.4);
+  --audio-control-active-mid: oklch(0.56 0.03 268.8);
+  --audio-control-active-end: oklch(0.61 0.029 269.1);
+  --audio-control-icon: oklch(0.91 0.028 259.4);
+  --audio-control-icon-muted: oklch(0.78 0.026 264.2);
+  --audio-status-info: oklch(0.78 0.128 252.8);
+  --audio-status-info-glow: oklch(0.78 0.128 252.8 / 0.65);
+  --audio-status-warning: oklch(0.86 0.144 84.4);
+  --audio-status-warning-glow: oklch(0.86 0.144 84.4 / 0.65);
+  --audio-status-error: oklch(0.71 0.188 25.3);
+  --audio-status-error-glow: oklch(0.71 0.188 25.3 / 0.65);
+  --audio-error-text: oklch(0.78 0.168 25.1 / 0.85);
+}
+
+@layer components {
+  .audio-shell {
+    @apply rounded-lg border border-audio-shell-border p-1;
+    background-image: linear-gradient(
+      180deg,
+      var(--audio-shell-top) 0%,
+      var(--audio-shell-upper) 8%,
+      var(--audio-shell-mid) 40%,
+      var(--audio-shell-lower) 92%,
+      var(--audio-shell-bottom) 100%
+    );
+    box-shadow:
+      0 8px 32px oklch(0 0 0 / 0.5),
+      inset 0 1px 0 oklch(1 0 0 / 0.3);
+  }
+
+  .audio-subshell {
+    @apply rounded-b-lg border border-t-0 border-audio-shell-border p-1;
+    background-image: linear-gradient(
+      180deg,
+      var(--audio-shell-upper) 0%,
+      var(--audio-shell-mid) 40%,
+      var(--audio-shell-lower) 92%,
+      var(--audio-shell-bottom) 100%
+    );
+    box-shadow: 0 8px 32px oklch(0 0 0 / 0.3);
+  }
+
+  .audio-titlebar {
+    @apply flex items-center justify-between border-b border-audio-titlebar-border px-3 py-1.5;
+    background-image: linear-gradient(
+      90deg,
+      var(--audio-titlebar-start),
+      var(--audio-titlebar-mid),
+      var(--audio-titlebar-end)
+    );
+  }
+
+  .audio-panel {
+    @apply relative overflow-hidden border-2 border-audio-panel-border;
+    background-image: linear-gradient(
+      180deg,
+      var(--audio-panel-start) 0%,
+      var(--audio-panel-mid) 50%,
+      var(--audio-panel-end) 100%
+    );
+    box-shadow:
+      inset 0 2px 8px oklch(0 0 0 / 0.6),
+      inset 0 -1px 0 oklch(1 0 0 / 0.02);
+  }
+
+  .audio-scanlines {
+    @apply pointer-events-none absolute inset-0;
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 1px,
+      var(--audio-grid-line) 1px,
+      var(--audio-grid-line) 2px
+    );
+  }
+
+  .audio-buffered-segment {
+    @apply absolute inset-y-0 bg-audio-buffered;
+  }
+
+  .audio-transport-button {
+    @apply flex h-7 w-8 cursor-pointer items-center justify-center rounded-sm border border-audio-control-border transition-shadow duration-75;
+    background-image: linear-gradient(
+      180deg,
+      var(--audio-control-start) 0%,
+      var(--audio-control-mid) 40%,
+      var(--audio-control-end) 100%
+    );
+    box-shadow:
+      0 1px 0 oklch(1 0 0 / 0.5),
+      inset 0 1px 0 oklch(1 0 0 / 0.4),
+      0 1px 2px oklch(0 0 0 / 0.12);
+  }
+
+  .audio-transport-button:active {
+    background-image: linear-gradient(
+      180deg,
+      var(--audio-control-active-start) 0%,
+      var(--audio-control-active-mid) 60%,
+      var(--audio-control-active-end) 100%
+    );
+    box-shadow:
+      inset 0 2px 4px oklch(0 0 0 / 0.2),
+      inset 0 0 1px oklch(0 0 0 / 0.1);
+  }
+
+  .audio-transport-button:disabled {
+    @apply cursor-default opacity-35;
+  }
+
+  .audio-transport-button:disabled:active {
+    background-image: linear-gradient(
+      180deg,
+      var(--audio-control-start) 0%,
+      var(--audio-control-mid) 40%,
+      var(--audio-control-end) 100%
+    );
+    box-shadow:
+      0 1px 0 oklch(1 0 0 / 0.5),
+      inset 0 1px 0 oklch(1 0 0 / 0.4),
+      0 1px 2px oklch(0 0 0 / 0.12);
+  }
 }
 
 @layer base {

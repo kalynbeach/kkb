@@ -1,0 +1,4 @@
+const AUDIO_BUFFERED_SEGMENT_CLASS_NAME = "audio-buffered-segment";
+const AUDIO_SCANLINES_CLASS_NAME = "audio-scanlines";
+
+export { AUDIO_BUFFERED_SEGMENT_CLASS_NAME, AUDIO_SCANLINES_CLASS_NAME };
