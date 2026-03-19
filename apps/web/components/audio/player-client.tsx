@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 
 import { PlayerShell } from "@/components/audio/player-shell";
 import { TrackSelector } from "@/components/audio/track-selector";
-import { selectTrackAsset } from "@/lib/audio/catalog/select-track-asset";
 import { createStaticTrackCatalog } from "@/lib/audio/catalog/static-track-catalog";
 import type { TrackCatalog } from "@/lib/audio/catalog/track-catalog";
-import type { TrackAsset, TrackRecord } from "@/lib/audio/catalog/track-types";
+import { selectTrackAsset } from "@/lib/audio/catalog/select-track-asset";
+import type { TrackRecord } from "@/lib/audio/catalog/track-types";
 import {
   createPlayerController,
   type PlayerController,
+  type PlayerSelection,
 } from "@/lib/audio/controller/player-controller";
 import type { WebPlayer } from "@/lib/audio/create-web-player";
 import { createWebPlayer } from "@/lib/audio/create-web-player";
@@ -20,12 +21,12 @@ const logActionError = (action: string) => (error: unknown) => {
   console.error(`[web-player] ${action} failed`, error);
 };
 
-const getTrackSubtitle = (track: TrackRecord | null, asset: TrackAsset | null) => {
-  if (!track && !asset) {
+const getTrackSubtitle = (selection: PlayerSelection | null) => {
+  if (!selection) {
     return "";
   }
 
-  return [track?.artist, asset?.mimeType].filter(Boolean).join(" • ");
+  return [selection.track.artist, selection.asset.mimeType].filter(Boolean).join(" • ");
 };
 
 type MountedPlayerProps = {
@@ -44,20 +45,29 @@ function MountedPlayer({
   defaultTrack,
 }: MountedPlayerProps) {
   const { snapshot } = usePlayerController(controller);
-
-  const selectedTrack = snapshot.selectedTrack ?? defaultTrack;
-  const selectedAsset = snapshot.asset ?? selectTrackAsset(selectedTrack);
+  const defaultAsset = defaultTrack ? selectTrackAsset(defaultTrack) : null;
+  const defaultSelection =
+    defaultTrack && defaultAsset
+      ? {
+          trackId: defaultTrack.id,
+          track: defaultTrack,
+          asset: defaultAsset,
+        }
+      : null;
+  const selection = snapshot.selection ?? defaultSelection;
 
   return (
     <div className="mx-auto flex w-full max-w-lg flex-col">
       <PlayerShell
         player={player}
-        title={selectedTrack?.title ?? "Unknown Track"}
-        subtitle={getTrackSubtitle(selectedTrack, selectedAsset)}
+        title={selection?.track.title ?? "Unknown Track"}
+        subtitle={getTrackSubtitle(selection)}
         status={snapshot.runtime.status}
         duration={snapshot.runtime.duration}
         sourceId={snapshot.runtime.sourceId}
         error={snapshot.runtime.error ?? snapshot.error}
+        rate={snapshot.runtime.rate}
+        volume={snapshot.runtime.volume}
         className="rounded-b-none border-b-0"
         onPlay={() => {
           controller.play().catch(logActionError("play"));
@@ -68,11 +78,17 @@ function MountedPlayer({
         onSeek={(seconds) => {
           controller.seek(seconds).catch(logActionError("seek"));
         }}
+        onSetRate={(rate) => {
+          controller.setRate(rate).catch(logActionError("setRate"));
+        }}
+        onSetVolume={(volume) => {
+          controller.setVolume(volume).catch(logActionError("setVolume"));
+        }}
       />
       <div className="audio-subshell">
         <TrackSelector
           tracks={tracks}
-          selectedTrackId={snapshot.selectedTrackId ?? defaultTrackId}
+          selectedTrackId={selection?.trackId ?? defaultTrackId}
           onSelectTrack={(trackId) => {
             controller.selectTrack(trackId).catch(logActionError("selectTrack"));
           }}
@@ -99,6 +115,7 @@ function PlayerClient({
   const tracks = catalog.listTracks();
   const defaultTrackId = catalog.getDefaultTrackId();
   const defaultTrack = catalog.getTrack(defaultTrackId);
+  const defaultAsset = defaultTrack ? selectTrackAsset(defaultTrack) : null;
 
   useEffect(() => {
     const nextPlayer = createPlayer();
@@ -125,15 +142,27 @@ function PlayerClient({
         <PlayerShell
           player={null}
           title={defaultTrack?.title ?? "Unknown Track"}
-          subtitle={getTrackSubtitle(defaultTrack, selectTrackAsset(defaultTrack))}
+          subtitle={getTrackSubtitle(
+            defaultTrack && defaultAsset
+              ? {
+                  trackId: defaultTrack.id,
+                  track: defaultTrack,
+                  asset: defaultAsset,
+                }
+              : null,
+          )}
           status="idle"
           duration={defaultTrack?.duration ?? 0}
           sourceId={null}
           error={null}
+          rate={1}
+          volume={1}
           className="rounded-b-none border-b-0"
           onPlay={() => {}}
           onPause={() => {}}
           onSeek={() => {}}
+          onSetRate={() => {}}
+          onSetVolume={() => {}}
         />
         <div className="audio-subshell">
           <TrackSelector

@@ -43,13 +43,7 @@ export class AudioEngine {
     if (hadActiveSource) {
       this.checkpoint.update({ currentTime: 0 });
     }
-    this.store.setState({
-      status: "loading",
-      currentTime: 0,
-      duration: 0,
-      sourceId: null,
-      error: null,
-    });
+    this.store.transitionToLoading();
 
     const playableSources: AudioSource[] = [];
     for (const source of this.sources) {
@@ -70,7 +64,7 @@ export class AudioEngine {
 
     for (const [index, source] of rankedSources.entries()) {
       if (index > 0) {
-        this.store.setState({ status: "recovering" });
+        this.store.transitionToRecovering();
       }
 
       try {
@@ -95,27 +89,38 @@ export class AudioEngine {
         }
       }
 
+      try {
+        await source.setRate(checkpoint.rate);
+        await source.setVolume(checkpoint.volume);
+      } catch (error) {
+        lastError = toError(error, "Unknown playback preference failure");
+        console.error(
+          `[audio-engine] playback preference restore failed for source "${source.id}"`,
+          lastError,
+        );
+        continue;
+      }
+
       const timeline = source.getTimeline();
       this.activeSource = source;
       this.subscribeToActiveSource(source);
-      this.store.setState({
-        status: "ready",
+      this.store.transitionToReady({
         currentTime: checkpoint.currentTime || timeline.currentTime,
         duration: timeline.duration,
         sourceId: source.id,
-        error: null,
+        rate: checkpoint.rate,
+        volume: checkpoint.volume,
       });
       return;
     }
 
     this.unsubscribeFromActiveSource();
     this.activeSource = null;
-    this.store.setState({
-      status: "error",
+    this.store.transitionToError({
+      error: lastError?.message ?? "Unable to load audio source",
       currentTime: 0,
       duration: 0,
       sourceId: null,
-      error: lastError?.message ?? "Unable to load audio source",
     });
 
     throw lastError ?? new Error("Unable to load audio source");
@@ -128,7 +133,7 @@ export class AudioEngine {
 
     try {
       await this.activeSource.play();
-      this.store.setState({ status: "playing", error: null });
+      this.store.transitionToPlaying();
     } catch (error) {
       const nextError = toError(error, "Unable to start playback");
       this.handleRuntimeError(nextError);
@@ -143,7 +148,7 @@ export class AudioEngine {
 
     try {
       await this.activeSource.pause();
-      this.store.setState({ status: "paused", error: null });
+      this.store.transitionToPaused();
     } catch (error) {
       const nextError = toError(error, "Unable to pause playback");
       this.handleRuntimeError(nextError);
@@ -156,7 +161,7 @@ export class AudioEngine {
     const previousSnapshotTime = this.store.getSnapshot().currentTime;
 
     this.checkpoint.update({ currentTime: seconds });
-    this.store.setState({ currentTime: seconds });
+    this.store.syncTimeline({ currentTime: seconds });
 
     if (!this.activeSource) {
       return;
@@ -168,29 +173,47 @@ export class AudioEngine {
       const nextError = toError(error, "Unable to seek playback");
       this.handleRuntimeError(nextError);
       this.checkpoint.update({ currentTime: previousCheckpoint });
-      this.store.setState({ currentTime: previousSnapshotTime });
+      this.store.syncTimeline({ currentTime: previousSnapshotTime });
       throw nextError;
     }
   }
 
   async setRate(rate: number) {
+    const previousRate = this.checkpoint.get().rate;
     this.checkpoint.update({ rate });
+
+    try {
+      await this.activeSource?.setRate(rate);
+      this.store.setRate(rate);
+    } catch (error) {
+      const nextError = toError(error, "Unable to update playback rate");
+      this.checkpoint.update({ rate: previousRate });
+      this.store.setRate(previousRate);
+      this.handleRuntimeError(nextError);
+      throw nextError;
+    }
   }
 
   async setVolume(volume: number) {
+    const previousVolume = this.checkpoint.get().volume;
     this.checkpoint.update({ volume });
+
+    try {
+      await this.activeSource?.setVolume(volume);
+      this.store.setVolume(volume);
+    } catch (error) {
+      const nextError = toError(error, "Unable to update volume");
+      this.checkpoint.update({ volume: previousVolume });
+      this.store.setVolume(previousVolume);
+      this.handleRuntimeError(nextError);
+      throw nextError;
+    }
   }
 
   async destroy() {
     await this.teardownActiveSource();
-    this.checkpoint.update({ currentTime: 0 });
-    this.store.setState({
-      status: "idle",
-      currentTime: 0,
-      duration: 0,
-      sourceId: null,
-      error: null,
-    });
+    this.checkpoint.reset();
+    this.store.reset();
   }
 
   private subscribeToActiveSource(source: AudioSource) {
@@ -245,16 +268,16 @@ export class AudioEngine {
     }
 
     if (event === "play") {
-      this.store.setState({ status: "playing", error: null });
+      this.store.transitionToPlaying();
       return;
     }
 
     if (event === "ended") {
+      const timeline = source.getTimeline();
       this.checkpoint.update({ currentTime: 0 });
-      this.store.setState({
-        status: "paused",
+      this.store.transitionToPaused({
         currentTime: 0,
-        duration: source.getTimeline().duration,
+        duration: timeline.duration,
       });
       await source.seek(0);
       return;
@@ -262,25 +285,22 @@ export class AudioEngine {
 
     if (event === "pause") {
       const timeline: TimelineSnapshot = source.getTimeline();
-      this.store.setState({
-        status: "paused",
+      this.store.transitionToPaused({
         currentTime: timeline.currentTime,
         duration: timeline.duration,
-        error: null,
       });
     }
   }
 
   private handleRuntimeError(error: Error) {
     const snapshot = this.store.getSnapshot();
-    this.store.setState({
-      status: "error",
+    this.store.transitionToError({
+      error: error.message,
       currentTime: this.activeSource
         ? this.activeSource.getTimeline().currentTime
         : snapshot.currentTime,
       duration: this.activeSource ? this.activeSource.getTimeline().duration : snapshot.duration,
       sourceId: this.activeSource?.id ?? snapshot.sourceId,
-      error: error.message,
     });
   }
 }

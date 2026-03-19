@@ -8,13 +8,17 @@ type RestoreStatus = "idle" | "restoring" | "complete" | "error";
 
 type PlayerControllerRuntimeSnapshot = ReturnType<WebPlayer["getSnapshot"]>;
 
+type PlayerSelection = {
+  trackId: string;
+  track: TrackRecord;
+  asset: TrackAsset;
+};
+
 type PlayerControllerSnapshot = {
   catalogStatus: CatalogStatus;
   restoreStatus: RestoreStatus;
-  selectedTrackId: string | null;
-  selectedTrack: TrackRecord | null;
+  selection: PlayerSelection | null;
   queueTrackIds: string[];
-  asset: TrackAsset | null;
   runtime: PlayerControllerRuntimeSnapshot;
   error: string | null;
 };
@@ -27,12 +31,22 @@ type PlayerController = {
   play(): Promise<void>;
   pause(): Promise<void>;
   seek(seconds: number): Promise<void>;
+  setRate(rate: number): Promise<void>;
+  setVolume(volume: number): Promise<void>;
   destroy(): Promise<void>;
 };
 
 type PlayerControllerPlayer = Pick<
   WebPlayer,
-  "getSnapshot" | "subscribe" | "loadTrack" | "play" | "pause" | "seek" | "destroy"
+  | "getSnapshot"
+  | "subscribe"
+  | "loadTrack"
+  | "play"
+  | "pause"
+  | "seek"
+  | "setRate"
+  | "setVolume"
+  | "destroy"
 >;
 
 type CreatePlayerControllerOptions = {
@@ -46,10 +60,8 @@ const getInitialSnapshot = (
 ): PlayerControllerSnapshot => ({
   catalogStatus,
   restoreStatus: "idle",
-  selectedTrackId: null,
-  selectedTrack: null,
+  selection: null,
   queueTrackIds: [],
-  asset: null,
   runtime: player.getSnapshot(),
   error: null,
 });
@@ -109,9 +121,11 @@ const createPlayerController = ({
 
     setSnapshot({
       catalogStatus: "ready",
-      selectedTrackId: track.id,
-      selectedTrack: track,
-      asset,
+      selection: {
+        trackId: track.id,
+        track,
+        asset,
+      },
       error: null,
     });
 
@@ -229,6 +243,14 @@ const createPlayerController = ({
     play: () => player.play(),
     pause: () => player.pause(),
     seek: (seconds) => player.seek(seconds),
+    setRate: async (rate) => {
+      await player.setRate(rate);
+      syncRuntimeSnapshot();
+    },
+    setVolume: async (volume) => {
+      await player.setVolume(volume);
+      syncRuntimeSnapshot();
+    },
     destroy: async () => {
       disposed = true;
       lifecycleToken += 1;
@@ -246,5 +268,6 @@ export type {
   PlayerControllerPlayer,
   PlayerControllerRuntimeSnapshot,
   PlayerControllerSnapshot,
+  PlayerSelection,
   RestoreStatus,
 };

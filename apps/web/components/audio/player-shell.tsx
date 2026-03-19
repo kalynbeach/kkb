@@ -20,9 +20,13 @@ type PlayerShellProps = {
   duration: number;
   sourceId: string | null;
   error: string | null;
+  rate: number;
+  volume: number;
   onPlay: () => void;
   onPause: () => void;
   onSeek: (seconds: number) => void;
+  onSetRate: (rate: number) => void;
+  onSetVolume: (volume: number) => void;
   className?: string;
 };
 
@@ -86,9 +90,13 @@ function PlayerShell({
   duration,
   sourceId,
   error,
+  rate,
+  volume,
   onPlay,
   onPause,
   onSeek,
+  onSetRate,
+  onSetVolume,
   className,
 }: PlayerShellProps) {
   const timeDisplayRef = useRef<HTMLDivElement>(null);
@@ -273,8 +281,12 @@ function PlayerShell({
             isPauseDisabled={presenter.isPauseDisabled}
             currentTimeLabel={presenter.currentTimeLabel}
             durationLabel={presenter.durationLabel}
+            rate={rate}
+            volume={volume}
             onPlay={onPlay}
             onPause={onPause}
+            onSetRate={onSetRate}
+            onSetVolume={onSetVolume}
           />
         </div>
 

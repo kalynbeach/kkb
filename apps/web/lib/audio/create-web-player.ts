@@ -21,6 +21,8 @@ type TimeRangesLike = {
 type AudioElementLike = {
   currentTime: number;
   duration: number;
+  playbackRate: number;
+  volume: number;
   buffered: TimeRangesLike;
   src: string;
   canPlayType(mimeType: string): string;
@@ -107,6 +109,8 @@ export const createWebPlayer = (options: CreateWebPlayerOptions = {}) => {
     play: () => engine.play(),
     pause: () => engine.pause(),
     seek: (seconds: number) => engine.seek(seconds),
+    setRate: (rate: number) => engine.setRate(rate),
+    setVolume: (volume: number) => engine.setVolume(volume),
     destroy: () => engine.destroy(),
     getTimeline: () => {
       const snapshot = engine.getSnapshot();

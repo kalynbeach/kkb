@@ -10,6 +10,8 @@ const createAudioStub = () => {
   return {
     currentTime: 0,
     duration: 0,
+    playbackRate: 1,
+    volume: 1,
     canPlayType: () => "probably",
     play: async () => {},
     pause: () => {},
@@ -89,6 +91,17 @@ describe("createFallbackSource", () => {
         mimeType: "audio/flac",
       }),
     ).resolves.toBe(false);
+  });
+
+  test("applies playback rate and volume to the fallback element", async () => {
+    const audio = createAudioStub();
+    const source = createFallbackSource(audio);
+
+    await source.setRate(0.8);
+    await source.setVolume(0.6);
+
+    expect(audio.playbackRate).toBe(0.8);
+    expect(audio.volume).toBe(0.6);
   });
 
   test("subscribes to native playback events", () => {

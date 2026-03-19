@@ -16,12 +16,16 @@ const createPlayerStub = () => ({
     duration: 180,
     sourceId: "media-element",
     error: null,
+    rate: 1,
+    volume: 1,
   }),
   subscribe: () => () => {},
   loadTrack: async () => {},
   play: async () => {},
   pause: async () => {},
   seek: async () => {},
+  setRate: async () => {},
+  setVolume: async () => {},
   destroy: async () => {},
   getTimeline: () => ({ currentTime: 0, duration: 180 }),
   getBufferedRanges: () => [{ start: 0, end: 30 }],
@@ -46,9 +50,13 @@ describe("PlayerShell", () => {
           duration={180}
           sourceId="media-element"
           error={null}
+          rate={1}
+          volume={1}
           onPlay={() => {}}
           onPause={() => {}}
           onSeek={() => {}}
+          onSetRate={() => {}}
+          onSetVolume={() => {}}
         />,
       ),
     ).not.toThrow();
@@ -68,9 +76,13 @@ describe("PlayerShell", () => {
         duration={100}
         sourceId="media-element"
         error={null}
+        rate={1}
+        volume={1}
         onPlay={() => {}}
         onPause={() => {}}
         onSeek={() => {}}
+        onSetRate={() => {}}
+        onSetVolume={() => {}}
       />,
     );
     const normalizedHtml = html.replaceAll("<!-- -->", "");
@@ -92,13 +104,44 @@ describe("PlayerShell", () => {
         duration={100}
         sourceId="media-element"
         error={null}
+        rate={1.5}
+        volume={0.4}
         onPlay={() => {}}
         onPause={() => {}}
         onSeek={() => {}}
+        onSetRate={() => {}}
+        onSetVolume={() => {}}
       />,
     );
     const normalizedHtml = html.replaceAll("<!-- -->", "");
 
     expect(normalizedHtml).toContain("buf 100%");
+  });
+
+  test("renders playback rate and volume controls", () => {
+    const html = renderToString(
+      <PlayerShell
+        player={createPlayerStub()}
+        title="Test Tone"
+        subtitle="Local AAC fixture routed through the current media-element path."
+        status="ready"
+        duration={180}
+        sourceId="media-element"
+        error={null}
+        rate={1.5}
+        volume={0.4}
+        onPlay={() => {}}
+        onPause={() => {}}
+        onSeek={() => {}}
+        onSetRate={() => {}}
+        onSetVolume={() => {}}
+      />,
+    );
+    const normalizedHtml = html.replaceAll("<!-- -->", "");
+
+    expect(normalizedHtml).toContain("Rate");
+    expect(normalizedHtml).toContain("1.5x");
+    expect(normalizedHtml).toContain("Volume");
+    expect(normalizedHtml).toContain("40%");
   });
 });

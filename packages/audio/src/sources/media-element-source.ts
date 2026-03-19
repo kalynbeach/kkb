@@ -8,6 +8,8 @@ type MediaErrorLike = {
 type AudioElementLike = {
   currentTime: number;
   duration: number;
+  playbackRate: number;
+  volume: number;
   error?: MediaErrorLike;
   src: string;
   canPlayType(mimeType: string): string;
@@ -53,6 +55,12 @@ export const createMediaElementSource = (audio: AudioElementLike): AudioSource =
   },
   seek: async (seconds) => {
     audio.currentTime = seconds;
+  },
+  setRate: async (rate) => {
+    audio.playbackRate = rate;
+  },
+  setVolume: async (volume) => {
+    audio.volume = volume;
   },
   getTimeline: () => ({
     currentTime: audio.currentTime,

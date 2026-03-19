@@ -9,6 +9,8 @@ const createAudioStub = () => {
   return {
     currentTime: 0,
     duration: 0,
+    playbackRate: 1,
+    volume: 1,
     canPlayType: (mimeType: string) => (mimeType.includes("audio/") ? "probably" : ""),
     play: async () => {},
     pause: () => {},
@@ -69,6 +71,17 @@ describe("createMediaElementSource", () => {
     await source.play();
 
     expect(playCalls).toBe(1);
+  });
+
+  test("applies playback rate and volume to the media element", async () => {
+    const audio = createAudioStub();
+    const source = createMediaElementSource(audio);
+
+    await source.setRate(1.5);
+    await source.setVolume(0.3);
+
+    expect(audio.playbackRate).toBe(1.5);
+    expect(audio.volume).toBe(0.3);
   });
 
   test("subscribes to native playback events", () => {

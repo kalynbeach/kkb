@@ -52,4 +52,23 @@ describe("createWebCodecsSource", () => {
       }),
     ).resolves.toBe(true);
   });
+
+  test("accepts playback rate and volume updates without changing the timeline", async () => {
+    const source = createWebCodecsSource({
+      globals: { AudioDecoder: class AudioDecoder {} },
+      demuxer: {
+        isConfigured: () => true,
+        supports: () => true,
+        load: async () => {},
+      },
+      timeline: {
+        currentTime: 0,
+        duration: 180,
+      },
+    });
+
+    await expect(source.setRate(1.1)).resolves.toBeUndefined();
+    await expect(source.setVolume(0.7)).resolves.toBeUndefined();
+    expect(source.getTimeline()).toEqual({ currentTime: 0, duration: 180 });
+  });
 });

@@ -18,5 +18,7 @@ describe("PlayerClient", () => {
 
     expect(html).toContain("Test Tone (AAC)");
     expect(html).toContain("Playlist");
+    expect(html).toContain("Rate");
+    expect(html).toContain("Volume");
   });
 });

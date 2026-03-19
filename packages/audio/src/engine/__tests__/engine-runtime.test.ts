@@ -4,21 +4,29 @@ import type { PlaybackEvent } from "../../sources/audio-source";
 import { AudioEngine } from "../engine";
 
 const createSource = ({
+  id = "media-element",
+  canPlay = async () => true,
   play,
   pause,
   seek,
+  setRate,
+  setVolume,
   getTimeline,
 }: {
+  id?: string;
+  canPlay?: (input: { src: string; mimeType?: string }) => Promise<boolean>;
   play?: () => Promise<void>;
   pause?: () => Promise<void>;
   seek?: (seconds: number) => Promise<void>;
+  setRate?: (rate: number) => Promise<void>;
+  setVolume?: (volume: number) => Promise<void>;
   getTimeline?: () => { currentTime: number; duration: number };
 } = {}) => {
   let listener: ((event: PlaybackEvent) => void) | undefined;
 
   return {
     source: {
-      id: "media-element",
+      id,
       capabilities: {
         streaming: true,
         sampleAccurateSeek: false,
@@ -27,12 +35,14 @@ const createSource = ({
         requiresUserGesture: true,
         requiresSAB: false,
       },
-      canPlay: async () => true,
+      canPlay,
       score: () => 1,
       load: async () => {},
       play: play ?? (async () => {}),
       pause: pause ?? (async () => {}),
       seek: seek ?? (async () => {}),
+      setRate: setRate ?? (async () => {}),
+      setVolume: setVolume ?? (async () => {}),
       getTimeline: getTimeline ?? (() => ({ currentTime: 12, duration: 180 })),
       destroy: async () => {},
       subscribePlayback: (nextListener: (event: PlaybackEvent) => void) => {
@@ -151,6 +161,71 @@ describe("AudioEngine runtime behavior", () => {
       duration: 180,
       sourceId: "media-element",
       error: "seek failed",
+    });
+  });
+
+  test("persists rate and volume across source switches and resets them on destroy", async () => {
+    const firstRateCalls: number[] = [];
+    const firstVolumeCalls: number[] = [];
+    const secondRateCalls: number[] = [];
+    const secondVolumeCalls: number[] = [];
+    const firstSource = createSource({
+      id: "media-element",
+      canPlay: async (input) => input.mimeType?.includes("mp4") ?? false,
+      setRate: async (rate) => {
+        firstRateCalls.push(rate);
+      },
+      setVolume: async (volume) => {
+        firstVolumeCalls.push(volume);
+      },
+    }).source;
+    const secondSource = createSource({
+      id: "fallback",
+      canPlay: async (input) => input.mimeType?.includes("webm") ?? false,
+      setRate: async (rate) => {
+        secondRateCalls.push(rate);
+      },
+      setVolume: async (volume) => {
+        secondVolumeCalls.push(volume);
+      },
+    }).source;
+    const engine = new AudioEngine({ sources: [firstSource, secondSource] });
+
+    await engine.load({
+      src: "/audio/test-tone-aac.m4a",
+      mimeType: "audio/mp4; codecs=mp4a.40.2",
+    });
+    await engine.setRate(1.5);
+    await engine.setVolume(0.4);
+
+    expect(engine.getSnapshot()).toMatchObject({
+      sourceId: "media-element",
+      rate: 1.5,
+      volume: 0.4,
+    });
+    expect(firstRateCalls).toEqual([1, 1.5]);
+    expect(firstVolumeCalls).toEqual([1, 0.4]);
+
+    await engine.load({
+      src: "/audio/test-tone-opus.webm",
+      mimeType: "audio/webm; codecs=opus",
+    });
+
+    expect(engine.getSnapshot()).toMatchObject({
+      sourceId: "fallback",
+      rate: 1.5,
+      volume: 0.4,
+    });
+    expect(secondRateCalls).toEqual([1.5]);
+    expect(secondVolumeCalls).toEqual([0.4]);
+
+    await engine.destroy();
+
+    expect(engine.getSnapshot()).toMatchObject({
+      status: "idle",
+      sourceId: null,
+      rate: 1,
+      volume: 1,
     });
   });
 });

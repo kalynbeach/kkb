@@ -15,6 +15,12 @@ const TEST_CAPABILITIES: AudioSource["capabilities"] = {
   requiresSAB: false,
 };
 
+const withControlSetters = <T extends object>(source: T) => ({
+  ...source,
+  setRate: async (_rate: number) => {},
+  setVolume: async (_volume: number) => {},
+});
+
 const createAudioStub = ({
   canPlayType = () => "probably",
   duration = 180,
@@ -28,6 +34,8 @@ const createAudioStub = ({
   return {
     currentTime: 0,
     duration,
+    playbackRate: 1,
+    volume: 1,
     canPlayType,
     play: async () => {
       for (const listener of listeners.get("play") ?? []) {
@@ -72,7 +80,7 @@ describe("AudioEngine recovery", () => {
     let firstAttempts = 0;
     let secondAttempts = 0;
 
-    const firstSource = {
+    const firstSource = withControlSetters({
       id: "webcodecs",
       capabilities: TEST_CAPABILITIES,
       canPlay: async () => true,
@@ -86,9 +94,9 @@ describe("AudioEngine recovery", () => {
       seek: async () => {},
       getTimeline: () => ({ currentTime: 12, duration: 180 }),
       destroy: async () => {},
-    };
+    });
 
-    const secondSource = {
+    const secondSource = withControlSetters({
       id: "media-element",
       capabilities: TEST_CAPABILITIES,
       canPlay: async () => true,
@@ -101,7 +109,7 @@ describe("AudioEngine recovery", () => {
       seek: async () => {},
       getTimeline: () => ({ currentTime: 12, duration: 180 }),
       destroy: async () => {},
-    };
+    });
 
     const engine = new AudioEngine({
       sources: [firstSource, secondSource],
@@ -120,7 +128,7 @@ describe("AudioEngine recovery", () => {
   test("skips sources whose canPlay check throws", async () => {
     let secondAttempts = 0;
 
-    const firstSource = {
+    const firstSource = withControlSetters({
       id: "broken-source",
       capabilities: TEST_CAPABILITIES,
       canPlay: async () => {
@@ -133,9 +141,9 @@ describe("AudioEngine recovery", () => {
       seek: async () => {},
       getTimeline: () => ({ currentTime: 0, duration: 180 }),
       destroy: async () => {},
-    };
+    });
 
-    const secondSource = {
+    const secondSource = withControlSetters({
       id: "media-element",
       capabilities: TEST_CAPABILITIES,
       canPlay: async () => true,
@@ -148,7 +156,7 @@ describe("AudioEngine recovery", () => {
       seek: async () => {},
       getTimeline: () => ({ currentTime: 12, duration: 180 }),
       destroy: async () => {},
-    };
+    });
 
     const engine = new AudioEngine({
       sources: [firstSource, secondSource],
@@ -164,7 +172,7 @@ describe("AudioEngine recovery", () => {
   });
 
   test("preserves checkpoint time when recovery succeeds", async () => {
-    const firstSource = {
+    const firstSource = withControlSetters({
       id: "webcodecs",
       capabilities: TEST_CAPABILITIES,
       canPlay: async () => true,
@@ -177,9 +185,9 @@ describe("AudioEngine recovery", () => {
       seek: async () => {},
       getTimeline: () => ({ currentTime: 24, duration: 180 }),
       destroy: async () => {},
-    };
+    });
 
-    const secondSource = {
+    const secondSource = withControlSetters({
       id: "media-element",
       capabilities: TEST_CAPABILITIES,
       canPlay: async () => true,
@@ -190,7 +198,7 @@ describe("AudioEngine recovery", () => {
       seek: async () => {},
       getTimeline: () => ({ currentTime: 24, duration: 180 }),
       destroy: async () => {},
-    };
+    });
 
     const engine = new AudioEngine({
       sources: [firstSource, secondSource],
@@ -212,7 +220,7 @@ describe("AudioEngine recovery", () => {
     console.error = consoleError as typeof console.error;
 
     try {
-      const firstSource = {
+      const firstSource = withControlSetters({
         id: "webcodecs",
         capabilities: TEST_CAPABILITIES,
         canPlay: async () => true,
@@ -225,9 +233,9 @@ describe("AudioEngine recovery", () => {
         seek: async () => {},
         getTimeline: () => ({ currentTime: 0, duration: 180 }),
         destroy: async () => {},
-      };
+      });
 
-      const secondSource = {
+      const secondSource = withControlSetters({
         id: "media-element",
         capabilities: TEST_CAPABILITIES,
         canPlay: async () => true,
@@ -238,7 +246,7 @@ describe("AudioEngine recovery", () => {
         seek: async () => {},
         getTimeline: () => ({ currentTime: 0, duration: 180 }),
         destroy: async () => {},
-      };
+      });
 
       const engine = new AudioEngine({
         sources: [firstSource, secondSource],
@@ -261,7 +269,7 @@ describe("AudioEngine recovery", () => {
   });
 
   test("falls through when checkpoint restore seek fails on a source", async () => {
-    const firstSource = {
+    const firstSource = withControlSetters({
       id: "webcodecs",
       capabilities: TEST_CAPABILITIES,
       canPlay: async () => true,
@@ -274,9 +282,9 @@ describe("AudioEngine recovery", () => {
       },
       getTimeline: () => ({ currentTime: 0, duration: 180 }),
       destroy: async () => {},
-    };
+    });
 
-    const secondSource = {
+    const secondSource = withControlSetters({
       id: "media-element",
       capabilities: TEST_CAPABILITIES,
       canPlay: async () => true,
@@ -287,7 +295,7 @@ describe("AudioEngine recovery", () => {
       seek: async () => {},
       getTimeline: () => ({ currentTime: 24, duration: 180 }),
       destroy: async () => {},
-    };
+    });
 
     const engine = new AudioEngine({
       sources: [firstSource, secondSource],
@@ -503,7 +511,7 @@ describe("AudioEngine recovery", () => {
     let pauseCalls = 0;
     let destroyCalls = 0;
 
-    const firstSource = {
+    const firstSource = withControlSetters({
       id: "first",
       capabilities: TEST_CAPABILITIES,
       canPlay: async (input: { src: string }) => input.src === "/audio/first.m4a",
@@ -518,9 +526,9 @@ describe("AudioEngine recovery", () => {
       destroy: async () => {
         destroyCalls += 1;
       },
-    };
+    });
 
-    const secondSource = {
+    const secondSource = withControlSetters({
       id: "second",
       capabilities: TEST_CAPABILITIES,
       canPlay: async (input: { src: string }) => input.src === "/audio/second.m4a",
@@ -531,7 +539,7 @@ describe("AudioEngine recovery", () => {
       seek: async () => {},
       getTimeline: () => ({ currentTime: 0, duration: 120 }),
       destroy: async () => {},
-    };
+    });
 
     const engine = new AudioEngine({
       sources: [firstSource, secondSource],
@@ -556,7 +564,7 @@ describe("AudioEngine recovery", () => {
     let pauseCalls = 0;
     let destroyCalls = 0;
 
-    const firstSource = {
+    const firstSource = withControlSetters({
       id: "first",
       capabilities: TEST_CAPABILITIES,
       canPlay: async (input: { src: string }) => input.src === "/audio/first.m4a",
@@ -572,9 +580,9 @@ describe("AudioEngine recovery", () => {
       destroy: async () => {
         destroyCalls += 1;
       },
-    };
+    });
 
-    const secondSource = {
+    const secondSource = withControlSetters({
       id: "second",
       capabilities: TEST_CAPABILITIES,
       canPlay: async (input: { src: string }) => input.src === "/audio/second.m4a",
@@ -585,7 +593,7 @@ describe("AudioEngine recovery", () => {
       seek: async () => {},
       getTimeline: () => ({ currentTime: 0, duration: 120 }),
       destroy: async () => {},
-    };
+    });
 
     const engine = new AudioEngine({
       sources: [firstSource, secondSource],
@@ -610,7 +618,7 @@ describe("AudioEngine recovery", () => {
     let pauseCalls = 0;
     let destroyCalls = 0;
 
-    const source = {
+    const source = withControlSetters({
       id: "source",
       capabilities: TEST_CAPABILITIES,
       canPlay: async (input: { src: string }) => input.src === "/audio/first.m4a",
@@ -625,7 +633,7 @@ describe("AudioEngine recovery", () => {
       destroy: async () => {
         destroyCalls += 1;
       },
-    };
+    });
 
     const engine = new AudioEngine({
       sources: [source],

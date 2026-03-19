@@ -52,6 +52,8 @@ export const createWebCodecsSource = ({
     seek: async (seconds) => {
       currentTimeline = { ...currentTimeline, currentTime: seconds };
     },
+    setRate: async (_rate) => {},
+    setVolume: async (_volume) => {},
     getTimeline: () => currentTimeline,
     destroy: async () => {
       await demuxer.destroy?.();

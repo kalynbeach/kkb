@@ -13,6 +13,8 @@ const createAudioStub = ({
   return {
     currentTime: 0,
     duration: 180,
+    playbackRate: 1,
+    volume: 1,
     buffered: {
       length: 1,
       start: () => 0,
@@ -82,6 +84,25 @@ describe("createWebPlayer", () => {
     expect(player.getBufferedRanges()).toEqual([]);
   });
 
+  test("surfaces rate and volume through the public player facade", async () => {
+    const mediaElement = createAudioStub();
+    const player = createWebPlayer({
+      createMediaElement: () => mediaElement,
+      createFallbackElement: createAudioStub,
+    });
+
+    await player.loadTrack(player.defaultTrack);
+    await player.setRate(1.4);
+    await player.setVolume(0.35);
+
+    expect(mediaElement.playbackRate).toBe(1.4);
+    expect(mediaElement.volume).toBe(0.35);
+    expect(player.getSnapshot()).toMatchObject({
+      rate: 1.4,
+      volume: 0.35,
+    });
+  });
+
   test("keeps the stub webcodecs path ineligible until a real demuxer is wired", async () => {
     const originalAudioDecoder = globalThis.AudioDecoder;
     globalThis.AudioDecoder = class AudioDecoder {};
@@ -119,6 +140,8 @@ describe("createWebPlayer", () => {
       status: "idle",
       sourceId: null,
       error: null,
+      rate: 1,
+      volume: 1,
     });
   });
 });

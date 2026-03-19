@@ -25,6 +25,8 @@ export type AudioSource = {
   play(): Promise<void>;
   pause(): Promise<void>;
   seek(seconds: number): Promise<void>;
+  setRate(rate: number): Promise<void>;
+  setVolume(volume: number): Promise<void>;
   getTimeline(): TimelineSnapshot;
   destroy(): Promise<void>;
   subscribePlayback?(listener: PlaybackListener): () => void;

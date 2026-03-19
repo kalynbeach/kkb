@@ -19,5 +19,9 @@ export const createPlaybackCheckpoint = () => {
       checkpoint = { ...checkpoint, ...patch };
       return checkpoint;
     },
+    reset: () => {
+      checkpoint = { ...DEFAULT_CHECKPOINT };
+      return checkpoint;
+    },
   };
 };

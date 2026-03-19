@@ -42,6 +42,8 @@ export const createWorkletPCMSource = ({
       currentTimeline = { ...currentTimeline, currentTime: seconds };
       transport.postMessage({ type: "seek", seconds });
     },
+    setRate: async (_rate) => {},
+    setVolume: async (_volume) => {},
     getTimeline: () => currentTimeline,
     destroy: async () => {},
   };
