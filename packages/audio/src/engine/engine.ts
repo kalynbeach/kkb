@@ -13,6 +13,9 @@ const DEFAULT_SCORE_CONTEXT: SourceScoreContext = {
   lowPowerModeLikely: false,
 };
 
+const INVALID_SEEK_TIME_MESSAGE = "Seek time must be a finite number greater than or equal to 0";
+const SEEK_EXCEEDS_DURATION_MESSAGE = "Seek time exceeds the loaded track duration";
+
 const toError = (error: unknown, fallbackMessage: string) =>
   error instanceof Error ? error : new Error(fallbackMessage);
 
@@ -25,6 +28,11 @@ export class AudioEngine {
   private unsubscribeActivePlayback: (() => void) | null = null;
 
   constructor(options: AudioEngineOptions) {
+    // The engine contract requires at least one source candidate up front.
+    if (options.sources.length === 0) {
+      throw new Error("AudioEngine requires at least one source");
+    }
+
     this.sources = options.sources;
     this.scoreContext = { ...DEFAULT_SCORE_CONTEXT, ...options.scoreContext };
   }
@@ -127,6 +135,7 @@ export class AudioEngine {
   }
 
   async play() {
+    // Explicit no-op until a track has been loaded into an active source.
     if (!this.activeSource) {
       return;
     }
@@ -142,6 +151,7 @@ export class AudioEngine {
   }
 
   async pause() {
+    // Explicit no-op until a track has been loaded into an active source.
     if (!this.activeSource) {
       return;
     }
@@ -157,6 +167,13 @@ export class AudioEngine {
   }
 
   async seek(seconds: number) {
+    const validationError = this.getSeekValidationError(seconds);
+    if (validationError) {
+      const nextError = new Error(validationError);
+      this.handleRuntimeError(nextError);
+      throw nextError;
+    }
+
     const previousCheckpoint = this.checkpoint.get().currentTime;
     const previousSnapshotTime = this.store.getSnapshot().currentTime;
 
@@ -176,6 +193,20 @@ export class AudioEngine {
       this.store.syncTimeline({ currentTime: previousSnapshotTime });
       throw nextError;
     }
+  }
+
+  private getSeekValidationError(seconds: number) {
+    if (!Number.isFinite(seconds) || seconds < 0) {
+      return INVALID_SEEK_TIME_MESSAGE;
+    }
+
+    // Pre-load seeks may be optimistic, but once duration is known we reject overshoots.
+    const duration = this.store.getSnapshot().duration;
+    if (Number.isFinite(duration) && duration > 0 && seconds > duration) {
+      return SEEK_EXCEEDS_DURATION_MESSAGE;
+    }
+
+    return null;
   }
 
   async setRate(rate: number) {
@@ -294,13 +325,31 @@ export class AudioEngine {
 
   private handleRuntimeError(error: Error) {
     const snapshot = this.store.getSnapshot();
+    // Runtime failures should preserve the original error even when timeline reads also fail.
+    const activeTimeline = this.getSafeActiveTimeline(snapshot);
     this.store.transitionToError({
       error: error.message,
-      currentTime: this.activeSource
-        ? this.activeSource.getTimeline().currentTime
-        : snapshot.currentTime,
-      duration: this.activeSource ? this.activeSource.getTimeline().duration : snapshot.duration,
+      currentTime: activeTimeline.currentTime,
+      duration: activeTimeline.duration,
       sourceId: this.activeSource?.id ?? snapshot.sourceId,
     });
+  }
+
+  private getSafeActiveTimeline(snapshot: ReturnType<AudioEngine["getSnapshot"]>) {
+    if (!this.activeSource) {
+      return {
+        currentTime: snapshot.currentTime,
+        duration: snapshot.duration,
+      };
+    }
+
+    try {
+      return this.activeSource.getTimeline();
+    } catch {
+      return {
+        currentTime: snapshot.currentTime,
+        duration: snapshot.duration,
+      };
+    }
   }
 }

@@ -119,4 +119,33 @@ describe("createMediaElementSource", () => {
       error: expect.any(Error),
     });
   });
+
+  test("maps media error codes to readable messages", () => {
+    const cases = [
+      { code: 2, message: "Media element network error" },
+      { code: 3, message: "Media element decode error" },
+      { code: 4, message: "Media element source is not supported" },
+      { code: 99, message: "Media element error" },
+    ];
+
+    for (const { code, message } of cases) {
+      const audio = {
+        ...createAudioStub(),
+        error: { code },
+      };
+      const source = createMediaElementSource(audio);
+      const events: Array<string | { type: string; error: Error }> = [];
+
+      source.subscribePlayback?.((event) => {
+        events.push(event);
+      });
+
+      audio.emit("error");
+
+      expect(events[0]).toMatchObject({
+        type: "error",
+        error: expect.objectContaining({ message }),
+      });
+    }
+  });
 });

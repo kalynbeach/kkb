@@ -31,11 +31,16 @@ const FALLBACK_CAPABILITIES: SourceCapabilities = {
 };
 
 const getMediaElementErrorMessage = (audio: AudioElementLike) => {
-  if (audio.error?.code) {
-    return `Media element error (code ${audio.error.code})`;
+  switch (audio.error?.code) {
+    case 2:
+      return "Media element network error";
+    case 3:
+      return "Media element decode error";
+    case 4:
+      return "Media element source is not supported";
+    default:
+      return "Media element error";
   }
-
-  return "Media element error";
 };
 
 export const createFallbackSource = (audio: AudioElementLike): AudioSource => ({
