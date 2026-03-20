@@ -72,6 +72,7 @@ const createPlayerController = ({
 }: CreatePlayerControllerOptions): PlayerController => {
   let snapshot = getInitialSnapshot(player);
   let initPromise: Promise<void> | null = null;
+  let trackLoadPromise: Promise<void> | null = null;
   let initialized = false;
   let disposed = false;
   let lifecycleToken = 0;
@@ -111,6 +112,7 @@ const createPlayerController = ({
 
   const loadTrack = async (track: TrackRecord, token: number) => {
     const asset = selectTrackAsset(track);
+    const previousSelection = snapshot.selection;
 
     if (!asset) {
       setSnapshot({
@@ -129,10 +131,23 @@ const createPlayerController = ({
       error: null,
     });
 
-    await player.loadTrack({
-      src: asset.src,
-      mimeType: asset.mimeType,
-    });
+    try {
+      await player.loadTrack({
+        src: asset.src,
+        mimeType: asset.mimeType,
+      });
+    } catch (error) {
+      if (isStale(token)) {
+        return false;
+      }
+
+      setSnapshot({
+        selection: previousSelection,
+        runtime: player.getSnapshot(),
+        error: toErrorMessage(error, "Unable to load selected track"),
+      });
+      throw error;
+    }
 
     if (isStale(token)) {
       return false;
@@ -219,25 +234,53 @@ const createPlayerController = ({
       }
     },
     selectTrack: async (trackId) => {
-      ensureCatalogReady();
-      const track = catalog.getTrack(trackId);
-
-      if (!track) {
-        setSnapshot({
-          error: `Track "${trackId}" is missing from the catalog`,
-        });
-        throw new Error(`Track "${trackId}" is missing from the catalog`);
+      if (initPromise) {
+        try {
+          await initPromise;
+        } catch {
+          // Allow explicit user selection to recover after a failed init attempt.
+        }
       }
 
-      const token = lifecycleToken;
-      await loadTrack(track, token);
-      if (isStale(token)) {
-        return;
+      if (trackLoadPromise) {
+        try {
+          await trackLoadPromise;
+        } catch {
+          // Allow the newest explicit selection to recover after an earlier load failure.
+        }
       }
 
-      if (!initialized) {
-        initialized = true;
-        setSnapshot({ restoreStatus: "complete" });
+      const nextTrackLoadPromise = (async () => {
+        ensureCatalogReady();
+        const track = catalog.getTrack(trackId);
+
+        if (!track) {
+          setSnapshot({
+            error: `Track "${trackId}" is missing from the catalog`,
+          });
+          throw new Error(`Track "${trackId}" is missing from the catalog`);
+        }
+
+        const token = lifecycleToken;
+        await loadTrack(track, token);
+        if (isStale(token)) {
+          return;
+        }
+
+        if (!initialized) {
+          initialized = true;
+          setSnapshot({ restoreStatus: "complete" });
+        }
+      })();
+
+      trackLoadPromise = nextTrackLoadPromise;
+
+      try {
+        await nextTrackLoadPromise;
+      } finally {
+        if (trackLoadPromise === nextTrackLoadPromise) {
+          trackLoadPromise = null;
+        }
       }
     },
     play: () => player.play(),

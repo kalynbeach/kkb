@@ -16,6 +16,12 @@ const OPUS_TRACK: TrackRecord = {
   assets: [{ src: "/audio/test-tone-opus.webm", mimeType: "audio/webm; codecs=opus" }],
 };
 
+const ALT_TRACK: TrackRecord = {
+  id: "test-tone-alt",
+  title: "Alt Track",
+  assets: [{ src: "/audio/test-tone-alt.m4a", mimeType: "audio/mp4; codecs=mp4a.40.2" }],
+};
+
 const createCatalogStub = ({
   tracks = [AAC_TRACK, OPUS_TRACK],
   defaultTrackId = AAC_TRACK.id,
@@ -32,7 +38,11 @@ const createCatalogStub = ({
   };
 };
 
-const createPlayerStub = () => {
+const createPlayerStub = ({
+  loadTrackImpl,
+}: {
+  loadTrackImpl?: (input: { src: string; mimeType?: string }) => Promise<void>;
+} = {}) => {
   let listener: (() => void) | null = null;
   let snapshot = {
     status: "idle" as const,
@@ -43,7 +53,7 @@ const createPlayerStub = () => {
     rate: 1,
     volume: 1,
   };
-  const loadTrack = mock(async (_input: { src: string; mimeType?: string }) => {});
+  const loadTrack = mock(loadTrackImpl ?? (async (_input: { src: string; mimeType?: string }) => {}));
   const play = mock(async () => {});
   const pause = mock(async () => {});
   const seek = mock(async (_seconds: number) => {});
@@ -280,6 +290,152 @@ describe("createPlayerController", () => {
         track: { id: "test-tone-aac", title: "AAC Track" },
       },
       error: 'Track "assetless-track" does not have a playable asset',
+    });
+  });
+
+  test("rolls back to the previous selection when a track load fails", async () => {
+    const catalog = createCatalogStub();
+    const { player } = createPlayerStub({
+      loadTrackImpl: async (input) => {
+        if (input.src === OPUS_TRACK.assets[0]?.src) {
+          throw new Error("load failed");
+        }
+      },
+    });
+    const controller = createPlayerController({ catalog, player });
+
+    await controller.init();
+    await expect(controller.selectTrack("test-tone-opus")).rejects.toThrow("load failed");
+
+    expect(controller.getSnapshot()).toMatchObject({
+      restoreStatus: "complete",
+      selection: {
+        trackId: "test-tone-aac",
+        track: { id: "test-tone-aac", title: "AAC Track" },
+        asset: {
+          src: "/audio/test-tone-aac.m4a",
+          mimeType: "audio/mp4; codecs=mp4a.40.2",
+        },
+      },
+      runtime: {
+        sourceId: "media-element",
+      },
+      error: "load failed",
+    });
+  });
+
+  test("waits for in-flight init before loading a newer selection", async () => {
+    const catalog = createCatalogStub();
+    const initDeferred = createDeferred<void>();
+    const selectDeferred = createDeferred<void>();
+    const { player, loadTrack } = createPlayerStub({
+      loadTrackImpl: (input) =>
+        input.src === AAC_TRACK.assets[0]?.src ? initDeferred.promise : selectDeferred.promise,
+    });
+    const controller = createPlayerController({ catalog, player });
+
+    const initPromise = controller.init();
+    await Promise.resolve();
+
+    const selectPromise = controller.selectTrack("test-tone-opus");
+    await Promise.resolve();
+
+    let selectResolved = false;
+    void selectPromise.then(() => {
+      selectResolved = true;
+    });
+
+    expect(loadTrack).toHaveBeenCalledTimes(1);
+    expect(selectResolved).toBe(false);
+
+    initDeferred.resolve();
+    await initPromise;
+    await Promise.resolve();
+
+    expect(loadTrack).toHaveBeenCalledTimes(2);
+    expect(selectResolved).toBe(false);
+
+    selectDeferred.resolve();
+    await selectPromise;
+
+    expect(controller.getSnapshot()).toMatchObject({
+      restoreStatus: "complete",
+      selection: {
+        trackId: "test-tone-opus",
+        track: { id: "test-tone-opus", title: "Opus Track" },
+        asset: {
+          src: "/audio/test-tone-opus.webm",
+          mimeType: "audio/webm; codecs=opus",
+        },
+      },
+      runtime: {
+        sourceId: "fallback",
+      },
+      error: null,
+    });
+  });
+
+  test("waits for an in-flight selection before loading a newer selection", async () => {
+    const catalog = createCatalogStub({
+      tracks: [AAC_TRACK, OPUS_TRACK, ALT_TRACK],
+    });
+    const opusDeferred = createDeferred<void>();
+    const altDeferred = createDeferred<void>();
+    const { player, loadTrack } = createPlayerStub({
+      loadTrackImpl: (input) => {
+        if (input.src === OPUS_TRACK.assets[0]?.src) {
+          return opusDeferred.promise;
+        }
+
+        if (input.src === ALT_TRACK.assets[0]?.src) {
+          return altDeferred.promise;
+        }
+
+        return Promise.resolve();
+      },
+    });
+    const controller = createPlayerController({ catalog, player });
+
+    await controller.init();
+
+    const firstSelectPromise = controller.selectTrack("test-tone-opus");
+    await Promise.resolve();
+
+    const secondSelectPromise = controller.selectTrack("test-tone-alt");
+    await Promise.resolve();
+
+    let secondSelectResolved = false;
+    void secondSelectPromise.then(() => {
+      secondSelectResolved = true;
+    });
+
+    expect(loadTrack).toHaveBeenCalledTimes(2);
+    expect(secondSelectResolved).toBe(false);
+
+    opusDeferred.resolve();
+    await firstSelectPromise;
+    await Promise.resolve();
+
+    expect(loadTrack).toHaveBeenCalledTimes(3);
+    expect(secondSelectResolved).toBe(false);
+
+    altDeferred.resolve();
+    await secondSelectPromise;
+
+    expect(controller.getSnapshot()).toMatchObject({
+      restoreStatus: "complete",
+      selection: {
+        trackId: "test-tone-alt",
+        track: { id: "test-tone-alt", title: "Alt Track" },
+        asset: {
+          src: "/audio/test-tone-alt.m4a",
+          mimeType: "audio/mp4; codecs=mp4a.40.2",
+        },
+      },
+      runtime: {
+        sourceId: "media-element",
+      },
+      error: null,
     });
   });
 

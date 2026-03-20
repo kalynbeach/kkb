@@ -44,7 +44,7 @@ function MountedPlayer({
   defaultTrackId,
   defaultTrack,
 }: MountedPlayerProps) {
-  const { snapshot } = usePlayerController(controller);
+  const snapshot = usePlayerController(controller);
   const defaultAsset = defaultTrack ? selectTrackAsset(defaultTrack) : null;
   const defaultSelection =
     defaultTrack && defaultAsset
