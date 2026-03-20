@@ -264,35 +264,6 @@ describe("createPlayerController", () => {
     });
   });
 
-  test("reports an error when a selected track does not have a playable asset", async () => {
-    const catalog = createCatalogStub({
-      tracks: [
-        AAC_TRACK,
-        {
-          id: "assetless-track",
-          title: "Assetless Track",
-          assets: [],
-        },
-      ],
-    });
-    const { player, loadTrack } = createPlayerStub();
-    const controller = createPlayerController({ catalog, player });
-
-    await controller.init();
-    await expect(controller.selectTrack("assetless-track")).rejects.toThrow(
-      'Track "assetless-track" does not have a playable asset',
-    );
-
-    expect(loadTrack).toHaveBeenCalledTimes(1);
-    expect(controller.getSnapshot()).toMatchObject({
-      selection: {
-        trackId: "test-tone-aac",
-        track: { id: "test-tone-aac", title: "AAC Track" },
-      },
-      error: 'Track "assetless-track" does not have a playable asset',
-    });
-  });
-
   test("rolls back to the previous selection when a track load fails", async () => {
     const catalog = createCatalogStub();
     const { player } = createPlayerStub({

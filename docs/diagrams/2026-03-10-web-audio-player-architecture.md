@@ -13,14 +13,21 @@ flowchart TB
         PC["PlayerClient<br/>(client component)"]
         MS["MountedPlayer"]
         PS["PlayerShell<br/>(WinAmp UI)"]
+        TS["TrackSelector"]
+        CAT["StaticTrackCatalog"]
         CWP["createWebPlayer()"]
+        CTRL["createPlayerController()"]
         UPS["usePlayerController()"]
 
         Route --> PC
+        PC -->|"create"| CAT
         PC -->|"useEffect mount"| CWP
+        PC -->|"compose"| CTRL
         PC -->|"player ready"| MS
+        CTRL -->|"catalog + player"| MS
         MS --> UPS
         MS --> PS
+        MS --> TS
     end
 
     subgraph UI["packages/ui (Shared Components)"]
@@ -50,11 +57,14 @@ flowchart TB
     end
 
     CWP -->|"creates"| Engine
-    UPS -->|"useSyncExternalStore"| Store
+    CTRL -->|"delegates runtime ops"| CWP
+    CTRL -->|"reads tracks"| CAT
+    UPS -->|"useSyncExternalStore"| CTRL
     PS -->|"rAF loop"| CWP
     PS --> Presenter
     PS --> Controls
     PS --> Waveform
+    TS -->|"selectTrack(trackId)"| CTRL
 ```
 
 ## AudioSource Interface
@@ -154,6 +164,7 @@ classDiagram
         +seek(seconds) Promise~void~
         +setRate(rate) Promise~void~
         +setVolume(volume) Promise~void~
+        +destroy() Promise~void~
         -subscribeToActiveSource(source)
         -teardownActiveSource()
         -handlePlaybackEvent(source, event)
@@ -163,7 +174,16 @@ classDiagram
         -PlayerState state
         -Set~Function~ listeners
         +getSnapshot() PlayerState
-        +setState(patch: Partial~PlayerState~)
+        +transitionToLoading()
+        +transitionToReady(input)
+        +transitionToPlaying()
+        +transitionToPaused(input)
+        +transitionToRecovering()
+        +transitionToError(input)
+        +syncTimeline(input)
+        +setRate(rate)
+        +setVolume(volume)
+        +reset()
         +subscribe(listener) () => void
     }
 
@@ -173,6 +193,8 @@ classDiagram
         +number duration
         +string sourceId
         +string error
+        +number rate
+        +number volume
     }
 
     class PlaybackCheckpoint {
@@ -226,5 +248,5 @@ flowchart TB
         SRC --> ENG["AudioEngine"]
     end
 
-    ENG --> API["WebPlayer API<br/>getSnapshot, subscribe, loadTrack,<br/>play, pause, seek, getTimeline,<br/>getBufferedRanges"]
+    ENG --> API["WebPlayer API<br/>getSnapshot, subscribe, loadTrack,<br/>play, pause, seek, setRate,<br/>setVolume, destroy, getTimeline,<br/>getBufferedRanges"]
 ```

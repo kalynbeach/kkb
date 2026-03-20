@@ -147,7 +147,7 @@ describe("AudioEngine runtime behavior", () => {
       mimeType: "audio/mp4; codecs=mp4a.40.2",
     });
 
-    emit("ended");
+    emit({ type: "ended" });
     await Promise.resolve();
     await Promise.resolve();
 
@@ -285,7 +285,7 @@ describe("AudioEngine runtime behavior", () => {
     });
 
     throwTimelineError = true;
-    emit("ended");
+    emit({ type: "ended" });
     await Promise.resolve();
     await Promise.resolve();
 

@@ -23,32 +23,43 @@ This document is intentionally narrower than the broader web audio player RFC. I
 
 ### 2.1 What exists today
 
-The current `/audio` route renders a single client component that creates one browser player instance and immediately loads one hard-coded default track.
+The current `/audio` route renders a client player shell backed by three app-level layers:
+
+1. a static track catalog
+2. a player controller that owns selection and boot sequencing
+3. a browser `WebPlayer` facade over `@kkb/audio`
 
 Relevant files:
 
 1. `apps/web/app/audio/page.tsx`
 2. `apps/web/components/audio/player-client.tsx`
-3. `apps/web/lib/audio/create-web-player.ts`
-4. `packages/audio/src/engine/engine.ts`
+3. `apps/web/lib/audio/controller/player-controller.ts`
+4. `apps/web/lib/audio/catalog/static-track-catalog.ts`
+5. `apps/web/lib/audio/catalog/static-track-catalog-data.ts`
+6. `apps/web/lib/audio/catalog/select-track-asset.ts`
+7. `apps/web/lib/audio/create-web-player.ts`
+8. `packages/audio/src/engine/engine.ts`
 
 The current behavior is:
 
 1. `PlayerClient` mounts on the client.
-2. It creates a `WebPlayer` with `createWebPlayer()`.
-3. On mount, it calls `player.loadTrack(player.defaultTrack)`.
-4. `defaultTrack` is hard-coded to `/audio/test-tone-aac.m4a`.
-5. The engine evaluates available source backends and selects one.
-6. The UI renders snapshot state from the engine with `useSyncExternalStore`.
+2. It creates a static `TrackCatalog`.
+3. It creates a `WebPlayer` with `createWebPlayer()`.
+4. It creates a `PlayerController` that composes the catalog and player.
+5. On mount, `controller.init()` loads the default catalog track.
+6. The controller resolves the active asset for that track and delegates the runtime load to `WebPlayer`.
+7. The engine evaluates available source backends and selects one.
+8. The UI renders controller snapshot state with `useSyncExternalStore`, while `PlayerShell` reads live timeline and buffered ranges imperatively from `WebPlayer`.
 
 ### 2.2 Current track storage
 
-There is no track catalog, no playlist model, and no API-backed track storage yet.
+There is still no API-backed track storage or browser persistence layer, but there is now a real track catalog shape inside the app.
 
-Current storage is split into two unrelated pieces:
+Current storage is split into three layers:
 
-1. Audio files live as static fixtures under `apps/web/public/audio/`.
-2. Runtime playback state lives only in memory inside the engine store and playback checkpoint.
+1. audio files live as static fixtures under `apps/web/public/audio/`
+2. track metadata lives in `apps/web/lib/audio/catalog/static-track-catalog-data.ts`
+3. runtime playback state lives only in memory inside the controller snapshot, engine store, and playback checkpoint
 
 Current fixtures:
 
@@ -57,8 +68,9 @@ Current fixtures:
 
 Current runtime state:
 
-1. `PlayerState` stores `status`, `currentTime`, `duration`, `sourceId`, and `error`.
-2. `PlaybackCheckpoint` stores `currentTime`, `rate`, and `volume`.
+1. `PlayerControllerSnapshot` stores `catalogStatus`, `restoreStatus`, `selection`, `queueTrackIds`, `runtime`, and `error`.
+2. `PlayerState` stores `status`, `currentTime`, `duration`, `sourceId`, `error`, `rate`, and `volume`.
+3. `PlaybackCheckpoint` stores `currentTime`, `rate`, and `volume`.
 
 There is currently no persistence layer for:
 
@@ -73,17 +85,18 @@ There is also no browser persistence such as `localStorage`, `sessionStorage`, o
 
 ### 2.3 Current selection behavior
 
-Today there are two different kinds of selection, but only one is explicit in the app:
+Today there are two explicit kinds of selection:
 
-1. Logical track selection
-2. Playback backend selection
+1. logical track selection in the app/controller
+2. playback backend selection in the engine
 
-Logical track selection is trivial today:
+Logical track selection now works like this:
 
-1. the app always selects one hard-coded track
-2. there is no user-facing track picker
-3. there is no track ID
-4. there is no manifest or library lookup step
+1. the app exposes stable track IDs through a static catalog
+2. the player renders a user-facing track picker
+3. the controller keeps one atomic `selection` object with `{ trackId, track, asset }`
+4. the controller resolves the active asset from the track record before calling into the runtime
+5. failed loads roll selection back to the last confirmed playable track
 
 Playback backend selection is implemented in the engine:
 
@@ -106,13 +119,17 @@ In the current browser wrapper, `enableWebCodecs` and `enableWorkletPCM` default
 ```mermaid
 flowchart TD
     Route["/audio route"] --> PlayerClient["PlayerClient"]
+    PlayerClient --> Catalog["createStaticTrackCatalog()"]
     PlayerClient --> Factory["createWebPlayer()"]
-    PlayerClient --> Load["loadTrack(defaultTrack)"]
+    PlayerClient --> Controller["createPlayerController()"]
+    Controller --> Init["controller.init()"]
 
     Factory --> Sources["Source list<br/>fallback, worklet, media-element, webcodecs"]
     Factory --> Engine["AudioEngine"]
+    Catalog --> Controller
 
-    Load --> Engine
+    Init --> ControllerLoad["resolve selection + asset"]
+    ControllerLoad --> Engine
     Engine --> Probe["canPlay(input) on each source"]
     Probe --> Rank["Sort playable sources by score"]
     Rank --> Attempt["Try load() in score order"]
@@ -121,9 +138,11 @@ flowchart TD
     Attempt --> Error["error when no source can load"]
     Recover --> Attempt
 
+    Controller --> ControllerState["In-memory PlayerControllerSnapshot"]
     Engine --> Store["In-memory PlayerState"]
     Engine --> Checkpoint["In-memory PlaybackCheckpoint"]
-    Store --> UI["PlayerShell via useSyncExternalStore"]
+    ControllerState --> UI["MountedPlayer via useSyncExternalStore"]
+    Factory --> Shell["PlayerShell live timeline reads"]
 ```
 
 ### 2.5 Current strengths
@@ -139,17 +158,16 @@ Those are strong foundations and should not be undone.
 
 ### 2.6 Current gaps
 
-The current player is still a demo integration rather than a real track system.
+The current player is no longer a single-track demo, but it is still a local-fixture implementation rather than a full product data model.
 
 Key gaps:
 
-1. no logical track model
-2. no catalog or manifest
-3. no distinction between track identity and track asset URL
-4. no persistence of selected track or resume position across reloads
-5. no queue, playlist, or next-track policy
-6. no explicit loading states for catalog fetch versus engine load
-7. no metadata layer for title, artist, artwork, waveform, or loudness info
+1. no API-backed or user-editable catalog yet
+2. no persistence of selected track or resume position across reloads
+3. no queue, playlist, or next-track policy beyond the static list
+4. no browser storage for controller or runtime state
+5. no remote metadata lifecycle for artwork, waveform, or loudness info
+6. no server-driven manifest or multi-asset negotiation beyond the local static catalog
 
 ## 3. Design Principles
 

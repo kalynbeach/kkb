@@ -7,7 +7,7 @@ export type PlayerStatus =
   | "recovering"
   | "error";
 
-export type PlayerState = {
+export type PlayerState = Readonly<{
   status: PlayerStatus;
   currentTime: number;
   duration: number;
@@ -15,7 +15,7 @@ export type PlayerState = {
   error: string | null;
   rate: number;
   volume: number;
-};
+}>;
 
 const INITIAL_STATE: PlayerState = {
   status: "idle",
@@ -49,6 +49,7 @@ export const createPlayerStore = () => {
   let state = INITIAL_STATE;
   const listeners = new Set<() => void>();
   const updateState = (nextState: PlayerState) => {
+    // useSyncExternalStore consumers depend on a fresh snapshot reference per transition.
     state = nextState;
     for (const listener of listeners) {
       listener();

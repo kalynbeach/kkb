@@ -28,13 +28,13 @@ stateDiagram-v2
     playing --> paused : pause() / ended
 
     paused --> playing : play()
+    ready --> idle : destroy()
+    playing --> idle : destroy()
+    paused --> idle : destroy()
+    recovering --> idle : destroy()
+    error --> idle : destroy()
 
     error --> loading : load() retry
-
-    note right of loading
-        ready, playing, and paused
-        can all return here via load()
-    end note
 ```
 
 ## Source Selection & Fallback
@@ -85,7 +85,7 @@ User interaction from click through engine to audio element.
 sequenceDiagram
     participant User
     participant Shell as PlayerShell
-    participant Presenter as createPlayerPresenter()
+    participant Controller as PlayerController
     participant ControllerHook as usePlayerController()
     participant Mounted as MountedPlayer
     participant WP as WebPlayer
@@ -95,28 +95,35 @@ sequenceDiagram
 
     Note over User,Audio: Play
     User->>Shell: click Play button
-    Shell->>WP: player.play()
+    Shell->>Controller: play()
+    Controller->>WP: play()
     WP->>Engine: play()
     Engine->>Source: play()
     Source->>Audio: audio.play()
     Audio-->>Source: "play" event
-    Source-->>Engine: playbackListener("play")
-    Engine->>Engine: store.setState({ status: "playing" })
+    Source-->>Engine: playbackListener({ type: "play" })
+    Engine->>Engine: transitionToPlaying()
     Engine-->>ControllerHook: snapshot change notification
     ControllerHook->>Mounted: controller snapshot
-    Mounted->>Presenter: { status: "playing", ... }
-    Presenter-->>Shell: { isPlaying: true, ... }
     Shell-->>User: UI updates (LED, button states)
 
     Note over User,Audio: Seek
     User->>Shell: click Waveform at 60%
     Shell->>Shell: calculate seconds from position
-    Shell->>WP: player.seek(seconds)
+    Shell->>Controller: seek(seconds)
+    Controller->>WP: seek(seconds)
     WP->>Engine: seek(seconds)
     Engine->>Engine: checkpoint.update({ currentTime })
-    Engine->>Engine: store.setState({ currentTime })
+    Engine->>Engine: syncTimeline({ currentTime })
     Engine->>Source: seek(seconds)
     Source->>Audio: audio.currentTime = seconds
+
+    Note over User,Audio: Rate / volume
+    User->>Shell: adjust shared controls
+    Shell->>Controller: setRate(rate) / setVolume(volume)
+    Controller->>WP: setRate(rate) / setVolume(volume)
+    WP->>Engine: persist control change
+    Engine->>Source: setRate(rate) / setVolume(volume)
 
     Note over User,Audio: Timeline updates (continuous)
     loop requestAnimationFrame
@@ -136,12 +143,17 @@ How state flows from engine through React to UI components.
 ```mermaid
 flowchart TB
     subgraph Engine["AudioEngine (outside React)"]
-        Store["PlayerStore<br/>status, currentTime,<br/>duration, sourceId, error"]
+        Store["PlayerStore<br/>status, currentTime,<br/>duration, sourceId,<br/>error, rate, volume"]
         AE["Audio Element<br/>currentTime, duration, buffered"]
     end
 
+    subgraph Controller["PlayerController"]
+        SNAP["selection, runtime,<br/>catalogStatus, restoreStatus"]
+        ACT["play / pause / seek / setRate / setVolume"]
+    end
+
     subgraph Hook["usePlayerController(controller)"]
-        USES["useSyncExternalStore()<br/>→ snapshot"]
+        USES["useSyncExternalStore()<br/>→ controller snapshot"]
     end
 
     subgraph ShellLoop["PlayerShell"]
@@ -149,7 +161,7 @@ flowchart TB
     end
 
     subgraph Client["MountedPlayer"]
-        Props["merged props:<br/>snapshot + timeline + bufferedRanges"]
+        Props["merged props:<br/>selection + runtime + timeline + bufferedRanges"]
     end
 
     subgraph Shell["PlayerShell"]
@@ -170,14 +182,18 @@ flowchart TB
         Play["onPlay()"]
         Pause["onPause()"]
         Seek["onSeek(seconds)"]
+        Rate["onSetRate(rate)"]
+        Volume["onSetVolume(volume)"]
     end
 
-    Store -->|"subscribe"| USES
+    Store -->|"player.subscribe"| SNAP
+    SNAP --> USES
     AE -->|"read per frame"| RAF
     USES --> Props
     RAF --> Props
     Props --> Shell
-    Actions -->|"player.play/pause/seek"| Engine
+    Actions -->|"controller actions"| ACT
+    ACT -->|"player facade"| Engine
 ```
 
 ## Checkpoint Recovery on Source Switch
@@ -206,5 +222,5 @@ sequenceDiagram
     Engine->>CP: get()
     CP-->>Engine: { currentTime: 0, rate: 1, volume: 1 }
     Note over Engine: No checkpoint seek runs because currentTime is 0
-    Engine->>Engine: store.setState({ status: "ready", currentTime: 0, sourceId: S2.id })
+    Engine->>Engine: transitionToReady({ status: "ready", currentTime: 0, sourceId: S2.id })
 ```

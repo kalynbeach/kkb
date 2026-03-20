@@ -14,14 +14,14 @@ type PlayerSelection = {
   asset: TrackAsset;
 };
 
-type PlayerControllerSnapshot = {
+type PlayerControllerSnapshot = Readonly<{
   catalogStatus: CatalogStatus;
   restoreStatus: RestoreStatus;
   selection: PlayerSelection | null;
-  queueTrackIds: string[];
+  queueTrackIds: readonly string[];
   runtime: PlayerControllerRuntimeSnapshot;
   error: string | null;
-};
+}>;
 
 type PlayerController = {
   getSnapshot(): PlayerControllerSnapshot;
@@ -71,6 +71,7 @@ const createPlayerController = ({
   player,
 }: CreatePlayerControllerOptions): PlayerController => {
   let snapshot = getInitialSnapshot(player);
+  // initPromise de-dupes concurrent boot, while initialized keeps later calls idempotent.
   let initPromise: Promise<void> | null = null;
   let trackLoadPromise: Promise<void> | null = null;
   let initialized = false;
@@ -114,13 +115,6 @@ const createPlayerController = ({
     const asset = selectTrackAsset(track);
     const previousSelection = snapshot.selection;
 
-    if (!asset) {
-      setSnapshot({
-        error: `Track "${track.id}" does not have a playable asset`,
-      });
-      throw new Error(`Track "${track.id}" does not have a playable asset`);
-    }
-
     setSnapshot({
       catalogStatus: "ready",
       selection: {
@@ -141,6 +135,7 @@ const createPlayerController = ({
         return false;
       }
 
+      // Selection updates optimistically, so failed loads must restore the last confirmed track.
       setSnapshot({
         selection: previousSelection,
         runtime: player.getSnapshot(),

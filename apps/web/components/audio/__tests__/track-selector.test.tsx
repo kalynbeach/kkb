@@ -40,8 +40,16 @@ describe("TrackSelector", () => {
     const html = renderToStaticMarkup(
       <TrackSelector
         tracks={[
-          { id: "test-tone-aac", title: "AAC Track", assets: [] },
-          { id: "test-tone-opus", title: "Opus Track", assets: [] },
+          {
+            id: "test-tone-aac",
+            title: "AAC Track",
+            assets: [{ src: "/audio/test-tone-aac.m4a", mimeType: "audio/mp4; codecs=mp4a.40.2" }],
+          },
+          {
+            id: "test-tone-opus",
+            title: "Opus Track",
+            assets: [{ src: "/audio/test-tone-opus.webm", mimeType: "audio/webm; codecs=opus" }],
+          },
         ]}
         selectedTrackId="test-tone-opus"
         onSelectTrack={() => {}}
@@ -58,8 +66,16 @@ describe("TrackSelector", () => {
     const onSelectTrack = mock((_trackId: string) => {});
     const element = TrackSelector({
       tracks: [
-        { id: "test-tone-aac", title: "AAC Track", assets: [] },
-        { id: "test-tone-opus", title: "Opus Track", assets: [] },
+        {
+          id: "test-tone-aac",
+          title: "AAC Track",
+          assets: [{ src: "/audio/test-tone-aac.m4a", mimeType: "audio/mp4; codecs=mp4a.40.2" }],
+        },
+        {
+          id: "test-tone-opus",
+          title: "Opus Track",
+          assets: [{ src: "/audio/test-tone-opus.webm", mimeType: "audio/webm; codecs=opus" }],
+        },
       ],
       selectedTrackId: "test-tone-aac",
       onSelectTrack,

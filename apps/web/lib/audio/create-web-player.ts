@@ -1,6 +1,9 @@
 import type { TrackInput } from "@kkb/audio/contracts/types";
 import { AudioEngine } from "@kkb/audio/engine/engine";
-import type { PlaybackEventName } from "@kkb/audio/sources/audio-source";
+import type {
+  AudioElementLike,
+  TimeRangesLike,
+} from "@kkb/audio/sources/media-element-shared";
 import { createFallbackSource } from "@kkb/audio/sources/fallback-source";
 import { createMediaElementSource } from "@kkb/audio/sources/media-element-source";
 import { createWebCodecsDemuxer } from "@kkb/audio/sources/webcodecs-demux";
@@ -12,31 +15,13 @@ type BufferedRange = {
   end: number;
 };
 
-type TimeRangesLike = {
-  length: number;
-  start(index: number): number;
-  end(index: number): number;
-};
-
-type AudioElementLike = {
-  currentTime: number;
-  duration: number;
-  playbackRate: number;
-  volume: number;
+type BufferedAudioElementLike = AudioElementLike & {
   buffered: TimeRangesLike;
-  src: string;
-  canPlayType(mimeType: string): string;
-  play(): Promise<void>;
-  pause(): void;
-  load(): void;
-  removeAttribute(name: string): void;
-  addEventListener(type: PlaybackEventName, listener: () => void): void;
-  removeEventListener(type: PlaybackEventName, listener: () => void): void;
 };
 
 type CreateWebPlayerOptions = {
-  createMediaElement?: () => AudioElementLike;
-  createFallbackElement?: () => AudioElementLike;
+  createMediaElement?: () => BufferedAudioElementLike;
+  createFallbackElement?: () => BufferedAudioElementLike;
   enableWebCodecs?: boolean;
   enableWorkletPCM?: boolean;
 };
@@ -48,10 +33,10 @@ const DEFAULT_TRACK: TrackInput = {
   mimeType: "audio/mp4; codecs=mp4a.40.2",
 };
 
-const createAudioElement = (): AudioElementLike => {
+const createAudioElement = (): BufferedAudioElementLike => {
   const audio = new Audio();
   audio.preload = "auto";
-  return audio;
+  return audio as BufferedAudioElementLike;
 };
 
 const toBufferedRanges = (buffered: TimeRangesLike | undefined): BufferedRange[] => {

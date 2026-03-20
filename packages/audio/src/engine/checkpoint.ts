@@ -1,8 +1,8 @@
-export type PlaybackCheckpoint = {
+export type PlaybackCheckpoint = Readonly<{
   currentTime: number;
   rate: number;
   volume: number;
-};
+}>;
 
 const DEFAULT_CHECKPOINT: PlaybackCheckpoint = {
   currentTime: 0,

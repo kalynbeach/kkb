@@ -156,6 +156,8 @@ Tier B is required, not optional, so lack of `COOP/COEP` is degraded performance
 
 ### 9.1 Error Taxonomy
 
+Historical note: the current runtime no longer ships concrete typed error subclasses. It surfaces human-readable `Error` messages while preserving the fallback and recovery model below.
+
 1. `NetworkError`
 2. `DecodeError`
 3. `WorkletError`

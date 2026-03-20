@@ -110,7 +110,7 @@ describe("createMediaElementSource", () => {
     unsubscribe?.();
     audio.emit("pause");
 
-    expect(events).toEqual(["play", "pause", "ended"]);
+    expect(events).toEqual([{ type: "play" }, { type: "pause" }, { type: "ended" }]);
   });
 
   test("forwards native error events to playback subscribers", () => {

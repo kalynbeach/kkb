@@ -84,6 +84,7 @@ function PlayerControls({
       </div>
 
       <div className="grid grid-cols-2 gap-3 px-2">
+        {/* Transport owns play/pause only; rate and volume stay in the shared controls layer. */}
         <label className="flex min-w-0 flex-col gap-1">
           <span className="font-mono text-[10px] uppercase tracking-wider text-audio-label">
             Rate

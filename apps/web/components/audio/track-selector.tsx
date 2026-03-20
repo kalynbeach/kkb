@@ -16,7 +16,6 @@ const FORMAT_LABELS: Record<string, string> = {
 
 const getFormatLabel = (track: TrackRecord): string => {
   const asset = track.assets[0];
-  if (!asset) return "";
   return FORMAT_LABELS[asset.mimeType] ?? asset.mimeType.split("/")[1]?.toUpperCase() ?? "";
 };
 

@@ -131,7 +131,7 @@ describe("createFallbackSource", () => {
     unsubscribe?.();
     audio.emit("ended");
 
-    expect(events).toEqual(["play", "pause"]);
+    expect(events).toEqual([{ type: "play" }, { type: "pause" }]);
   });
 
   test("forwards native error events to playback subscribers", () => {

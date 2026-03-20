@@ -1,6 +1,6 @@
-import type { TrackRecord } from "./track-types";
+import type { TrackRecordInput } from "./track-types";
 
-const STATIC_TRACK_CATALOG_DATA: TrackRecord[] = [
+const STATIC_TRACK_CATALOG_DATA: TrackRecordInput[] = [
   {
     id: "test-tone-aac",
     title: "Test Tone (AAC)",

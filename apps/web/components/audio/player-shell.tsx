@@ -168,6 +168,7 @@ function PlayerShell({
       return;
     }
 
+    // React owns coarse state; live timeline and buffered ranges stay on the imperative path.
     syncLiveTimeline();
 
     if (!shouldPollPlayerTimeline(status)) {
@@ -222,6 +223,7 @@ function PlayerShell({
             </div>
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1.5">
+                {/* Decorative fixture metadata until real track diagnostics exist. */}
                 <span className="font-mono text-[9px] uppercase text-audio-accent-faint">kbps</span>
                 <span className="font-mono text-xs font-bold text-audio-accent-muted">128</span>
               </div>

@@ -84,6 +84,7 @@ export class AudioEngine {
       }
 
       const checkpoint = this.checkpoint.get();
+      // Restore timeline and control preferences before exposing the source as ready.
       if (checkpoint.currentTime > 0) {
         try {
           await source.seek(checkpoint.currentTime);
@@ -293,28 +294,29 @@ export class AudioEngine {
       return;
     }
 
-    if (typeof event !== "string") {
+    if (event.type === "error") {
       this.handleRuntimeError(event.error);
       return;
     }
 
-    if (event === "play") {
+    if (event.type === "play") {
       this.store.transitionToPlaying();
       return;
     }
 
-    if (event === "ended") {
+    if (event.type === "ended") {
       const timeline = source.getTimeline();
       this.checkpoint.update({ currentTime: 0 });
       this.store.transitionToPaused({
         currentTime: 0,
         duration: timeline.duration,
       });
+      // Keep source rewind explicit so a subsequent play starts from the beginning.
       await source.seek(0);
       return;
     }
 
-    if (event === "pause") {
+    if (event.type === "pause") {
       const timeline: TimelineSnapshot = source.getTimeline();
       this.store.transitionToPaused({
         currentTime: timeline.currentTime,

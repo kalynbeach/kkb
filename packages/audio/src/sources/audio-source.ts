@@ -7,15 +7,21 @@ import type {
 
 export type PlaybackEventName = "play" | "pause" | "ended" | "error";
 
+export type PlaybackStateEvent =
+  | { type: "play" }
+  | { type: "pause" }
+  | { type: "ended" };
+
 export type PlaybackErrorEvent = {
   type: "error";
   error: Error;
 };
 
-export type PlaybackEvent = "play" | "pause" | "ended" | PlaybackErrorEvent;
+export type PlaybackEvent = PlaybackStateEvent | PlaybackErrorEvent;
 
 export type PlaybackListener = (event: PlaybackEvent) => void;
 
+// Sources follow a strict lifecycle: canPlay -> load -> runtime controls -> destroy.
 export type AudioSource = {
   id: string;
   capabilities: SourceCapabilities;

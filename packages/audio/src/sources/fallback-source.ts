@@ -1,25 +1,6 @@
 import type { SourceCapabilities } from "../contracts/types";
-import type { AudioSource, PlaybackEventName } from "./audio-source";
-
-type MediaErrorLike = {
-  code: number;
-} | null;
-
-type AudioElementLike = {
-  currentTime: number;
-  duration: number;
-  playbackRate: number;
-  volume: number;
-  error?: MediaErrorLike;
-  src: string;
-  canPlayType(mimeType: string): string;
-  play(): Promise<void>;
-  pause(): void;
-  load(): void;
-  removeAttribute(name: string): void;
-  addEventListener(type: PlaybackEventName, listener: () => void): void;
-  removeEventListener(type: PlaybackEventName, listener: () => void): void;
-};
+import type { AudioSource } from "./audio-source";
+import { createMediaElementBackedSource, type AudioElementLike } from "./media-element-shared";
 
 const FALLBACK_CAPABILITIES: SourceCapabilities = {
   streaming: true,
@@ -30,78 +11,10 @@ const FALLBACK_CAPABILITIES: SourceCapabilities = {
   requiresSAB: false,
 };
 
-const getMediaElementErrorMessage = (audio: AudioElementLike) => {
-  switch (audio.error?.code) {
-    case 2:
-      return "Media element network error";
-    case 3:
-      return "Media element decode error";
-    case 4:
-      return "Media element source is not supported";
-    default:
-      return "Media element error";
-  }
-};
-
-export const createFallbackSource = (audio: AudioElementLike): AudioSource => ({
-  id: "fallback",
-  capabilities: FALLBACK_CAPABILITIES,
-  canPlay: async (input) => audio.canPlayType(input.mimeType ?? "") !== "",
-  score: (_context) => 1,
-  load: async (input) => {
-    audio.src = input.src;
-    audio.load();
-  },
-  play: async () => {
-    await audio.play();
-  },
-  pause: async () => {
-    audio.pause();
-  },
-  seek: async (seconds) => {
-    audio.currentTime = seconds;
-  },
-  setRate: async (rate) => {
-    audio.playbackRate = rate;
-  },
-  setVolume: async (volume) => {
-    audio.volume = volume;
-  },
-  getTimeline: () => ({
-    currentTime: audio.currentTime,
-    duration: audio.duration,
-  }),
-  destroy: async () => {
-    audio.removeAttribute("src");
-    audio.load();
-  },
-  subscribePlayback: (listener) => {
-    const play = () => {
-      listener("play");
-    };
-    const pause = () => {
-      listener("pause");
-    };
-    const ended = () => {
-      listener("ended");
-    };
-    const error = () => {
-      listener({
-        type: "error",
-        error: new Error(getMediaElementErrorMessage(audio)),
-      });
-    };
-
-    audio.addEventListener("play", play);
-    audio.addEventListener("pause", pause);
-    audio.addEventListener("ended", ended);
-    audio.addEventListener("error", error);
-
-    return () => {
-      audio.removeEventListener("play", play);
-      audio.removeEventListener("pause", pause);
-      audio.removeEventListener("ended", ended);
-      audio.removeEventListener("error", error);
-    };
-  },
-});
+export const createFallbackSource = (audio: AudioElementLike): AudioSource =>
+  createMediaElementBackedSource({
+    audio,
+    capabilities: FALLBACK_CAPABILITIES,
+    id: "fallback",
+    score: 1,
+  });
