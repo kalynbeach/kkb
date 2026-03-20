@@ -89,6 +89,30 @@ describe("AudioEngine runtime behavior", () => {
     });
   });
 
+  test("records an error state when pause fails", async () => {
+    const engine = new AudioEngine({
+      sources: [
+        createSource({
+          pause: async () => {
+            throw new Error("pause blocked");
+          },
+        }).source,
+      ],
+    });
+
+    await engine.load({
+      src: "/audio/test-tone-aac.m4a",
+      mimeType: "audio/mp4; codecs=mp4a.40.2",
+    });
+
+    await expect(engine.pause()).rejects.toThrow("pause blocked");
+    expect(engine.getSnapshot()).toMatchObject({
+      status: "error",
+      error: "pause blocked",
+      sourceId: "media-element",
+    });
+  });
+
   test("records an error state when the active source emits an error event", async () => {
     const { source, emit } = createSource();
     const engine = new AudioEngine({ sources: [source] });

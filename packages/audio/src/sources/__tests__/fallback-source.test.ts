@@ -79,6 +79,19 @@ describe("createFallbackSource", () => {
     expect(playCalls).toBe(1);
   });
 
+  test("treats inputs without mimeType as ineligible", async () => {
+    const source = createFallbackSource({
+      ...createAudioStub(),
+      canPlayType: (mimeType: string) => (mimeType.includes("audio/") ? "probably" : ""),
+    });
+
+    await expect(
+      source.canPlay({
+        src: "/audio/test-tone-opus.webm",
+      }),
+    ).resolves.toBe(false);
+  });
+
   test("rejects unsupported mime types during source selection", async () => {
     const source = createFallbackSource({
       ...createAudioStub(),

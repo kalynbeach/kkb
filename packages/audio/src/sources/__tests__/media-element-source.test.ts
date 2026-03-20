@@ -73,6 +73,17 @@ describe("createMediaElementSource", () => {
     expect(playCalls).toBe(1);
   });
 
+  test("treats inputs without mimeType as ineligible", async () => {
+    const audio = createAudioStub();
+    const source = createMediaElementSource(audio);
+
+    await expect(
+      source.canPlay({
+        src: "/audio/test-tone-aac.m4a",
+      }),
+    ).resolves.toBe(false);
+  });
+
   test("applies playback rate and volume to the media element", async () => {
     const audio = createAudioStub();
     const source = createMediaElementSource(audio);

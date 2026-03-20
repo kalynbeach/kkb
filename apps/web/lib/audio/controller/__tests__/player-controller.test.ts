@@ -1,36 +1,36 @@
 import { describe, expect, mock, test } from "bun:test";
 
 import type { TrackCatalog } from "../../catalog/track-catalog";
+import type { TrackRecord } from "../../catalog/track-types";
 import { createPlayerController } from "../player-controller";
 
-const createCatalogStub = (): TrackCatalog => ({
-  listTracks: () => [
-    {
-      id: "test-tone-aac",
-      title: "AAC Track",
-      assets: [{ src: "/audio/test-tone-aac.m4a", mimeType: "audio/mp4; codecs=mp4a.40.2" }],
-    },
-    {
-      id: "test-tone-opus",
-      title: "Opus Track",
-      assets: [{ src: "/audio/test-tone-opus.webm", mimeType: "audio/webm; codecs=opus" }],
-    },
-  ],
-  getTrack: (trackId) =>
-    ({
-      "test-tone-aac": {
-        id: "test-tone-aac",
-        title: "AAC Track",
-        assets: [{ src: "/audio/test-tone-aac.m4a", mimeType: "audio/mp4; codecs=mp4a.40.2" }],
-      },
-      "test-tone-opus": {
-        id: "test-tone-opus",
-        title: "Opus Track",
-        assets: [{ src: "/audio/test-tone-opus.webm", mimeType: "audio/webm; codecs=opus" }],
-      },
-    })[trackId] ?? null,
-  getDefaultTrackId: () => "test-tone-aac",
-});
+const AAC_TRACK: TrackRecord = {
+  id: "test-tone-aac",
+  title: "AAC Track",
+  assets: [{ src: "/audio/test-tone-aac.m4a", mimeType: "audio/mp4; codecs=mp4a.40.2" }],
+};
+
+const OPUS_TRACK: TrackRecord = {
+  id: "test-tone-opus",
+  title: "Opus Track",
+  assets: [{ src: "/audio/test-tone-opus.webm", mimeType: "audio/webm; codecs=opus" }],
+};
+
+const createCatalogStub = ({
+  tracks = [AAC_TRACK, OPUS_TRACK],
+  defaultTrackId = AAC_TRACK.id,
+}: {
+  tracks?: TrackRecord[];
+  defaultTrackId?: string;
+} = {}): TrackCatalog => {
+  const tracksById = new Map(tracks.map((track) => [track.id, track]));
+
+  return {
+    listTracks: () => tracks,
+    getTrack: (trackId) => tracksById.get(trackId) ?? null,
+    getDefaultTrackId: () => defaultTrackId,
+  };
+};
 
 const createPlayerStub = () => {
   let listener: (() => void) | null = null;
@@ -198,6 +198,88 @@ describe("createPlayerController", () => {
       catalogStatus: "ready",
       restoreStatus: "error",
       error: "load failed",
+    });
+  });
+
+  test("reuses the in-flight init promise and loads the default track once", async () => {
+    const catalog = createCatalogStub();
+    const deferred = createDeferred<void>();
+    const { player, loadTrack } = createPlayerStub();
+    const controller = createPlayerController({
+      catalog,
+      player: {
+        ...player,
+        loadTrack: async (input) => {
+          await loadTrack(input);
+          return deferred.promise;
+        },
+      },
+    });
+
+    const firstInit = controller.init();
+    const secondInit = controller.init();
+
+    expect(loadTrack).toHaveBeenCalledTimes(1);
+
+    deferred.resolve();
+    await firstInit;
+    await secondInit;
+
+    expect(loadTrack).toHaveBeenCalledTimes(1);
+    expect(controller.getSnapshot()).toMatchObject({
+      restoreStatus: "complete",
+      selection: {
+        trackId: "test-tone-aac",
+      },
+    });
+  });
+
+  test("keeps the current selection when selectTrack receives a missing track id", async () => {
+    const catalog = createCatalogStub();
+    const { player, loadTrack } = createPlayerStub();
+    const controller = createPlayerController({ catalog, player });
+
+    await controller.init();
+    await expect(controller.selectTrack("missing-track")).rejects.toThrow(
+      'Track "missing-track" is missing from the catalog',
+    );
+
+    expect(loadTrack).toHaveBeenCalledTimes(1);
+    expect(controller.getSnapshot()).toMatchObject({
+      selection: {
+        trackId: "test-tone-aac",
+        track: { id: "test-tone-aac", title: "AAC Track" },
+      },
+      error: 'Track "missing-track" is missing from the catalog',
+    });
+  });
+
+  test("reports an error when a selected track does not have a playable asset", async () => {
+    const catalog = createCatalogStub({
+      tracks: [
+        AAC_TRACK,
+        {
+          id: "assetless-track",
+          title: "Assetless Track",
+          assets: [],
+        },
+      ],
+    });
+    const { player, loadTrack } = createPlayerStub();
+    const controller = createPlayerController({ catalog, player });
+
+    await controller.init();
+    await expect(controller.selectTrack("assetless-track")).rejects.toThrow(
+      'Track "assetless-track" does not have a playable asset',
+    );
+
+    expect(loadTrack).toHaveBeenCalledTimes(1);
+    expect(controller.getSnapshot()).toMatchObject({
+      selection: {
+        trackId: "test-tone-aac",
+        track: { id: "test-tone-aac", title: "AAC Track" },
+      },
+      error: 'Track "assetless-track" does not have a playable asset',
     });
   });
 
