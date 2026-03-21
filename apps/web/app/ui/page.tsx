@@ -5,6 +5,13 @@ import Link from "next/link";
 import { CatalogNav } from "./_components/catalog-nav";
 import { ComponentCard } from "./_components/component-card";
 import { Section } from "./_components/section";
+import { FeedbackSection, feedbackSectionItemCount } from "./_components/sections/feedback-section";
+import { InputSection, inputSectionItemCount } from "./_components/sections/input-section";
+import { LayoutSection, layoutSectionItemCount } from "./_components/sections/layout-section";
+import {
+  NavigationSection,
+  navigationSectionItemCount,
+} from "./_components/sections/navigation-section";
 
 const catalogSections = [
   {
@@ -52,6 +59,57 @@ const catalogSections = [
   },
 ] as const;
 
+const sectionItemCounts = {
+  layout: layoutSectionItemCount,
+  navigation: navigationSectionItemCount,
+  input: inputSectionItemCount,
+  feedback: feedbackSectionItemCount,
+  overlay: 0,
+  menu: 0,
+  data: 0,
+  audio: 0,
+} as const;
+
+function SectionPlaceholder({ label }: { label: string }) {
+  return (
+    <ComponentCard
+      title="Section scaffold ready"
+      description="Shared card and section primitives are in place for follow-up demos."
+      className="md:col-span-2 xl:col-span-3"
+    >
+      <Empty className="min-h-52 rounded-none border-0">
+        <EmptyHeader>
+          <EmptyTitle>{label} content lands next</EmptyTitle>
+          <EmptyDescription>
+            This section stays deferred while the core catalog sections ship in issue #21.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
+    </ComponentCard>
+  );
+}
+
+function renderSectionContent(sectionId: (typeof catalogSections)[number]["id"]) {
+  switch (sectionId) {
+    case "layout":
+      return <LayoutSection />;
+    case "navigation":
+      return <NavigationSection />;
+    case "input":
+      return <InputSection />;
+    case "feedback":
+      return <FeedbackSection />;
+    case "overlay":
+      return <SectionPlaceholder label="Overlay" />;
+    case "menu":
+      return <SectionPlaceholder label="Menu" />;
+    case "data":
+      return <SectionPlaceholder label="Data" />;
+    case "audio":
+      return <SectionPlaceholder label="Audio" />;
+  }
+}
+
 export default function UiPage() {
   return (
     <main className="min-h-screen bg-background">
@@ -88,23 +146,9 @@ export default function UiPage() {
                 id={section.id}
                 title={section.label}
                 description={section.description}
-                itemCount={0}
+                itemCount={sectionItemCounts[section.id]}
               >
-                <ComponentCard
-                  title="Section scaffold ready"
-                  description="Shared card and section primitives are in place for follow-up demos."
-                  className="md:col-span-2 xl:col-span-3"
-                >
-                  <Empty className="min-h-52 rounded-none border-0">
-                    <EmptyHeader>
-                      <EmptyTitle>{section.label} content lands next</EmptyTitle>
-                      <EmptyDescription>
-                        This section is intentionally empty in issue #18. Follow-up work adds the
-                        real demos without rewriting the page shell.
-                      </EmptyDescription>
-                    </EmptyHeader>
-                  </Empty>
-                </ComponentCard>
+                {renderSectionContent(section.id)}
               </Section>
             ))}
           </div>
