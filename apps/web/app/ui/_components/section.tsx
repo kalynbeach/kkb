@@ -29,7 +29,7 @@ export function Section({ id, title, description, itemCount, className, children
           <p className="max-w-3xl text-sm leading-6 text-muted-foreground">{description}</p>
         ) : null}
       </div>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{children}</div>
+      <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">{children}</div>
     </section>
   );
 }
