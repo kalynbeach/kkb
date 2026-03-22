@@ -117,7 +117,7 @@ export function ContextMenuDemo() {
   return (
     <div className="p-6">
       <ContextMenu>
-        <ContextMenuTrigger className="flex min-h-52 flex-col justify-between rounded-xl border border-dashed bg-background p-4 text-left outline-none">
+        <ContextMenuTrigger className="flex min-h-52 flex-col justify-between rounded-xl border border-dashed bg-background p-4 text-left outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium">Context region</p>
