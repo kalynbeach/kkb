@@ -1,8 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { renderToString } from "react-dom/server";
 
-import { Section } from "../_components/section";
-import { LayoutSection } from "../_components/sections/layout-section";
+import { Section } from "../../../components/ui-catalog/section";
+import { LayoutSection } from "../../../components/ui-catalog/sections/layout-section";
 import UiPage from "../page";
 
 function renderUiPageHtml() {
@@ -39,7 +39,9 @@ describe("/ui page", () => {
     expect(html).toContain("Context Menu");
     expect(html).toContain("Menubar");
     expect(html).toContain("Command");
-    expect(html).toContain("Dropdown, context, menubar, and command surfaces with isolated local state.");
+    expect(html).toContain(
+      "Dropdown, context, menubar, and command surfaces with isolated local state.",
+    );
     expect(html).not.toContain("Dropdown Menu + Context Menu");
     expect(html).not.toContain("Menu content lands next");
   });
@@ -51,18 +53,28 @@ describe("/ui page", () => {
     expect(html).toContain("Code");
     expect(html).toContain("Keyboard Shortcuts");
     expect(html).toContain("Carousel");
-    expect(html).toContain("Tables, inline code, shortcut patterns, and carousel cards with narrow local state.");
-    expect(html).toContain("Representative key patterns for command-style UIs without implying live route wiring.");
+    expect(html).toContain(
+      "Tables, inline code, shortcut patterns, and carousel cards with narrow local state.",
+    );
+    expect(html).toContain(
+      "Representative key patterns for command-style UIs without implying live route wiring.",
+    );
     expect(html).not.toContain("Open command palette");
     expect(html).not.toContain("Jump to menu section");
     expect(html).not.toContain("Data content lands next");
   });
 
-  test("keeps audio deferred in the placeholder shell", () => {
+  test("renders audio cards and the composition demo instead of the placeholder shell", () => {
     const html = renderUiPageHtml();
 
-    expect(html).toContain("Audio content lands next");
-    expect(html).toContain("Section scaffold ready");
+    expect(html).toContain("Waveform");
+    expect(html).toContain("Playhead");
+    expect(html).toContain("Player Controls");
+    expect(html).toContain("Audio Composition");
+    expect(html).toContain("Test Tone (AAC)");
+    expect(html).toContain("Playlist");
+    expect(html).not.toContain("Audio content lands next");
+    expect(html).not.toContain("Section scaffold ready");
   });
 
   test("keeps section cards two-up on desktop before widening to three columns", () => {

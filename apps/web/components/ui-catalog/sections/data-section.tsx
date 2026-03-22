@@ -92,10 +92,7 @@ export function DataSection() {
         </div>
       </ComponentCard>
 
-      <ComponentCard
-        title="Carousel"
-        description="Local slide data with manual navigation only."
-      >
+      <ComponentCard title="Carousel" description="Local slide data with manual navigation only.">
         <CarouselDemo />
       </ComponentCard>
     </>

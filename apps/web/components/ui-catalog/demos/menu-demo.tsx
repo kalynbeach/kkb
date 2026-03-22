@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import { Badge } from "@kkb/ui/components/badge";
 import { Button } from "@kkb/ui/components/button";
 import {
@@ -35,6 +33,7 @@ import {
   MenubarSeparator,
   MenubarTrigger,
 } from "@kkb/ui/components/menubar";
+import { useState } from "react";
 
 type AlignmentMode = "grid" | "stack";
 type DensityMode = "comfortable" | "compact";
@@ -137,7 +136,9 @@ export function ContextMenuDemo() {
           {contextActions.map((action) => (
             <ContextMenuItem
               key={action.label}
-              onSelect={() => setSurfaceState(action.label === "Mark reviewed" ? "review" : "ready")}
+              onSelect={() =>
+                setSurfaceState(action.label === "Mark reviewed" ? "review" : "ready")
+              }
             >
               {action.label}
             </ContextMenuItem>

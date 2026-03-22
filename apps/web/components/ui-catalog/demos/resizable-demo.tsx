@@ -1,11 +1,7 @@
 "use client";
 
 import { Badge } from "@kkb/ui/components/badge";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "@kkb/ui/components/resizable";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@kkb/ui/components/resizable";
 
 const panelNotes = [
   "Keep section shells server-owned.",

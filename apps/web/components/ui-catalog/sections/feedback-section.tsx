@@ -63,9 +63,9 @@ export function FeedbackSection() {
           <div className="flex items-center gap-3 rounded-xl border px-4 py-3">
             <Spinner className="size-4" />
             <div className="space-y-1">
-              <p className="text-sm font-medium">Preparing follow-up demos</p>
+              <p className="text-sm font-medium">Final verification pass</p>
               <p className="text-sm text-muted-foreground">
-                Overlay, menu, data, and audio sections remain queued.
+                Route-level checks now focus on browser QA and production validation.
               </p>
             </div>
           </div>

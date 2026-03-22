@@ -1,13 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { Window } from "happy-dom";
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
-import { Window } from "happy-dom";
-
-import { CarouselDemo } from "../_components/demos/carousel-demo";
-import { CommandDemo } from "../_components/demos/command-demo";
-import { DropdownMenuDemo } from "../_components/demos/menu-demo";
-import { DialogSheetDemo, PopoverHoverCardTooltipDemo } from "../_components/demos/overlay-demo";
+import { CarouselDemo } from "../../../components/ui-catalog/demos/carousel-demo";
+import { CommandDemo } from "../../../components/ui-catalog/demos/command-demo";
+import { DropdownMenuDemo } from "../../../components/ui-catalog/demos/menu-demo";
+import {
+  DialogSheetDemo,
+  PopoverHoverCardTooltipDemo,
+} from "../../../components/ui-catalog/demos/overlay-demo";
 
 type DomEnvironment = {
   cleanup: () => void;
@@ -47,9 +49,7 @@ class IntersectionObserverStub implements IntersectionObserver {
   readonly rootMargin = "";
   readonly thresholds = [0];
 
-  constructor(
-    readonly callback: IntersectionObserverCallback,
-  ) {}
+  constructor(readonly callback: IntersectionObserverCallback) {}
 
   disconnect() {}
 

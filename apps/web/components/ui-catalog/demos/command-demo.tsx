@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import { Button } from "@kkb/ui/components/button";
 import {
   CommandDialog,
@@ -13,6 +11,7 @@ import {
   CommandSeparator,
   CommandShortcut,
 } from "@kkb/ui/components/command";
+import { useState } from "react";
 
 type CommandGroupData = {
   heading: string;

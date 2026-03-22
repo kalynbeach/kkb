@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import { Calendar } from "@kkb/ui/components/calendar";
 import { Label } from "@kkb/ui/components/label";
 import {
@@ -13,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@kkb/ui/components/select";
+import { useState } from "react";
 
 const densityOptions = [
   { value: "compact", label: "Compact" },

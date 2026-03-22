@@ -89,9 +89,10 @@ export function NavigationSection() {
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="defer">
-              <AccordionTrigger>What stays deferred?</AccordionTrigger>
+              <AccordionTrigger>What still needs signoff?</AccordionTrigger>
               <AccordionContent>
-                Overlay, menu, data-display, and audio demos remain in later issues.
+                Final browser QA still needs a clean pass across anchors, focus, mobile overflow,
+                and theme toggle behavior.
               </AccordionContent>
             </AccordionItem>
           </Accordion>

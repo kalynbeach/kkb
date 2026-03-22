@@ -18,7 +18,8 @@ type CarouselSlide = {
 const carouselSlides: ReadonlyArray<CarouselSlide> = [
   {
     title: "Server sections",
-    detail: "Keep page structure on the server and isolate richer interaction inside small islands.",
+    detail:
+      "Keep page structure on the server and isolate richer interaction inside small islands.",
     tag: "shell",
   },
   {

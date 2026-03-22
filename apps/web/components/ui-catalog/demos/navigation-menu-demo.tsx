@@ -44,7 +44,11 @@ export function NavigationMenuDemo() {
             <NavigationMenuContent className="w-[min(26rem,calc(100vw-5rem))]">
               <div className="grid gap-2 p-1">
                 {navigationItems.map((item) => (
-                  <NavigationMenuLink key={item.href} href={item.href} className="rounded-md border">
+                  <NavigationMenuLink
+                    key={item.href}
+                    href={item.href}
+                    className="rounded-md border"
+                  >
                     <span className="font-medium text-foreground">{item.title}</span>
                     <span className="text-muted-foreground">{item.detail}</span>
                   </NavigationMenuLink>
