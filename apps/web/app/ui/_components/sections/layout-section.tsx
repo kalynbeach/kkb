@@ -23,8 +23,9 @@ import { Separator } from "@kkb/ui/components/separator";
 import { Layers3, ListFilter, Package2, ScrollText } from "lucide-react";
 
 import { ComponentCard } from "../component-card";
+import { ResizableDemo } from "../demos/resizable-demo";
 
-export const layoutSectionItemCount = 4;
+export const layoutSectionItemCount = 5;
 
 const recentLayoutTokens = [
   {
@@ -169,6 +170,13 @@ export function LayoutSection() {
             </div>
           </ScrollArea>
         </div>
+      </ComponentCard>
+
+      <ComponentCard
+        title="Resizable Panels"
+        description="Adjustable workspace regions with explicit handles and constrained panel widths."
+      >
+        <ResizableDemo />
       </ComponentCard>
 
       <ComponentCard

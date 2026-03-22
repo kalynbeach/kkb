@@ -31,8 +31,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@kkb/ui/components/tab
 import { ChevronRight, Compass, LayoutTemplate, PanelsTopLeft } from "lucide-react";
 
 import { ComponentCard } from "../component-card";
+import { NavigationMenuDemo } from "../demos/navigation-menu-demo";
 
-export const navigationSectionItemCount = 4;
+export const navigationSectionItemCount = 5;
 
 export function NavigationSection() {
   return (
@@ -82,7 +83,7 @@ export function NavigationSection() {
             className="rounded-xl border px-4"
           >
             <AccordionItem value="scope">
-              <AccordionTrigger>What lands in #21?</AccordionTrigger>
+              <AccordionTrigger>What ships in the current catalog pass?</AccordionTrigger>
               <AccordionContent>
                 Layout, navigation, input, and feedback cards with representative examples.
               </AccordionContent>
@@ -151,6 +152,13 @@ export function NavigationSection() {
             </div>
           </div>
         </div>
+      </ComponentCard>
+
+      <ComponentCard
+        title="Navigation Menu"
+        description="Compact top-level exploration with nested content and lightweight links."
+      >
+        <NavigationMenuDemo />
       </ComponentCard>
 
       <ComponentCard

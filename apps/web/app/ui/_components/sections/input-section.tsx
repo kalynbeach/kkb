@@ -15,7 +15,6 @@ import {
   InputOTPSlot,
 } from "@kkb/ui/components/input-otp";
 import { Label } from "@kkb/ui/components/label";
-import { NativeSelect, NativeSelectOption } from "@kkb/ui/components/native-select";
 import { RadioGroup, RadioGroupItem } from "@kkb/ui/components/radio-group";
 import { Slider } from "@kkb/ui/components/slider";
 import { Switch } from "@kkb/ui/components/switch";
@@ -25,8 +24,9 @@ import { ToggleGroup, ToggleGroupItem } from "@kkb/ui/components/toggle-group";
 import { Bell, Search, SlidersHorizontal, Sparkles } from "lucide-react";
 
 import { ComponentCard } from "../component-card";
+import { CalendarDemo, SelectDemo } from "../demos/select-calendar-demo";
 
-export const inputSectionItemCount = 5;
+export const inputSectionItemCount = 6;
 
 export function InputSection() {
   return (
@@ -103,36 +103,37 @@ export function InputSection() {
       </ComponentCard>
 
       <ComponentCard
-        title="OTP + Native Select"
-        description="Structured entry and low-friction platform-native selection."
+        title="OTP + Select"
+        description="Structured entry plus a richer controlled select surface for preset choices."
       >
-        <div className="space-y-4 p-6">
+        <div className="space-y-0">
           <div className="space-y-2">
-            <p className="text-sm font-medium">Verification code</p>
-            <InputOTP maxLength={6}>
-              <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
-              </InputOTPGroup>
-              <InputOTPSeparator />
-              <InputOTPGroup>
-                <InputOTPSlot index={3} />
-                <InputOTPSlot index={4} />
-                <InputOTPSlot index={5} />
-              </InputOTPGroup>
-            </InputOTP>
+            <div className="space-y-4 border-b p-6">
+              <p className="text-sm font-medium">Verification code</p>
+              <InputOTP maxLength={6}>
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} />
+                  <InputOTPSlot index={1} />
+                  <InputOTPSlot index={2} />
+                </InputOTPGroup>
+                <InputOTPSeparator />
+                <InputOTPGroup>
+                  <InputOTPSlot index={3} />
+                  <InputOTPSlot index={4} />
+                  <InputOTPSlot index={5} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
           </div>
-
-          <div className="space-y-2">
-            <p className="text-sm font-medium">Preferred density</p>
-            <NativeSelect defaultValue="comfortable" className="w-full">
-              <NativeSelectOption value="compact">Compact</NativeSelectOption>
-              <NativeSelectOption value="comfortable">Comfortable</NativeSelectOption>
-              <NativeSelectOption value="spacious">Spacious</NativeSelectOption>
-            </NativeSelect>
-          </div>
+          <SelectDemo />
         </div>
+      </ComponentCard>
+
+      <ComponentCard
+        title="Calendar"
+        description="Single-date picking with a compact month view and local selected state."
+      >
+        <CalendarDemo />
       </ComponentCard>
 
       <ComponentCard

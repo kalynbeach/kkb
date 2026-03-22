@@ -5,13 +5,16 @@ import Link from "next/link";
 import { CatalogNav } from "./_components/catalog-nav";
 import { ComponentCard } from "./_components/component-card";
 import { Section } from "./_components/section";
+import { DataSection, dataSectionItemCount } from "./_components/sections/data-section";
 import { FeedbackSection, feedbackSectionItemCount } from "./_components/sections/feedback-section";
 import { InputSection, inputSectionItemCount } from "./_components/sections/input-section";
 import { LayoutSection, layoutSectionItemCount } from "./_components/sections/layout-section";
+import { MenuSection, menuSectionItemCount } from "./_components/sections/menu-section";
 import {
   NavigationSection,
   navigationSectionItemCount,
 } from "./_components/sections/navigation-section";
+import { OverlaySection, overlaySectionItemCount } from "./_components/sections/overlay-section";
 
 const catalogSections = [
   {
@@ -39,17 +42,17 @@ const catalogSections = [
   {
     id: "overlay",
     label: "Overlay",
-    description: "Dialog and popover demos follow once the isolated client demo islands are added.",
+    description: "Dialogs, drawers, and contextual overlays stay isolated inside small demo islands.",
   },
   {
     id: "menu",
     label: "Menu",
-    description: "Menu patterns and command surfaces will layer onto this scaffold.",
+    description: "Dropdown, context, menubar, and command surfaces with isolated local state.",
   },
   {
     id: "data",
     label: "Data",
-    description: "Tables, code, carousel, and related display components will land here.",
+    description: "Tables, inline code, shortcut patterns, and carousel cards with narrow local state.",
   },
   {
     id: "audio",
@@ -64,9 +67,9 @@ const sectionItemCounts = {
   navigation: navigationSectionItemCount,
   input: inputSectionItemCount,
   feedback: feedbackSectionItemCount,
-  overlay: 0,
-  menu: 0,
-  data: 0,
+  overlay: overlaySectionItemCount,
+  menu: menuSectionItemCount,
+  data: dataSectionItemCount,
   audio: 0,
 } as const;
 
@@ -81,7 +84,7 @@ function SectionPlaceholder({ label }: { label: string }) {
         <EmptyHeader>
           <EmptyTitle>{label} content lands next</EmptyTitle>
           <EmptyDescription>
-            This section stays deferred while the core catalog sections ship in issue #21.
+            This section stays deferred while follow-up catalog demos land in later task work.
           </EmptyDescription>
         </EmptyHeader>
       </Empty>
@@ -100,11 +103,11 @@ function renderSectionContent(sectionId: (typeof catalogSections)[number]["id"])
     case "feedback":
       return <FeedbackSection />;
     case "overlay":
-      return <SectionPlaceholder label="Overlay" />;
+      return <OverlaySection />;
     case "menu":
-      return <SectionPlaceholder label="Menu" />;
+      return <MenuSection />;
     case "data":
-      return <SectionPlaceholder label="Data" />;
+      return <DataSection />;
     case "audio":
       return <SectionPlaceholder label="Audio" />;
   }
