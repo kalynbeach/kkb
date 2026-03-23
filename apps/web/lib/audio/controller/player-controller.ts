@@ -299,7 +299,6 @@ const createPlayerController = ({
   };
 };
 
-export { createPlayerController };
 export type {
   CatalogStatus,
   PlayerController,
@@ -309,3 +308,4 @@ export type {
   PlayerSelection,
   RestoreStatus,
 };
+export { createPlayerController };

@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 
 import { PlayerShell } from "@/components/audio/player-shell";
 import { TrackSelector } from "@/components/audio/track-selector";
+import { selectTrackAsset } from "@/lib/audio/catalog/select-track-asset";
 import { createStaticTrackCatalog } from "@/lib/audio/catalog/static-track-catalog";
 import type { TrackCatalog } from "@/lib/audio/catalog/track-catalog";
-import { selectTrackAsset } from "@/lib/audio/catalog/select-track-asset";
 import type { TrackRecord } from "@/lib/audio/catalog/track-types";
 import {
   createPlayerController,

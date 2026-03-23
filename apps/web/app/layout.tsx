@@ -1,6 +1,6 @@
+import { ThemeProvider } from "@kkb/ui/components/theme-provider";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { ThemeProvider } from "@kkb/ui/components/theme-provider";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -29,9 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${berkeleyMono.variable}`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} ${berkeleyMono.variable}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

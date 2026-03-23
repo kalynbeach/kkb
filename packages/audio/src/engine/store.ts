@@ -86,7 +86,10 @@ export const createPlayerStore = () => {
         error: null,
       });
     },
-    transitionToPaused: ({ currentTime = state.currentTime, duration = state.duration }: TimelineStateInput = {}) => {
+    transitionToPaused: ({
+      currentTime = state.currentTime,
+      duration = state.duration,
+    }: TimelineStateInput = {}) => {
       updateState({
         ...state,
         status: "paused",
@@ -117,7 +120,10 @@ export const createPlayerStore = () => {
         error,
       });
     },
-    syncTimeline: ({ currentTime = state.currentTime, duration = state.duration }: TimelineStateInput) => {
+    syncTimeline: ({
+      currentTime = state.currentTime,
+      duration = state.duration,
+    }: TimelineStateInput) => {
       updateState({
         ...state,
         currentTime,

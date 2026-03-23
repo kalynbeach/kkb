@@ -1,10 +1,7 @@
 import type { TrackInput } from "@kkb/audio/contracts/types";
 import { AudioEngine } from "@kkb/audio/engine/engine";
-import type {
-  AudioElementLike,
-  TimeRangesLike,
-} from "@kkb/audio/sources/media-element-shared";
 import { createFallbackSource } from "@kkb/audio/sources/fallback-source";
+import type { AudioElementLike, TimeRangesLike } from "@kkb/audio/sources/media-element-shared";
 import { createMediaElementSource } from "@kkb/audio/sources/media-element-source";
 import { createWebCodecsDemuxer } from "@kkb/audio/sources/webcodecs-demux";
 import { createWebCodecsSource } from "@kkb/audio/sources/webcodecs-source";

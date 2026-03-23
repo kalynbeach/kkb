@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { createElement, createRef } from "react";
 import { renderToString } from "react-dom/server";
 
-import { Waveform, getNextSeekTimeForKey } from "../waveform";
+import { getNextSeekTimeForKey, Waveform } from "../waveform";
 
 describe("Waveform keyboard seeking", () => {
   test("does not server-render buffered segments into the live-updated layer", () => {

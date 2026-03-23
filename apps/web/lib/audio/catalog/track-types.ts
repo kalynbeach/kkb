@@ -30,7 +30,8 @@ type TrackRecord = TrackRecordBase & {
   assets: NonEmptyTrackAssets;
 };
 
-const hasAssets = (assets: readonly TrackAsset[]): assets is NonEmptyTrackAssets => assets.length > 0;
+const hasAssets = (assets: readonly TrackAsset[]): assets is NonEmptyTrackAssets =>
+  assets.length > 0;
 
 const validateTrackRecord = (track: TrackRecordInput | null): TrackRecord | null => {
   if (!track || !hasAssets(track.assets)) {
@@ -40,5 +41,5 @@ const validateTrackRecord = (track: TrackRecordInput | null): TrackRecord | null
   return track as TrackRecord;
 };
 
-export { validateTrackRecord };
 export type { TrackAsset, TrackId, TrackRecord, TrackRecordInput };
+export { validateTrackRecord };

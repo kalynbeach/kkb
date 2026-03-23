@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 
-import { isMediaElementEligibleInput, isWebCodecsEligibleInput, normalizeMimeType } from "../codecs";
+import {
+  isMediaElementEligibleInput,
+  isWebCodecsEligibleInput,
+  normalizeMimeType,
+} from "../codecs";
 
 describe("isWebCodecsEligibleInput", () => {
   test("returns true for opus in webm", () => {
