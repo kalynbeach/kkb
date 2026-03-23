@@ -53,7 +53,9 @@ const createPlayerStub = ({
     rate: 1,
     volume: 1,
   };
-  const loadTrack = mock(loadTrackImpl ?? (async (_input: { src: string; mimeType?: string }) => {}));
+  const loadTrack = mock(
+    loadTrackImpl ?? (async (_input: { src: string; mimeType?: string }) => {}),
+  );
   const play = mock(async () => {});
   const pause = mock(async () => {});
   const seek = mock(async (_seconds: number) => {});

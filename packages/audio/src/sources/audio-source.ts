@@ -7,10 +7,7 @@ import type {
 
 export type PlaybackEventName = "play" | "pause" | "ended" | "error";
 
-export type PlaybackStateEvent =
-  | { type: "play" }
-  | { type: "pause" }
-  | { type: "ended" };
+export type PlaybackStateEvent = { type: "play" } | { type: "pause" } | { type: "ended" };
 
 export type PlaybackErrorEvent = {
   type: "error";

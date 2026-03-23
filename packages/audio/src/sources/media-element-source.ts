@@ -1,6 +1,6 @@
 import type { SourceCapabilities } from "../contracts/types";
 import type { AudioSource } from "./audio-source";
-import { createMediaElementBackedSource, type AudioElementLike } from "./media-element-shared";
+import { type AudioElementLike, createMediaElementBackedSource } from "./media-element-shared";
 
 const MEDIA_ELEMENT_CAPABILITIES: SourceCapabilities = {
   streaming: true,
