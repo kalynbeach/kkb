@@ -1,5 +1,10 @@
 # Plan: `/ui` Visual Component Catalog
 
+## Status
+- Shipped via `#17` on 2026-03-22/2026-03-23.
+- Route entry still lives at `apps/web/app/ui/page.tsx`.
+- Shared catalog components landed under `apps/web/components/ui-catalog/*`, not the earlier `apps/web/app/ui/_components/*` scaffold paths.
+
 ## Goal
 Add a `/ui` route to `@kkb/web` that presents a curated visual catalog of user-facing, demoable primitives from `@kkb/ui`, plus one app-level audio composition demo using the existing `PlayerClient` / `PlayerShell` stack.
 
@@ -60,26 +65,29 @@ Add a `/ui` route to `@kkb/web` that presents a curated visual catalog of user-f
 ```
 apps/web/app/ui/
   page.tsx                              # Server page; owns layout + section assembly
-  _components/
-    catalog-nav.tsx                     # "use client" — sticky nav + active section tracking
-    component-card.tsx                  # Shared card shell; safe to render from server or client trees
-    section.tsx                         # Server section wrapper
-    sections/
-      layout-section.tsx                # Server section
-      navigation-section.tsx            # Server section
-      input-section.tsx                 # Server section
-      feedback-section.tsx              # Server section
-      overlay-section.tsx               # Server section
-      menu-section.tsx                  # Server section
-      data-display-section.tsx          # Server section
-      audio-section.tsx                 # Server section
-    demos/
-      button-demo.tsx                   # Optional "use client" only when needed
-      overlay-demo.tsx                  # "use client"
-      menu-demo.tsx                     # "use client"
-      carousel-demo.tsx                 # "use client"
-      command-demo.tsx                  # "use client"
-      audio-composition-demo.tsx        # "use client"
+
+apps/web/components/ui-catalog/
+  catalog-nav.tsx                       # "use client" — sticky nav + active section tracking
+  component-card.tsx                    # Shared card shell; safe to render from server or client trees
+  section.tsx                           # Server section wrapper
+  sections/
+    layout-section.tsx                  # Server section
+    navigation-section.tsx              # Server section
+    input-section.tsx                   # Server section
+    feedback-section.tsx                # Server section
+    overlay-section.tsx                 # Server section
+    menu-section.tsx                    # Server section
+    data-section.tsx                    # Server section
+    audio-section.tsx                   # Server section
+  demos/
+    overlay-demo.tsx                    # "use client"
+    menu-demo.tsx                       # "use client"
+    carousel-demo.tsx                   # "use client"
+    command-demo.tsx                    # "use client"
+    resizable-demo.tsx                  # "use client"
+    navigation-menu-demo.tsx            # "use client"
+    select-calendar-demo.tsx            # "use client"
+    audio-demo.tsx                      # "use client"
 
 Modified:
   apps/web/app/page.tsx                 # Add /ui nav link
@@ -208,9 +216,9 @@ Mobile: sidebar hidden, top horizontal pill nav shown instead
 ### Step 1: Create shared scaffolding
 Create:
 - `apps/web/app/ui/page.tsx`
-- `apps/web/app/ui/_components/catalog-nav.tsx`
-- `apps/web/app/ui/_components/component-card.tsx`
-- `apps/web/app/ui/_components/section.tsx`
+- `apps/web/components/ui-catalog/catalog-nav.tsx`
+- `apps/web/components/ui-catalog/component-card.tsx`
+- `apps/web/components/ui-catalog/section.tsx`
 
 Requirements:
 - `page.tsx` stays server-rendered
@@ -219,7 +227,7 @@ Requirements:
 - `section.tsx` owns heading, anchor id, count badge, spacing, and card grid
 
 ### Step 2: Add server section files
-Create one server section file per category under `apps/web/app/ui/_components/sections/`.
+Create one server section file per category under `apps/web/components/ui-catalog/sections/`.
 
 Requirements:
 - Each section imports only the demos/components it needs

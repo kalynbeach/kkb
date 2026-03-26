@@ -13,15 +13,15 @@
 ### Task 1: Lock Shared Facts
 
 **Files:**
-- Modify: `/Users/kalynbeach/dev/kkb/kkb/README.md`
-- Modify: `/Users/kalynbeach/dev/kkb/kkb/AGENTS.md`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/package.json`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/turbo.json`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/apps/web/package.json`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/apps/docs/package.json`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/packages/audio/package.json`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/packages/ui/package.json`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/packages/typescript-config/package.json`
+- Modify: `/Users/kalynbeach/dev/kb/kkb/README.md`
+- Modify: `/Users/kalynbeach/dev/kb/kkb/AGENTS.md`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/package.json`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/turbo.json`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/apps/web/package.json`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/apps/docs/package.json`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/packages/audio/package.json`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/packages/ui/package.json`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/packages/typescript-config/package.json`
 
 - [ ] **Step 1: Build a current-state fact list**
 Document the exact workspace inventory, package names, root scripts, Turbo tasks, and which workspaces actually define `build`, `check-types`, and `test`.
@@ -47,12 +47,13 @@ Decide whether roadmap items stay in root docs. If they remain, move them into a
 ### Task 2: Rewrite `README.md`
 
 **Files:**
-- Modify: `/Users/kalynbeach/dev/kkb/kkb/README.md`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/apps/web/app/page.tsx`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/apps/web/app/audio/page.tsx`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/apps/web/app/json-render/page.tsx`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/apps/docs/app/page.tsx`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/docs`
+- Modify: `/Users/kalynbeach/dev/kb/kkb/README.md`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/apps/web/app/page.tsx`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/apps/web/app/audio/page.tsx`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/apps/web/app/json-render/page.tsx`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/apps/web/app/ui/page.tsx`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/apps/docs/app/page.tsx`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/docs`
 
 - [ ] **Step 1: Replace vague workspace blurbs**
 Describe actual roles:
@@ -80,13 +81,13 @@ Either remove the completed TODO checklist or convert it into a short “Current
 ### Task 3: Rewrite `AGENTS.md`
 
 **Files:**
-- Modify: `/Users/kalynbeach/dev/kkb/kkb/AGENTS.md`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/package.json`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/turbo.json`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/apps/web/app/page.tsx`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/apps/docs/app/page.tsx`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/packages/audio/package.json`
-- Reference: `/Users/kalynbeach/dev/kkb/kkb/packages/ui/package.json`
+- Modify: `/Users/kalynbeach/dev/kb/kkb/AGENTS.md`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/package.json`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/turbo.json`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/apps/web/app/page.tsx`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/apps/docs/app/page.tsx`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/packages/audio/package.json`
+- Reference: `/Users/kalynbeach/dev/kb/kkb/packages/ui/package.json`
 
 - [ ] **Step 1: Expand project structure section**
 Add `packages/audio`, update workspace descriptions to reflect current maturity, and keep package inventory aligned with `README.md`.
@@ -107,8 +108,8 @@ Remove or reword any generic guidance that no longer reflects this repo's curren
 ### Task 4: Verify Doc Consistency
 
 **Files:**
-- Modify: `/Users/kalynbeach/dev/kkb/kkb/README.md`
-- Modify: `/Users/kalynbeach/dev/kkb/kkb/AGENTS.md`
+- Modify: `/Users/kalynbeach/dev/kb/kkb/README.md`
+- Modify: `/Users/kalynbeach/dev/kb/kkb/AGENTS.md`
 
 - [ ] **Step 1: Diff only target docs**
 Run: `git diff -- README.md AGENTS.md`

@@ -1,5 +1,10 @@
 # `/ui` Catalog Issue `#18` Implementation Plan
 
+## Status
+- Closed on 2026-03-21.
+- `apps/web/app/ui/page.tsx` stayed as the route entry.
+- Shared scaffold components ultimately landed under `apps/web/components/ui-catalog/*` after the route shipped.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Ship issue `#18` by adding the initial `/ui` route scaffold, shared catalog layout primitives, and a home-page entrypoint without pulling section implementation into the same change.
@@ -23,11 +28,11 @@
 
 - Create: `apps/web/app/ui/page.tsx`
   Server route entry. Owns page-level layout, section registry, and shared shell composition.
-- Create: `apps/web/app/ui/_components/catalog-nav.tsx`
+- Create: `apps/web/components/ui-catalog/catalog-nav.tsx`
   Client nav for active-section tracking, anchor highlighting, and mobile horizontal nav behavior.
-- Create: `apps/web/app/ui/_components/component-card.tsx`
+- Create: `apps/web/components/ui-catalog/component-card.tsx`
   Shared card shell that can wrap both server-rendered examples and later client demo islands.
-- Create: `apps/web/app/ui/_components/section.tsx`
+- Create: `apps/web/components/ui-catalog/section.tsx`
   Shared section wrapper with heading, anchor target, count badge, and responsive card layout.
 - Modify: `apps/web/app/page.tsx`
   Add `/ui` entry link from the home route.
@@ -74,8 +79,8 @@ Expected: PASS
 ### Task 2: Build Shared Section And Card Primitives
 
 **Files:**
-- Create: `apps/web/app/ui/_components/component-card.tsx`
-- Create: `apps/web/app/ui/_components/section.tsx`
+- Create: `apps/web/components/ui-catalog/component-card.tsx`
+- Create: `apps/web/components/ui-catalog/section.tsx`
 - Reference: `packages/ui/src/components/card.tsx`
 - Reference: `packages/ui/src/components/empty.tsx`
 
@@ -112,7 +117,7 @@ Expected: PASS
 ### Task 3: Build Client Nav As The Only Required Client Boundary
 
 **Files:**
-- Create: `apps/web/app/ui/_components/catalog-nav.tsx`
+- Create: `apps/web/components/ui-catalog/catalog-nav.tsx`
 - Modify: `apps/web/app/ui/page.tsx`
 
 - [ ] **Step 1: Write the smallest failing behavior test only if nav state logic becomes hard to reason about**

@@ -5,7 +5,8 @@
 ## Current state
 
 - Monorepo scaffold managed with Bun + Turborepo + Next.js 16 + React 19.
-- `apps/docs` is still a lightweight shell, while substantive project docs already live under `docs/` and core feature work is currently centered in `apps/web`.
+- `apps/docs` is still a lightweight shell, while substantive project docs already live under `docs/`.
+- `apps/web` is the active demo host and currently exposes `/audio`, `/ui`, and `/json-render`.
 
 ## Workspace inventory
 
@@ -41,7 +42,7 @@ turbo run check-types --filter=@kkb/ui
 
 - Internal namespace: `@kkb/*` with `workspace:*` dependencies.
 - Project docs live under `docs/` for plans, specs, research, reports, and diagrams.
-- For quick orientation, `apps/web/app/page.tsx` is the current demo entry and `apps/docs/app/page.tsx` is the docs shell.
+- For quick orientation, `apps/web/app/page.tsx` links to the current demos and `apps/docs/app/page.tsx` is still the docs shell.
 
 ## Roadmap / future
 
