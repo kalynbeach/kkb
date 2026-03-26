@@ -48,6 +48,6 @@ jobs:
           # or https://code.claude.com/docs/en/cli-reference for available options
           # claude_args: '--allowed-tools Bash(gh pr:*)'
           claude_args: |
-            --max-turns 10
+            --max-turns 25
             --model claude-opus-4-6
-            --allowedTools "Bash(bun install),Bash(bun test:*),Bash(bun run check-types)"
+            --allowedTools "Bash(bun install),Bash(bun run build),Bash(bun run test),Bash(bun run check-types),Bash(bun run format-and-lint)"
