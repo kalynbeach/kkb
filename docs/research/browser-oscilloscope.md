@@ -1,686 +1,796 @@
 # Browser Oscilloscope & Cymatics Explorer
 
-> Research and design document for an advanced WebGPU-powered oscilloscope
-> running in the browser, built as part of the `@kkb/audio` package.
+> Research and design brief for a WebGPU-powered artistic oscilloscope in the browser, built as part of `@kkb/audio`.
 
 > **Inspiration**: [anthrupad oscilloscope video](https://x.com/anthrupad/status/2036024416686195187)
-> — XY mode Lissajous figures, Harmonic Orbits, and Tunnel visual modes
-> with classic green phosphor CRT aesthetic.
+> — XY mode Lissajous figures, harmonic orbit clusters, tunnel forms, and classic green phosphor CRT glow.
 
----
-
-## Vision
-
-A browser-based oscilloscope that serves as an **artistic exploration tool** for
-sound, geometry, and cymatics. Not a measurement instrument — an expressive
-canvas where audio signals become visual geometry.
-
-Core experiences:
-- Watch Lissajous figures form and evolve as frequency ratios shift
-- Explore dense orbital clusters of overlapping harmonic traces
-- Fall into spiral tunnel vortices driven by audio
-- Feed live mic input or loaded tracks and see the stereo field as geometry
-- Dial in parameters, save presets, experiment freely
-
-Future direction: extend into Chladni plate simulations and other cymatics
-visualizations (separate effort, not in scope here).
+> **Document status**: This is a product and technical research brief, not yet a final implementation spec. It describes the intended user experience, the most likely architecture, known monorepo/platform constraints, and a staged path to a compelling V1.
 
 ---
 
 ## Table of Contents
 
-1. [Display Modes](#display-modes)
-2. [Rendering Architecture](#rendering-architecture)
-3. [Signal Pipeline](#signal-pipeline)
-4. [Audio Engine Integration](#audio-engine-integration)
-5. [Controls & Interaction](#controls--interaction)
-6. [Canvas & Layout](#canvas--layout)
-7. [Package Structure](#package-structure)
-8. [Implementation Phases](#implementation-phases)
+1. [Overview](#overview)
+2. [V1 Product Scope](#v1-product-scope)
+3. [V1 Success Criteria](#v1-success-criteria)
+4. [Product Vision & User Experience](#product-vision--user-experience)
+5. [Current Monorepo Context & Constraints](#current-monorepo-context--constraints)
+6. [Architecture Overview](#architecture-overview)
+7. [Core Data Model](#core-data-model)
+8. [Signal Sources](#signal-sources)
+9. [Display Modes](#display-modes)
+10. [Mode-Specific Notes](#mode-specific-notes)
+11. [Rendering Architecture](#rendering-architecture)
+12. [Phosphor Visual Model](#phosphor-visual-model)
+13. [Shader & Packaging Strategy](#shader--packaging-strategy)
+14. [Public API Design](#public-api-design)
+15. [Browser Host Integration](#browser-host-integration)
+16. [Controls & Presets](#controls--presets)
+17. [Canvas, Layout & HUD](#canvas-layout--hud)
+18. [Package Structure](#package-structure)
+19. [Implementation Phases](#implementation-phases)
+20. [Risks & Open Questions](#risks--open-questions)
+21. [Future Extensions](#future-extensions)
+
+---
+
+## Overview
+
+This project is a **browser-based oscilloscope for artistic exploration**, not a measurement instrument. The goal is to turn audio into geometry with a visual language inspired by vintage CRT oscilloscopes: bright phosphor traces, bloom, persistence, and rich motion.
+
+It should feel like a playable visual instrument:
+
+- Set exact frequency ratios and watch stable Lissajous figures form
+- Slightly detune signals and watch those figures rotate and breathe
+- Layer related traces into harmonic orbit clouds
+- Feed in live mic or line input and explore stereo geometry
+- Eventually visualize track playback once the host app exposes a proper tap path
+
+The oscilloscope should live in the runtime layer as a **headless rendering and signal-consumption system**. Browser-only concerns such as permissions, host graph wiring, and React integration should stay outside the core package.
+
+---
+
+## V1 Product Scope
+
+The first shippable version should be intentionally narrow. The fastest path to something compelling is a stable renderer with a great XY mode, not a full mode matrix or a perfect CRT simulation.
+
+### In scope for V1
+
+- WebGPU renderer with support detection
+- Internal dual-oscillator source
+- Mic input source via host-managed `AnalyserNode`
+- XY / Lissajous mode as the primary mode
+- Basic phosphor palette and trail persistence
+- Minimal bloom or glow pass
+- Essential controls for exploration
+- Built-in presets
+- First demo/wrapper in `apps/web`
+
+### Explicitly deferred from V1
+
+- Track playback visualization from the current audio player stack
+- AudioWorklet + `SharedArrayBuffer` PCM transport for the oscilloscope
+- Full physically motivated phosphor simulation
+- Advanced CRT post-processing stack
+- Full URL-state sharing and deep preset exchange
+- Chladni / cymatics simulations
+
+### Near-term follow-up after V1
+
+These items are intentionally excluded from the first shippable milestone even though they are likely next in sequence.
+
+- Y-T mode with trigger support
+- Harmonic Orbits
+- Tunnel / Polar modes
+- Spectrum mode
+- Host graph work required for track visualization
+
+---
+
+## V1 Success Criteria
+
+A V1 release should be considered successful if it meets the following bar:
+
+- XY mode runs smoothly in supported WebGPU browsers
+- internal oscillators produce stable, controllable figures
+- mic input works through a host-managed analyser path
+- the first demo in `apps/web` exposes essential controls and presets
+- unsupported browsers show a clear, deliberate fallback message
+
+---
+
+## Product Vision & User Experience
+
+This oscilloscope is an **expressive canvas for sound and geometry**.
+
+It should invite the user to experiment, not calibrate:
+
+- **Discover structure**: hear a fifth, see a 3:2 figure stabilize
+- **See drift**: add slight detune and watch a fixed pattern become living motion
+- **Explore stereo**: route left and right channels into XY space and see width, correlation, and motion become shape
+- **Feel the medium**: traces should glow, fade, and bloom like phosphor, not like a flat digital graph
+
+The aesthetic target is not perfect historical reproduction. The goal is **perceptual plausibility** and strong visual character: enough CRT influence to feel warm, alive, and luminous, without letting simulation ambitions block shipping.
+
+---
+
+## Current Monorepo Context & Constraints
+
+The design is constrained by the repo that exists today.
+
+### Relevant architectural facts
+
+- `@kkb/audio` is a **headless browser audio runtime**.
+- `apps/web` owns **browser orchestration**, route composition, and runtime creation.
+- `@kkb/ui` is intentionally kept separate from `@kkb/audio`; it should not be assumed to become the first oscilloscope adapter layer.
+- The current audio player stack in `apps/web` primarily uses **media-element-backed playback paths**.
+- The current worklet utilities in `@kkb/audio` are **minimal primitives**, not a ready-made PCM-sharing transport for visualization.
+- `apps/web` is **not currently configured for COOP/COEP isolation**, so `SharedArrayBuffer`-based transport is not available by default.
+
+### What this means for oscilloscope design
+
+1. The oscilloscope core can live in `@kkb/audio`.
+2. The first React wrapper/demo should live in `apps/web`.
+3. Mic input is realistic for V1 because it can be host-managed with `AnalyserNode`.
+4. Track playback visualization is **not** a cheap extension of the current engine. It requires new host-level graph work.
+5. The oscilloscope should consume a generic `SignalProvider`, not engine internals.
+
+---
+
+## Architecture Overview
+
+The system should be split into three layers:
+
+### 1. Oscilloscope core (`@kkb/audio`)
+
+Owns:
+- rendering state
+- display mode logic
+- GPU resources
+- phosphor/trail behavior
+- signal consumption through a generic interface
+
+Does **not** own:
+- browser permissions
+- `AudioContext` creation policy
+- track playback authority
+- React lifecycle
+
+### 2. Browser host (`apps/web`)
+
+Owns:
+- canvas mounting
+- WebGPU support messaging
+- mic permission flow
+- any Web Audio graph construction needed for sources
+- future graph taps for track playback
+- creation of `SignalProvider` instances
+
+### 3. Presentation wrapper (`apps/web` first)
+
+Owns:
+- controls
+- layout
+- presets UI
+- config editing
+- lifecycle wiring between host resources and oscilloscope core
+
+### Recommended architectural rule
+
+**The oscilloscope should accept a `SignalProvider`; it should not be responsible for constructing one from browser APIs.**
+
+That keeps the runtime package focused and makes host integration explicit.
+
+---
+
+## Core Data Model
+
+The core abstraction should avoid a too-narrow “single point generator” mental model. Some modes are naturally parametric curves; others are frame-window or spectral modes. The abstraction should be **frame-oriented**.
+
+### SignalProvider
+
+A signal provider presents time-domain and frequency-domain data in a consistent shape.
+
+```typescript
+type SignalProvider = {
+  /** Time-domain samples for channel 0 or 1 */
+  getSamples(channel: 0 | 1): Float32Array;
+  /** Frequency-domain data for channel 0 or 1 */
+  getFrequencyData(channel: 0 | 1): Float32Array;
+  /** FFT output width */
+  frequencyBinCount: number;
+  /** FFT input size */
+  fftSize: number;
+  /** Audio sample rate in Hz */
+  sampleRate: number;
+  /** Smoothing factor used for FFT-style providers */
+  smoothing: number;
+  /** Channel availability */
+  channelCount: 1 | 2;
+};
+```
+
+### Why this interface matters
+
+- Internal oscillators can implement it directly
+- Mic input can wrap `AnalyserNode`
+- Future track taps can expose the same shape
+- The renderer can adapt to provider characteristics instead of assuming every source behaves identically
+
+### DisplayMode
+
+A display mode produces a frame of geometry from the current signal and configuration.
+
+```typescript
+type DisplayMode = {
+  id: string;
+  name: string;
+  generateFrame(input: {
+    time: number;
+    signals: SignalProvider;
+    params: ModeParams;
+    viewport: { width: number; height: number };
+  }): FrameGeometry;
+  params: ModeParamSchema;
+};
+```
+
+### FrameGeometry
+
+Different modes may emit different geometry classes.
+
+```typescript
+type FrameGeometry =
+  | { kind: "points"; points: Float32Array }
+  | { kind: "line-strip"; points: Float32Array }
+  | { kind: "bins"; values: Float32Array };
+```
+
+Notes:
+- XY-like modes can emit points or a line strip
+- Y-T emits a line strip derived from a triggered window of samples
+- Spectrum emits bins rather than trace points
+- Future multi-layer modes may emit multiple geometry batches internally, but the frame-oriented model still fits better than a single-point generator
+
+### Coordinate convention
+
+All spatial modes should output normalized coordinates in `[-1, 1]`.
+The renderer maps those to clip space. Spectral modes may instead emit normalized magnitudes to be interpreted by a dedicated shader or raster path.
+
+---
+
+## Signal Sources
+
+These sources should all adapt to the same `SignalProvider` contract, but they do not have equal implementation cost.
+
+### 1. Internal Oscillators
+
+This is the best V1 source because it keeps the oscilloscope self-contained.
+
+Recommended capabilities:
+- two oscillators, A and B
+- frequency as Hz and/or note
+- phase offset
+- amplitude
+- waveform type: sine, square, saw, triangle
+- ratio lock to musical intervals
+- detune in cents
+
+This source enables the strongest first experience:
+- 1:1 + 90° phase = circle
+- 2:1 = figure eight
+- 3:2 = reference-style Lissajous form
+- slight detune = slow pattern rotation
+
+### 2. Mic / Line Input
+
+Mic input is realistic for V1 with clear host boundaries.
+
+Host responsibilities:
+- request permission with `navigator.mediaDevices.getUserMedia()`
+- create `AudioContext` if needed
+- create analyser nodes and any splitters/gain stages
+- pass an analyser-backed `SignalProvider` to the oscilloscope
+
+Practical notes:
+- stereo line input maps well to XY mode
+- mono mic input collapses toward a diagonal in XY mode unless transformed
+- gain normalization is useful
+- device selection is a host concern, not an oscilloscope-core concern
+
+### 3. Track Playback (Deferred)
+
+Track visualization should be treated as **deferred host-integration work**, not as a near-zero-cost V1 addition.
+
+Why:
+- the current audio player in `apps/web` is primarily media-element-backed
+- the current engine is a playback/source lifecycle abstraction, not a reusable Web Audio graph owner
+- there is not yet a stable host-owned analyser tap point for the active playback path
+
+### Future target shape for track visualization
+
+A likely future host path looks like this:
+
+```text
+HTMLMediaElement
+  -> MediaElementAudioSourceNode
+  -> ChannelSplitterNode / GainNode / AnalyserNode(s)
+  -> destination
+```
+
+The oscilloscope would then consume analyser-backed data through `SignalProvider`.
+
+**Recommendation**: do not make track playback a V1 dependency. Get the renderer and self-contained signal paths working first.
 
 ---
 
 ## Display Modes
 
-Six display modes, all sharing the same GPU rendering pipeline. Each mode is a
-**point generator** — a function mapping time and audio signals to `(x, y)`
-screen coordinates. The renderer is mode-agnostic.
+Not all modes are equally ready. The display modes below are grouped by implementation maturity.
 
-### Mode Architecture
+### V1 Primary Mode: XY / Lissajous
 
-```typescript
-type PointGenerator = (
-  t: number,              // elapsed time in seconds
-  signals: SignalProvider, // audio sample data
-  params: ModeParams,     // mode-specific parameters
-) => { x: number; y: number }; // normalized -1..1
+Two signals drive X and Y simultaneously.
 
-type DisplayMode = {
-  id: string;
-  name: string;
-  generator: PointGenerator;
-  params: ModeParamSchema;
-};
+```text
+x(t) = A * sin(fx * t + φx)
+y(t) = B * sin(fy * t + φy)
 ```
 
-### Y-T (Time Domain)
+Why it is the right first mode:
+- it is visually distinctive immediately
+- it pairs perfectly with internal oscillators
+- it maps naturally to stereo input later
+- it strongly supports the “audio as geometry” concept
 
-The classic oscilloscope view. X = time, Y = amplitude.
+Key controls:
+- oscillator frequencies
+- phase
+- amplitude
+- waveform
+- ratio lock
+- detune
+- trail length
 
-- Shows waveform shape directly (sine, square, sawtooth, etc.)
-- Requires triggering to stabilize display (zero-crossing or Schmitt trigger)
-- Best in wide aspect ratios (16:9, 21:9)
+### Phase 2 Mode: Y-T (Time Domain)
 
-### XY (Lissajous)
+The classic oscilloscope waveform view. X is time, Y is amplitude.
 
-Two signals drive X and Y axes simultaneously.
+Important note: this is **not** just a parametric point generator. It is a frame-window mode:
+- choose a recent sample window
+- detect a stable trigger point
+- map the visible slice across the horizontal span
 
-```
-x(t) = A * sin(f_a * t + φ_a)
-y(t) = B * sin(f_b * t + φ_b)
-```
+This mode is highly valuable, but it depends on a stable frame-selection model and trigger logic, so it should follow the base XY renderer.
 
-- Frequency ratios produce distinct figures: 1:1 → ellipse/circle, 2:1 → figure-8,
-  3:2 → the classic pattern from the reference video
-- Phase difference rotates/deforms the figure
-- With live audio: X = left channel, Y = right channel
-- Frequency ratio lock snaps to musical intervals (unison, octave, fifth, fourth,
-  major third, etc.)
-- Slight detune creates slow phase drift → figure rotates and breathes
+### Later Mode: Harmonic Orbits
 
-### Harmonic Orbits
+Overlay multiple related XY traces with long persistence.
 
-Multiple simultaneous Lissajous figures overlaid with long persistence, creating
-dense orbital clusters.
+Recommended V1-compatible strategy for this later mode:
+- run several XY-style layers with harmonic offsets in frequency/phase/amplitude
+- accumulate long trails
+- emphasize bloom and center intensity
 
-Two possible implementations:
+Treat 3D projection variants as later experimentation, not the first implementation path.
 
-**Approach A: Multi-layer XY**
-Run N oscillator pairs simultaneously, each with harmonically related but
-slightly offset parameters (frequency, phase, amplitude). With long trail
-persistence (200+ frames), the overlapping traces create the orbital cloud.
+### Later Mode: Tunnel
 
-```
-For each orbit k (k = 0..N-1):
-  x_k(t) = A_k * sin(f_x_k * t + φ_x_k)
-  y_k(t) = A_k * sin(f_y_k * t + φ_y_k)
-```
+A spiral or vortex projection whose radius and depth evolve over time.
 
-**Approach B: 3D Lissajous projection**
-Generate a 3D Lissajous curve and project it to 2D. The third dimension creates
-the depth/orbit effect:
+Good later candidate because:
+- visually striking
+- shares many rendering needs with XY
+- can be strongly audio-reactive
 
-```
-x(t) = sin(a * t)
-y(t) = sin(b * t + φ) * cos(c * t)
-z(t) = cos(b * t + φ) * sin(c * t)
+### Later Mode: Polar
 
-// Project to screen:
-x_screen = x / (1 + z * perspective)
-y_screen = y / (1 + z * perspective)
-```
+Map time, phase, or periodic structure into angular position and amplitude or magnitude into radius.
 
-Visual characteristics:
-- Very long trail persistence (200+ frames of history)
-- Strong bloom — center blown out white-green, outer traces dim
-- Possible slow rotation of the overall cluster
+This is promising for symmetry-rich signals and visually dense mandala-like forms.
 
-Audio-reactive variant: multiple frequency-band-filtered versions of the stereo
-XY signal, overlaid — bass in one orbit, mids in another, highs in another.
+### Later Mode: Spectrum
 
-### Tunnel
+FFT-derived display of frequency magnitude.
 
-A decaying spiral with perspective projection, creating the illusion of looking
-into a vortex.
+This should share the same canvas and overall phosphor aesthetic, but it should **not** be forced into the same point-history assumptions as XY-style modes.
 
-```
-θ(t) = ω * t                       // angle increases with time
-r(t) = r_max * e^(-decay * t)      // radius shrinks exponentially
+---
 
-// 3D position on a tilted disk:
-x3d = r(t) * cos(θ(t))
-y3d = r(t) * sin(θ(t))
-z3d = depth * (1 - r(t) / r_max)   // deeper as radius shrinks
+## Mode-Specific Notes
 
-// Perspective projection:
-x_screen = x3d / (1 + z3d * perspective)
-y_screen = y3d / (1 + z3d * perspective)
-```
+### Triggering for Y-T
 
-Visual characteristics:
-- Logarithmic spiral — each revolution tighter than the last
-- Perspective tilt — spiral viewed at angle, creating elliptical outer ring
-- Brightness shift — inner core brighter (beam slows as spiral tightens),
-  outer ring dimmer (beam moves faster)
-- Convergence point offset from center, selling the 3D illusion
-- Color shifts from green → yellow → white at the hottest center point
+Triggering stabilizes the waveform by selecting a repeatable phase-aligned starting point.
 
-Audio-reactive variant: amplitude modulates spiral decay rate. Louder = wider
-spiral, quieter = tighter collapse. Frequency content could modulate rotation
-speed or tilt angle.
+Recommended progression:
+1. zero-crossing detection
+2. Schmitt trigger with hysteresis
+3. correlation-based alignment later if needed
 
-Controllable parameters: rotation speed, decay rate, perspective strength,
-tilt angle.
+### Harmonic Orbits Strategy
 
-### Polar
+Recommended first implementation:
+- multi-layer XY
+- parameter spread across layers
+- long visual persistence
+- no fake 3D projection required initially
 
-Map audio properties to polar coordinates.
+### Spectrum Notes
 
-```
-angle = phase or time
-radius = amplitude or frequency magnitude
-```
+FFT output consistency matters.
+Providers should either standardize or expose:
+- `fftSize`
+- `smoothing`
+- channel behavior
+- linear vs logarithmic bin rendering choice
 
-Produces circular and mandala-like patterns. Natural for visualizing periodic
-signals. Can reveal symmetry in audio that XY mode doesn't show.
+### Mono input behavior
 
-### Spectrum
-
-FFT-based frequency domain view.
-
-```
-x = frequency bin (linear or logarithmic scale)
-y = magnitude (dB)
-```
-
-Reveals harmonic content and overtone structure. Logarithmic frequency scale
-better matches musical perception. Optional peak hold for identifying
-fundamental frequencies.
+For XY mode, mono input produces limited geometry by default. If mono mic support feels underwhelming, future options include:
+- mono-to-generated hybrid mode
+- small decorrelation/widening transform
+- explicit UX note that stereo sources are more interesting for XY
 
 ---
 
 ## Rendering Architecture
 
-### Why WebGPU
+The renderer is best understood as **what ships first** versus **what it may evolve into**.
 
-- Handles millions of points per frame (vs ~10K ceiling on Canvas2D)
-- Custom shaders for physically-based phosphor simulation
-- Compute shaders for bloom and post-processing
-- Future-proof — the successor to WebGL
-- Starting with WebGPU means the V1 "simple trail" architecture evolves cleanly
-  into the physically-accurate phosphor model without rewriting
+### V1 Rendering Pipeline
 
-### The Phosphor Model
+Recommended V1 pipeline:
 
-Real CRT oscilloscope visual characteristics to simulate:
+1. CPU reads current signal data from the provider
+2. Active display mode generates a frame of geometry
+3. Geometry uploads to GPU buffers
+4. A render pass draws traces into a render target or directly to screen
+5. Optional lightweight glow or bloom pass softens the image
+6. Composite to the visible canvas
 
-**Beam intensity = inverse of velocity.** Where the signal changes slowly
-(peaks/troughs), the beam lingers and phosphor glows brighter. Where it sweeps
-fast (zero crossings), fewer photons → dimmer. This is visible in the reference
-video — outer lobes of Lissajous figures are brighter than center crossings.
+Why this is the right start:
+- fewer moving parts
+- easier to debug
+- enough to produce a strong visual result
+- keeps the renderer architecture open for later compute-heavy upgrades
 
-**Phosphor persistence (afterglow).** P31 phosphor (classic green) has fast
-initial decay (~40μs to 10% brightness) but a long low-level afterglow. Creates
-the "trail" effect. Each point has an age; brightness follows a decay curve that
-drops fast then lingers.
+### V2 Target Pipeline
 
-**Bloom/glow.** Bright points bleed light into surrounding pixels. This is the
-halo that gives CRT scopes their warmth.
+Once the base renderer is solid, evolve toward a richer phosphor model:
 
-### GPU Pipeline
+1. compute-driven accumulation/history
+2. rasterization to HDR texture
+3. multi-scale bloom passes
+4. tone mapping and CRT-style post effects
+5. velocity-aware brightness and richer decay curves
 
-Four-pass rendering architecture:
+This is the long-term target, not the initial dependency chain.
 
-**Pass 1: Point accumulation (compute shader)**
-- Input: ring buffer of `(x, y, age, velocity)` tuples
-- Each audio frame pushes new points, increments age on existing
-- Points beyond max age get recycled
-- Output: storage buffer of screen-space points with brightness values
+### Signal History vs Visual Persistence History
 
-**Pass 2: Point rasterization (render pass)**
-- Draw points as small quads/sprites
-- Fragment shader computes brightness from age + velocity
-- Render to HDR texture (not directly to screen — bloom needs it)
+These should be treated as separate concepts.
 
-**Pass 3: Bloom (compute shader)**
-- Downsample the HDR texture
-- Gaussian blur at multiple scales
-- Composite back → phosphor glow effect
+#### Signal history
+Used for:
+- frame generation
+- trigger detection
+- FFT input
+- mode calculations
 
-**Pass 4: Tone map + composite (render pass)**
-- Map HDR to display range
-- Apply phosphor color (green P31, amber P12, blue P11, or custom)
-- Optional: CRT curvature distortion, scanlines, vignette
+#### Visual persistence history
+Used for:
+- trails
+- phosphor fade
+- temporal accumulation
+- bloom-friendly density
 
-### GPU Buffer Layout
+They do **not** need to share the same buffer model.
 
-Primary data structure: a ring buffer of samples on the GPU.
+#### Downsampling / geometry reduction
 
-```
-struct Point {
-  x: f32,        // normalized -1..1
-  y: f32,        // normalized -1..1
-  age: f32,      // 0 = just drawn, increases each frame
-  velocity: f32  // sqrt(dx² + dy²) at this point
-}
-```
+If performance requires it later, prefer geometry-aware reduction over blindly discarding raw samples.
 
-Ring buffer size determines trail length. 8K–64K points is a good range.
-At 60fps with 800 samples/frame, 48K points gives 60 frames of trail.
+Examples:
+- fewer points when a trace segment is visually linear
+- reduced trail history at lower quality settings
+- half-resolution bloom in performance mode
 
-### WGSL Shader Strategy
+#### WebGPU availability
 
-Inline WGSL as TypeScript string constants. Keeps the `@kkb/audio` zero-build-step
-convention (raw `.ts` exports, no bundler transforms needed).
+As of early 2026, WebGPU support is strong enough to justify a WebGPU-first design.
+
+Policy:
+- detect support at init
+- present a clear unsupported-state UI in the host
+- do not maintain a second full Canvas2D renderer unless product requirements change dramatically
+
+---
+
+## Phosphor Visual Model
+
+The goal is **perceptual plausibility**, not exact CRT physics.
+
+### Beam intensity and motion
+
+A useful visual heuristic is that slower-moving regions of the trace appear brighter than fast crossings.
+
+This matters because it gives:
+- brighter lobes in stable Lissajous forms
+- more convincing orbital clusters
+- less flat-looking traces overall
+
+### Persistence / afterglow
+
+The image should not disappear instantly. A trace should:
+- appear quickly
+- decay noticeably
+- leave a lingering low-level glow
+
+A simple exponential or two-stage decay is enough for early versions.
+
+### Bloom / glow
+
+Bright traces should bleed light into nearby pixels.
+
+This gives:
+- warmth
+- density
+- the “hot center” effect in clustered patterns
+
+### Intensity-dependent color shift
+
+Later versions can move from:
+- dim green
+- bright green
+- yellow-green
+- near-white highlights
+
+This is a later fidelity enhancement, not required for V1.
+
+---
+
+## Shader & Packaging Strategy
+
+### WGSL strategy
+
+Inline WGSL as TypeScript string literals inside `@kkb/audio`.
+
+Benefits:
+- matches the package's source-first style
+- no extra bundler transform required
+- easy direct imports in Bun/Next/Turbo flows
+- simple to version with the runtime code
+
+Example shape:
 
 ```typescript
-// Example: shaders/phosphor.ts
-export const phosphorVertex = /* wgsl */`
-  @vertex fn vs(@builtin(vertex_index) i: u32) -> @builtin(position) vec4f {
+export const traceVertex = /* wgsl */ `
+  @vertex fn vs(@builtin(vertex_index) index: u32) -> @builtin(position) vec4f {
     // ...
   }
 `;
-
-export const phosphorFragment = /* wgsl */`
-  @fragment fn fs(@location(0) age: f32, @location(1) vel: f32) -> @location(0) vec4f {
-    let brightness = (1.0 / (1.0 + vel * 4.0)) * exp(-age * decay);
-    return vec4f(color * brightness, brightness);
-  }
-`;
 ```
 
-- No build tooling changes — it's just TypeScript
-- Works with Turbopack, Bun test runner, and direct TS imports
-- `/* wgsl */` comment enables syntax highlighting via "WGSL Literal" VS Code extension
-- Shaders are small (100–300 lines each) — string constants are fine
+### Caveat
 
-### V1 vs V2 Rendering
-
-**V1 (simple trail):**
-- Points fade based on age alone (linear or exponential decay)
-- Single-pass bloom (one Gaussian blur)
-- Flat phosphor color
-- Functional and visually appealing
-
-**V2 (physically-accurate phosphor):**
-- Velocity-dependent beam intensity
-- Multi-timescale decay matching real P31 phosphor curves
-- Multi-pass bloom at different scales
-- Intensity-dependent color shift (dim green → bright green → yellow → white)
-- Optional CRT effects (barrel distortion, scanlines, vignette, noise)
+This approach is appropriate while the shader suite remains modest. If shader count or size grows substantially, external organization can be revisited later without changing the public architecture.
 
 ---
 
-## Signal Pipeline
+## Public API Design
 
-Three signal sources feed a unified interface. The oscilloscope doesn't care
-where the signal comes from.
+The public API should reflect the architectural split: the oscilloscope owns rendering, the host owns browser audio setup.
 
-### Unified Signal Interface
+### Headless runtime API
 
 ```typescript
-type SignalProvider = {
-  /** Get current time-domain samples for the given channel (0 = L/A, 1 = R/B) */
-  getSamples(channel: 0 | 1): Float32Array;
-  /** Get frequency-domain magnitude data (dB) for the given channel */
-  getFrequencyData(channel: 0 | 1): Float32Array;
-  /** Number of FFT bins (frequencyBinCount = fftSize / 2) */
-  frequencyBinCount: number;
-  /** Audio sample rate in Hz */
-  sampleRate: number;
-};
+import { createOscilloscope } from "@kkb/audio/oscilloscope";
+
+const scope = createOscilloscope(canvasElement, {
+  mode: "xy",
+  phosphor: {
+    color: "p31-green",
+    trailLength: 60,
+    bloom: 0.8,
+  },
+  canvas: {
+    aspectRatio: "1:1",
+    quality: "quality",
+  },
+  source: {
+    type: "oscillators",
+    a: { frequency: 300, waveform: "sine", phase: 0, amplitude: 1 },
+    b: { frequency: 200, waveform: "sine", phase: 0, amplitude: 1 },
+  },
+});
+
+scope.start();
+scope.setMode("xy");
+scope.updateConfig({ phosphor: { bloom: 1.1 } });
+scope.setSignalProvider(provider);
+const state = scope.getState();
+scope.destroy();
 ```
 
-Time-domain modes (Y-T, XY, Orbits, Tunnel, Polar) use `getSamples()`.
-Spectrum mode uses `getFrequencyData()`. Both are part of the core interface
-so every source can drive every mode without reimplementing FFT internally.
+### API principles
 
-**FFT parameters that affect Spectrum output:**
-- **`fftSize`**: determines frequency resolution. Larger = more bins but higher
-  latency. Default 2048 (= 1024 bins, ~23Hz resolution at 48kHz). Should be
-  configurable per-provider and match across L/R analysers.
-- **Windowing**: `AnalyserNode` applies a Blackman window by default. The
-  oscillator source's software FFT should use the same window function for
-  consistent output across providers.
-- **Smoothing**: `AnalyserNode.smoothingTimeConstant` (default 0.8) applies
-  exponential moving average across frames. The oscillator FFT provider should
-  implement equivalent smoothing. A provider-level `smoothing` config (0–1)
-  keeps this consistent.
+- `start()` starts the render loop, not browser audio capture
+- `setSignalProvider()` attaches an externally created provider
+- internal oscillators are the only source type the oscilloscope core should create for itself
+- mic setup and future track taps remain host responsibilities
 
-Providers that disagree on these parameters will produce visually inconsistent
-Spectrum output when switching sources — so the contract should either enforce
-defaults or expose them as read-only properties for the renderer to adapt.
+### Host responsibilities
 
-For the oscillator source (which has no native FFT), a lightweight FFT
-implementation (e.g. radix-2 Cooley-Tukey) computes frequency data from the
-generated samples on demand, with matching window and smoothing behavior.
-
-### Source 1: Internal Oscillators
-
-Built-in signal generators for pure exploration.
-
-- Two independent oscillators (for XY mode) with:
-  - Frequency (Hz or musical note)
-  - Phase offset (0–360°)
-  - Amplitude (0–1)
-  - Waveform type (sine, square, sawtooth, triangle)
-- **Frequency ratio lock** — snap to exact ratios (1:1, 2:1, 3:2, 4:3, 5:4, etc.)
-  with musical interval labels (unison, octave, fifth, fourth, major third)
-- **Detune knob** (cents) — slight detuning creates slow phase drift, causing
-  figures to rotate and evolve over time
-
-This is the purest cymatics exploration mode. Set a 3:2 ratio, watch the figure
-form. Shift the phase, watch it morph. Detune slightly, watch it rotate.
-
-### Source 2: Mic / Line Input
-
-Live audio input via `navigator.mediaDevices.getUserMedia({ audio: true })`.
-
-- `ChannelSplitterNode` for independent L/R access
-- Mono mic → XY mode produces a diagonal line (not useful). Options:
-  - "Mono + generated" mode: mic → Y axis, internal oscillator → X axis
-  - Apply stereo widening/decorrelation to mono input
-- Stereo line input (audio interface) → full XY capability
-- Gain control for input level normalization
-
-### Source 3: Loaded Tracks (via `@kkb/audio` engine)
-
-Tap via consumer-side graph wiring above the engine (see
-[Audio Engine Integration](#audio-engine-integration) for the gap analysis and
-required refactor).
-
-- Insert AnalyserNode(s) into the audio graph after the source, before destination
-- For XY mode: split stereo into two AnalyserNodes via ChannelSplitterNode
-- Stereo music in XY mode produces chaotic Lissajous clouds:
-  - Bass-heavy tracks → dense center patterns
-  - Wide-stereo mixes → broad, sweeping figures
-  - Panned instruments → diagonal bias in the figure
-
-### Triggering (Y-T mode)
-
-Stabilizes the time-domain display by detecting a consistent point in the
-waveform cycle. Without triggering, the waveform drifts across the screen.
-
-Options (in order of complexity):
-1. **Zero-crossing detection** — find where signal crosses zero going upward
-2. **Schmitt trigger** — zero-crossing with hysteresis to avoid noise jitter
-3. **Correlation-based** — compare current buffer to previous for best alignment
-   (most stable, most expensive)
-
-For XY/Lissajous/Orbits/Tunnel modes, triggering is less critical since figures
-are inherently stable when frequency ratios are exact.
-
-### Worklet Path (V2) — New Platform Work
-
-For the physically-accurate phosphor model, an AudioWorklet feeding raw PCM
-samples via SharedArrayBuffer would give lower latency and sample-level precision
-for computing per-sample velocity.
-
-**Current state of `@kkb/audio` worklet infra:**
-- `sab-ring-buffer.ts` — minimal SharedArrayBuffer allocator (no atomics-based
-  read/write cursors, no stereo framing, no real producer/consumer protocol)
-- `register-worklet.ts` — thin wrapper around `audioWorklet.addModule()`
-- The app is **not configured for COOP/COEP isolation**, which is required for
-  `SharedArrayBuffer` in cross-origin contexts
-
-**What Phase 3 actually requires (new work):**
-- Atomics-based lock-free ring buffer with proper read/write cursors
-- Stereo-interleaved or dual-channel framing protocol
-- A worklet processor that writes PCM samples into the SAB each quantum
-- Consumer-side reader that drains samples at render frame rate
-- COOP/COEP headers configured on the hosting app (`Cross-Origin-Opener-Policy:
-  same-origin`, `Cross-Origin-Embedder-Policy: require-corp`)
-- Fallback path for when SAB is unavailable (non-isolated contexts)
-
-V1 uses AnalyserNode (simpler, no isolation requirements). V2 builds the full
-worklet pipeline as new platform work.
+The host should own:
+- mic permission and device selection
+- `AudioContext` creation policy
+- analyser creation
+- track player graph wiring
+- unsupported-state UI
 
 ---
 
-## Audio Engine Integration
+## Browser Host Integration
 
-The oscilloscope should stay **decoupled from the engine internals** — it
-consumes audio signals through the `SignalProvider` interface, not through
-engine-specific types. However, connecting the oscilloscope to track playback
-requires new API surface that does not exist today.
+The first production-facing wrapper should live in `apps/web`.
 
-### Current Engine Boundary (Gap)
+Why:
+- browser-only APIs already live there
+- permission flows belong there
+- the current audio player integration already lives there
+- it avoids creating a new `@kkb/ui` → `@kkb/audio` coupling by default
 
-The `AudioEngine` class manages source lifecycle (load/play/pause/seek) and
-exposes a store-based state model, but it does **not** expose:
-- The underlying `AudioContext`
-- Source `AudioNode` references
-- Any analyser or graph insertion point
+### Responsibilities for the first wrapper
 
-The consumer-side code (React hooks or integration layer) that owns the
-`AudioContext` and wires sources to the destination is where the tap must live.
-But today that wiring is implicit — there is no explicit "graph owner" above
-the engine that exposes nodes for tapping.
+- manage a `canvas` ref
+- instantiate and destroy the oscilloscope runtime
+- create/manage the chosen `SignalProvider`
+- surface controls and presets
+- show unsupported or permission-required states cleanly
 
-### Required: Graph Access API
+### Mic integration path
 
-To connect the oscilloscope to track playback, one of these approaches is needed:
+Likely host path:
+- request media stream
+- create audio context if needed
+- create analyser node(s)
+- wrap them in `AnalyserSignalProvider`
+- pass provider to oscilloscope
 
-**Option A: Engine exposes a tap hook**
-Add an optional `getOutputNode(): AudioNode | null` method to `AudioSource` or a
-`createAnalyserTap()` method on the engine that returns a `ChannelSplitterNode` +
-`AnalyserNode` pair wired to the current source output. This is the smallest
-change but couples the oscilloscope concern into the engine API.
+### Future track integration path
 
-**Option B: Graph owner layer**
-Introduce an explicit graph orchestrator above the engine that owns the
-`AudioContext`, connects engine sources to the destination, and provides
-analyser insertion points. The oscilloscope connects to this layer, not the
-engine directly. More work but cleaner separation.
+Track visualization requires a deliberate host graph owner above or beside the current player wiring. It should not be bolted onto the current runtime by exposing internal engine nodes.
 
-**Option C: External wiring at the React/integration layer**
-The integration code that creates the `AudioContext` and connects the engine's
-source nodes to `ctx.destination` also creates AnalyserNodes and passes them
-to the oscilloscope. The engine itself remains unchanged. This works today if
-the integration layer already has node-level access, but the current consumer
-code may need refactoring to expose those nodes.
-
-**Recommended for V1: Option C.** Refactor the consumer-side integration to
-expose the audio graph nodes, wire AnalyserNodes externally, and pass them to
-the oscilloscope. Evaluate Options A/B for V2 if the integration becomes
-unwieldy.
-
-### Tap Point (Target Architecture)
-
-```
-AudioContext (owned by integration layer)
-  └── source node → ChannelSplitter → AnalyserNode(L) ─┐
-                                     → AnalyserNode(R) ─┤→ destination
-                                                        │
-                                     Oscilloscope reads ←┘
-```
-
-### Adapter Pattern
-
-Each signal source implements `SignalProvider`. The oscilloscope only depends on
-this interface:
-
-```typescript
-// Wraps Web Audio AnalyserNode for engine/mic sources
-class AnalyserSignalProvider implements SignalProvider {
-  private bufferL: Float32Array;
-  private bufferR: Float32Array;
-  private freqBufferL: Float32Array;
-  private freqBufferR: Float32Array;
-
-  constructor(
-    private analyserL: AnalyserNode,
-    private analyserR: AnalyserNode,
-  ) {
-    this.bufferL = new Float32Array(analyserL.fftSize);
-    this.bufferR = new Float32Array(analyserR.fftSize);
-    this.freqBufferL = new Float32Array(analyserL.frequencyBinCount);
-    this.freqBufferR = new Float32Array(analyserR.frequencyBinCount);
-  }
-
-  getSamples(channel: 0 | 1): Float32Array {
-    const analyser = channel === 0 ? this.analyserL : this.analyserR;
-    const buffer = channel === 0 ? this.bufferL : this.bufferR;
-    analyser.getFloatTimeDomainData(buffer);
-    return buffer;
-  }
-
-  getFrequencyData(channel: 0 | 1): Float32Array {
-    const analyser = channel === 0 ? this.analyserL : this.analyserR;
-    const buffer = channel === 0 ? this.freqBufferL : this.freqBufferR;
-    analyser.getFloatFrequencyData(buffer);
-    return buffer;
-  }
-
-  get frequencyBinCount(): number {
-    return this.analyserL.frequencyBinCount;
-  }
-
-  get sampleRate(): number {
-    return this.analyserL.context.sampleRate;
-  }
-}
-
-// Generates samples internally for oscillator source
-class OscillatorSignalProvider implements SignalProvider {
-  // ... generates sine/square/sawtooth/triangle samples
-}
-```
+Recommended future architecture:
+- host owns the Web Audio graph for analyzable playback
+- host passes analyser-backed provider into the oscilloscope
+- `@kkb/audio` remains focused on playback runtime and source selection, not visualization taps
 
 ---
 
-## Controls & Interaction
+## Controls & Presets
 
-Designed as an artistic exploration tool — intuitive, expressive, preset-friendly.
+Controls should be phased so the initial surface stays focused.
 
-### Signal Controls
+### V1 controls
 
-| Control | Range | Notes |
-|---------|-------|-------|
-| Source selector | oscillators / mic / track | Switches SignalProvider |
-| Oscillator A frequency | 20Hz–20kHz (or note) | Logarithmic scale |
-| Oscillator B frequency | 20Hz–20kHz (or note) | Logarithmic scale |
-| Phase offset | 0–360° | Per-oscillator |
-| Amplitude | 0–1 | Per-oscillator |
-| Waveform | sine / square / saw / triangle | Per-oscillator |
-| Ratio lock | 1:1, 2:1, 3:2, 4:3, 5:4... | Musical interval names |
-| Detune | ±100 cents | Slow drift when nonzero |
-| Input gain | -∞ to +12dB | For mic/track sources |
+#### Signal controls
+- source: oscillators / mic
+- oscillator A frequency
+- oscillator B frequency
+- waveform per oscillator
+- phase per oscillator
+- amplitude per oscillator
+- ratio lock
+- detune
 
-### Display Controls
+#### Display controls
+- mode: XY
+- trail length
+- point density or quality setting
+- aspect ratio
+- phosphor color preset
+- bloom intensity
+- background brightness
+- grid toggle
 
-| Control | Range | Notes |
-|---------|-------|-------|
-| Mode | Y-T / XY / Orbits / Tunnel / Polar / Spectrum | Swaps point generator |
-| Timebase | 0.1ms–100ms/div | Y-T mode only |
-| Vertical gain | 0.1x–10x | Scales Y amplitude |
-| Trigger level | -1..1 | Y-T mode, with slope selector |
-| Trail length | 1–300 frames | How many frames of history |
-| Point density | 256–4096 samples/frame | Points sent to GPU per frame |
+### Later controls
 
-### Mode-Specific Controls
+- Y-T timebase and trigger controls
+- Harmonic Orbit count/spread
+- Tunnel rotation/decay/perspective
+- Spectrum scale controls
+- advanced CRT effect tuning
+- URL-state sharing
 
-**Harmonic Orbits:**
-| Control | Range | Notes |
-|---------|-------|-------|
-| Orbit count | 1–16 | Number of simultaneous layers |
-| Spread | 0–1 | How much parameters vary between orbits |
-| Rotation speed | 0–10 | Overall cluster rotation rate |
+### Presets
 
-**Tunnel:**
-| Control | Range | Notes |
-|---------|-------|-------|
-| Rotation speed | 0.1–10 | Angular velocity |
-| Decay rate | 0.01–1.0 | How quickly spiral tightens |
-| Perspective | 0–2 | Depth exaggeration |
-| Tilt angle | 0–90° | Viewing angle |
+Built-in presets are worth supporting early because they strengthen the exploratory experience.
 
-### Visual Controls
+Good initial presets:
+- Circle
+- Figure Eight
+- Lissajous 3:2
+- Breathing Detune
+- Stereo XY
 
-| Control | Range | Notes |
-|---------|-------|-------|
-| Phosphor color | P31 green / P12 amber / P11 blue / custom | Preset or RGB picker |
-| Bloom intensity | 0–2 | Glow amount |
-| Background brightness | 0–0.1 | Pure black to subtle dark gray |
-| Grid | on/off | Major divisions overlay |
-| Grid opacity | 0–0.5 | Subtle by default |
-| CRT effects | off / subtle / full | Curvature, vignette, scanlines |
-
-### Preset System
-
-- **Save/load** parameter snapshots (all controls serialized to JSON)
-- **Built-in presets**:
-  - "Lissajous 3:2" — clean ratio, default phase
-  - "Circle" — 1:1 ratio, 90° phase offset
-  - "Figure Eight" — 2:1 ratio
-  - "Orbit Cloud" — Harmonic Orbits with 8 layers, high spread
-  - "Deep Tunnel" — Tunnel with slow decay, strong perspective
-  - "Breathing" — 3:2 ratio with slight detune for slow rotation
-  - "Stereo Field" — track source, XY mode, medium trail
-- **URL-encodable state** — share a preset as a link
+URL-encodable preset sharing can follow later.
 
 ---
 
-## Canvas & Layout
+## Canvas, Layout & HUD
 
-### Aspect Ratio Options
+### Aspect ratio strategy
 
-| Preset | Ratio | Best for |
-|--------|-------|----------|
-| **Square** (default) | 1:1 | XY, Polar, Orbits |
-| **CRT** | 4:3 | Classic oscilloscope feel |
-| **Wide** | 16:9 | Y-T, Spectrum, Tunnel |
-| **Ultra** | 21:9 | Cinematic tunnel/spectrum |
-| **Fill** | container | Responsive, fills parent element |
+V1 should optimize first for **square presentation**, because XY mode is the strongest early mode.
 
-The canvas renders at the selected resolution. The UI container letterboxes or
-pillarboxes as needed to maintain the chosen ratio.
+Recommended aspect ratios:
+- `1:1` default
+- `4:3` optional classic CRT feel
+- `16:9` later, especially once Y-T and Spectrum are stronger
+- `fill` for responsive host layouts
 
-### Resolution
+### Resolution and quality
 
-- Render at device pixel ratio (e.g. 2x on Retina) for crisp points
-- Bloom passes can run at half resolution for performance
-- Expose a quality setting: "performance" (1x, half-res bloom) vs "quality"
-  (2x, full-res bloom)
+- render at device pixel ratio where practical
+- offer a quality mode toggle
+- allow half-resolution bloom in performance mode
 
-### HUD Overlay
+### HUD
 
-Minimal heads-up display matching the reference video aesthetic:
-- Top-left: mode name (e.g. `XY MODE | LISSAJOUS 3:2`)
-- Top-right: elapsed time (`t=31.0s`)
-- Bottom-left: source info, key parameters
-- Monospace font, phosphor-matched color, low opacity
+A minimal phosphor-style overlay can add atmosphere without clutter.
+
+Possible fields:
+- active mode
+- source type
+- current ratio or key frequencies
+- elapsed time
+
+This should stay subtle and low-opacity.
+
+### Unsupported states
+
+If WebGPU is unavailable, the host should present a deliberate unsupported state rather than silently degrading.
 
 ---
 
 ## Package Structure
 
-Located within `packages/audio/src/oscilloscope/`:
+The oscilloscope core should live under `packages/audio/src/oscilloscope/`.
 
-```
+```text
 oscilloscope/
-├── types.ts                 # Core types: OscilloscopeConfig, DisplayMode,
-│                            #   PhosphorSettings, SignalProvider, ModeParams, etc.
+├── index.ts                 # Public entrypoint
+├── types.ts                 # Config, shared types
 ├── signal/
-│   ├── signal-provider.ts   # SignalProvider interface
-│   ├── oscillator-source.ts # Internal dual-oscillator generator
-│   └── analyser-source.ts   # AnalyserNode wrapper (mic + track)
+│   ├── signal-provider.ts   # SignalProvider contract
+│   ├── oscillator-source.ts # Internal dual-oscillator provider
+│   └── analyser-source.ts   # Wraps AnalyserNode-based sources
 ├── modes/
-│   ├── mode.ts              # DisplayMode interface, PointGenerator type
-│   ├── yt.ts                # Y-T time domain mode
+│   ├── mode.ts              # DisplayMode + FrameGeometry types
 │   ├── xy.ts                # XY / Lissajous mode
-│   ├── orbits.ts            # Harmonic Orbits mode
-│   ├── tunnel.ts            # Tunnel / vortex mode
-│   ├── polar.ts             # Polar mode
-│   └── spectrum.ts          # Spectrum (FFT) mode
-├── trigger.ts               # Zero-crossing / Schmitt trigger logic
+│   ├── yt.ts                # Y-T mode (later)
+│   ├── orbits.ts            # Harmonic Orbits (later)
+│   ├── tunnel.ts            # Tunnel (later)
+│   ├── polar.ts             # Polar (later)
+│   └── spectrum.ts          # Spectrum (later)
 ├── renderer/
-│   ├── types.ts             # GPU buffer layouts, pipeline config
+│   ├── pipeline.ts          # WebGPU orchestration
+│   ├── buffers.ts           # Geometry + persistence buffers
 │   ├── shaders/
-│   │   ├── point.ts         # Point accumulation compute shader (WGSL)
-│   │   ├── phosphor.ts      # Phosphor brightness + decay shader (WGSL)
-│   │   ├── bloom.ts         # Multi-pass bloom compute shader (WGSL)
-│   │   └── composite.ts     # Tone mapping + CRT effects shader (WGSL)
-│   ├── ring-buffer.ts       # GPU ring buffer management
-│   └── pipeline.ts          # WebGPU pipeline orchestration
-├── presets.ts               # Built-in parameter presets
-└── index.ts                 # Public API: createOscilloscope(canvas, config)
+│   │   ├── trace.ts         # Core trace shaders
+│   │   ├── bloom.ts         # Glow/bloom shaders
+│   │   └── composite.ts     # Final composite shaders
+│   └── types.ts             # GPU-side layouts and config
+├── trigger.ts               # Y-T trigger helpers
+└── presets.ts               # Built-in presets
 ```
 
-### Exports
+### Export strategy
 
-Add the oscilloscope entry to the **existing** exports map in
-`packages/audio/package.json` (do not replace the other entries):
+Add a dedicated entry without removing existing package exports:
 
 ```json
 {
@@ -690,158 +800,115 @@ Add the oscilloscope entry to the **existing** exports map in
     "./sources/*": "./src/sources/*.ts",
     "./worklet/*": "./src/worklet/*.ts",
     "./metrics/*": "./src/metrics/*.ts",
+    "./oscilloscope": "./src/oscilloscope/index.ts",
     "./oscilloscope/*": "./src/oscilloscope/*.ts"
   }
 }
 ```
 
-### Public API
+Consumers should prefer importing from `@kkb/audio/oscilloscope` unless a lower-level internal module is intentionally needed.
 
-```typescript
-import { createOscilloscope } from "@kkb/audio/oscilloscope/index";
+### Important package boundary notes
 
-const scope = createOscilloscope(canvasElement, {
-  mode: "xy",
-  phosphor: { color: "p31-green", trailLength: 60, bloom: 1.0 },
-  canvas: { aspectRatio: "1:1" },
-  source: {
-    type: "oscillators",
-    a: { frequency: 300, waveform: "sine", phase: 0, amplitude: 1 },
-    b: { frequency: 200, waveform: "sine", phase: 0, amplitude: 1 },
-  },
-});
-
-scope.start();                       // begin render loop + audio
-scope.setMode("tunnel");             // switch display mode
-scope.setFrequency("a", 440);        // update oscillator
-scope.setSource({ type: "mic" });    // switch to mic input
-scope.loadPreset("orbit-cloud");     // apply preset
-scope.getState();                    // serialize current config
-scope.destroy();                     // teardown GPU + audio resources
-```
-
-### React Integration
-
-The React wrapper lives in `apps/web` or `packages/ui`, not in the audio package:
-
-```tsx
-<Oscilloscope
-  mode="xy"
-  source={{ type: "oscillators", a: { frequency: 300 }, b: { frequency: 200 } }}
-  phosphor={{ color: "p31-green" }}
-  aspectRatio="1:1"
-  className="w-full max-w-[800px]"
-/>
-```
-
-Manages canvas ref, config state, and lifecycle (start/destroy on mount/unmount).
+The following do **not** belong in `@kkb/audio` v1:
+- React wrapper components
+- mic permission UI
+- host-specific device selection UI
+- track player graph orchestration in `apps/web`
 
 ---
 
 ## Implementation Phases
 
-### Phase 1: Foundation
+### Phase 1: Smallest Viable Renderer
 
-Core rendering + internal oscillators. Proof of concept.
+- WebGPU init and support detection
+- internal dual-oscillator provider
+- XY mode only
+- CPU-generated frame geometry uploaded each frame
+- simple trail fade
+- basic phosphor palette
+- lightweight bloom if cheap enough
+- first demo in `apps/web`
 
-- [ ] WebGPU device initialization and capability detection
-- [ ] GPU ring buffer for point storage
-- [ ] Basic point rasterization shader (age-based fade, flat color)
-- [ ] Single-pass bloom
-- [ ] Internal dual-oscillator signal source
-- [ ] XY (Lissajous) mode point generator
-- [ ] Y-T mode point generator with zero-crossing trigger
-- [ ] `createOscilloscope()` public API
-- [ ] Grid overlay and HUD
-- [ ] Canvas aspect ratio options (1:1, 4:3, 16:9)
-- [ ] Basic phosphor color selection (P31 green, P12 amber, P11 blue)
+### Phase 2: Core Expansion
 
-### Phase 2: All Modes + Audio Sources
+- mic input via analyser-backed provider
+- Y-T mode
+- zero-crossing trigger
+- grid + minimal HUD
+- preset save/load (local/basic)
+- additional phosphor presets
 
-Complete the mode set and connect real audio.
+### Phase 3: More Modes + Host Integration Work
 
-- [ ] Harmonic Orbits mode
-- [ ] Tunnel mode
-- [ ] Polar mode
-- [ ] Spectrum mode (FFT integration)
-- [ ] AnalyserNode-based signal provider (for mic and track sources)
-- [ ] Refactor consumer-side audio integration to expose graph nodes (Option C
-      prerequisite for track source — see Audio Engine Integration section)
-- [ ] Mic input source with channel splitter
-- [ ] Track source integration via AnalyserNode tap on audio graph
-- [ ] Schmitt trigger (improved Y-T stability)
-- [ ] Mode-specific parameter controls
-- [ ] Preset system (save/load/built-in presets)
-- [ ] URL-encodable state
+- Harmonic Orbits
+- Tunnel
+- Polar
+- Spectrum
+- host-side graph work needed for track visualization
+- Schmitt trigger for better Y-T stability
 
-### Phase 3: Physically-Accurate Phosphor
+### Phase 4: Fidelity Upgrades
 
-Upgrade rendering fidelity.
+- richer trail behavior
+- velocity-sensitive brightness
+- improved decay curves
+- better bloom stack
+- CRT-style post effects
+- quality presets
 
-- [ ] Velocity-dependent beam intensity
-- [ ] Multi-timescale phosphor decay curves (P31 fast + slow components)
-- [ ] Intensity-dependent color shift (dim green → bright → yellow → white)
-- [ ] Multi-pass bloom at different scales
-- [ ] AudioWorklet + SAB signal path for sample-level precision
-- [ ] CRT effects (barrel distortion, scanlines, vignette, noise)
-- [ ] Quality presets (performance vs quality)
+### Phase 5: Precision Audio Path
 
-### Phase 4: React Component + Polish
+- AudioWorklet-based sample feed
+- `SharedArrayBuffer` transport
+- atomics-based ring buffer protocol
+- COOP/COEP configuration in host app
+- non-isolated fallback path
 
-Ship it as a usable component.
+#### Important note on Phase 5
 
-- [ ] `<Oscilloscope />` React component
-- [ ] Touch/gesture controls for mobile
-- [ ] Keyboard shortcuts for mode switching, parameter nudging
-- [ ] WebGPU fallback detection (graceful error when unsupported)
-- [ ] Performance profiling and optimization
-- [ ] Documentation and usage examples
+This worklet path is a fidelity and latency upgrade, not a prerequisite for shipping a compelling product.
+
+It is also **distinct from the current playback-oriented `WorkletPCMSource` abstraction** already present in `@kkb/audio`; the oscilloscope would need its own PCM-sharing transport contract.
 
 ---
 
-## Key Technical Notes
+## Risks & Open Questions
 
-### Frame Rate Coupling
+### 1. V1 scope creep
 
-The renderer runs at monitor refresh rate via `requestAnimationFrame` (60–144fps).
-Audio data accumulates between frames. At 48kHz sample rate and 60fps, ~800
-samples arrive per frame — 800 points for XY mode, which is reasonable. With
-a 60-frame trail at 800 points/frame = 48K total points, well within WebGPU's
-comfort zone.
+The biggest risk is trying to ship too many modes and too much phosphor fidelity at once.
 
-### Downsampling
+### 2. Track visualization dependency chain
 
-Not needed for V1. If performance requires it later, strategies include:
-- Skip every Nth sample (simple, loses high-frequency detail)
-- Lanczos or sinc interpolation (preserves quality)
-- Adaptive: fewer points when signal is linear, more at transitions
+Track playback visualization depends on host graph work that does not exist yet. This should not block the renderer project.
 
-### WebGPU Availability
+### 3. Spectrum path divergence
 
-As of early 2026, WebGPU is supported in Chrome, Edge, and Safari. Firefox
-support is still in progress. The oscilloscope should detect capability at init
-and fail gracefully with a clear message when unsupported. A Canvas2D fallback
-is not planned — the visual fidelity gap is too large and maintaining two
-renderers doubles the work.
+Spectrum may need a somewhat different rendering path than trail-based geometry. That is acceptable, but should be acknowledged early.
 
-### Coordinate System
+### 4. Y-T timing and trigger complexity
 
-All modes output normalized coordinates in the range `[-1, 1]` for both axes.
-The vertex shader maps these to clip space. The grid overlay is drawn in the
-same coordinate system with divisions at regular intervals.
+Y-T looks conceptually simple but introduces frame-window, trigger, and stabilization concerns that XY does not.
+
+### 5. WebGPU support variance
+
+The product should have a strong unsupported-state story in browsers that lack WebGPU.
+
+### 6. Mono mic UX quality
+
+XY mode is strongest with stereo signals. Mono mic input may need special UX treatment to feel satisfying.
 
 ---
 
-## Future: Cymatics Extensions
+## Future Extensions
 
-Not in scope for the oscilloscope, but the signal pipeline and rendering
-infrastructure lay the groundwork for:
+Not in scope for the oscilloscope itself, but related future directions include:
 
-- **Chladni plate simulator** — model 2D vibrating membrane driven by audio,
-  show nodal lines where "sand" accumulates. Solve the 2D wave equation on GPU
-  via compute shaders. Visualize as height map or particle system.
-- **3D cymatic surfaces** — height map driven by FFT data. WebGPU mesh rendering.
-- **Harmonic series explorer** — visualize overtones and how they combine.
-  Interactive additive synthesis with visual feedback.
-- **Waveform morphing** — continuously blend between waveform shapes, see how
-  the visual (Lissajous, spectrum, etc.) changes in real time.
+- **Chladni plate simulation**
+- **3D cymatic surfaces**
+- **harmonic series explorer**
+- **waveform morphing tools**
+
+The signal-provider and host-integration abstractions may carry forward into those efforts, but the renderer assumptions may diverge substantially once the work moves from trace-oriented visualization to field or surface simulation.
