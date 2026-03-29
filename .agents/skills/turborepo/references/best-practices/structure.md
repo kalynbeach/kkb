@@ -95,7 +95,34 @@ Package tasks enable Turborepo to:
 
 ```json
 {
-  "$schema": "https://turborepo.dev/schema.v2.json",
+  "$schema": "https://v2-8-22-canary-3.turborepo.dev/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
+    },
+    "lint": {},
+    "test": {
+      "dependsOn": ["build"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
+```
+
+With `futureFlags.globalConfiguration`, global settings move under a `global` key:
+
+```json
+{
+  "$schema": "https://v2-8-22-canary-3.turborepo.dev/schema.json",
+  "futureFlags": { "globalConfiguration": true },
+  "global": {
+    "inputs": ["tsconfig.json"],
+    "env": ["CI"]
+  },
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
@@ -124,8 +151,8 @@ You can group packages by adding more workspace paths:
 packages:
   - "apps/*"
   - "packages/*"
-  - "packages/config/*"    # Grouped configs
-  - "packages/features/*"  # Feature packages
+  - "packages/config/*" # Grouped configs
+  - "packages/features/*" # Feature packages
 ```
 
 This allows:
@@ -148,7 +175,7 @@ packages/
 ```yaml
 # BAD: Nested wildcards cause ambiguous behavior
 packages:
-  - "packages/**"  # Don't do this!
+  - "packages/**" # Don't do this!
 ```
 
 ## Package Anatomy
@@ -167,10 +194,11 @@ packages/ui/
 
 ```json
 {
-  "name": "@kkb/ui",           // Unique, namespaced name
-  "version": "0.0.0",           // Version (can be 0.0.0 for internal)
-  "private": true,              // Prevents accidental publishing
-  "exports": {                  // Entry points
+  "name": "@repo/ui", // Unique, namespaced name
+  "version": "0.0.0", // Version (can be 0.0.0 for internal)
+  "private": true, // Prevents accidental publishing
+  "exports": {
+    // Entry points
     "./button": "./src/button.tsx"
   }
 }
@@ -210,7 +238,7 @@ packages/
 ```json
 // packages/ui/tsconfig.json
 {
-  "extends": "@kkb/typescript-config/library.json",
+  "extends": "@repo/typescript-config/library.json",
   "compilerOptions": {
     "outDir": "dist",
     "rootDir": "src"
@@ -240,7 +268,7 @@ packages/
 ```json
 // packages/eslint-config/package.json
 {
-  "name": "@kkb/eslint-config",
+  "name": "@repo/eslint-config",
   "exports": {
     "./base": "./base.js",
     "./next": "./next.js",
@@ -254,7 +282,7 @@ packages/
 ```js
 // apps/web/.eslintrc.js
 module.exports = {
-  extends: ["@kkb/eslint-config/next"],
+  extends: ["@repo/eslint-config/next"]
 };
 ```
 

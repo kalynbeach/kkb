@@ -8,7 +8,7 @@ Dependencies belong in the package that uses them, not the root.
 
 ```bash
 # Good: Install in specific package
-pnpm add react --filter=@kkb/ui
+pnpm add react --filter=@repo/ui
 pnpm add next --filter=web
 
 # Avoid: Installing in root
@@ -78,13 +78,13 @@ Only repository-level tools:
 
 ```bash
 # pnpm
-pnpm add lodash --filter=@kkb/utils
+pnpm add lodash --filter=@repo/utils
 
 # npm
-npm install lodash --workspace=@kkb/utils
+npm install lodash --workspace=@repo/utils
 
 # yarn
-yarn workspace @kkb/utils add lodash
+yarn workspace @repo/utils add lodash
 
 # bun
 cd packages/utils && bun add lodash
@@ -94,25 +94,25 @@ cd packages/utils && bun add lodash
 
 ```bash
 # pnpm
-pnpm add jest --save-dev --filter=web --filter=@kkb/ui
+pnpm add jest --save-dev --filter=web --filter=@repo/ui
 
 # npm
-npm install jest --save-dev --workspace=web --workspace=@kkb/ui
+npm install jest --save-dev --workspace=web --workspace=@repo/ui
 
 # yarn (v2+)
-yarn workspaces foreach -R --from '{web,@kkb/ui}' add jest --dev
+yarn workspaces foreach -R --from '{web,@repo/ui}' add jest --dev
 ```
 
 ### Internal Packages
 
 ```bash
 # pnpm
-pnpm add @kkb/ui --filter=web
+pnpm add @repo/ui --filter=web
 
 # This updates package.json:
 {
   "dependencies": {
-    "@kkb/ui": "workspace:*"
+    "@repo/ui": "workspace:*"
   }
 }
 ```
@@ -161,7 +161,7 @@ catalog:
 // Any package.json
 {
   "dependencies": {
-    "react": "catalog:"  // Uses version from catalog
+    "react": "catalog:" // Uses version from catalog
   }
 }
 ```
@@ -172,10 +172,10 @@ catalog:
 
 ```json
 // pnpm/bun
-{ "@kkb/ui": "workspace:*" }
+{ "@repo/ui": "workspace:*" }
 
 // npm/yarn
-{ "@kkb/ui": "*" }
+{ "@repo/ui": "*" }
 ```
 
 Turborepo understands these relationships and orders builds accordingly.
@@ -200,7 +200,7 @@ For library packages that expect the consumer to provide dependencies:
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
-    "react": "^18.0.0",      // For development/testing
+    "react": "^18.0.0", // For development/testing
     "react-dom": "^18.0.0"
   }
 }

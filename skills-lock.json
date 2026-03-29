@@ -15,6 +15,11 @@
       "source": "vercel-labs/json-render",
       "sourceType": "github",
       "computedHash": "b09982175f109a3b6392bdda43bca48061dfe8ff2655ed3206b811fafb0028a7"
+    },
+    "turborepo": {
+      "source": "vercel/turborepo",
+      "sourceType": "github",
+      "computedHash": "033481e4d43482f98a5b6c159db2a553598e6a4dc94d893526cb27210cf8efc3"
     }
   }
 }
