@@ -208,7 +208,7 @@ export type OscilloscopePreset = {
 export type OscilloscopeController = {
   destroy(): void;
   getState(): { config: OscilloscopeConfig; provider: SignalProvider | null; running: boolean };
-  setSignalProvider(provider: SignalProvider | null): void;
+  setSignalProvider(provider: SignalProvider | null): void; // null clears any host override and falls back to the internal oscillator provider
   start(): Promise<void>;
   stop(): void;
   updateConfig(update: OscilloscopeConfigUpdate): void;
@@ -242,6 +242,8 @@ export const getOscilloscopeSupport = (
   };
 };
 ```
+
+Treat this helper as a preflight only. `navigator.gpu` can still be present while `requestAdapter()`, `requestDevice()`, or `canvas.getContext("webgpu")` fail later, so the client owner must convert `scope.start()` failures into the same user-visible fallback state instead of only logging them.
 
 ```ts
 import type { OscilloscopePreset } from "./types";
@@ -839,6 +841,7 @@ describe("createOscilloscope", () => {
     });
 
     scope.setSignalProvider(provider);
+    scope.setSignalProvider(null);
     await scope.start();
     scope.stop();
     scope.destroy();
@@ -944,6 +947,7 @@ import type { OscilloscopeRenderer } from "./types";
 import { COMPOSITE_SHADER } from "./shaders/composite";
 import { TRACE_SHADER } from "./shaders/trace";
 
+const HISTORY_FORMAT: GPUTextureFormat = "rgba16float";
 const HISTORY_USAGE = GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING;
 
 export const createWebGpuRenderer = async (
@@ -996,13 +1000,24 @@ export const createWebGpuRenderer = async (
     primitive: { topology: "line-strip" },
   });
 
-  const compositePipeline = device.createRenderPipeline({
+  const historyCompositePipeline = device.createRenderPipeline({
     layout: "auto",
     vertex: { module: compositeModule, entryPoint: "vs" },
     fragment: {
       module: compositeModule,
       entryPoint: "fs",
-      targets: [{ format: "rgba16float" }, { format }],
+      targets: [{ format: HISTORY_FORMAT }],
+    },
+    primitive: { topology: "triangle-list" },
+  });
+
+  const screenCompositePipeline = device.createRenderPipeline({
+    layout: "auto",
+    vertex: { module: compositeModule, entryPoint: "vs" },
+    fragment: {
+      module: compositeModule,
+      entryPoint: "fs",
+      targets: [{ format }],
     },
     primitive: { topology: "triangle-list" },
   });
@@ -1010,25 +1025,35 @@ export const createWebGpuRenderer = async (
   let size = { width: Math.max(1, canvas.width), height: Math.max(1, canvas.height) };
   let readIndex = 0;
   let writeIndex = 1;
-  let histories = [0, 1].map(() =>
+
+  const createHistoryTexture = () =>
     device.createTexture({
-      format: "rgba16float",
+      format: HISTORY_FORMAT,
       size,
       usage: HISTORY_USAGE,
-    }),
-  );
+    });
+
+  let histories = [createHistoryTexture(), createHistoryTexture()];
+
+  const recreateHistories = () => {
+    histories.forEach((texture) => texture.destroy());
+    histories = [createHistoryTexture(), createHistoryTexture()];
+    readIndex = 0;
+    writeIndex = 1;
+  };
 
   const resize = (width: number, height: number, dpr: number) => {
-    canvas.width = Math.max(1, Math.floor(width * dpr));
-    canvas.height = Math.max(1, Math.floor(height * dpr));
-    size = { width: canvas.width, height: canvas.height };
-    histories = [0, 1].map(() =>
-      device.createTexture({
-        format: "rgba16float",
-        size,
-        usage: HISTORY_USAGE,
-      }),
-    );
+    const nextWidth = Math.max(1, Math.floor(width * dpr));
+    const nextHeight = Math.max(1, Math.floor(height * dpr));
+
+    if (canvas.width === nextWidth && canvas.height === nextHeight) {
+      return;
+    }
+
+    canvas.width = nextWidth;
+    canvas.height = nextHeight;
+    size = { width: nextWidth, height: nextHeight };
+    recreateHistories();
   };
 
   const drawFrame = (geometry: FrameGeometry, config: OscilloscopeConfig) => {
@@ -1048,7 +1073,7 @@ export const createWebGpuRenderer = async (
     const currentTextureView = context.getCurrentTexture().createView();
 
     const historyBindGroup = device.createBindGroup({
-      layout: compositePipeline.getBindGroupLayout(0),
+      layout: historyCompositePipeline.getBindGroupLayout(0),
       entries: [
         { binding: 0, resource: previousHistoryView },
         { binding: 1, resource: sampler },
@@ -1066,7 +1091,7 @@ export const createWebGpuRenderer = async (
         },
       ],
     });
-    historyPass.setPipeline(compositePipeline);
+    historyPass.setPipeline(historyCompositePipeline);
     historyPass.setBindGroup(0, historyBindGroup);
     historyPass.draw(3);
     historyPass.setPipeline(tracePipeline);
@@ -1075,7 +1100,7 @@ export const createWebGpuRenderer = async (
     historyPass.end();
 
     const screenBindGroup = device.createBindGroup({
-      layout: compositePipeline.getBindGroupLayout(0),
+      layout: screenCompositePipeline.getBindGroupLayout(0),
       entries: [
         { binding: 0, resource: historyView },
         { binding: 1, resource: sampler },
@@ -1093,7 +1118,7 @@ export const createWebGpuRenderer = async (
         },
       ],
     });
-    screenPass.setPipeline(compositePipeline);
+    screenPass.setPipeline(screenCompositePipeline);
     screenPass.setBindGroup(0, screenBindGroup);
     screenPass.draw(3);
     screenPass.end();
@@ -1161,17 +1186,22 @@ export const createOscilloscope = (
   let running = false;
   let frameHandle = 0;
   let renderer: OscilloscopeRenderer | null = null;
-  let provider: SignalProvider | null = createOscillatorSignalProvider(config.source);
+  let internalProvider: SignalProvider | null = createOscillatorSignalProvider(config.source);
+  let providerOverride: SignalProvider | null = null;
+  const xyMode = createXyMode();
+
+  const getActiveProvider = () => providerOverride ?? internalProvider;
 
   const tick = () => {
-    if (!running || !renderer || !provider) {
+    const activeProvider = getActiveProvider();
+    if (!running || !renderer || !activeProvider) {
       return;
     }
 
     renderer.resize(canvas.clientWidth, canvas.clientHeight, window.devicePixelRatio || 1);
-    const geometry = createXyMode().generateFrame({
+    const geometry = xyMode.generateFrame({
       time: now(),
-      signals: provider,
+      signals: activeProvider,
       params: { gain: 1, sampleCount: Math.max(256, config.phosphor.trailLength * 8) },
       viewport: { height: canvas.height, width: canvas.width },
     });
@@ -1185,11 +1215,12 @@ export const createOscilloscope = (
       cancelFrame(frameHandle);
       renderer?.destroy();
       renderer = null;
-      provider = null;
+      providerOverride = null;
+      internalProvider = null;
     },
-    getState: () => ({ config, provider, running }),
+    getState: () => ({ config, provider: getActiveProvider(), running }),
     setSignalProvider: (nextProvider) => {
-      provider = nextProvider;
+      providerOverride = nextProvider;
     },
     start: async () => {
       if (running) {
@@ -1206,8 +1237,8 @@ export const createOscilloscope = (
     },
     updateConfig: (update) => {
       config = mergeConfig(config, update);
-      if (provider && "update" in provider && typeof provider.update === "function") {
-        provider.update(config.source);
+      if (internalProvider && "update" in internalProvider && typeof internalProvider.update === "function") {
+        internalProvider.update(config.source);
       }
     },
   };
@@ -1260,6 +1291,10 @@ describe("OscilloscopeClient", () => {
 });
 ```
 
+Also add a client-render test in this same file that changes a control value and asserts `createScope(...)` is still called exactly once while `scope.updateConfig(...)` receives the new settings. That guards the intended headless-runtime lifecycle.
+
+Also add a startup-failure test that makes `scope.start()` reject and asserts the shell swaps from the canvas to a readable fallback message instead of leaving a blank viewport.
+
 - [ ] **Step 2: Write the failing route render test**
 
 ```ts
@@ -1297,11 +1332,12 @@ export default function OscilloscopePage() {
 
 ```tsx
 import type { OscilloscopeConfig, OscilloscopeSupport } from "@kkb/audio/oscilloscope";
+import type { RefObject } from "react";
 
 import { OscilloscopeControls } from "./oscilloscope-controls";
 
 type OscilloscopeShellProps = {
-  canvasRef: React.RefObject<HTMLCanvasElement | null>;
+  canvasRef: RefObject<HTMLCanvasElement | null>;
   config: OscilloscopeConfig;
   micStatus: "idle" | "requesting" | "ready" | "error";
   micError: string | null;
@@ -1498,9 +1534,24 @@ type OscilloscopeClientProps = {
   createScope?: typeof createOscilloscope;
 };
 
+const mergeConfig = (current: OscilloscopeConfig, next: Partial<OscilloscopeConfig>): OscilloscopeConfig => ({
+  ...current,
+  ...next,
+  canvas: { ...current.canvas, ...next.canvas },
+  phosphor: { ...current.phosphor, ...next.phosphor },
+  source: {
+    ...current.source,
+    ...next.source,
+    a: { ...current.source.a, ...next.source?.a },
+    b: { ...current.source.b, ...next.source?.b },
+  },
+});
+
 export function OscilloscopeClient({ createScope = createOscilloscope }: OscilloscopeClientProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const support = useMemo(() => getOscilloscopeSupport(), []);
+  const scopeRef = useRef<ReturnType<typeof createOscilloscope> | null>(null);
+  const baseSupport = useMemo(() => getOscilloscopeSupport(), []);
+  const [support, setSupport] = useState(baseSupport);
   const [config, setConfig] = useState<OscilloscopeConfig>(OSCILLOSCOPE_PRESETS[0].config);
 
   useEffect(() => {
@@ -1509,14 +1560,41 @@ export function OscilloscopeClient({ createScope = createOscilloscope }: Oscillo
     }
 
     const scope = createScope(canvasRef.current, config);
+    let destroyed = false;
+    const destroyScope = () => {
+      if (destroyed) {
+        return;
+      }
+
+      destroyed = true;
+      scope.destroy();
+      if (scopeRef.current === scope) {
+        scopeRef.current = null;
+      }
+    };
+
+    scopeRef.current = scope;
     scope.start().catch((error) => {
+      if (destroyed) {
+        return;
+      }
+
       console.error("[oscilloscope] start failed", error);
+      setSupport({
+        reason: error instanceof Error ? `Unable to start WebGPU renderer: ${error.message}` : "Unable to start WebGPU renderer in this browser.",
+        supported: false,
+      });
+      destroyScope();
     });
 
     return () => {
-      scope.destroy();
+      destroyScope();
     };
-  }, [config, createScope, support.supported]);
+  }, [createScope, support.supported]);
+
+  useEffect(() => {
+    scopeRef.current?.updateConfig(config);
+  }, [config]);
 
   return (
     <OscilloscopeShell
@@ -1524,7 +1602,7 @@ export function OscilloscopeClient({ createScope = createOscilloscope }: Oscillo
       config={config}
       micError={null}
       micStatus="idle"
-      onConfigChange={(next) => setConfig((current) => ({ ...current, ...next }))}
+      onConfigChange={(next) => setConfig((current) => mergeConfig(current, next))}
       onPresetChange={(presetId) => {
         const preset = OSCILLOSCOPE_PRESETS.find((item) => item.id === presetId);
         if (preset) {
@@ -1699,23 +1777,62 @@ useEffect(() => {
   }
 
   const scope = createScope(canvasRef.current, config);
+  let destroyed = false;
+  const destroyScope = () => {
+    if (destroyed) {
+      return;
+    }
+
+    destroyed = true;
+    const runtime = micRuntimeRef.current;
+    micRuntimeRef.current = null;
+    scope.destroy();
+    if (scopeRef.current === scope) {
+      scopeRef.current = null;
+    }
+    runtime?.destroy().catch((error) => {
+      console.error("[oscilloscope] mic destroy failed", error);
+    });
+  };
+
   scopeRef.current = scope;
   scope.start().catch((error) => {
+    if (destroyed) {
+      return;
+    }
+
     console.error("[oscilloscope] start failed", error);
+    setSupport({
+      reason: error instanceof Error ? `Unable to start WebGPU renderer: ${error.message}` : "Unable to start WebGPU renderer in this browser.",
+      supported: false,
+    });
+    destroyScope();
   });
 
   return () => {
-    scope.destroy();
-    scopeRef.current = null;
-    micRuntimeRef.current?.destroy().catch((error) => {
-      console.error("[oscilloscope] mic destroy failed", error);
-    });
-    micRuntimeRef.current = null;
+    destroyScope();
   };
-}, [config, createScope, support.supported]);
+}, [createScope, support.supported]);
 
 useEffect(() => {
-  if (config.source.type !== "mic" || !scopeRef.current) {
+  scopeRef.current?.updateConfig(config);
+}, [config]);
+
+useEffect(() => {
+  const scope = scopeRef.current;
+  if (!scope) {
+    return;
+  }
+
+  if (config.source.type !== "mic") {
+    const runtime = micRuntimeRef.current;
+    micRuntimeRef.current = null;
+    scope.setSignalProvider(null);
+    setMicError(null);
+    setMicStatus("idle");
+    runtime?.destroy().catch((error) => {
+      console.error("[oscilloscope] mic destroy failed", error);
+    });
     return;
   }
 
@@ -1730,23 +1847,31 @@ useEffect(() => {
         return;
       }
 
+      const previousRuntime = micRuntimeRef.current;
       micRuntimeRef.current = runtime;
-      scopeRef.current?.setSignalProvider(runtime.provider);
+      previousRuntime?.destroy().catch(() => {});
+      scope.setSignalProvider(runtime.provider);
       setMicStatus("ready");
     })
     .catch((error: unknown) => {
+      if (cancelled) {
+        return;
+      }
+
+      scope.setSignalProvider(null);
       setMicError(error instanceof Error ? error.message : "Unable to access microphone.");
       setMicStatus("error");
     });
 
   return () => {
     cancelled = true;
-    micRuntimeRef.current?.destroy().catch(() => {});
-    micRuntimeRef.current = null;
-    setMicStatus("idle");
   };
 }, [config.source.type]);
 ```
+
+Also extend `oscilloscope-client.test.tsx` to switch `oscillators → mic → oscillators` and assert the same scope instance survives while the mic cleanup path restores the internal provider via `scope.setSignalProvider(null)`.
+
+Also add a stale-rejection test that switches away from mic before `createMicProvider()` rejects and verifies the cancelled request does not overwrite the oscillator UI with `micStatus="error"`.
 
 - [ ] **Step 5: Run focused verification**
 
@@ -1817,7 +1942,7 @@ git commit -m "feat: ship browser oscilloscope v1"
 - Keep `track playback` out of this branch even if it feels close. The current player path is still media-element-first and should not be entangled with the oscilloscope V1 ship.
 - If the WebGPU pipeline is noisier than expected, keep the ping-pong history path and simplify only the composite math. Do not replace the renderer with Canvas2D.
 - If the mic effect in mono is underwhelming, ship it anyway with honest UX copy. Do not widen scope into decorrelation transforms in this branch.
-- If `requestAnimationFrame` plus texture resize on every tick is too expensive, move `renderer.resize(...)` behind a cached width/height check. Keep that optimization inside the renderer or runtime layer, not in React.
+- Keep `renderer.resize(...)` idempotent inside the renderer/runtime layer. It should compare the backing canvas size and only destroy/recreate the history textures when width or height actually changes, never on every animation frame.
 
 ## Success Criteria Recap
 
@@ -1828,7 +1953,7 @@ git commit -m "feat: ship browser oscilloscope v1"
 - `@kkb/audio` stays headless and reusable
 - no track-player graph work is pulled into the initial branch
 
-Plan complete and saved to `docs/superpowers/plans/2026-04-02-browser-oscilloscope-v1.md`. Two execution options:
+Plan complete and saved to `docs/plans/2026-04-02-browser-oscilloscope-v1.md`. Two execution options:
 
 **1. Subagent-Driven (recommended)** - I dispatch a fresh subagent per task, review between tasks, fast iteration
 
