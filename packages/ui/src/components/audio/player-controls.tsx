@@ -4,15 +4,10 @@ import { cn } from "@kkb/ui/lib/utils";
 import { Pause, Play, SkipBack, SkipForward, Square } from "lucide-react";
 
 type PlayerControlsProps = {
-  title: string;
-  subtitle?: string;
-  isPlaying: boolean;
   canSelectPrevious?: boolean;
   canSelectNext?: boolean;
   isPlayDisabled?: boolean;
   isPauseDisabled?: boolean;
-  currentTimeLabel: string;
-  durationLabel: string;
   rate: number;
   volume: number;
   className?: string;

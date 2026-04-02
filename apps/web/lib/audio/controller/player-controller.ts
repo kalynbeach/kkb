@@ -208,12 +208,12 @@ const createPlayerController = ({
     });
   };
 
-  const selectTrackById = async (trackId: string) => {
+  const waitForInFlightOperations = async () => {
     if (initPromise) {
       try {
         await initPromise;
       } catch {
-        // Allow explicit user selection to recover after a failed init attempt.
+        // Allow follow-up actions to recover after a failed init attempt.
       }
     }
 
@@ -221,9 +221,13 @@ const createPlayerController = ({
       try {
         await trackLoadPromise;
       } catch {
-        // Allow the newest explicit selection to recover after an earlier load failure.
+        // Allow follow-up actions to recover after an earlier load failure.
       }
     }
+  };
+
+  const selectTrackById = async (trackId: string) => {
+    await waitForInFlightOperations();
 
     const nextTrackLoadPromise = (async () => {
       ensureCatalogReady();
@@ -327,9 +331,14 @@ const createPlayerController = ({
     previous: () => selectAdjacentTrack(-1),
     next: () => selectAdjacentTrack(1),
     stop: async () => {
-      await player.pause();
-      await player.seek(0);
-      syncRuntimeSnapshot();
+      await waitForInFlightOperations();
+
+      try {
+        await player.pause();
+        await player.seek(0);
+      } finally {
+        syncRuntimeSnapshot();
+      }
     },
     play: () => player.play(),
     pause: () => player.pause(),

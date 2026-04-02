@@ -278,14 +278,10 @@ function PlayerShell({
 
         <div className="mx-1 mt-1 mb-1">
           <PlayerControls
-            title={title}
-            isPlaying={presenter.isPlaying}
             canSelectPrevious={canSelectPrevious}
             canSelectNext={canSelectNext}
             isPlayDisabled={presenter.isPlayDisabled}
             isPauseDisabled={presenter.isPauseDisabled}
-            currentTimeLabel={presenter.currentTimeLabel}
-            durationLabel={presenter.durationLabel}
             rate={rate}
             volume={volume}
             onPrevious={onPrevious}

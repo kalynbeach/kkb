@@ -152,13 +152,8 @@ export function PlayerControlsDemo() {
         </Badge>
       </div>
       <PlayerControls
-        title="Demo transport"
-        subtitle="Local controls state"
-        isPlaying={isPlaying}
         isPlayDisabled={presenter.isPlayDisabled}
         isPauseDisabled={presenter.isPauseDisabled}
-        currentTimeLabel={presenter.currentTimeLabel}
-        durationLabel={presenter.durationLabel}
         rate={rate}
         volume={volume}
         onPlay={() => setIsPlaying(true)}
