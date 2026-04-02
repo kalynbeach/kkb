@@ -68,12 +68,23 @@ function MountedPlayer({
         error={snapshot.runtime.error ?? snapshot.error}
         rate={snapshot.runtime.rate}
         volume={snapshot.runtime.volume}
+        canSelectPrevious={snapshot.canSelectPrevious}
+        canSelectNext={snapshot.canSelectNext}
         className="rounded-b-none border-b-0"
+        onPrevious={() => {
+          controller.previous().catch(logActionError("previous"));
+        }}
         onPlay={() => {
           controller.play().catch(logActionError("play"));
         }}
         onPause={() => {
           controller.pause().catch(logActionError("pause"));
+        }}
+        onStop={() => {
+          controller.stop().catch(logActionError("stop"));
+        }}
+        onNext={() => {
+          controller.next().catch(logActionError("next"));
         }}
         onSeek={(seconds) => {
           controller.seek(seconds).catch(logActionError("seek"));
@@ -116,6 +127,7 @@ function PlayerClient({
   const defaultTrackId = catalog.getDefaultTrackId();
   const defaultTrack = catalog.getTrack(defaultTrackId);
   const defaultAsset = defaultTrack ? selectTrackAsset(defaultTrack) : null;
+  const defaultTrackIndex = tracks.findIndex((track) => track.id === defaultTrackId);
 
   useEffect(() => {
     const nextPlayer = createPlayer();
@@ -157,9 +169,14 @@ function PlayerClient({
           error={null}
           rate={1}
           volume={1}
+          canSelectPrevious={defaultTrackIndex > 0}
+          canSelectNext={defaultTrackIndex >= 0 && defaultTrackIndex < tracks.length - 1}
           className="rounded-b-none border-b-0"
+          onPrevious={() => {}}
           onPlay={() => {}}
           onPause={() => {}}
+          onStop={() => {}}
+          onNext={() => {}}
           onSeek={() => {}}
           onSetRate={() => {}}
           onSetVolume={() => {}}

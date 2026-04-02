@@ -90,6 +90,63 @@ describe("PlayerShell", () => {
     expect(normalizedHtml).toContain("buf 30%");
   });
 
+  test("renders previous, stop, and next controls from transport state", () => {
+    const html = renderToString(
+      <PlayerShell
+        player={createPlayerStub()}
+        title="Test Tone"
+        subtitle="Local AAC fixture routed through the current media-element path."
+        status="ready"
+        duration={180}
+        sourceId="media-element"
+        error={null}
+        rate={1}
+        volume={1}
+        canSelectPrevious={false}
+        canSelectNext={true}
+        onPlay={() => {}}
+        onPause={() => {}}
+        onPrevious={() => {}}
+        onStop={() => {}}
+        onNext={() => {}}
+        onSeek={() => {}}
+        onSetRate={() => {}}
+        onSetVolume={() => {}}
+      />,
+    );
+    const normalizedHtml = html.replaceAll("<!-- -->", "");
+
+    expect(normalizedHtml).toContain('disabled="" aria-label="Previous"');
+    expect(normalizedHtml).not.toContain('disabled="" aria-label="Stop"');
+    expect(normalizedHtml).not.toContain('disabled="" aria-label="Next"');
+  });
+
+  test("does not render fake diagnostics when no real track metadata exists", () => {
+    const html = renderToString(
+      <PlayerShell
+        player={createPlayerStub()}
+        title="Test Tone"
+        subtitle="Local AAC fixture routed through the current media-element path."
+        status="playing"
+        duration={180}
+        sourceId="media-element"
+        error={null}
+        rate={1}
+        volume={1}
+        onPlay={() => {}}
+        onPause={() => {}}
+        onSeek={() => {}}
+        onSetRate={() => {}}
+        onSetVolume={() => {}}
+      />,
+    );
+    const normalizedHtml = html.replaceAll("<!-- -->", "");
+
+    expect(normalizedHtml).not.toContain("kbps");
+    expect(normalizedHtml).not.toContain("khz");
+    expect(normalizedHtml).not.toContain("stereo");
+  });
+
   test("clamps buffered progress display to 100 percent", () => {
     const html = renderToString(
       <PlayerShell

@@ -192,6 +192,65 @@ describe("createPlayerController", () => {
     });
   });
 
+  test("selects adjacent tracks with previous and next", async () => {
+    const catalog = createCatalogStub();
+    const { player, loadTrack } = createPlayerStub();
+    const controller = createPlayerController({ catalog, player });
+
+    await controller.init();
+    await controller.next();
+    expect(loadTrack).toHaveBeenLastCalledWith({
+      src: "/audio/test-tone-opus.webm",
+      mimeType: "audio/webm; codecs=opus",
+    });
+    expect(controller.getSnapshot()).toMatchObject({
+      selection: {
+        trackId: "test-tone-opus",
+      },
+    });
+
+    await controller.previous();
+    expect(loadTrack).toHaveBeenLastCalledWith({
+      src: "/audio/test-tone-aac.m4a",
+      mimeType: "audio/mp4; codecs=mp4a.40.2",
+    });
+    expect(controller.getSnapshot()).toMatchObject({
+      selection: {
+        trackId: "test-tone-aac",
+      },
+    });
+  });
+
+  test("reports previous and next availability from queue position", async () => {
+    const catalog = createCatalogStub();
+    const { player } = createPlayerStub();
+    const controller = createPlayerController({ catalog, player });
+
+    await controller.init();
+    expect(controller.getSnapshot()).toMatchObject({
+      canSelectPrevious: false,
+      canSelectNext: true,
+    });
+
+    await controller.next();
+    expect(controller.getSnapshot()).toMatchObject({
+      canSelectPrevious: true,
+      canSelectNext: false,
+    });
+  });
+
+  test("stop pauses playback and resets the timeline to zero", async () => {
+    const catalog = createCatalogStub();
+    const { player, pause, seek } = createPlayerStub();
+    const controller = createPlayerController({ catalog, player });
+
+    await controller.init();
+    await controller.stop();
+
+    expect(pause).toHaveBeenCalledTimes(1);
+    expect(seek).toHaveBeenCalledWith(0);
+  });
+
   test("marks restore as error when init fails", async () => {
     const catalog = createCatalogStub();
     const { player } = createPlayerStub();

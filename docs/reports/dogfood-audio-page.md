@@ -1,102 +1,73 @@
 # Dogfood Report: `/audio` Page
 
-**Date:** 2026-03-16
+**Date:** 2026-04-02
 **URL:** `http://localhost:3000/audio`
 **App:** `@kkb/web`
 
 ---
 
-## Bugs
+## Resolved In This Pass
 
-### 1. Previous / Next / Stop buttons permanently disabled
+### 1. Previous / Next / Stop transport now works
 
-**Files:** `packages/ui/src/components/audio/player-controls.tsx:60,80,84`
+**Files:** `apps/web/lib/audio/controller/player-controller.ts`, `apps/web/components/audio/player-client.tsx`, `apps/web/components/audio/player-shell.tsx`, `packages/ui/src/components/audio/player-controls.tsx`
 
-All three transport buttons are hardcoded `disabled` with no props or callbacks wired up:
+- `Previous` and `Next` now derive from queue position
+- `Stop` is wired through the controller and resets playback to `0`
+- Server-render coverage now checks disabled/enabled transport states directly
 
-```tsx
-<TransportButton disabled label="Previous">
-<TransportButton disabled label="Stop">
-<TransportButton disabled label="Next">
-```
+### 2. Initial waveform slider no longer renders `aria-valuemax="NaN"`
 
-- Previous/Next should enable based on track position in playlist (track 1 of 2 → Next enabled; track 2 of 2 → Previous enabled)
-- Stop has no `onStop` callback plumbed through the component tree
-- **Impact:** Confusing — users see controls that can never be activated
+**Files:** `packages/ui/src/components/audio/waveform.tsx`, `apps/web/lib/audio/catalog/static-track-catalog-data.ts`
 
-### 2. `aria-valuemax="NaN"` on Seek slider at initial render
+- Fixture tracks now provide stable `duration: 2`
+- `Waveform` now clamps invalid duration input to a safe zero-valued slider contract
+- Server-render coverage now checks that invalid durations render `aria-valuemax="0"` instead of `NaN`
 
-**File:** `packages/ui/src/components/audio/waveform.tsx:174`
+### 3. Fake diagnostics removed from the shell
 
-Before audio metadata loads, `duration` propagates as `NaN` through the chain:
+**File:** `apps/web/components/audio/player-shell.tsx`
 
-```
-snapshot.runtime.duration (NaN) → player-shell → waveform → aria-valuemax={Math.round(NaN)} = NaN
-```
-
-- Root cause: `TrackRecord.duration` is not specified in `static-track-catalog-data.ts`, and the audio engine reports `NaN` until the `<audio>` element loads metadata
-- After Play is clicked (triggering metadata load), the value corrects to `"2"`
-- **Impact:** Accessibility — screen readers see an invalid slider range on page load
-
-### 3. Track catalog missing `duration` field
-
-**File:** `apps/web/lib/audio/catalog/static-track-catalog-data.ts`
-
-`TrackRecord` type supports `duration?: number` but neither track entry specifies it. Contributes to the NaN issue above and the "0:00" duration display before playback.
-
-**Fix:** Add `duration: 2` to both track entries.
+- Removed hardcoded `128 kbps`
+- Removed hardcoded `44 khz`
+- Removed the status-derived `stereo` label
+- The shell now relies on real source, status, and buffered-state affordances only
 
 ---
 
-## UX Issues
+## Remaining Limitations
 
-### 4. KBPS / KHZ values are hardcoded
-
-**File:** `apps/web/components/audio/player-shell.tsx:217,224`
-
-Always shows "128 kbps" and "44 khz" regardless of actual codec/bitrate. The Opus track likely has different properties.
-
-### 5. Waveform is static / decorative
+### 1. Waveform is still static / decorative
 
 **File:** `packages/ui/src/components/audio/waveform.tsx` (`DEFAULT_BARS`)
 
 Same 32 hardcoded bars rendered for all tracks — not derived from actual audio data. By design (no `waveformUrl` in catalog data), but could be misleading.
 
-### 6. "stereo" indicator is status-based, not data-based
+### 2. Track diagnostics remain intentionally unavailable
 
-**File:** `apps/web/components/audio/player-shell.tsx:331-332`
-
-Shows "stereo" when `status === "playing"`, "—" otherwise. Doesn't detect actual channel count.
+- The player still does not detect real bitrate, sample rate, or channel count
+- This pass intentionally removed misleading placeholders instead of inventing approximate values
 
 ---
 
 ## What Works Well
 
 - Track switching updates title, subtitle (mime type), and status correctly
+- Queue-aware transport controls now reflect first/last track boundaries
+- Default server render now has stable `0:02` duration metadata from fixture data
 - Playlist selection highlighting with accessible `role="listbox"`
 - Retro/80s aesthetic is cohesive — gradients, monospace, blue glow effects
 - Mobile responsive — player fits 375px viewport with proper truncation
 - Status LED color coding (blue=normal, amber=loading, red=error)
 - Progress bar and buffering percentage update after metadata loads
+- Initial seek slider render is now accessibility-safe
 - Clean architecture — external store pattern with `useSyncExternalStore`, DI for testability
-
----
-
-## Screenshots
-
-Captured during testing (not committed):
-
-- `/tmp/audio-page-initial.png` — initial state
-- `/tmp/audio-playing.png` — after play attempt
-- `/tmp/audio-track2.png` — after switching to track 2
-- `/tmp/audio-mobile.png` — 375x812 mobile viewport
-- `/tmp/audio-focus.png` — keyboard focus state
 
 ---
 
 ## Notes
 
-- Audio playback could not be fully tested due to headless Chrome's autoplay policy blocking audio
-- The "PAUSED" status after clicking Play is expected behavior in headless environments
+- This refresh is based on the current verified render/test output after the 2026-04-02 audio UX follow-up changes
+- Browser-level playback QA is still useful later, but the core regressions in this report now have focused automated coverage
 - The player uses a multi-source audio engine: WebCodecs → Worklet → MediaElement → Fallback (HTMLAudioElement)
 - The active source is "media-element" as shown in the title bar

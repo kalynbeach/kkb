@@ -5,6 +5,7 @@ const STATIC_TRACK_CATALOG_DATA: TrackRecordInput[] = [
     id: "test-tone-aac",
     title: "Test Tone (AAC)",
     artist: "KKB",
+    duration: 2,
     assets: [
       {
         src: "/audio/test-tone-aac.m4a",
@@ -16,6 +17,7 @@ const STATIC_TRACK_CATALOG_DATA: TrackRecordInput[] = [
     id: "test-tone-opus",
     title: "Test Tone (Opus)",
     artist: "KKB",
+    duration: 2,
     assets: [
       {
         src: "/audio/test-tone-opus.webm",

@@ -7,6 +7,8 @@ type PlayerControlsProps = {
   title: string;
   subtitle?: string;
   isPlaying: boolean;
+  canSelectPrevious?: boolean;
+  canSelectNext?: boolean;
   isPlayDisabled?: boolean;
   isPauseDisabled?: boolean;
   currentTimeLabel: string;
@@ -14,8 +16,11 @@ type PlayerControlsProps = {
   rate: number;
   volume: number;
   className?: string;
+  onPrevious?: () => void;
   onPlay?: () => void;
   onPause?: () => void;
+  onStop?: () => void;
+  onNext?: () => void;
   onSetRate?: (rate: number) => void;
   onSetVolume?: (volume: number) => void;
 };
@@ -47,22 +52,30 @@ function TransportButton({
 }
 
 function PlayerControls({
+  canSelectPrevious = false,
+  canSelectNext = false,
   isPlayDisabled = false,
   isPauseDisabled = false,
   rate,
   volume,
   className,
+  onPrevious,
   onPlay,
   onPause,
+  onStop,
+  onNext,
   onSetRate,
   onSetVolume,
 }: PlayerControlsProps) {
   const controlsDisabled = isPlayDisabled && isPauseDisabled;
+  const isPreviousDisabled = controlsDisabled || !canSelectPrevious;
+  const isStopDisabled = controlsDisabled;
+  const isNextDisabled = controlsDisabled || !canSelectNext;
 
   return (
     <div className={cn("flex flex-col gap-2 py-1.5", className)}>
       <div className="flex items-center justify-center gap-[3px]">
-        <TransportButton disabled label="Previous">
+        <TransportButton disabled={isPreviousDisabled} onClick={onPrevious} label="Previous">
           <SkipBack className="size-[11px] fill-audio-control-icon-muted text-audio-control-icon-muted" />
         </TransportButton>
 
@@ -74,11 +87,11 @@ function PlayerControls({
           <Pause className="size-3 fill-audio-control-icon text-audio-control-icon" />
         </TransportButton>
 
-        <TransportButton disabled label="Stop">
+        <TransportButton disabled={isStopDisabled} onClick={onStop} label="Stop">
           <Square className="size-2.5 fill-audio-control-icon-muted text-audio-control-icon-muted" />
         </TransportButton>
 
-        <TransportButton disabled label="Next">
+        <TransportButton disabled={isNextDisabled} onClick={onNext} label="Next">
           <SkipForward className="size-[11px] fill-audio-control-icon-muted text-audio-control-icon-muted" />
         </TransportButton>
       </div>

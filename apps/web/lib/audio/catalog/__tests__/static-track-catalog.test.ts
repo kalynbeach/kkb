@@ -13,6 +13,7 @@ describe("createStaticTrackCatalog", () => {
     expect(catalog.getTrack("test-tone-aac")).toMatchObject({
       id: "test-tone-aac",
       title: "Test Tone (AAC)",
+      duration: 2,
       assets: [
         {
           src: "/audio/test-tone-aac.m4a",
@@ -20,10 +21,10 @@ describe("createStaticTrackCatalog", () => {
         },
       ],
     });
-    expect(catalog.getTrack("test-tone-aac")).not.toHaveProperty("duration");
     expect(catalog.getTrack("test-tone-opus")).toMatchObject({
       id: "test-tone-opus",
       title: "Test Tone (Opus)",
+      duration: 2,
       assets: [
         {
           src: "/audio/test-tone-opus.webm",
@@ -31,7 +32,6 @@ describe("createStaticTrackCatalog", () => {
         },
       ],
     });
-    expect(catalog.getTrack("test-tone-opus")).not.toHaveProperty("duration");
     expect(catalog.getTrack("missing-track")).toBeNull();
   });
 });
