@@ -121,8 +121,11 @@ function Waveform({
   playheadRef,
   bufferedRangesRef,
 }: WaveformProps) {
+  const safeDuration = Number.isFinite(duration) && duration > 0 ? duration : 0;
+  const safeCurrentTime =
+    safeDuration > 0 && Number.isFinite(currentTime) && currentTime >= 0 ? currentTime : 0;
   const progressPercent =
-    duration > 0 ? Math.min(100, Math.max(0, (currentTime / duration) * 100)) : 0;
+    safeDuration > 0 ? Math.min(100, Math.max(0, (safeCurrentTime / safeDuration) * 100)) : 0;
   const hasLiveBufferedRangesLayer = bufferedRangesRef !== undefined;
 
   const handleSeek = (event: React.PointerEvent<HTMLDivElement>) => {
@@ -170,9 +173,9 @@ function Waveform({
       ref={rootRef}
       role="slider"
       tabIndex={0}
-      aria-valuenow={Math.round(currentTime)}
+      aria-valuenow={Math.round(safeCurrentTime)}
       aria-valuemin={0}
-      aria-valuemax={Math.round(duration)}
+      aria-valuemax={Math.round(safeDuration)}
       aria-label="Seek"
       onPointerDown={handleSeek}
       onKeyDown={handleKeyDown}
@@ -186,8 +189,9 @@ function Waveform({
         {hasLiveBufferedRangesLayer
           ? null
           : bufferedRanges.map((range) => {
-              const left = duration > 0 ? (range.start / duration) * 100 : 0;
-              const width = duration > 0 ? ((range.end - range.start) / duration) * 100 : 0;
+              const left = safeDuration > 0 ? (range.start / safeDuration) * 100 : 0;
+              const width =
+                safeDuration > 0 ? ((range.end - range.start) / safeDuration) * 100 : 0;
 
               return (
                 <div

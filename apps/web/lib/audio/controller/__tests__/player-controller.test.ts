@@ -192,6 +192,65 @@ describe("createPlayerController", () => {
     });
   });
 
+  test("selects adjacent tracks with previous and next", async () => {
+    const catalog = createCatalogStub();
+    const { player, loadTrack } = createPlayerStub();
+    const controller = createPlayerController({ catalog, player });
+
+    await controller.init();
+    await controller.next();
+    expect(loadTrack).toHaveBeenLastCalledWith({
+      src: "/audio/test-tone-opus.webm",
+      mimeType: "audio/webm; codecs=opus",
+    });
+    expect(controller.getSnapshot()).toMatchObject({
+      selection: {
+        trackId: "test-tone-opus",
+      },
+    });
+
+    await controller.previous();
+    expect(loadTrack).toHaveBeenLastCalledWith({
+      src: "/audio/test-tone-aac.m4a",
+      mimeType: "audio/mp4; codecs=mp4a.40.2",
+    });
+    expect(controller.getSnapshot()).toMatchObject({
+      selection: {
+        trackId: "test-tone-aac",
+      },
+    });
+  });
+
+  test("reports previous and next availability from queue position", async () => {
+    const catalog = createCatalogStub();
+    const { player } = createPlayerStub();
+    const controller = createPlayerController({ catalog, player });
+
+    await controller.init();
+    expect(controller.getSnapshot()).toMatchObject({
+      canSelectPrevious: false,
+      canSelectNext: true,
+    });
+
+    await controller.next();
+    expect(controller.getSnapshot()).toMatchObject({
+      canSelectPrevious: true,
+      canSelectNext: false,
+    });
+  });
+
+  test("stop pauses playback and resets the timeline to zero", async () => {
+    const catalog = createCatalogStub();
+    const { player, pause, seek } = createPlayerStub();
+    const controller = createPlayerController({ catalog, player });
+
+    await controller.init();
+    await controller.stop();
+
+    expect(pause).toHaveBeenCalledTimes(1);
+    expect(seek).toHaveBeenCalledWith(0);
+  });
+
   test("marks restore as error when init fails", async () => {
     const catalog = createCatalogStub();
     const { player } = createPlayerStub();
@@ -348,6 +407,45 @@ describe("createPlayerController", () => {
     });
   });
 
+  test("computes next after init resolves when the default track is not first in queue", async () => {
+    const catalog = createCatalogStub({
+      tracks: [AAC_TRACK, OPUS_TRACK, ALT_TRACK],
+      defaultTrackId: OPUS_TRACK.id,
+    });
+    const initDeferred = createDeferred<void>();
+    const { player, loadTrack } = createPlayerStub({
+      loadTrackImpl: (input) =>
+        input.src === OPUS_TRACK.assets[0]?.src ? initDeferred.promise : Promise.resolve(),
+    });
+    const controller = createPlayerController({ catalog, player });
+
+    const initPromise = controller.init();
+    await Promise.resolve();
+
+    const nextPromise = controller.next();
+    await Promise.resolve();
+
+    expect(loadTrack).toHaveBeenCalledTimes(1);
+
+    initDeferred.resolve();
+    await initPromise;
+    await nextPromise;
+
+    expect(loadTrack).toHaveBeenNthCalledWith(1, {
+      src: "/audio/test-tone-opus.webm",
+      mimeType: "audio/webm; codecs=opus",
+    });
+    expect(loadTrack).toHaveBeenNthCalledWith(2, {
+      src: "/audio/test-tone-alt.m4a",
+      mimeType: "audio/mp4; codecs=mp4a.40.2",
+    });
+    expect(controller.getSnapshot()).toMatchObject({
+      selection: {
+        trackId: "test-tone-alt",
+      },
+    });
+  });
+
   test("waits for an in-flight selection before loading a newer selection", async () => {
     const catalog = createCatalogStub({
       tracks: [AAC_TRACK, OPUS_TRACK, ALT_TRACK],
@@ -410,6 +508,34 @@ describe("createPlayerController", () => {
       },
       error: null,
     });
+  });
+
+  test("waits for in-flight track loading before stopping", async () => {
+    const catalog = createCatalogStub();
+    const selectDeferred = createDeferred<void>();
+    const { player, pause, seek } = createPlayerStub({
+      loadTrackImpl: (input) =>
+        input.src === OPUS_TRACK.assets[0]?.src ? selectDeferred.promise : Promise.resolve(),
+    });
+    const controller = createPlayerController({ catalog, player });
+
+    await controller.init();
+
+    const selectPromise = controller.selectTrack("test-tone-opus");
+    await Promise.resolve();
+
+    const stopPromise = controller.stop();
+    await Promise.resolve();
+
+    expect(pause).toHaveBeenCalledTimes(0);
+    expect(seek).toHaveBeenCalledTimes(0);
+
+    selectDeferred.resolve();
+    await selectPromise;
+    await stopPromise;
+
+    expect(pause).toHaveBeenCalledTimes(1);
+    expect(seek).toHaveBeenCalledWith(0);
   });
 
   test("ignores stale init completion after destroy", async () => {

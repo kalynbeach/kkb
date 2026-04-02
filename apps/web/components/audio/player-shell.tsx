@@ -22,8 +22,13 @@ type PlayerShellProps = {
   error: string | null;
   rate: number;
   volume: number;
+  canSelectPrevious?: boolean;
+  canSelectNext?: boolean;
+  onPrevious?: () => void;
   onPlay: () => void;
   onPause: () => void;
+  onStop?: () => void;
+  onNext?: () => void;
   onSeek: (seconds: number) => void;
   onSetRate: (rate: number) => void;
   onSetVolume: (volume: number) => void;
@@ -92,8 +97,13 @@ function PlayerShell({
   error,
   rate,
   volume,
+  canSelectPrevious = false,
+  canSelectNext = false,
+  onPrevious,
   onPlay,
   onPause,
+  onStop,
+  onNext,
   onSeek,
   onSetRate,
   onSetVolume,
@@ -221,16 +231,7 @@ function PlayerShell({
             >
               {presenter.currentTimeLabel}
             </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-1.5">
-                {/* Decorative fixture metadata until real track diagnostics exist. */}
-                <span className="font-mono text-[9px] uppercase text-audio-accent-faint">kbps</span>
-                <span className="font-mono text-xs font-bold text-audio-accent-muted">128</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-mono text-[9px] uppercase text-audio-accent-faint">khz</span>
-                <span className="font-mono text-xs font-bold text-audio-accent-muted">44</span>
-              </div>
+            <div className="flex items-center">
               <StatusLed status={status} />
             </div>
           </div>
@@ -277,16 +278,17 @@ function PlayerShell({
 
         <div className="mx-1 mt-1 mb-1">
           <PlayerControls
-            title={title}
-            isPlaying={presenter.isPlaying}
+            canSelectPrevious={canSelectPrevious}
+            canSelectNext={canSelectNext}
             isPlayDisabled={presenter.isPlayDisabled}
             isPauseDisabled={presenter.isPauseDisabled}
-            currentTimeLabel={presenter.currentTimeLabel}
-            durationLabel={presenter.durationLabel}
             rate={rate}
             volume={volume}
+            onPrevious={onPrevious}
             onPlay={onPlay}
             onPause={onPause}
+            onStop={onStop}
+            onNext={onNext}
             onSetRate={onSetRate}
             onSetVolume={onSetVolume}
           />
@@ -331,7 +333,7 @@ function PlayerShell({
 function StatusLed({ status }: { status: PlayerShellProps["status"] }) {
   const isActive = status === "playing";
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center">
       <div
         className={cn(
           "size-1.5 rounded-full transition-colors",
@@ -340,9 +342,6 @@ function StatusLed({ status }: { status: PlayerShellProps["status"] }) {
             : "bg-audio-accent-soft",
         )}
       />
-      <span className="font-mono text-[9px] uppercase text-audio-accent-faint">
-        {status === "playing" ? "stereo" : "—"}
-      </span>
     </div>
   );
 }

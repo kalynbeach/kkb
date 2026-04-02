@@ -20,5 +20,6 @@ describe("PlayerClient", () => {
     expect(html).toContain("Playlist");
     expect(html).toContain("Rate");
     expect(html).toContain("Volume");
+    expect(html).toContain("0:02");
   });
 });

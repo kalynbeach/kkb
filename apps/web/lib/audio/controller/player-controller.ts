@@ -19,6 +19,8 @@ type PlayerControllerSnapshot = Readonly<{
   restoreStatus: RestoreStatus;
   selection: PlayerSelection | null;
   queueTrackIds: readonly string[];
+  canSelectPrevious: boolean;
+  canSelectNext: boolean;
   runtime: PlayerControllerRuntimeSnapshot;
   error: string | null;
 }>;
@@ -28,6 +30,9 @@ type PlayerController = {
   subscribe(listener: () => void): () => void;
   init(): Promise<void>;
   selectTrack(trackId: string): Promise<void>;
+  previous(): Promise<void>;
+  next(): Promise<void>;
+  stop(): Promise<void>;
   play(): Promise<void>;
   pause(): Promise<void>;
   seek(seconds: number): Promise<void>;
@@ -54,23 +59,40 @@ type CreatePlayerControllerOptions = {
   player: PlayerControllerPlayer;
 };
 
-const getInitialSnapshot = (
-  player: PlayerControllerPlayer,
-  catalogStatus: CatalogStatus = "idle",
-): PlayerControllerSnapshot => ({
-  catalogStatus,
-  restoreStatus: "idle",
-  selection: null,
-  queueTrackIds: [],
-  runtime: player.getSnapshot(),
-  error: null,
-});
-
 const createPlayerController = ({
   catalog,
   player,
 }: CreatePlayerControllerOptions): PlayerController => {
-  let snapshot = getInitialSnapshot(player);
+  const getQueueTrackIds = () => catalog.listTracks().map((track) => track.id);
+
+  const getTransportFlags = (
+    queueTrackIds: readonly string[],
+    selection: PlayerSelection | null,
+  ) => {
+    const activeTrackId = selection?.trackId ?? queueTrackIds[0] ?? null;
+    const activeIndex = activeTrackId ? queueTrackIds.indexOf(activeTrackId) : -1;
+
+    return {
+      canSelectPrevious: activeIndex > 0,
+      canSelectNext: activeIndex >= 0 && activeIndex < queueTrackIds.length - 1,
+    };
+  };
+
+  const createSnapshot = (
+    base: Omit<PlayerControllerSnapshot, "canSelectPrevious" | "canSelectNext">,
+  ): PlayerControllerSnapshot => ({
+    ...base,
+    ...getTransportFlags(base.queueTrackIds, base.selection),
+  });
+
+  let snapshot = createSnapshot({
+    catalogStatus: "idle",
+    restoreStatus: "idle",
+    selection: null,
+    queueTrackIds: getQueueTrackIds(),
+    runtime: player.getSnapshot(),
+    error: null,
+  });
   // initPromise de-dupes concurrent boot, while initialized keeps later calls idempotent.
   let initPromise: Promise<void> | null = null;
   let trackLoadPromise: Promise<void> | null = null;
@@ -90,11 +112,16 @@ const createPlayerController = ({
       return;
     }
 
-    snapshot = {
+    const nextSelection = "selection" in patch ? (patch.selection ?? null) : snapshot.selection;
+    const nextQueueTrackIds = patch.queueTrackIds ?? snapshot.queueTrackIds;
+
+    snapshot = createSnapshot({
       ...snapshot,
       ...patch,
+      selection: nextSelection,
+      queueTrackIds: nextQueueTrackIds,
       runtime: patch.runtime ?? snapshot.runtime,
-    };
+    });
     emit();
   };
 
@@ -159,6 +186,7 @@ const createPlayerController = ({
 
     setSnapshot({
       catalogStatus: "loading",
+      queueTrackIds: getQueueTrackIds(),
       error: null,
     });
 
@@ -175,8 +203,79 @@ const createPlayerController = ({
 
     setSnapshot({
       catalogStatus: "ready",
+      queueTrackIds: getQueueTrackIds(),
       restoreStatus: initialized ? snapshot.restoreStatus : "restoring",
     });
+  };
+
+  const waitForInFlightOperations = async () => {
+    if (initPromise) {
+      try {
+        await initPromise;
+      } catch {
+        // Allow follow-up actions to recover after a failed init attempt.
+      }
+    }
+
+    if (trackLoadPromise) {
+      try {
+        await trackLoadPromise;
+      } catch {
+        // Allow follow-up actions to recover after an earlier load failure.
+      }
+    }
+  };
+
+  const selectTrackById = async (trackId: string) => {
+    await waitForInFlightOperations();
+
+    const nextTrackLoadPromise = (async () => {
+      ensureCatalogReady();
+      const track = catalog.getTrack(trackId);
+
+      if (!track) {
+        setSnapshot({
+          error: `Track "${trackId}" is missing from the catalog`,
+        });
+        throw new Error(`Track "${trackId}" is missing from the catalog`);
+      }
+
+      const token = lifecycleToken;
+      await loadTrack(track, token);
+      if (isStale(token)) {
+        return;
+      }
+
+      if (!initialized) {
+        initialized = true;
+        setSnapshot({ restoreStatus: "complete" });
+      }
+    })();
+
+    trackLoadPromise = nextTrackLoadPromise;
+
+    try {
+      await nextTrackLoadPromise;
+    } finally {
+      if (trackLoadPromise === nextTrackLoadPromise) {
+        trackLoadPromise = null;
+      }
+    }
+  };
+
+  const selectAdjacentTrack = async (offset: -1 | 1) => {
+    ensureCatalogReady();
+
+    const queueTrackIds = snapshot.queueTrackIds;
+    const activeTrackId = snapshot.selection?.trackId ?? queueTrackIds[0] ?? null;
+    const activeIndex = activeTrackId ? queueTrackIds.indexOf(activeTrackId) : -1;
+    const nextTrackId = activeIndex >= 0 ? queueTrackIds[activeIndex + offset] : null;
+
+    if (!nextTrackId) {
+      return;
+    }
+
+    await selectTrackById(nextTrackId);
   };
 
   return {
@@ -228,54 +327,17 @@ const createPlayerController = ({
         initPromise = null;
       }
     },
-    selectTrack: async (trackId) => {
-      if (initPromise) {
-        try {
-          await initPromise;
-        } catch {
-          // Allow explicit user selection to recover after a failed init attempt.
-        }
-      }
-
-      if (trackLoadPromise) {
-        try {
-          await trackLoadPromise;
-        } catch {
-          // Allow the newest explicit selection to recover after an earlier load failure.
-        }
-      }
-
-      const nextTrackLoadPromise = (async () => {
-        ensureCatalogReady();
-        const track = catalog.getTrack(trackId);
-
-        if (!track) {
-          setSnapshot({
-            error: `Track "${trackId}" is missing from the catalog`,
-          });
-          throw new Error(`Track "${trackId}" is missing from the catalog`);
-        }
-
-        const token = lifecycleToken;
-        await loadTrack(track, token);
-        if (isStale(token)) {
-          return;
-        }
-
-        if (!initialized) {
-          initialized = true;
-          setSnapshot({ restoreStatus: "complete" });
-        }
-      })();
-
-      trackLoadPromise = nextTrackLoadPromise;
+    selectTrack: (trackId) => selectTrackById(trackId),
+    previous: () => selectAdjacentTrack(-1),
+    next: () => selectAdjacentTrack(1),
+    stop: async () => {
+      await waitForInFlightOperations();
 
       try {
-        await nextTrackLoadPromise;
+        await player.pause();
+        await player.seek(0);
       } finally {
-        if (trackLoadPromise === nextTrackLoadPromise) {
-          trackLoadPromise = null;
-        }
+        syncRuntimeSnapshot();
       }
     },
     play: () => player.play(),

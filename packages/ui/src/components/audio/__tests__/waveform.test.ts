@@ -19,6 +19,18 @@ describe("Waveform keyboard seeking", () => {
     expect(html).not.toContain("width:30%");
   });
 
+  test("renders a safe zero-valued slider contract when duration is invalid", () => {
+    const html = renderToString(
+      createElement(Waveform, {
+        duration: Number.NaN,
+        currentTime: 12,
+      }),
+    ).replaceAll("<!-- -->", "");
+
+    expect(html).toContain('aria-valuemax="0"');
+    expect(html).not.toContain('aria-valuemax="NaN"');
+  });
+
   test("seeks backward five seconds on ArrowLeft", () => {
     expect(
       getNextSeekTimeForKey({
