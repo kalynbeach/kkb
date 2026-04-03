@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { Window } from "happy-dom";
 import { act } from "react";
-import { renderToString } from "react-dom/server";
 import { createRoot, type Root } from "react-dom/client";
+import { renderToString } from "react-dom/server";
 
 import { OscilloscopeClient } from "../oscilloscope-client";
 
@@ -199,14 +199,32 @@ describe("OscilloscopeClient", () => {
       updateConfig,
     };
     const createScope = mock(() => scope);
+    const createMicProvider = mock(async () => ({
+      destroy: async () => {},
+      provider: {
+        channelCount: 1,
+        fftSize: 8,
+        frequencyBinCount: 4,
+        sampleRate: 48_000,
+        smoothing: 0,
+        getFrequencyData: () => new Float32Array(4),
+        getSamples: () => new Float32Array(8),
+      },
+    }));
 
-    renderIntoDom(environment, <OscilloscopeClient createScope={createScope} />);
+    await renderIntoDomAsync(
+      environment,
+      <OscilloscopeClient createMicProvider={createMicProvider} createScope={createScope} />,
+    );
 
-    const inputs = Array.from(environment.document.querySelectorAll("input[type='number']"));
-    const aFrequencyInput = inputs[0] as HTMLInputElement;
+    const buttons = Array.from(environment.document.querySelectorAll("button"));
+    const micButton = buttons.find((button) => button.textContent?.includes("Mic")) as HTMLButtonElement;
 
-    dispatchInput(aFrequencyInput, environment.window, "330");
-    await Promise.resolve();
+    dispatchClick(micButton, environment.window);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
 
     expect(createScope).toHaveBeenCalledTimes(1);
     expect(updateConfig).toHaveBeenCalled();
@@ -234,7 +252,15 @@ describe("OscilloscopeClient", () => {
 
   test("reuses the same scope while mic mode attaches and detaches a host provider", async () => {
     const environment = domEnvironment as DomEnvironment;
-    const provider = { channelCount: 1, fftSize: 8, frequencyBinCount: 4, sampleRate: 48_000, smoothing: 0, getFrequencyData: () => new Float32Array(4), getSamples: () => new Float32Array(8) };
+    const provider = {
+      channelCount: 1,
+      fftSize: 8,
+      frequencyBinCount: 4,
+      sampleRate: 48_000,
+      smoothing: 0,
+      getFrequencyData: () => new Float32Array(4),
+      getSamples: () => new Float32Array(8),
+    };
     const scope = {
       destroy: mock(() => {}),
       getState: () => ({ config: null, provider: null, running: true }),
@@ -249,15 +275,16 @@ describe("OscilloscopeClient", () => {
 
     await renderIntoDomAsync(
       environment,
-      <OscilloscopeClient
-        createMicProvider={createMicProvider}
-        createScope={createScope}
-      />,
+      <OscilloscopeClient createMicProvider={createMicProvider} createScope={createScope} />,
     );
 
     const buttons = Array.from(environment.document.querySelectorAll("button"));
-    const micButton = buttons.find((button) => button.textContent?.includes("Mic")) as HTMLButtonElement;
-    const oscillatorsButton = buttons.find((button) => button.textContent?.includes("Oscillators")) as HTMLButtonElement;
+    const micButton = buttons.find((button) =>
+      button.textContent?.includes("Mic"),
+    ) as HTMLButtonElement;
+    const oscillatorsButton = buttons.find((button) =>
+      button.textContent?.includes("Oscillators"),
+    ) as HTMLButtonElement;
 
     dispatchClick(micButton, environment.window);
     await act(async () => {
@@ -297,15 +324,16 @@ describe("OscilloscopeClient", () => {
 
     await renderIntoDomAsync(
       environment,
-      <OscilloscopeClient
-        createMicProvider={createMicProvider}
-        createScope={createScope}
-      />,
+      <OscilloscopeClient createMicProvider={createMicProvider} createScope={createScope} />,
     );
 
     const buttons = Array.from(environment.document.querySelectorAll("button"));
-    const micButton = buttons.find((button) => button.textContent?.includes("Mic")) as HTMLButtonElement;
-    const oscillatorsButton = buttons.find((button) => button.textContent?.includes("Oscillators")) as HTMLButtonElement;
+    const micButton = buttons.find((button) =>
+      button.textContent?.includes("Mic"),
+    ) as HTMLButtonElement;
+    const oscillatorsButton = buttons.find((button) =>
+      button.textContent?.includes("Oscillators"),
+    ) as HTMLButtonElement;
 
     dispatchClick(micButton, environment.window);
     dispatchClick(oscillatorsButton, environment.window);

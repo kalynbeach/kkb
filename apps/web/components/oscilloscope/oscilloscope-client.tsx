@@ -1,12 +1,9 @@
 "use client";
 
-import {
-  createOscilloscope,
-  getOscilloscopeSupport,
-  OSCILLOSCOPE_PRESETS,
-  type OscilloscopeConfig,
-  type OscilloscopeSupport,
-} from "@kkb/audio/oscilloscope";
+import { OSCILLOSCOPE_PRESETS } from "@kkb/audio/oscilloscope/presets";
+import { createOscilloscope } from "@kkb/audio/oscilloscope/runtime";
+import { getOscilloscopeSupport } from "@kkb/audio/oscilloscope/support";
+import type { OscilloscopeConfig, OscilloscopeSupport } from "@kkb/audio/oscilloscope/types";
 import { useEffect, useRef, useState } from "react";
 
 import { createMicProvider } from "@/lib/oscilloscope/create-mic-provider";
@@ -34,9 +31,20 @@ const mergeConfig = (
   },
 });
 
-const defaultPreset = OSCILLOSCOPE_PRESETS[0]!;
-const getInitialSupport = (): OscilloscopeSupport =>
-  typeof navigator === "undefined" ? { reason: null, supported: true } : getOscilloscopeSupport();
+const getDefaultPreset = () => {
+  const preset = OSCILLOSCOPE_PRESETS[0];
+  if (!preset) {
+    throw new Error("At least one oscilloscope preset is required.");
+  }
+
+  return preset;
+};
+
+const defaultPreset = getDefaultPreset();
+const initialSupport: OscilloscopeSupport = {
+  reason: "Checking WebGPU support...",
+  supported: false,
+};
 
 export function OscilloscopeClient({
   createMicProvider: createMicProviderOverride = createMicProvider,
@@ -45,7 +53,7 @@ export function OscilloscopeClient({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const micRuntimeRef = useRef<null | { destroy(): Promise<void> }>(null);
   const scopeRef = useRef<ReturnType<typeof createOscilloscope> | null>(null);
-  const [support, setSupport] = useState<OscilloscopeSupport>(getInitialSupport);
+  const [support, setSupport] = useState<OscilloscopeSupport>(initialSupport);
   const [config, setConfig] = useState<OscilloscopeConfig>(defaultPreset.config);
   const [micError, setMicError] = useState<string | null>(null);
   const [micStatus, setMicStatus] = useState<"idle" | "requesting" | "ready" | "error">("idle");

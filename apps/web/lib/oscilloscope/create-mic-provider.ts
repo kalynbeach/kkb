@@ -33,7 +33,9 @@ export const createMicProvider = async ({
       destroy: async () => {
         source.disconnect();
         left.disconnect();
-        stream.getTracks().forEach((track) => track.stop());
+        stream.getTracks().forEach((track) => {
+          track.stop();
+        });
         await audioContext.close();
       },
       provider: createAnalyserSignalProvider({
@@ -58,7 +60,9 @@ export const createMicProvider = async ({
       splitter.disconnect();
       left.disconnect();
       right.disconnect();
-      stream.getTracks().forEach((track) => track.stop());
+      stream.getTracks().forEach((track) => {
+        track.stop();
+      });
       await audioContext.close();
     },
     provider: createAnalyserSignalProvider({

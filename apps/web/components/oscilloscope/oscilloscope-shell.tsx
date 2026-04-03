@@ -1,4 +1,4 @@
-import type { OscilloscopeConfig, OscilloscopeSupport } from "@kkb/audio/oscilloscope";
+import type { OscilloscopeConfig, OscilloscopeSupport } from "@kkb/audio/oscilloscope/types";
 import type { RefObject } from "react";
 
 import { OscilloscopeControls } from "./oscilloscope-controls";

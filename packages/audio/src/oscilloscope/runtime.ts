@@ -6,11 +6,7 @@ import {
   type OscillatorSignalProvider,
 } from "./signal/oscillator-source";
 import type { SignalProvider } from "./signal/signal-provider";
-import type {
-  OscilloscopeConfig,
-  OscilloscopeConfigUpdate,
-  OscilloscopeController,
-} from "./types";
+import type { OscilloscopeConfig, OscilloscopeConfigUpdate, OscilloscopeController } from "./types";
 
 type RuntimeOptions = {
   cancelFrame?: (handle: number) => void;
@@ -46,8 +42,7 @@ export const createOscilloscope = (
   const cancelFrame = options.cancelFrame ?? cancelAnimationFrame;
   const getDevicePixelRatio =
     options.getDevicePixelRatio ??
-    (() =>
-      typeof window === "undefined" ? 1 : Math.max(1, window.devicePixelRatio || 1));
+    (() => (typeof window === "undefined" ? 1 : Math.max(1, window.devicePixelRatio || 1)));
   const now = options.now ?? (() => performance.now() / 1000);
 
   let config = initialConfig;
@@ -68,15 +63,20 @@ export const createOscilloscope = (
       return;
     }
 
-    renderer.resize(canvas.clientWidth, canvas.clientHeight, getDevicePixelRatio());
-    const geometry = xyMode.generateFrame({
-      time: now(),
-      signals: activeProvider,
-      params: { gain: 1, sampleCount: Math.max(256, config.phosphor.trailLength * 8) },
-      viewport: { height: canvas.height, width: canvas.width },
-    });
-    renderer.drawFrame(geometry, config);
-    frameHandle = requestFrame(tick);
+    try {
+      renderer.resize(canvas.clientWidth, canvas.clientHeight, getDevicePixelRatio());
+      const geometry = xyMode.generateFrame({
+        time: now(),
+        signals: activeProvider,
+        params: { gain: 1, sampleCount: Math.max(256, config.phosphor.trailLength * 8) },
+        viewport: { height: canvas.height, width: canvas.width },
+      });
+      renderer.drawFrame(geometry, config);
+      frameHandle = requestFrame(tick);
+    } catch (error) {
+      running = false;
+      console.error("[oscilloscope] render tick failed", error);
+    }
   };
 
   return {

@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
-
-import type { SignalProvider } from "../signal/signal-provider";
 import { createOscilloscope } from "../runtime";
+import type { SignalProvider } from "../signal/signal-provider";
 
 const provider: SignalProvider = {
   channelCount: 2,
@@ -16,7 +15,12 @@ const provider: SignalProvider = {
 describe("createOscilloscope", () => {
   test("starts once, attaches providers, and tears down the renderer", async () => {
     const drawCalls: number[] = [];
-    const canvas = { clientHeight: 320, clientWidth: 320, height: 320, width: 320 } as HTMLCanvasElement;
+    const canvas = {
+      clientHeight: 320,
+      clientWidth: 320,
+      height: 320,
+      width: 320,
+    } as HTMLCanvasElement;
 
     const scope = createOscilloscope(
       canvas,

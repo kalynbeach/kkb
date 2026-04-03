@@ -1,4 +1,5 @@
-import { OSCILLOSCOPE_PRESETS, type OscilloscopeConfig } from "@kkb/audio/oscilloscope";
+import { OSCILLOSCOPE_PRESETS } from "@kkb/audio/oscilloscope/presets";
+import type { OscilloscopeConfig } from "@kkb/audio/oscilloscope/types";
 
 type OscilloscopeControlsProps = {
   config: OscilloscopeConfig;
@@ -19,11 +20,15 @@ export function OscilloscopeControls({
     <aside className="rounded-3xl border border-emerald-500/20 bg-black/40 p-5 text-emerald-50">
       <div className="space-y-5">
         <div>
-          <label className="mb-2 block font-mono text-xs uppercase tracking-[0.2em] text-emerald-300/80">
+          <label
+            className="mb-2 block font-mono text-xs uppercase tracking-[0.2em] text-emerald-300/80"
+            htmlFor="oscilloscope-preset"
+          >
             Preset
           </label>
           <select
             className="w-full rounded-xl border border-emerald-500/20 bg-[#071009] px-3 py-2 text-sm"
+            id="oscilloscope-preset"
             onChange={(event) => onPresetChange(event.target.value)}
             value={selectedPresetId}
           >
@@ -36,9 +41,9 @@ export function OscilloscopeControls({
         </div>
 
         <div>
-          <label className="mb-2 block font-mono text-xs uppercase tracking-[0.2em] text-emerald-300/80">
+          <p className="mb-2 block font-mono text-xs uppercase tracking-[0.2em] text-emerald-300/80">
             Source
-          </label>
+          </p>
           <div className="grid grid-cols-2 gap-2">
             <button
               className="rounded-xl border border-emerald-500/20 px-3 py-2 text-sm"

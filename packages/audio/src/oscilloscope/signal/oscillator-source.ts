@@ -25,7 +25,6 @@ const sampleWave = (waveform: OscillatorSourceConfig["a"]["waveform"], phase: nu
       return wrapped * 2 - 1;
     case "triangle":
       return 1 - 4 * Math.abs(wrapped - 0.5);
-    case "sine":
     default:
       return Math.sin(wrapped * Math.PI * 2);
   }
@@ -54,7 +53,7 @@ export const createOscillatorSignalProvider = (
   const buildSamples = (oscillator: OscillatorSourceConfig["a"]) => {
     const samples = new Float32Array(fftSize);
     const now = clock();
-    const detuneMultiplier = Math.pow(2, oscillator.detuneCents / 1200);
+    const detuneMultiplier = 2 ** (oscillator.detuneCents / 1200);
     const frequency = oscillator.frequency * detuneMultiplier;
 
     for (let index = 0; index < fftSize; index += 1) {

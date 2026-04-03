@@ -12,6 +12,6 @@ fn vs(@location(0) point: vec2f) -> VertexOut {
 
 @fragment
 fn fs() -> @location(0) vec4f {
-  return vec4f(0.45, 1.0, 0.62, 0.9);
+  return vec4f(0.18, 1.0, 0.42, 0.08);
 }
 `;
