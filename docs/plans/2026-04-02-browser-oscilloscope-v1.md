@@ -26,19 +26,19 @@ This plan is partially implemented on `feature/oscilloscope-v1`.
 ### Current branch deviations from the original plan
 - the `@kkb/audio/oscilloscope` barrel entrypoint and `packages/audio/src/oscilloscope/index.ts` were intentionally removed; consumers now use direct subpath imports
 - the original ping-pong persistence/composite renderer path proved unstable in-browser; the current renderer direction is now a simpler single-history fade/composite pipeline rather than the original ping-pong design
-- automated browser verification via `agent-browser` is currently limited: in this headless environment the `/oscilloscope` route still remains stuck on the pre-hydration `Checking WebGPU support...` state even after lazy-loading the runtime and hardening startup failure handling, even though other interactive routes hydrate, so final browser-level smoke verification is still open
+- `agent-browser` verification is now working again when exercised against `http://localhost:3000/oscilloscope` after the dev-server restart; the route hydrates, mounts the `<canvas>`, and runs the WebGPU renderer in fresh sessions
 
 ### Verification status
 - `bun run test -- --filter=@kkb/audio --filter=@kkb/web`: passing
 - `bun run check-types -- --filter=@kkb/audio --filter=@kkb/web`: passing
 - `bun run format-and-lint`: passing with one existing non-blocking warning in `packages/ui/src/components/sidebar.tsx`
-- `agent-browser` review: `/oscilloscope` loads, but this environment does not yet hydrate the route far enough to validate the live WebGPU renderer end-to-end
+- `agent-browser` review on `http://localhost:3000/oscilloscope`: passing for oscillator-mode smoke coverage; the route hydrates, mounts the canvas, and the renderer produces frame-to-frame pixel diffs in screenshots
+- `agent-browser` mic-mode review: browser media permission is denied in this headless environment, but the UI surfaces `Permission denied` and cleanly recovers when switching back to oscillators
 
 ### Remaining work for the next execution slice
-- validate the new single-history phosphor renderer in a browser session that fully hydrates `/oscilloscope`
 - tune fade, trace intensity, and glow weights against live browser output now that the simpler persistence path is in place
-- investigate whether the `agent-browser` hydration stall is a tool limitation, a headless WebGPU limitation, or an oscilloscope-route-specific client error
-- decide whether to keep the new lazy-loaded oscilloscope runtime path as the default startup architecture regardless of the `agent-browser` result, since it improves failure isolation and reduces eager client work on the route
+- optionally add a dedicated browser-smoke script or checklist for the verified `localhost` + `agent-browser` oscillator flow so this regression is easier to recheck
+- decide whether to keep the new lazy-loaded oscilloscope runtime path as the default startup architecture regardless of the earlier `agent-browser` flake, since it improves failure isolation and reduces eager client work on the route
 - optional cleanup of any stale renderer scaffolding once the renderer direction is finalized
 
 ---
