@@ -141,6 +141,17 @@ function dispatchClick(target: Element, window: Window) {
   });
 }
 
+function dispatchChange(
+  target: HTMLInputElement | HTMLSelectElement,
+  nextValue: string,
+  window: Window,
+) {
+  act(() => {
+    target.value = nextValue;
+    target.dispatchEvent(new window.Event("change", { bubbles: true }));
+  });
+}
+
 function createDeferred<T>() {
   let reject!: (reason?: unknown) => void;
   let resolve!: (value: T | PromiseLike<T>) => void;
@@ -328,6 +339,113 @@ describe("OscilloscopeClient", () => {
     });
     expect(createMicProvider).toHaveBeenCalledTimes(1);
     expect(scope.setSignalProvider).toHaveBeenCalledWith(provider);
+  });
+
+  test("passes the fake mic mode from the URL into the mic provider factory", async () => {
+    const environment = domEnvironment as DomEnvironment;
+    environment.window.history.replaceState(
+      {},
+      "",
+      "http://localhost/oscilloscope?mic=fake-stereo",
+    );
+
+    const provider = {
+      channelCount: 2,
+      fftSize: 8,
+      frequencyBinCount: 4,
+      sampleRate: 48_000,
+      smoothing: 0,
+      getFrequencyData: () => new Float32Array(4),
+      getSamples: () => new Float32Array(8),
+    };
+    const scope = {
+      destroy: mock(() => {}),
+      getState: () => ({ config: null, provider: null, running: true }),
+      setSignalProvider: mock((_provider: unknown) => {}),
+      start: mock(async () => {}),
+      stop: mock(() => {}),
+      updateConfig: mock((_config: unknown) => {}),
+    };
+    const createScope = mock(() => scope);
+    const createMicProvider = mock(async (_options?: unknown) => ({
+      destroy: async () => {},
+      provider,
+    }));
+
+    await renderIntoDomAsync(
+      environment,
+      <OscilloscopeClient createMicProvider={createMicProvider} createScope={createScope} />,
+    );
+
+    const buttons = Array.from(environment.document.querySelectorAll("button"));
+    const micButton = buttons.find((button) =>
+      button.textContent?.includes("Mic"),
+    ) as HTMLButtonElement;
+
+    dispatchClick(micButton, environment.window);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(createMicProvider).toHaveBeenCalledWith({ mode: "fake-stereo" });
+  });
+
+  test("keeps mic mode active when switching presets", async () => {
+    const environment = domEnvironment as DomEnvironment;
+    const provider = {
+      channelCount: 2,
+      fftSize: 8,
+      frequencyBinCount: 4,
+      sampleRate: 48_000,
+      smoothing: 0,
+      getFrequencyData: () => new Float32Array(4),
+      getSamples: () => new Float32Array(8),
+    };
+    const scope = {
+      destroy: mock(() => {}),
+      getState: () => ({ config: null, provider: null, running: true }),
+      setSignalProvider: mock((_provider: unknown) => {}),
+      start: mock(async () => {}),
+      stop: mock(() => {}),
+      updateConfig: mock((_config: unknown) => {}),
+    };
+    const createScope = mock(() => scope);
+    const createMicProvider = mock(async () => ({
+      destroy: async () => {},
+      provider,
+    }));
+
+    await renderIntoDomAsync(
+      environment,
+      <OscilloscopeClient createMicProvider={createMicProvider} createScope={createScope} />,
+    );
+
+    const buttons = Array.from(environment.document.querySelectorAll("button"));
+    const micButton = buttons.find((button) =>
+      button.textContent?.includes("Mic"),
+    ) as HTMLButtonElement;
+    const presetSelect = environment.document.querySelector("select") as HTMLSelectElement;
+
+    dispatchClick(micButton, environment.window);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    dispatchChange(presetSelect, "figure-eight", environment.window);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(createMicProvider).toHaveBeenCalledTimes(1);
+    expect(scope.setSignalProvider).toHaveBeenCalledWith(provider);
+    expect(scope.updateConfig.mock.calls.at(-1)?.[0]).toMatchObject({
+      source: {
+        type: "mic",
+      },
+    });
   });
 
   test("reuses the same scope while mic mode attaches and detaches a host provider", async () => {

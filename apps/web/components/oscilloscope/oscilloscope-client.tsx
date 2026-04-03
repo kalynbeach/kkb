@@ -5,7 +5,7 @@ import { getOscilloscopeSupport } from "@kkb/audio/oscilloscope/support";
 import type { OscilloscopeConfig, OscilloscopeSupport } from "@kkb/audio/oscilloscope/types";
 import { useEffect, useRef, useState } from "react";
 
-import { createMicProvider } from "@/lib/oscilloscope/create-mic-provider";
+import { createMicProvider, type MicInputMode } from "@/lib/oscilloscope/create-mic-provider";
 
 import { OscilloscopeShell } from "./oscilloscope-shell";
 
@@ -52,6 +52,19 @@ const loadCreateScopeDefault: LoadCreateScope = () => import("@kkb/audio/oscillo
 const initialSupport: OscilloscopeSupport = {
   reason: "Checking WebGPU support...",
   supported: false,
+};
+
+const getMicInputMode = (): MicInputMode => {
+  if (typeof window === "undefined") {
+    return "live";
+  }
+
+  const mic = new URLSearchParams(window.location.search).get("mic");
+  if (mic === "fake-mono" || mic === "fake-stereo") {
+    return mic;
+  }
+
+  return "live";
 };
 
 export function OscilloscopeClient({
@@ -102,7 +115,7 @@ export function OscilloscopeClient({
     setMicError(null);
     setMicStatus("requesting");
 
-    createMicProviderOverride()
+    createMicProviderOverride({ mode: getMicInputMode() })
       .then((runtime) => {
         if (micRequestIdRef.current !== requestId || scopeRef.current !== scope) {
           runtime.destroy().catch(() => {});
@@ -227,7 +240,13 @@ export function OscilloscopeClient({
       onPresetChange={(presetId) => {
         const preset = OSCILLOSCOPE_PRESETS.find((item) => item.id === presetId);
         if (preset) {
-          setConfig(preset.config);
+          setConfig((current) => ({
+            ...preset.config,
+            source: {
+              ...preset.config.source,
+              type: current.source.type,
+            },
+          }));
           setSelectedPresetId(preset.id);
         }
       }}
