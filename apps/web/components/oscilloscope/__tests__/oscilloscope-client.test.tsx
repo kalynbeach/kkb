@@ -127,25 +127,11 @@ function setupDom(): DomEnvironment {
   };
 }
 
-function renderIntoDom(environment: DomEnvironment, element: React.ReactNode) {
-  act(() => {
-    environment.root.render(element);
-  });
-}
-
 async function renderIntoDomAsync(environment: DomEnvironment, element: React.ReactNode) {
   await act(async () => {
     environment.root.render(element);
     await Promise.resolve();
     await Promise.resolve();
-  });
-}
-
-function dispatchInput(target: HTMLInputElement, window: Window, value: string) {
-  act(() => {
-    target.value = value;
-    target.dispatchEvent(new window.Event("input", { bubbles: true }));
-    target.dispatchEvent(new window.Event("change", { bubbles: true }));
   });
 }
 
@@ -218,7 +204,9 @@ describe("OscilloscopeClient", () => {
     );
 
     const buttons = Array.from(environment.document.querySelectorAll("button"));
-    const micButton = buttons.find((button) => button.textContent?.includes("Mic")) as HTMLButtonElement;
+    const micButton = buttons.find((button) =>
+      button.textContent?.includes("Mic"),
+    ) as HTMLButtonElement;
 
     dispatchClick(micButton, environment.window);
     await act(async () => {
