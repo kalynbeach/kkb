@@ -1,3 +1,5 @@
+import type { SignalProvider } from "./signal/signal-provider";
+
 export type OscilloscopeModeId = "xy";
 export type OscilloscopeWaveform = "sine" | "square" | "saw" | "triangle";
 export type OscilloscopeAspectRatio = "1:1" | "4:3";
@@ -55,4 +57,17 @@ export type OscilloscopePreset = {
   config: OscilloscopeConfig;
   id: string;
   name: string;
+};
+
+export type OscilloscopeController = {
+  destroy(): void;
+  getState(): {
+    config: OscilloscopeConfig;
+    provider: SignalProvider | null;
+    running: boolean;
+  };
+  setSignalProvider(provider: SignalProvider | null): void;
+  start(): Promise<void>;
+  stop(): void;
+  updateConfig(update: OscilloscopeConfigUpdate): void;
 };
