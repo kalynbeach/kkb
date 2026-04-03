@@ -1,13 +1,13 @@
 export const FADE_SHADER = /* wgsl */ `
 struct RenderUniforms {
   fadeAlpha: f32,
-  bloomStrength: f32,
-  background: f32,
+  traceAlpha: f32,
+  backgroundLift: f32,
   glowSpread: f32,
   texelSizeX: f32,
   texelSizeY: f32,
-  padding0: f32,
-  padding1: f32,
+  bloomStrength: f32,
+  traceGain: f32,
 };
 
 @group(0) @binding(0) var<uniform> uniforms: RenderUniforms;
@@ -31,6 +31,6 @@ fn vs(@builtin(vertex_index) index: u32) -> VertexOut {
 
 @fragment
 fn fs() -> @location(0) vec4f {
-  return vec4f(vec3f(uniforms.background), uniforms.fadeAlpha);
+  return vec4f(0.0, 0.0, 0.0, uniforms.fadeAlpha);
 }
 `;

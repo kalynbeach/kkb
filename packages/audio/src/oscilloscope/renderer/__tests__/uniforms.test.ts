@@ -36,7 +36,7 @@ const config: OscilloscopeConfig = {
 };
 
 describe("createRendererUniformValues", () => {
-  test("maps longer trails to slower fade while preserving canvas-derived texel sizes", () => {
+  test("maps longer trails to slower fade and lower per-frame trace energy", () => {
     const shortTrail = createRendererUniformValues(
       {
         ...config,
@@ -57,8 +57,34 @@ describe("createRendererUniformValues", () => {
     );
 
     expect(shortTrail.fadeAlpha).toBeGreaterThan(longTrail.fadeAlpha);
+    expect(shortTrail.traceAlpha).toBeGreaterThan(longTrail.traceAlpha);
     expect(longTrail.texelSizeX).toBeCloseTo(1 / 640, 6);
     expect(longTrail.texelSizeY).toBeCloseTo(1 / 320, 6);
+  });
+
+  test("maps higher bloom into wider glow, hotter trace gain, and a brighter background lift", () => {
+    const lowBloom = createRendererUniformValues(
+      {
+        ...config,
+        phosphor: { ...config.phosphor, bloom: 0 },
+      },
+      640,
+      320,
+      1 / 60,
+    );
+    const highBloom = createRendererUniformValues(
+      {
+        ...config,
+        phosphor: { ...config.phosphor, bloom: 1.5 },
+      },
+      640,
+      320,
+      1 / 60,
+    );
+
+    expect(highBloom.glowSpread).toBeGreaterThan(lowBloom.glowSpread);
+    expect(highBloom.traceGain).toBeGreaterThan(lowBloom.traceGain);
+    expect(highBloom.backgroundLift).toBeGreaterThan(lowBloom.backgroundLift);
   });
 
   test("clamps bloom and background inputs into safe shader ranges", () => {
@@ -73,9 +99,10 @@ describe("createRendererUniformValues", () => {
       1 / 60,
     );
 
-    expect(values.background).toBe(0);
+    expect(values.backgroundLift).toBeGreaterThanOrEqual(0);
     expect(values.bloomStrength).toBe(1.5);
-    expect(values.fadeAlpha).toBeLessThanOrEqual(0.14);
+    expect(values.fadeAlpha).toBeLessThanOrEqual(0.1);
+    expect(values.traceAlpha).toBeLessThanOrEqual(0.05);
     expect(values.texelSizeX).toBe(1);
     expect(values.texelSizeY).toBe(1);
   });
@@ -101,10 +128,12 @@ describe("packRendererUniforms", () => {
     expect(payload).toBeInstanceOf(Float32Array);
     expect(payload).toHaveLength(8);
     expect(payload[0]).toBeCloseTo(values.fadeAlpha, 6);
-    expect(payload[1]).toBeCloseTo(values.bloomStrength, 6);
-    expect(payload[2]).toBeCloseTo(values.background, 6);
+    expect(payload[1]).toBeCloseTo(values.traceAlpha, 6);
+    expect(payload[2]).toBeCloseTo(values.backgroundLift, 6);
     expect(payload[3]).toBeCloseTo(values.glowSpread, 6);
     expect(payload[4]).toBeCloseTo(values.texelSizeX, 6);
     expect(payload[5]).toBeCloseTo(values.texelSizeY, 6);
+    expect(payload[6]).toBeCloseTo(values.bloomStrength, 6);
+    expect(payload[7]).toBeCloseTo(values.traceGain, 6);
   });
 });

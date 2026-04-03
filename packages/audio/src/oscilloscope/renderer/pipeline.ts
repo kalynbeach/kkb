@@ -136,6 +136,10 @@ export const createWebGpuRenderer = async (
     layout: fadePipeline.getBindGroupLayout(0),
     entries: [{ binding: 0, resource: { buffer: uniformBuffer } }],
   });
+  const traceBindGroup = device.createBindGroup({
+    layout: tracePipeline.getBindGroupLayout(0),
+    entries: [{ binding: 0, resource: { buffer: uniformBuffer } }],
+  });
 
   let historyTexture: GPUTexture | null = null;
   let historyPrimed = false;
@@ -216,6 +220,7 @@ export const createWebGpuRenderer = async (
     historyPass.setBindGroup(0, fadeBindGroup);
     historyPass.draw(3);
     historyPass.setPipeline(tracePipeline);
+    historyPass.setBindGroup(0, traceBindGroup);
     historyPass.setVertexBuffer(0, vertexBuffer);
     historyPass.draw(geometry.points.length / 2);
     historyPass.end();
