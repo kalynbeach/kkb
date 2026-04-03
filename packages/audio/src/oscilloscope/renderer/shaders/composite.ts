@@ -46,35 +46,35 @@ fn sampleHistory(uv: vec2f, offset: vec2f) -> vec3f {
 @fragment
 fn fs(input: VertexOut) -> @location(0) vec4f {
   let texel = vec2f(uniforms.texelSizeX, uniforms.texelSizeY) * uniforms.glowSpread;
-  let outerTexel = texel * 2.2;
+  let outerTexel = texel * 2.0;
   let center = sampleHistory(input.uv, vec2f(0.0, 0.0));
   let blur =
-      center * 0.18 +
-      sampleHistory(input.uv, vec2f(texel.x, 0.0)) * 0.14 +
-      sampleHistory(input.uv, vec2f(-texel.x, 0.0)) * 0.14 +
-      sampleHistory(input.uv, vec2f(0.0, texel.y)) * 0.14 +
-      sampleHistory(input.uv, vec2f(0.0, -texel.y)) * 0.14 +
-      sampleHistory(input.uv, vec2f(texel.x, texel.y)) * 0.065 +
-      sampleHistory(input.uv, vec2f(-texel.x, texel.y)) * 0.065 +
-      sampleHistory(input.uv, vec2f(texel.x, -texel.y)) * 0.065 +
-      sampleHistory(input.uv, vec2f(-texel.x, -texel.y)) * 0.065;
+      center * 0.2 +
+      sampleHistory(input.uv, vec2f(texel.x, 0.0)) * 0.13 +
+      sampleHistory(input.uv, vec2f(-texel.x, 0.0)) * 0.13 +
+      sampleHistory(input.uv, vec2f(0.0, texel.y)) * 0.13 +
+      sampleHistory(input.uv, vec2f(0.0, -texel.y)) * 0.13 +
+      sampleHistory(input.uv, vec2f(texel.x, texel.y)) * 0.055 +
+      sampleHistory(input.uv, vec2f(-texel.x, texel.y)) * 0.055 +
+      sampleHistory(input.uv, vec2f(texel.x, -texel.y)) * 0.055 +
+      sampleHistory(input.uv, vec2f(-texel.x, -texel.y)) * 0.055;
   let halo =
-      sampleHistory(input.uv, vec2f(outerTexel.x, 0.0)) * 0.05 +
-      sampleHistory(input.uv, vec2f(-outerTexel.x, 0.0)) * 0.05 +
-      sampleHistory(input.uv, vec2f(0.0, outerTexel.y)) * 0.05 +
-      sampleHistory(input.uv, vec2f(0.0, -outerTexel.y)) * 0.05 +
-      sampleHistory(input.uv, vec2f(outerTexel.x, outerTexel.y)) * 0.03 +
-      sampleHistory(input.uv, vec2f(-outerTexel.x, outerTexel.y)) * 0.03 +
-      sampleHistory(input.uv, vec2f(outerTexel.x, -outerTexel.y)) * 0.03 +
-      sampleHistory(input.uv, vec2f(-outerTexel.x, -outerTexel.y)) * 0.03;
-  let glow = max((blur + halo * 1.25) * (0.48 + uniforms.bloomStrength * 0.44) - center * 0.14, vec3f(0.0));
-  let lit = center * (1.0 + uniforms.traceGain * 0.34) + glow;
-  let phosphor = vec3f(0.72, 1.0, 0.7);
-  let mapped = vec3f(1.0) - exp(-lit * vec3f(1.45, 1.22, 1.0));
+      sampleHistory(input.uv, vec2f(outerTexel.x, 0.0)) * 0.03 +
+      sampleHistory(input.uv, vec2f(-outerTexel.x, 0.0)) * 0.03 +
+      sampleHistory(input.uv, vec2f(0.0, outerTexel.y)) * 0.03 +
+      sampleHistory(input.uv, vec2f(0.0, -outerTexel.y)) * 0.03 +
+      sampleHistory(input.uv, vec2f(outerTexel.x, outerTexel.y)) * 0.016 +
+      sampleHistory(input.uv, vec2f(-outerTexel.x, outerTexel.y)) * 0.016 +
+      sampleHistory(input.uv, vec2f(outerTexel.x, -outerTexel.y)) * 0.016 +
+      sampleHistory(input.uv, vec2f(-outerTexel.x, -outerTexel.y)) * 0.016;
+  let glow = max((blur + halo * 0.8) * (0.38 + uniforms.bloomStrength * 0.3) - center * 0.18, vec3f(0.0));
+  let lit = center * (1.0 + uniforms.traceGain * 0.28) + glow;
+  let phosphor = vec3f(0.74, 1.0, 0.71);
+  let mapped = vec3f(1.0) - exp(-lit * vec3f(1.28, 1.08, 0.9));
   let tinted = mapped * phosphor;
-  let highlight = smoothstep(0.42, 1.28, max(max(lit.r, lit.g), lit.b));
-  let hotCore = mix(tinted, vec3f(0.95, 1.0, 0.9), highlight * 0.5);
-  let floor = vec3f(uniforms.backgroundLift * 0.65, uniforms.backgroundLift, uniforms.backgroundLift * 0.6);
+  let highlight = smoothstep(0.52, 1.4, max(max(lit.r, lit.g), lit.b));
+  let hotCore = mix(tinted, vec3f(0.93, 1.0, 0.9), highlight * 0.38);
+  let floor = vec3f(uniforms.backgroundLift * 0.42, uniforms.backgroundLift * 0.64, uniforms.backgroundLift * 0.38);
   return vec4f(max(hotCore, floor), 1.0);
 }
 `;

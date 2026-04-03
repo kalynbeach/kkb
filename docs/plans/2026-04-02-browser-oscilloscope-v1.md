@@ -19,7 +19,9 @@ This plan is partially implemented on `feature/oscilloscope-v1`.
 - hydration mismatch fix for the `/oscilloscope` route
 - barrel export removal in favor of direct `@kkb/audio/oscilloscope/*` imports
 - renderer-quality follow-up started: the direct-to-swapchain trace baseline has been replaced with a simpler single-history-texture renderer that fades accumulated phosphor, redraws the trace into HDR history, and composites a lightweight glow pass back to the screen
+- renderer uniform plumbing has been aligned across `uniforms.ts`, `pipeline.ts`, and the active WGSL shaders so trace, fade, and composite passes now share one explicit uniform contract; the trace pass also binds its own uniform bind group correctly in-browser
 - renderer uniform mapping now has focused unit coverage in `packages/audio/src/oscilloscope/renderer/__tests__/uniforms.test.ts`
+- the next renderer-quality slice is underway on top of that baseline: composite glow has been narrowed to reduce milky detune washout, and the fade curve now keeps long trails visibly decaying instead of flattening dense motion into a fogged background
 - `apps/web/components/oscilloscope/oscilloscope-client.tsx` now hardens startup failures in two additional ways: synchronous `createScope(...)` exceptions are converted into the same readable fallback state as async `scope.start()` failures, and the default oscilloscope runtime is loaded lazily instead of being imported eagerly at module evaluation time
 - startup-failure UI is now less misleading: when renderer startup fails, the status banner mirrors the renderer failure reason instead of claiming the internal oscillators are active
 
@@ -36,7 +38,8 @@ This plan is partially implemented on `feature/oscilloscope-v1`.
 - `agent-browser` mic-mode review: browser media permission is denied in this headless environment, but the UI surfaces `Permission denied` and cleanly recovers when switching back to oscillators
 
 ### Remaining work for the next execution slice
-- tune fade, trace intensity, and glow weights against live browser output now that the simpler persistence path is in place
+- continue tuning fade, trace intensity, and glow weights against live browser output now that the renderer uniform plumbing is stable and the first anti-washout composite pass is in place
+- specifically, keep pushing toward a stronger phosphor feel without reintroducing the milky detune washout: preserve hot cores, keep the halo soft, and hold onto visible decay in long-trail presets
 - optionally add a dedicated browser-smoke script or checklist for the verified `localhost` + `agent-browser` oscillator flow so this regression is easier to recheck
 - decide whether to keep the new lazy-loaded oscilloscope runtime path as the default startup architecture regardless of the earlier `agent-browser` flake, since it improves failure isolation and reduces eager client work on the route
 - optional cleanup of any stale renderer scaffolding once the renderer direction is finalized

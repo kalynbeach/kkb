@@ -58,6 +58,7 @@ describe("createRendererUniformValues", () => {
 
     expect(shortTrail.fadeAlpha).toBeGreaterThan(longTrail.fadeAlpha);
     expect(shortTrail.traceAlpha).toBeGreaterThan(longTrail.traceAlpha);
+    expect(longTrail.fadeAlpha).toBeGreaterThan(0.03);
     expect(longTrail.texelSizeX).toBeCloseTo(1 / 640, 6);
     expect(longTrail.texelSizeY).toBeCloseTo(1 / 320, 6);
   });
