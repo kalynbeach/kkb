@@ -8,7 +8,7 @@
 
 **Tech Stack:** Bun, Turborepo, TypeScript 6, React 19, Next.js 16, WebGPU, Web Audio API, `bun:test`, `happy-dom`, Biome.
 
-## Status Update (2026-04-02)
+## Status Update (2026-04-03)
 
 This plan is partially implemented on `feature/oscilloscope-v1`.
 
@@ -18,21 +18,28 @@ This plan is partially implemented on `feature/oscilloscope-v1`.
 - mono mic behavior duplicates into both axes
 - hydration mismatch fix for the `/oscilloscope` route
 - barrel export removal in favor of direct `@kkb/audio/oscilloscope/*` imports
+- renderer-quality follow-up started: the direct-to-swapchain trace baseline has been replaced with a simpler single-history-texture renderer that fades accumulated phosphor, redraws the trace into HDR history, and composites a lightweight glow pass back to the screen
+- renderer uniform mapping now has focused unit coverage in `packages/audio/src/oscilloscope/renderer/__tests__/uniforms.test.ts`
+- `apps/web/components/oscilloscope/oscilloscope-client.tsx` now hardens startup failures in two additional ways: synchronous `createScope(...)` exceptions are converted into the same readable fallback state as async `scope.start()` failures, and the default oscilloscope runtime is loaded lazily instead of being imported eagerly at module evaluation time
+- startup-failure UI is now less misleading: when renderer startup fails, the status banner mirrors the renderer failure reason instead of claiming the internal oscillators are active
 
 ### Current branch deviations from the original plan
 - the `@kkb/audio/oscilloscope` barrel entrypoint and `packages/audio/src/oscilloscope/index.ts` were intentionally removed; consumers now use direct subpath imports
-- the original ping-pong persistence/composite renderer path proved unstable in-browser; the active renderer is currently a simpler direct WebGPU trace baseline while phosphor persistence/glow quality is deferred to follow-up work
-- the route now renders visible geometry and the controls work, but the renderer is not yet at the visual quality bar described in the research brief
+- the original ping-pong persistence/composite renderer path proved unstable in-browser; the current renderer direction is now a simpler single-history fade/composite pipeline rather than the original ping-pong design
+- automated browser verification via `agent-browser` is currently limited: in this headless environment the `/oscilloscope` route still remains stuck on the pre-hydration `Checking WebGPU support...` state even after lazy-loading the runtime and hardening startup failure handling, even though other interactive routes hydrate, so final browser-level smoke verification is still open
 
 ### Verification status
 - `bun run test -- --filter=@kkb/audio --filter=@kkb/web`: passing
 - `bun run check-types -- --filter=@kkb/audio --filter=@kkb/web`: passing
-- `bun run format-and-lint`: passing (with one existing non-blocking warning in `packages/ui/src/components/sidebar.tsx`)
+- `bun run format-and-lint`: passing with one existing non-blocking warning in `packages/ui/src/components/sidebar.tsx`
+- `agent-browser` review: `/oscilloscope` loads, but this environment does not yet hydrate the route far enough to validate the live WebGPU renderer end-to-end
 
 ### Remaining work for the next execution slice
-- dedicated renderer-quality pass to restore convincing persistence, glow, and phosphor behavior without regressing stability
-- optional cleanup of now-inactive composite/persistence scaffolding once the renderer direction is finalized
-- final manual smoke pass after renderer work returns
+- validate the new single-history phosphor renderer in a browser session that fully hydrates `/oscilloscope`
+- tune fade, trace intensity, and glow weights against live browser output now that the simpler persistence path is in place
+- investigate whether the `agent-browser` hydration stall is a tool limitation, a headless WebGPU limitation, or an oscilloscope-route-specific client error
+- decide whether to keep the new lazy-loaded oscilloscope runtime path as the default startup architecture regardless of the `agent-browser` result, since it improves failure isolation and reduces eager client work on the route
+- optional cleanup of any stale renderer scaffolding once the renderer direction is finalized
 
 ---
 
@@ -44,7 +51,7 @@ This plan is partially implemented on `feature/oscilloscope-v1`.
 - internal dual-oscillator source
 - analyser-backed external provider wrapper
 - XY / Lissajous mode only
-- initial WebGPU trace renderer baseline, with persistence/glow quality treated as follow-up work
+- initial WebGPU phosphor renderer using a single accumulated history texture plus lightweight composite glow, with further visual tuning still treated as follow-up work
 - `apps/web/app/oscilloscope/page.tsx`
 - oscillator controls, preset picker, source switch, unsupported-state UI
 - mic input via host-owned `AudioContext` + `AnalyserNode`
@@ -84,13 +91,19 @@ This plan is partially implemented on `feature/oscilloscope-v1`.
 - `packages/audio/src/oscilloscope/renderer/types.ts`
   Renderer interface and GPU resource type declarations.
 - `packages/audio/src/oscilloscope/renderer/pipeline.ts`
-  WebGPU init and the current direct-trace render baseline; future persistence/composite work will continue here.
+  WebGPU init plus the active single-history phosphor renderer: fade accumulated history, redraw the trace into HDR history, then composite a lightweight glow pass to screen.
+- `packages/audio/src/oscilloscope/renderer/uniforms.ts`
+  Pure helpers that derive safe renderer uniform values from oscilloscope config.
 - `packages/audio/src/oscilloscope/renderer/shaders/trace.ts`
-  WGSL trace shader strings.
+  WGSL trace shader strings tuned for additive phosphor accumulation.
+- `packages/audio/src/oscilloscope/renderer/shaders/fade.ts`
+  WGSL fullscreen fade shader used to decay the accumulated history texture.
 - `packages/audio/src/oscilloscope/renderer/shaders/composite.ts`
-  WGSL fullscreen composite shader strings retained for the renderer-quality follow-up.
+  WGSL fullscreen composite shader used by the active glow/composite pass.
 - `packages/audio/src/oscilloscope/__tests__/support.test.ts`
   Support detection tests.
+- `packages/audio/src/oscilloscope/renderer/__tests__/uniforms.test.ts`
+  Renderer-uniform mapping and packing tests.
 - `packages/audio/src/oscilloscope/signal/__tests__/oscillator-source.test.ts`
   Oscillator provider tests.
 - `packages/audio/src/oscilloscope/signal/__tests__/analyser-source.test.ts`
@@ -104,9 +117,9 @@ This plan is partially implemented on `feature/oscilloscope-v1`.
 - `apps/web/app/oscilloscope/page.tsx`
   Dedicated server route that mounts the client shell.
 - `apps/web/components/oscilloscope/oscilloscope-client.tsx`
-  Client owner for runtime lifecycle, preset state, source switching, and mic attach/detach.
+  Client owner for runtime lifecycle, preset state, source switching, and mic attach/detach; now lazy-loads the default oscilloscope runtime and converts both sync and async startup failures into the same fallback UI.
 - `apps/web/components/oscilloscope/oscilloscope-shell.tsx`
-  Presentational shell: canvas, support state, and mic status banner.
+  Presentational shell: canvas, support state, and mic status banner, with startup failures mirrored in the banner instead of misleading source-active copy.
 - `apps/web/components/oscilloscope/oscilloscope-controls.tsx`
   Pure control surface for presets, source toggle, and oscillator/phosphor settings.
 - `apps/web/lib/oscilloscope/create-mic-provider.ts`
@@ -114,7 +127,7 @@ This plan is partially implemented on `feature/oscilloscope-v1`.
 - `apps/web/lib/oscilloscope/__tests__/create-mic-provider.test.ts`
   Mic provider factory tests.
 - `apps/web/components/oscilloscope/__tests__/oscilloscope-client.test.tsx`
-  Server-render safety test for the client component.
+  Server-render safety plus runtime-startup failure coverage for the client component.
 - `apps/web/app/oscilloscope/__tests__/page.test.tsx`
   Route render test for page copy and controls.
 - `apps/web/app/page.tsx`

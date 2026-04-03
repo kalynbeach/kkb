@@ -48,6 +48,7 @@ export const createOscilloscope = (
   let config = initialConfig;
   let running = false;
   let frameHandle = 0;
+  let lastFrameTime: number | null = null;
   let renderer: OscilloscopeRenderer | null = null;
   let internalProvider: OscillatorSignalProvider | null = createOscillatorSignalProvider(
     config.source,
@@ -64,17 +65,21 @@ export const createOscilloscope = (
     }
 
     try {
+      const frameTime = now();
+      const deltaSeconds = lastFrameTime === null ? 1 / 60 : Math.max(0, frameTime - lastFrameTime);
+      lastFrameTime = frameTime;
       renderer.resize(canvas.clientWidth, canvas.clientHeight, getDevicePixelRatio());
       const geometry = xyMode.generateFrame({
-        time: now(),
+        time: frameTime,
         signals: activeProvider,
         params: { gain: 1, sampleCount: Math.max(256, config.phosphor.trailLength * 8) },
         viewport: { height: canvas.height, width: canvas.width },
       });
-      renderer.drawFrame(geometry, config);
+      renderer.drawFrame(geometry, config, deltaSeconds);
       frameHandle = requestFrame(tick);
     } catch (error) {
       running = false;
+      lastFrameTime = null;
       console.error("[oscilloscope] render tick failed", error);
     }
   };
@@ -85,6 +90,7 @@ export const createOscilloscope = (
       cancelFrame(frameHandle);
       renderer?.destroy();
       renderer = null;
+      lastFrameTime = null;
       providerOverride = null;
       internalProvider = null;
     },
@@ -99,11 +105,13 @@ export const createOscilloscope = (
 
       renderer ??= await createRenderer(canvas);
       running = true;
+      lastFrameTime = null;
       tick();
     },
     stop: () => {
       running = false;
       cancelFrame(frameHandle);
+      lastFrameTime = null;
     },
     updateConfig: (update) => {
       config = mergeConfig(config, update);

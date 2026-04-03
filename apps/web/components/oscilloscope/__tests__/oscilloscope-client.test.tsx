@@ -164,13 +164,19 @@ afterEach(() => {
 });
 
 describe("OscilloscopeClient", () => {
-  test("does not create the browser runtime during server render", () => {
+  test("does not create or load the browser runtime during server render", () => {
     const createScope = mock(() => {
       throw new Error("browser runtime should not start during server render");
     });
+    const loadCreateScope = mock(async () => ({ createOscilloscope: createScope }));
 
-    expect(() => renderToString(<OscilloscopeClient createScope={createScope} />)).not.toThrow();
+    expect(() =>
+      renderToString(
+        <OscilloscopeClient createScope={createScope} loadCreateScope={loadCreateScope} />,
+      ),
+    ).not.toThrow();
     expect(createScope).not.toHaveBeenCalled();
+    expect(loadCreateScope).not.toHaveBeenCalled();
   });
 
   test("keeps one scope instance alive while controls push config updates", async () => {
@@ -236,6 +242,92 @@ describe("OscilloscopeClient", () => {
     expect(environment.document.body.textContent).toContain(
       "Unable to start WebGPU renderer: adapter unavailable",
     );
+    expect(environment.document.body.textContent).not.toContain("Internal oscillators active");
+  });
+
+  test("shows a readable fallback message when scope construction throws synchronously", async () => {
+    const environment = domEnvironment as DomEnvironment;
+    const createScope = mock(() => {
+      throw new Error("scope construction failed");
+    });
+
+    await renderIntoDomAsync(environment, <OscilloscopeClient createScope={createScope} />);
+
+    expect(environment.document.body.textContent).toContain(
+      "Unable to start WebGPU renderer: scope construction failed",
+    );
+    expect(environment.document.body.textContent).not.toContain("Internal oscillators active");
+  });
+
+  test("shows a readable fallback message when lazy scope loading fails", async () => {
+    const environment = domEnvironment as DomEnvironment;
+    const loadCreateScope = mock(async () => {
+      throw new Error("lazy scope import failed");
+    });
+
+    await renderIntoDomAsync(environment, <OscilloscopeClient loadCreateScope={loadCreateScope} />);
+
+    expect(environment.document.body.textContent).toContain(
+      "Unable to start WebGPU renderer: lazy scope import failed",
+    );
+    expect(environment.document.body.textContent).not.toContain("Internal oscillators active");
+  });
+
+  test("replays latest source state after lazy scope loading resolves", async () => {
+    const environment = domEnvironment as DomEnvironment;
+    const provider = {
+      channelCount: 1,
+      fftSize: 8,
+      frequencyBinCount: 4,
+      sampleRate: 48_000,
+      smoothing: 0,
+      getFrequencyData: () => new Float32Array(4),
+      getSamples: () => new Float32Array(8),
+    };
+    const scope = {
+      destroy: mock(() => {}),
+      getState: () => ({ config: null, provider: null, running: true }),
+      setSignalProvider: mock((_provider: unknown) => {}),
+      start: mock(async () => {}),
+      stop: mock(() => {}),
+      updateConfig: mock((_config: unknown) => {}),
+    };
+    const createScope = mock((_canvas: HTMLCanvasElement, _config: unknown) => scope);
+    const deferred = createDeferred<{ createOscilloscope: typeof createScope }>();
+    const loadCreateScope = mock(() => deferred.promise);
+    const createMicProvider = mock(async () => ({
+      destroy: async () => {},
+      provider,
+    }));
+
+    await renderIntoDomAsync(
+      environment,
+      <OscilloscopeClient
+        createMicProvider={createMicProvider}
+        loadCreateScope={loadCreateScope}
+      />,
+    );
+
+    const buttons = Array.from(environment.document.querySelectorAll("button"));
+    const micButton = buttons.find((button) =>
+      button.textContent?.includes("Mic"),
+    ) as HTMLButtonElement;
+
+    dispatchClick(micButton, environment.window);
+
+    await act(async () => {
+      deferred.resolve({ createOscilloscope: createScope });
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(createScope).toHaveBeenCalledTimes(1);
+    expect(createScope.mock.calls[0]?.[1]).toMatchObject({
+      source: { type: "mic" },
+    });
+    expect(createMicProvider).toHaveBeenCalledTimes(1);
+    expect(scope.setSignalProvider).toHaveBeenCalledWith(provider);
   });
 
   test("reuses the same scope while mic mode attaches and detaches a host provider", async () => {

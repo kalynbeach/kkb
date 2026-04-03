@@ -43,15 +43,17 @@ export function OscilloscopeShell({
           )}
         </div>
         <div className="mt-4 font-mono text-xs text-emerald-200/70">
-          {config.source.type === "mic"
-            ? micStatus === "error"
-              ? micError
-              : micStatus === "ready"
-                ? "Mic input active"
-                : micStatus === "requesting"
-                  ? "Requesting mic permission"
-                  : "Mic input idle"
-            : "Internal oscillators active"}
+          {!support.supported && support.reason
+            ? support.reason
+            : config.source.type === "mic"
+              ? micStatus === "error"
+                ? micError
+                : micStatus === "ready"
+                  ? "Mic input active"
+                  : micStatus === "requesting"
+                    ? "Requesting mic permission"
+                    : "Mic input idle"
+              : "Internal oscillators active"}
         </div>
       </section>
 
