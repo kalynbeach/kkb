@@ -88,6 +88,7 @@ export function OscilloscopeControls({
               <ToggleGroup
                 aria-label="Oscilloscope source"
                 className="w-full font-mono text-xs uppercase tracking-[0.14em]"
+                data-testid="oscilloscope-source-toggle"
                 onValueChange={(value) => {
                   if (value === "oscillators" || value === "mic") {
                     onSourceChange(value);
@@ -97,10 +98,20 @@ export function OscilloscopeControls({
                 value={config.source.type}
                 variant="outline"
               >
-                <ToggleGroupItem className="flex-1 justify-center" value="oscillators">
+                <ToggleGroupItem
+                  aria-label="Oscillators"
+                  className="flex-1 justify-center"
+                  data-testid="oscilloscope-source-oscillators"
+                  value="oscillators"
+                >
                   Oscillators
                 </ToggleGroupItem>
-                <ToggleGroupItem className="flex-1 justify-center" value="mic">
+                <ToggleGroupItem
+                  aria-label="Mic"
+                  className="flex-1 justify-center"
+                  data-testid="oscilloscope-source-mic"
+                  value="mic"
+                >
                   Mic
                 </ToggleGroupItem>
               </ToggleGroup>
@@ -121,7 +132,9 @@ export function OscilloscopeControls({
               <ControlLabel htmlFor="oscilloscope-preset">Starting point</ControlLabel>
               <Select onValueChange={onPresetChange} value={selectedPresetId}>
                 <SelectTrigger
+                  aria-label="Preset"
                   className="w-full font-mono text-xs uppercase tracking-[0.14em]"
+                  data-testid="oscilloscope-preset-trigger"
                   id="oscilloscope-preset"
                 >
                   <SelectValue placeholder="Select a preset" />
@@ -129,7 +142,11 @@ export function OscilloscopeControls({
                 <SelectContent>
                   <SelectGroup>
                     {OSCILLOSCOPE_PRESETS.map((preset) => (
-                      <SelectItem key={preset.id} value={preset.id}>
+                      <SelectItem
+                        data-testid={`oscilloscope-preset-${preset.id}`}
+                        key={preset.id}
+                        value={preset.id}
+                      >
                         {preset.name}
                       </SelectItem>
                     ))}
@@ -230,6 +247,7 @@ export function OscilloscopeControls({
               </div>
               <Slider
                 aria-label="Trail length"
+                data-testid="oscilloscope-trail-slider"
                 id="oscilloscope-trail"
                 max={128}
                 min={16}
@@ -257,6 +275,7 @@ export function OscilloscopeControls({
               </div>
               <Slider
                 aria-label="Bloom intensity"
+                data-testid="oscilloscope-bloom-slider"
                 id="oscilloscope-bloom"
                 max={1.5}
                 min={0}

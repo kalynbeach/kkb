@@ -2,6 +2,7 @@
 
 Date: 2026-04-04  
 Status: Proposed next slice  
+Latest browser verification: `docs/reports/2026-04-04-oscilloscope-browser-smoke.md`  
 Scope: `/oscilloscope` UI/UX refactor only  
 Primary targets:
 - `apps/web/app/oscilloscope/page.tsx`

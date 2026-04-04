@@ -147,6 +147,8 @@ export function OscilloscopeShell({
 }: OscilloscopeShellProps) {
   const supportBadge = getSupportBadge(support);
   const stageStatus = getStageStatus({ config, micError, micStatus, support });
+  const stageAlert = stageStatus.type === "alert" ? stageStatus : null;
+  const stageSummary = stageStatus.type === "compact" ? stageStatus : null;
 
   return (
     <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start">
@@ -182,6 +184,8 @@ export function OscilloscopeShell({
           </CardHeader>
 
           <CardContent className="flex flex-col gap-2.5 py-3.5">
+            {stageAlert ? <OscilloscopeStageStatus {...stageAlert} /> : null}
+
             <AspectRatio ratio={1}>
               <div className="relative size-full overflow-hidden rounded-2xl border border-emerald-400/20 bg-[#020604] shadow-[inset_0_0_0_1px_rgba(16,185,129,0.06)]">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.16)_0%,rgba(16,185,129,0.06)_32%,rgba(0,0,0,0)_72%)]" />
@@ -195,7 +199,7 @@ export function OscilloscopeShell({
               </div>
             </AspectRatio>
 
-            <OscilloscopeStageStatus {...stageStatus} />
+            {stageSummary ? <OscilloscopeStageStatus {...stageSummary} /> : null}
           </CardContent>
         </Card>
       </section>
