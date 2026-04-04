@@ -107,7 +107,7 @@ export const createMicProvider = async ({
   const stream = await getUserMedia({
     audio: {
       autoGainControl: false,
-      channelCount: 2,
+      channelCount: { ideal: 2 },
       echoCancellation: false,
       noiseSuppression: false,
     },
@@ -120,9 +120,9 @@ export const createMicProvider = async ({
   left.smoothingTimeConstant = 0.28;
 
   const primaryTrack = stream.getAudioTracks()[0];
-  const channelCount = primaryTrack?.getSettings().channelCount ?? 2;
+  const channelCount = primaryTrack?.getSettings().channelCount;
 
-  if (channelCount < 2) {
+  if (typeof channelCount !== "number" || channelCount < 2) {
     source.connect(left);
 
     return {

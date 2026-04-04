@@ -16,6 +16,11 @@ type RuntimeOptions = {
   requestFrame?: (callback: FrameRequestCallback) => number;
 };
 
+const EMPTY_GEOMETRY = {
+  kind: "line-strip" as const,
+  points: new Float32Array(0),
+};
+
 const mergeConfig = (
   current: OscilloscopeConfig,
   update: OscilloscopeConfigUpdate,
@@ -50,31 +55,44 @@ export const createOscilloscope = (
   let frameHandle = 0;
   let lastFrameTime: number | null = null;
   let renderer: OscilloscopeRenderer | null = null;
-  let internalProvider: OscillatorSignalProvider | null = createOscillatorSignalProvider(
-    config.source,
-  );
+  let internalProvider: OscillatorSignalProvider | null =
+    config.source.type === "oscillators" ? createOscillatorSignalProvider(config.source) : null;
   let providerOverride: SignalProvider | null = null;
   const xyMode = createXyMode();
 
-  const getActiveProvider = () => providerOverride ?? internalProvider;
+  const syncInternalProvider = () => {
+    if (config.source.type !== "oscillators") {
+      internalProvider = null;
+      return;
+    }
+
+    internalProvider ??= createOscillatorSignalProvider(config.source);
+    internalProvider.update(config.source);
+  };
+
+  const getActiveProvider = () =>
+    config.source.type === "mic" ? providerOverride : internalProvider;
 
   const tick = () => {
-    const activeProvider = getActiveProvider();
-    if (!running || !renderer || !activeProvider) {
+    if (!running || !renderer) {
       return;
     }
 
     try {
+      const activeProvider = getActiveProvider();
       const frameTime = now();
       const deltaSeconds = lastFrameTime === null ? 1 / 60 : Math.max(0, frameTime - lastFrameTime);
       lastFrameTime = frameTime;
       renderer.resize(canvas.clientWidth, canvas.clientHeight, getDevicePixelRatio());
-      const geometry = xyMode.generateFrame({
-        time: frameTime,
-        signals: activeProvider,
-        params: { gain: 1, sampleCount: Math.max(256, config.phosphor.trailLength * 8) },
-        viewport: { height: canvas.height, width: canvas.width },
-      });
+      const geometry =
+        activeProvider === null
+          ? EMPTY_GEOMETRY
+          : xyMode.generateFrame({
+              time: frameTime,
+              signals: activeProvider,
+              params: { gain: 1, sampleCount: Math.max(256, config.phosphor.trailLength * 8) },
+              viewport: { height: canvas.height, width: canvas.width },
+            });
       renderer.drawFrame(geometry, config, deltaSeconds);
       frameHandle = requestFrame(tick);
     } catch (error) {
@@ -115,7 +133,7 @@ export const createOscilloscope = (
     },
     updateConfig: (update) => {
       config = mergeConfig(config, update);
-      internalProvider?.update(config.source);
+      syncInternalProvider();
     },
   };
 };

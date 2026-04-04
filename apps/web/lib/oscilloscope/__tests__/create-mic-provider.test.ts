@@ -5,6 +5,7 @@ import { createMicProvider } from "../create-mic-provider";
 describe("createMicProvider", () => {
   test("requests a stream, builds analysers, and returns a teardown handle", async () => {
     let stopped = 0;
+    let requestedConstraints: MediaStreamConstraints | null = null;
     const track = {
       getSettings: () => ({ channelCount: 2 }),
       stop: () => {
@@ -35,10 +36,21 @@ describe("createMicProvider", () => {
 
     const result = await createMicProvider({
       createAudioContext: () => audioContext as unknown as AudioContext,
-      getUserMedia: async () => stream as unknown as MediaStream,
+      getUserMedia: async (constraints) => {
+        requestedConstraints = constraints;
+        return stream as unknown as MediaStream;
+      },
     });
 
     expect(result.provider.channelCount).toBe(2);
+    expect(requestedConstraints).toEqual({
+      audio: {
+        autoGainControl: false,
+        channelCount: { ideal: 2 },
+        echoCancellation: false,
+        noiseSuppression: false,
+      },
+    });
     await result.destroy();
     expect(stopped).toBe(1);
   });
@@ -68,6 +80,47 @@ describe("createMicProvider", () => {
       close: async () => {},
       createAnalyser: () => analyser,
       createChannelSplitter: () => ({ connect: () => {}, disconnect: () => {} }),
+      createMediaStreamSource: () => ({ connect: () => {}, disconnect: () => {} }),
+    };
+
+    const result = await createMicProvider({
+      createAudioContext: () => audioContext as unknown as AudioContext,
+      getUserMedia: async () => stream as unknown as MediaStream,
+    });
+
+    expect(result.provider.channelCount).toBe(2);
+    expect(Array.from(result.provider.getSamples(1))).not.toEqual(
+      Array.from(result.provider.getSamples(0)),
+    );
+  });
+
+  test("treats missing channel count metadata as mono-safe input", async () => {
+    const track = {
+      getSettings: () => ({}),
+      stop: () => {},
+    };
+    const stream = {
+      getAudioTracks: () => [track],
+      getTracks: () => [track],
+    };
+
+    const analyser = {
+      fftSize: 8,
+      frequencyBinCount: 4,
+      smoothingTimeConstant: 0.5,
+      getFloatFrequencyData: (_target: Float32Array) => {},
+      getFloatTimeDomainData: (target: Float32Array) =>
+        target.set([0.2, 0.35, 0.5, 0.62, 0.38, 0.1, -0.1, -0.25]),
+      disconnect: () => {},
+    };
+
+    const audioContext = {
+      sampleRate: 48_000,
+      close: async () => {},
+      createAnalyser: () => analyser,
+      createChannelSplitter: () => {
+        throw new Error("stereo splitter should not be used when channel count is unknown");
+      },
       createMediaStreamSource: () => ({ connect: () => {}, disconnect: () => {} }),
     };
 
