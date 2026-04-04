@@ -7,9 +7,12 @@ describe("/oscilloscope page", () => {
   test("renders the oscilloscope shell and essential controls", () => {
     const html = renderToString(<OscilloscopePage />).replaceAll("<!-- -->", "");
 
-    expect(html).toContain("Browser Oscilloscope");
-    expect(html).toContain("Circle");
+    expect(html).toContain("Audio experiments");
+    expect(html).toContain("Oscilloscope");
+    expect(html).toContain("Stage");
     expect(html).toContain("Source");
+    expect(html).toContain("Preset");
+    expect(html).toContain("Visual");
     expect(html).toContain("Oscillators");
     expect(html).toContain("Mic");
   });

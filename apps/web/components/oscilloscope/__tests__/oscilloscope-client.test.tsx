@@ -137,19 +137,60 @@ async function renderIntoDomAsync(environment: DomEnvironment, element: React.Re
 
 function dispatchClick(target: Element, window: Window) {
   act(() => {
+    target.dispatchEvent(new window.PointerEvent("pointerdown", { bubbles: true, button: 0 }));
+    target.dispatchEvent(new window.MouseEvent("mousedown", { bubbles: true, button: 0 }));
+    target.dispatchEvent(new window.PointerEvent("pointerup", { bubbles: true, button: 0 }));
+    target.dispatchEvent(new window.MouseEvent("mouseup", { bubbles: true, button: 0 }));
     target.dispatchEvent(new window.MouseEvent("click", { bubbles: true, button: 0 }));
   });
 }
 
-function dispatchChange(
-  target: HTMLInputElement | HTMLSelectElement,
-  nextValue: string,
-  window: Window,
-) {
-  act(() => {
-    target.value = nextValue;
-    target.dispatchEvent(new window.Event("change", { bubbles: true }));
+function getButtonByText(environment: DomEnvironment, text: string) {
+  const button = Array.from(environment.document.querySelectorAll("button")).find((candidate) =>
+    candidate.textContent?.includes(text),
+  );
+
+  if (!(button instanceof environment.window.HTMLButtonElement)) {
+    throw new Error(`Unable to find button containing text: ${text}`);
+  }
+
+  return button;
+}
+
+async function selectPreset(environment: DomEnvironment, value: string) {
+  const nativeSelect = environment.document.querySelector('select[aria-label="Preset fallback"]');
+
+  if (nativeSelect instanceof environment.window.HTMLSelectElement) {
+    act(() => {
+      nativeSelect.value = value;
+      nativeSelect.dispatchEvent(new environment.window.Event("change", { bubbles: true }));
+    });
+    return;
+  }
+
+  const trigger = environment.document.querySelector(
+    '[data-slot="select-trigger"]',
+  ) as HTMLButtonElement | null;
+
+  if (!trigger) {
+    throw new Error("Unable to find preset select trigger.");
+  }
+
+  dispatchClick(trigger, environment.window);
+  await act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
   });
+
+  const option = Array.from(
+    environment.document.querySelectorAll('[data-slot="select-item"]'),
+  ).find((candidate) => candidate.getAttribute("data-value") === value);
+
+  if (!(option instanceof environment.window.HTMLElement)) {
+    throw new Error(`Unable to find preset option: ${value}`);
+  }
+
+  dispatchClick(option, environment.window);
 }
 
 function createDeferred<T>() {
@@ -220,10 +261,7 @@ describe("OscilloscopeClient", () => {
       <OscilloscopeClient createMicProvider={createMicProvider} createScope={createScope} />,
     );
 
-    const buttons = Array.from(environment.document.querySelectorAll("button"));
-    const micButton = buttons.find((button) =>
-      button.textContent?.includes("Mic"),
-    ) as HTMLButtonElement;
+    const micButton = getButtonByText(environment, "Mic");
 
     dispatchClick(micButton, environment.window);
     await act(async () => {
@@ -319,10 +357,7 @@ describe("OscilloscopeClient", () => {
       />,
     );
 
-    const buttons = Array.from(environment.document.querySelectorAll("button"));
-    const micButton = buttons.find((button) =>
-      button.textContent?.includes("Mic"),
-    ) as HTMLButtonElement;
+    const micButton = getButtonByText(environment, "Mic");
 
     dispatchClick(micButton, environment.window);
 
@@ -377,10 +412,7 @@ describe("OscilloscopeClient", () => {
       <OscilloscopeClient createMicProvider={createMicProvider} createScope={createScope} />,
     );
 
-    const buttons = Array.from(environment.document.querySelectorAll("button"));
-    const micButton = buttons.find((button) =>
-      button.textContent?.includes("Mic"),
-    ) as HTMLButtonElement;
+    const micButton = getButtonByText(environment, "Mic");
 
     dispatchClick(micButton, environment.window);
     await act(async () => {
@@ -421,11 +453,7 @@ describe("OscilloscopeClient", () => {
       <OscilloscopeClient createMicProvider={createMicProvider} createScope={createScope} />,
     );
 
-    const buttons = Array.from(environment.document.querySelectorAll("button"));
-    const micButton = buttons.find((button) =>
-      button.textContent?.includes("Mic"),
-    ) as HTMLButtonElement;
-    const presetSelect = environment.document.querySelector("select") as HTMLSelectElement;
+    const micButton = getButtonByText(environment, "Mic");
 
     dispatchClick(micButton, environment.window);
     await act(async () => {
@@ -433,7 +461,7 @@ describe("OscilloscopeClient", () => {
       await Promise.resolve();
     });
 
-    dispatchChange(presetSelect, "figure-eight", environment.window);
+    await selectPreset(environment, "figure-eight");
     await act(async () => {
       await Promise.resolve();
       await Promise.resolve();
@@ -446,6 +474,48 @@ describe("OscilloscopeClient", () => {
         type: "mic",
       },
     });
+  });
+
+  test("hides oscillator-only signal controls in mic mode", async () => {
+    const environment = domEnvironment as DomEnvironment;
+    const scope = {
+      destroy: mock(() => {}),
+      getState: () => ({ config: null, provider: null, running: true }),
+      setSignalProvider: mock((_provider: unknown) => {}),
+      start: mock(async () => {}),
+      stop: mock(() => {}),
+      updateConfig: mock((_config: unknown) => {}),
+    };
+    const createScope = mock(() => scope);
+    const createMicProvider = mock(async () => ({
+      destroy: async () => {},
+      provider: {
+        channelCount: 1,
+        fftSize: 8,
+        frequencyBinCount: 4,
+        sampleRate: 48_000,
+        smoothing: 0,
+        getFrequencyData: () => new Float32Array(4),
+        getSamples: () => new Float32Array(8),
+      },
+    }));
+
+    await renderIntoDomAsync(
+      environment,
+      <OscilloscopeClient createMicProvider={createMicProvider} createScope={createScope} />,
+    );
+
+    expect(environment.document.body.textContent).toContain("Oscillator A");
+    expect(environment.document.body.textContent).toContain("Oscillator B");
+
+    dispatchClick(getButtonByText(environment, "Mic"), environment.window);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(environment.document.body.textContent).not.toContain("Oscillator A");
+    expect(environment.document.body.textContent).not.toContain("Oscillator B");
   });
 
   test("reuses the same scope while mic mode attaches and detaches a host provider", async () => {
@@ -476,13 +546,8 @@ describe("OscilloscopeClient", () => {
       <OscilloscopeClient createMicProvider={createMicProvider} createScope={createScope} />,
     );
 
-    const buttons = Array.from(environment.document.querySelectorAll("button"));
-    const micButton = buttons.find((button) =>
-      button.textContent?.includes("Mic"),
-    ) as HTMLButtonElement;
-    const oscillatorsButton = buttons.find((button) =>
-      button.textContent?.includes("Oscillators"),
-    ) as HTMLButtonElement;
+    const micButton = getButtonByText(environment, "Mic");
+    const oscillatorsButton = getButtonByText(environment, "Oscillators");
 
     dispatchClick(micButton, environment.window);
     await act(async () => {
@@ -525,13 +590,8 @@ describe("OscilloscopeClient", () => {
       <OscilloscopeClient createMicProvider={createMicProvider} createScope={createScope} />,
     );
 
-    const buttons = Array.from(environment.document.querySelectorAll("button"));
-    const micButton = buttons.find((button) =>
-      button.textContent?.includes("Mic"),
-    ) as HTMLButtonElement;
-    const oscillatorsButton = buttons.find((button) =>
-      button.textContent?.includes("Oscillators"),
-    ) as HTMLButtonElement;
+    const micButton = getButtonByText(environment, "Mic");
+    const oscillatorsButton = getButtonByText(environment, "Oscillators");
 
     dispatchClick(micButton, environment.window);
     dispatchClick(oscillatorsButton, environment.window);
