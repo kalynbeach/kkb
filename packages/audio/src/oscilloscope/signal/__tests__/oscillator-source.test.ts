@@ -51,4 +51,33 @@ describe("createOscillatorSignalProvider", () => {
 
     expect(after).not.toEqual(before);
   });
+
+  test("uses one clock sample for both channels in the same frame", () => {
+    let clockCalls = 0;
+    const provider = createOscillatorSignalProvider(
+      {
+        ratioLock: "1:1",
+        type: "oscillators",
+        a: { amplitude: 1, detuneCents: 0, frequency: 220, phase: Math.PI / 2, waveform: "sine" },
+        b: { amplitude: 1, detuneCents: 0, frequency: 220, phase: 0, waveform: "sine" },
+      },
+      {
+        clock: () => {
+          clockCalls += 1;
+          return 1;
+        },
+        fftSize: 8,
+        sampleRate: 48_000,
+      },
+    );
+
+    const left = provider.getSamples(0);
+    const right = provider.getSamples(1);
+
+    expect(clockCalls).toBe(1);
+
+    for (let index = 0; index < left.length; index += 1) {
+      expect(left[index] ** 2 + right[index] ** 2).toBeCloseTo(1, 5);
+    }
+  });
 });

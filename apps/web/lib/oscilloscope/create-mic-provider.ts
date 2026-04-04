@@ -14,6 +14,11 @@ const MIC_SAMPLE_CONDITIONING = {
 } as const;
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+const stopStreamTracks = (stream: MediaStream) => {
+  stream.getTracks().forEach((track) => {
+    track.stop();
+  });
+};
 
 const createFakeAnalyser = ({
   clock,
@@ -113,61 +118,74 @@ export const createMicProvider = async ({
     },
   });
 
-  const audioContext = createAudioContext();
-  const source = audioContext.createMediaStreamSource(stream);
-  const left = audioContext.createAnalyser();
-  left.fftSize = 1024;
-  left.smoothingTimeConstant = 0.28;
+  let audioContext: AudioContext | null = null;
 
-  const primaryTrack = stream.getAudioTracks()[0];
-  const channelCount = primaryTrack?.getSettings().channelCount;
+  try {
+    const context = createAudioContext();
+    audioContext = context;
+    const source = context.createMediaStreamSource(stream);
+    const left = context.createAnalyser();
+    left.fftSize = 1024;
+    left.smoothingTimeConstant = 0.28;
 
-  if (typeof channelCount !== "number" || channelCount < 2) {
-    source.connect(left);
+    const primaryTrack = stream.getAudioTracks()[0];
+    const channelCount = primaryTrack?.getSettings().channelCount;
+
+    if (typeof channelCount !== "number" || channelCount < 2) {
+      source.connect(left);
+
+      return {
+        destroy: async () => {
+          source.disconnect();
+          left.disconnect();
+          stopStreamTracks(stream);
+          await context.close();
+        },
+        provider: createAnalyserSignalProvider({
+          left,
+          monoChannelMode: "derived-stereo",
+          sampleConditioning: MIC_SAMPLE_CONDITIONING,
+          sampleRate: context.sampleRate,
+        }),
+      };
+    }
+
+    const splitter = context.createChannelSplitter(2);
+    const right = context.createAnalyser();
+    right.fftSize = 1024;
+    right.smoothingTimeConstant = 0.28;
+
+    source.connect(splitter);
+    splitter.connect(left, 0);
+    splitter.connect(right, 1);
 
     return {
       destroy: async () => {
         source.disconnect();
+        splitter.disconnect();
         left.disconnect();
-        stream.getTracks().forEach((track) => {
-          track.stop();
-        });
-        await audioContext.close();
+        right.disconnect();
+        stopStreamTracks(stream);
+        await context.close();
       },
       provider: createAnalyserSignalProvider({
         left,
-        monoChannelMode: "derived-stereo",
+        right,
         sampleConditioning: MIC_SAMPLE_CONDITIONING,
-        sampleRate: audioContext.sampleRate,
+        sampleRate: context.sampleRate,
       }),
     };
+  } catch (error) {
+    stopStreamTracks(stream);
+
+    if (audioContext) {
+      try {
+        await audioContext.close();
+      } catch {
+        // Ignore cleanup failures and preserve the original setup error.
+      }
+    }
+
+    throw error;
   }
-
-  const splitter = audioContext.createChannelSplitter(2);
-  const right = audioContext.createAnalyser();
-  right.fftSize = 1024;
-  right.smoothingTimeConstant = 0.28;
-
-  source.connect(splitter);
-  splitter.connect(left, 0);
-  splitter.connect(right, 1);
-
-  return {
-    destroy: async () => {
-      source.disconnect();
-      splitter.disconnect();
-      left.disconnect();
-      right.disconnect();
-      stream.getTracks().forEach((track) => {
-        track.stop();
-      });
-      await audioContext.close();
-    },
-    provider: createAnalyserSignalProvider({
-      left,
-      right,
-      sampleConditioning: MIC_SAMPLE_CONDITIONING,
-      sampleRate: audioContext.sampleRate,
-    }),
-  };
 };

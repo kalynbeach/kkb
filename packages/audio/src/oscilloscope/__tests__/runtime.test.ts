@@ -161,4 +161,55 @@ describe("createOscilloscope", () => {
 
     expect(pointCounts).toEqual([0]);
   });
+
+  test("caps trace geometry to the renderer vertex buffer budget", async () => {
+    const pointCounts: number[] = [];
+    const oversizedProvider: SignalProvider = {
+      channelCount: 2,
+      fftSize: 10_000,
+      frequencyBinCount: 5_000,
+      sampleRate: 48_000,
+      smoothing: 0,
+      getFrequencyData: () => new Float32Array(5_000),
+      getSamples: () => new Float32Array(10_000),
+    };
+    const canvas = {
+      clientHeight: 320,
+      clientWidth: 320,
+      height: 320,
+      width: 320,
+    } as HTMLCanvasElement;
+
+    const scope = createOscilloscope(
+      canvas,
+      {
+        canvas: { aspectRatio: "1:1", background: 0.02, quality: "quality" },
+        mode: "xy",
+        phosphor: { bloom: 0.75, color: "p31-green", trailLength: 10_000 },
+        source: {
+          type: "mic",
+          ratioLock: "1:1",
+          a: { amplitude: 1, detuneCents: 0, frequency: 220, phase: 0, waveform: "sine" },
+          b: { amplitude: 1, detuneCents: 0, frequency: 220, phase: 0, waveform: "sine" },
+        },
+      },
+      {
+        createRenderer: async () => ({
+          destroy: () => {},
+          drawFrame: (geometry) => {
+            pointCounts.push(geometry.points.length);
+          },
+          resize: () => {},
+        }),
+        now: () => 1,
+        requestFrame: () => 1,
+        cancelFrame: () => {},
+      },
+    );
+
+    scope.setSignalProvider(oversizedProvider);
+    await scope.start();
+
+    expect(pointCounts).toEqual([8192]);
+  });
 });

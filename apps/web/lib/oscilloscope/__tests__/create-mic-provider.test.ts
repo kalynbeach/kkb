@@ -148,4 +148,74 @@ describe("createMicProvider", () => {
     );
     await result.destroy();
   });
+
+  test("stops tracks when audio context creation fails after stream acquisition", async () => {
+    let stopped = 0;
+    const track = {
+      getSettings: () => ({ channelCount: 1 }),
+      stop: () => {
+        stopped += 1;
+      },
+    };
+    const stream = {
+      getAudioTracks: () => [track],
+      getTracks: () => [track],
+    };
+
+    await expect(
+      createMicProvider({
+        createAudioContext: () => {
+          throw new Error("context failed");
+        },
+        getUserMedia: async () => stream as unknown as MediaStream,
+      }),
+    ).rejects.toThrow("context failed");
+
+    expect(stopped).toBe(1);
+  });
+
+  test("closes partial audio graph resources when analyser wiring throws", async () => {
+    let stopped = 0;
+    let closed = 0;
+    const track = {
+      getSettings: () => ({ channelCount: 2 }),
+      stop: () => {
+        stopped += 1;
+      },
+    };
+    const stream = {
+      getAudioTracks: () => [track],
+      getTracks: () => [track],
+    };
+
+    const analyser = () => ({
+      fftSize: 1024,
+      frequencyBinCount: 512,
+      smoothingTimeConstant: 0.5,
+      getFloatFrequencyData: (_target: Float32Array) => {},
+      getFloatTimeDomainData: (_target: Float32Array) => {},
+      disconnect: () => {},
+    });
+
+    await expect(
+      createMicProvider({
+        createAudioContext: () =>
+          ({
+            sampleRate: 48_000,
+            close: async () => {
+              closed += 1;
+            },
+            createAnalyser: analyser,
+            createChannelSplitter: () => {
+              throw new Error("splitter failed");
+            },
+            createMediaStreamSource: () => ({ connect: () => {}, disconnect: () => {} }),
+          }) as unknown as AudioContext,
+        getUserMedia: async () => stream as unknown as MediaStream,
+      }),
+    ).rejects.toThrow("splitter failed");
+
+    expect(stopped).toBe(1);
+    expect(closed).toBe(1);
+  });
 });

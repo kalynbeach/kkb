@@ -423,6 +423,49 @@ describe("OscilloscopeClient", () => {
     expect(createMicProvider).toHaveBeenCalledWith({ mode: "fake-stereo" });
   });
 
+  test("clamps hash-restored visual and oscillator settings to safe bounds", async () => {
+    const environment = domEnvironment as DomEnvironment;
+    environment.window.history.replaceState(
+      {},
+      "",
+      "http://localhost/oscilloscope#preset=circle&trail=100000&bloom=10&freqA=-10&freqB=500000",
+    );
+
+    const scope = {
+      destroy: mock(() => {}),
+      getState: () => ({ config: null, provider: null, running: true }),
+      setSignalProvider: mock((_provider: unknown) => {}),
+      start: mock(async () => {}),
+      stop: mock(() => {}),
+      updateConfig: mock((_config: unknown) => {}),
+    };
+    const createScope = mock(() => scope);
+
+    await renderIntoDomAsync(environment, <OscilloscopeClient createScope={createScope} />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(scope.updateConfig.mock.calls.at(-1)?.[0]).toMatchObject({
+      phosphor: {
+        bloom: 1.5,
+        trailLength: 128,
+      },
+      source: {
+        a: {
+          frequency: 1,
+        },
+        b: {
+          frequency: 20_000,
+        },
+      },
+    });
+    expect(environment.window.location.hash).toBe(
+      "#preset=circle&source=oscillators&freqA=1&freqB=20000&trail=128&bloom=1.5",
+    );
+  });
+
   test("keeps mic mode active when switching presets", async () => {
     const environment = domEnvironment as DomEnvironment;
     const provider = {

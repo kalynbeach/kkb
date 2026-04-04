@@ -20,6 +20,8 @@ const EMPTY_GEOMETRY = {
   kind: "line-strip" as const,
   points: new Float32Array(0),
 };
+const MAX_VERTEX_FLOATS = 8192;
+const MAX_TRACE_POINTS = MAX_VERTEX_FLOATS / 2;
 
 const mergeConfig = (
   current: OscilloscopeConfig,
@@ -90,7 +92,13 @@ export const createOscilloscope = (
           : xyMode.generateFrame({
               time: frameTime,
               signals: activeProvider,
-              params: { gain: 1, sampleCount: Math.max(256, config.phosphor.trailLength * 8) },
+              params: {
+                gain: 1,
+                sampleCount: Math.min(
+                  MAX_TRACE_POINTS,
+                  Math.max(256, Math.round(config.phosphor.trailLength) * 8),
+                ),
+              },
               viewport: { height: canvas.height, width: canvas.width },
             });
       renderer.drawFrame(geometry, config, deltaSeconds);

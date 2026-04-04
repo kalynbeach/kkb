@@ -53,6 +53,14 @@ const initialSupport: OscilloscopeSupport = {
   reason: "Checking WebGPU support...",
   supported: false,
 };
+const MIN_TRAIL_LENGTH = 16;
+const MAX_TRAIL_LENGTH = 128;
+const MIN_BLOOM = 0;
+const MAX_BLOOM = 1.5;
+const MIN_FREQUENCY = 1;
+const MAX_FREQUENCY = 20_000;
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 const getMicInputMode = (): MicInputMode => {
   if (typeof window === "undefined") {
@@ -77,11 +85,16 @@ const readHashConfig = (): { config: OscilloscopeConfig; presetId: string } | nu
   const preset = presetId ? OSCILLOSCOPE_PRESETS.find((p) => p.id === presetId) : null;
   const base = preset?.config ?? defaultPreset.config;
 
-  const num = (key: string, fallback: number) => {
+  const readClampedNumber = (key: string, fallback: number, min: number, max: number) => {
     const raw = params.get(key);
     if (raw === null) return fallback;
     const v = Number(raw);
-    return Number.isFinite(v) ? v : fallback;
+    return Number.isFinite(v) ? clamp(v, min, max) : fallback;
+  };
+
+  const readClampedInteger = (key: string, fallback: number, min: number, max: number) => {
+    const value = readClampedNumber(key, fallback, min, max);
+    return Number.isFinite(value) ? Math.round(value) : fallback;
   };
 
   return {
@@ -90,13 +103,24 @@ const readHashConfig = (): { config: OscilloscopeConfig; presetId: string } | nu
       source: {
         ...base.source,
         type: params.get("source") === "mic" ? "mic" : "oscillators",
-        a: { ...base.source.a, frequency: num("freqA", base.source.a.frequency) },
-        b: { ...base.source.b, frequency: num("freqB", base.source.b.frequency) },
+        a: {
+          ...base.source.a,
+          frequency: readClampedNumber("freqA", base.source.a.frequency, MIN_FREQUENCY, MAX_FREQUENCY),
+        },
+        b: {
+          ...base.source.b,
+          frequency: readClampedNumber("freqB", base.source.b.frequency, MIN_FREQUENCY, MAX_FREQUENCY),
+        },
       },
       phosphor: {
         ...base.phosphor,
-        trailLength: num("trail", base.phosphor.trailLength),
-        bloom: num("bloom", base.phosphor.bloom),
+        trailLength: readClampedInteger(
+          "trail",
+          base.phosphor.trailLength,
+          MIN_TRAIL_LENGTH,
+          MAX_TRAIL_LENGTH,
+        ),
+        bloom: readClampedNumber("bloom", base.phosphor.bloom, MIN_BLOOM, MAX_BLOOM),
       },
     },
     presetId: preset?.id ?? defaultPreset.id,

@@ -49,10 +49,19 @@ export const createOscillatorSignalProvider = (
   const fftSize = options.fftSize ?? 1024;
   const clock = options.clock ?? (() => performance.now() / 1000);
   const emptyFrequencyData = new Float32Array(fftSize / 2);
+  let frameSamples:
+    | {
+        left: Float32Array;
+        right: Float32Array;
+      }
+    | null = null;
+  let servedChannels = {
+    left: false,
+    right: false,
+  };
 
-  const buildSamples = (oscillator: OscillatorSourceConfig["a"]) => {
+  const buildSamples = (oscillator: OscillatorSourceConfig["a"], now: number) => {
     const samples = new Float32Array(fftSize);
-    const now = clock();
     const detuneMultiplier = 2 ** (oscillator.detuneCents / 1200);
     const frequency = oscillator.frequency * detuneMultiplier;
 
@@ -65,6 +74,24 @@ export const createOscillatorSignalProvider = (
     return samples;
   };
 
+  const readFrameSamples = () => {
+    if (frameSamples && !(servedChannels.left && servedChannels.right)) {
+      return frameSamples;
+    }
+
+    const now = clock();
+    frameSamples = {
+      left: buildSamples(config.a, now),
+      right: buildSamples(config.b, now),
+    };
+    servedChannels = {
+      left: false,
+      right: false,
+    };
+
+    return frameSamples;
+  };
+
   return {
     channelCount: 2,
     fftSize,
@@ -72,9 +99,24 @@ export const createOscillatorSignalProvider = (
     sampleRate,
     smoothing: 0,
     getFrequencyData: () => emptyFrequencyData,
-    getSamples: (channel) => buildSamples(channel === 0 ? config.a : config.b),
+    getSamples: (channel) => {
+      const currentFrameSamples = readFrameSamples();
+
+      if (channel === 0) {
+        servedChannels.left = true;
+        return currentFrameSamples.left;
+      }
+
+      servedChannels.right = true;
+      return currentFrameSamples.right;
+    },
     update: (update) => {
       config = mergeSourceConfig(config, update);
+      frameSamples = null;
+      servedChannels = {
+        left: false,
+        right: false,
+      };
     },
   };
 };
