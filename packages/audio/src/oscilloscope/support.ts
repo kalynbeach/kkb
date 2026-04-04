@@ -12,12 +12,11 @@ export const getOscilloscopeSupport = (
   if (!env.navigator?.gpu) {
     return {
       reason: "WebGPU is not available in this browser.",
-      supported: false,
+      status: "unsupported",
     };
   }
 
   return {
-    reason: null,
-    supported: true,
+    status: "supported",
   };
 };

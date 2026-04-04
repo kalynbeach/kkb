@@ -1,7 +1,7 @@
 "use client";
 
 import { OSCILLOSCOPE_PRESETS } from "@kkb/audio/oscilloscope/presets";
-import type { OscilloscopeConfig } from "@kkb/audio/oscilloscope/types";
+import type { OscilloscopeConfig, OscilloscopeConfigUpdate } from "@kkb/audio/oscilloscope/types";
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@kkb/ui/components/field";
 import { Input } from "@kkb/ui/components/input";
 import {
@@ -17,7 +17,7 @@ import { ToggleGroup, ToggleGroupItem } from "@kkb/ui/components/toggle-group";
 
 type OscilloscopeControlsProps = {
   config: OscilloscopeConfig;
-  onConfigChange: (config: Partial<OscilloscopeConfig>) => void;
+  onConfigChange: (config: OscilloscopeConfigUpdate) => void;
   onPresetChange: (presetId: string) => void;
   onResetVisual: () => void;
   onSourceChange: (source: OscilloscopeConfig["source"]["type"]) => void;

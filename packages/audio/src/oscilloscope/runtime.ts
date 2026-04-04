@@ -1,3 +1,4 @@
+import { mergeOscilloscopeConfig } from "./config";
 import { createXyMode } from "./modes/xy";
 import { createWebGpuRenderer } from "./renderer/pipeline";
 import type { OscilloscopeRenderer } from "./renderer/types";
@@ -6,7 +7,7 @@ import {
   type OscillatorSignalProvider,
 } from "./signal/oscillator-source";
 import type { SignalProvider } from "./signal/signal-provider";
-import type { OscilloscopeConfig, OscilloscopeConfigUpdate, OscilloscopeController } from "./types";
+import type { OscilloscopeConfig, OscilloscopeController } from "./types";
 
 type RuntimeOptions = {
   cancelFrame?: (handle: number) => void;
@@ -22,22 +23,6 @@ const EMPTY_GEOMETRY = {
 };
 const MAX_VERTEX_FLOATS = 8192;
 const MAX_TRACE_POINTS = MAX_VERTEX_FLOATS / 2;
-
-const mergeConfig = (
-  current: OscilloscopeConfig,
-  update: OscilloscopeConfigUpdate,
-): OscilloscopeConfig => ({
-  ...current,
-  ...update,
-  canvas: { ...current.canvas, ...update.canvas },
-  phosphor: { ...current.phosphor, ...update.phosphor },
-  source: {
-    ...current.source,
-    ...update.source,
-    a: { ...current.source.a, ...update.source?.a },
-    b: { ...current.source.b, ...update.source?.b },
-  },
-});
 
 export const createOscilloscope = (
   canvas: HTMLCanvasElement,
@@ -140,7 +125,7 @@ export const createOscilloscope = (
       lastFrameTime = null;
     },
     updateConfig: (update) => {
-      config = mergeConfig(config, update);
+      config = mergeOscilloscopeConfig(config, update);
       syncInternalProvider();
     },
   };

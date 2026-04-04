@@ -1,4 +1,8 @@
-import type { OscilloscopeConfig, OscilloscopeSupport } from "@kkb/audio/oscilloscope/types";
+import type {
+  OscilloscopeConfig,
+  OscilloscopeConfigUpdate,
+  OscilloscopeSupport,
+} from "@kkb/audio/oscilloscope/types";
 import { Alert, AlertDescription, AlertTitle } from "@kkb/ui/components/alert";
 import { AspectRatio } from "@kkb/ui/components/aspect-ratio";
 import { Badge } from "@kkb/ui/components/badge";
@@ -11,7 +15,7 @@ type OscilloscopeShellProps = {
   config: OscilloscopeConfig;
   micError: string | null;
   micStatus: "idle" | "requesting" | "ready" | "error";
-  onConfigChange: (config: Partial<OscilloscopeConfig>) => void;
+  onConfigChange: (config: OscilloscopeConfigUpdate) => void;
   onPresetChange: (presetId: string) => void;
   onResetVisual: () => void;
   onSourceChange: (source: OscilloscopeConfig["source"]["type"]) => void;
@@ -33,15 +37,14 @@ type StageStatus =
     };
 
 const getSupportBadge = (support: OscilloscopeSupport) => {
-  if (support.supported) {
-    return { label: "WebGPU", variant: "secondary" as const };
+  switch (support.status) {
+    case "supported":
+      return { label: "WebGPU", variant: "secondary" as const };
+    case "checking":
+      return { label: "Checking", variant: "outline" as const };
+    case "unsupported":
+      return { label: "Unsupported", variant: "outline" as const };
   }
-
-  if (support.reason === "Checking WebGPU support...") {
-    return { label: "Checking", variant: "outline" as const };
-  }
-
-  return { label: "Unsupported", variant: "outline" as const };
 };
 
 const getStageStatus = ({
@@ -50,17 +53,14 @@ const getStageStatus = ({
   micStatus,
   support,
 }: Pick<OscilloscopeShellProps, "config" | "micError" | "micStatus" | "support">): StageStatus => {
-  if (!support.supported) {
+  if (support.status !== "supported") {
     return {
       description:
-        support.reason === "Checking WebGPU support..."
+        support.status === "checking"
           ? "Checking whether this browser can start WebGPU."
-          : (support.reason ?? "This browser cannot start the oscilloscope renderer."),
-      title:
-        support.reason === "Checking WebGPU support..."
-          ? "Checking browser support"
-          : "WebGPU unavailable",
-      tone: support.reason === "Checking WebGPU support..." ? "neutral" : "critical",
+          : support.reason,
+      title: support.status === "checking" ? "Checking browser support" : "WebGPU unavailable",
+      tone: support.status === "checking" ? "neutral" : "critical",
       type: "alert",
     };
   }
@@ -152,11 +152,11 @@ export function OscilloscopeShell({
         <AspectRatio ratio={1}>
           <div className="relative size-full overflow-hidden rounded-2xl border border-emerald-400/20 bg-[#020604] shadow-[inset_0_0_0_1px_rgba(16,185,129,0.06)]">
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(16,185,129,0.16)_0%,rgba(16,185,129,0.06)_32%,rgba(0,0,0,0)_72%)]" />
-            {support.supported ? (
+            {support.status === "supported" ? (
               <canvas className="relative z-10 h-full w-full" ref={canvasRef} />
             ) : (
               <div className="relative z-10 flex h-full items-center justify-center px-8 text-center text-sm leading-6 text-white/70">
-                {support.reason}
+                {support.status === "checking" ? "Checking WebGPU support..." : support.reason}
               </div>
             )}
           </div>

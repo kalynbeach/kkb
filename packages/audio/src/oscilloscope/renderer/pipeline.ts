@@ -21,6 +21,7 @@ const GPU_BUFFER_USAGE_UNIFORM = 0x0040;
 const GPU_TEXTURE_USAGE_TEXTURE_BINDING = 0x0004;
 const GPU_TEXTURE_USAGE_RENDER_ATTACHMENT = 0x0010;
 const HISTORY_FORMAT: GPUTextureFormat = "rgba16float";
+const MAX_VERTEX_FLOATS = 8192;
 
 export const createWebGpuRenderer = async (
   canvas: HTMLCanvasElement,
@@ -50,7 +51,7 @@ export const createWebGpuRenderer = async (
     usage: GPU_BUFFER_USAGE_COPY_DST | GPU_BUFFER_USAGE_UNIFORM,
   });
   const vertexBuffer = device.createBuffer({
-    size: 8192 * Float32Array.BYTES_PER_ELEMENT,
+    size: MAX_VERTEX_FLOATS * Float32Array.BYTES_PER_ELEMENT,
     usage: GPU_BUFFER_USAGE_COPY_DST | GPU_BUFFER_USAGE_VERTEX,
   });
 
@@ -186,8 +187,13 @@ export const createWebGpuRenderer = async (
       throw new Error("Oscilloscope history texture is not initialized.");
     }
 
+    const tracePoints =
+      geometry.points.length > MAX_VERTEX_FLOATS
+        ? geometry.points.subarray(0, MAX_VERTEX_FLOATS)
+        : geometry.points;
+
     device.queue.writeBuffer(uniformBuffer, 0, uniforms);
-    device.queue.writeBuffer(vertexBuffer, 0, geometry.points);
+    device.queue.writeBuffer(vertexBuffer, 0, tracePoints);
 
     const historyView = history.createView();
     const compositeBindGroup = device.createBindGroup({
@@ -222,7 +228,7 @@ export const createWebGpuRenderer = async (
     historyPass.setPipeline(tracePipeline);
     historyPass.setBindGroup(0, traceBindGroup);
     historyPass.setVertexBuffer(0, vertexBuffer);
-    historyPass.draw(geometry.points.length / 2);
+    historyPass.draw(tracePoints.length / 2);
     historyPass.end();
 
     historyPrimed = true;

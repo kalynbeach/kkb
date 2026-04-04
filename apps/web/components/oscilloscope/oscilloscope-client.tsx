@@ -1,8 +1,13 @@
 "use client";
 
+import { mergeOscilloscopeConfig } from "@kkb/audio/oscilloscope/config";
 import { OSCILLOSCOPE_PRESETS } from "@kkb/audio/oscilloscope/presets";
 import { getOscilloscopeSupport } from "@kkb/audio/oscilloscope/support";
-import type { OscilloscopeConfig, OscilloscopeSupport } from "@kkb/audio/oscilloscope/types";
+import type {
+  OscilloscopeConfig,
+  OscilloscopeConfigUpdate,
+  OscilloscopeSupport,
+} from "@kkb/audio/oscilloscope/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { createMicProvider, type MicInputMode } from "@/lib/oscilloscope/create-mic-provider";
@@ -22,22 +27,6 @@ type OscilloscopeClientProps = {
   loadCreateScope?: LoadCreateScope;
 };
 
-const mergeConfig = (
-  current: OscilloscopeConfig,
-  next: Partial<OscilloscopeConfig>,
-): OscilloscopeConfig => ({
-  ...current,
-  ...next,
-  canvas: { ...current.canvas, ...next.canvas },
-  phosphor: { ...current.phosphor, ...next.phosphor },
-  source: {
-    ...current.source,
-    ...next.source,
-    a: { ...current.source.a, ...next.source?.a },
-    b: { ...current.source.b, ...next.source?.b },
-  },
-});
-
 const getDefaultPreset = () => {
   const preset = OSCILLOSCOPE_PRESETS[0];
   if (!preset) {
@@ -50,8 +39,7 @@ const getDefaultPreset = () => {
 const defaultPreset = getDefaultPreset();
 const loadCreateScopeDefault: LoadCreateScope = () => import("@kkb/audio/oscilloscope/runtime");
 const initialSupport: OscilloscopeSupport = {
-  reason: "Checking WebGPU support...",
-  supported: false,
+  status: "checking",
 };
 const MIN_TRAIL_LENGTH = 16;
 const MAX_TRAIL_LENGTH = 128;
@@ -105,11 +93,21 @@ const readHashConfig = (): { config: OscilloscopeConfig; presetId: string } | nu
         type: params.get("source") === "mic" ? "mic" : "oscillators",
         a: {
           ...base.source.a,
-          frequency: readClampedNumber("freqA", base.source.a.frequency, MIN_FREQUENCY, MAX_FREQUENCY),
+          frequency: readClampedNumber(
+            "freqA",
+            base.source.a.frequency,
+            MIN_FREQUENCY,
+            MAX_FREQUENCY,
+          ),
         },
         b: {
           ...base.source.b,
-          frequency: readClampedNumber("freqB", base.source.b.frequency, MIN_FREQUENCY, MAX_FREQUENCY),
+          frequency: readClampedNumber(
+            "freqB",
+            base.source.b.frequency,
+            MIN_FREQUENCY,
+            MAX_FREQUENCY,
+          ),
         },
       },
       phosphor: {
@@ -241,7 +239,7 @@ export function OscilloscopeClient({
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!support.supported || !canvas) {
+    if (support.status !== "supported" || !canvas) {
       return;
     }
 
@@ -275,7 +273,7 @@ export function OscilloscopeClient({
           error instanceof Error
             ? `Unable to start WebGPU renderer: ${error.message}`
             : "Unable to start WebGPU renderer in this browser.",
-        supported: false,
+        status: "unsupported",
       });
       destroyScope();
     };
@@ -290,7 +288,6 @@ export function OscilloscopeClient({
         const latestConfig = latestConfigRef.current;
         scope = resolvedCreateScope(canvas, latestConfig);
         scopeRef.current = scope;
-        scope.updateConfig(latestConfig);
         syncSignalSource(scope, latestConfig.source.type);
         scope.start().catch(failStartup);
       } catch (error) {
@@ -303,7 +300,7 @@ export function OscilloscopeClient({
     return () => {
       destroyScope();
     };
-  }, [createScope, loadCreateScope, support.supported]);
+  }, [createScope, loadCreateScope, support.status]);
 
   useEffect(() => {
     scopeRef.current?.updateConfig(config);
@@ -349,8 +346,8 @@ export function OscilloscopeClient({
       config={config}
       micError={micError}
       micStatus={micStatus}
-      onConfigChange={(next) => {
-        setConfig((current) => mergeConfig(current, next));
+      onConfigChange={(next: OscilloscopeConfigUpdate) => {
+        setConfig((current) => mergeOscilloscopeConfig(current, next));
       }}
       onPresetChange={(presetId) => {
         const preset = OSCILLOSCOPE_PRESETS.find((item) => item.id === presetId);

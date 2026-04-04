@@ -48,10 +48,13 @@ export type OscilloscopeConfigUpdate = {
   };
 };
 
-export type OscilloscopeSupport = {
-  reason: string | null;
-  supported: boolean;
-};
+export type OscilloscopeSupport =
+  | { status: "checking" }
+  | { status: "supported" }
+  | {
+      reason: string;
+      status: "unsupported";
+    };
 
 export type OscilloscopePreset = {
   config: OscilloscopeConfig;

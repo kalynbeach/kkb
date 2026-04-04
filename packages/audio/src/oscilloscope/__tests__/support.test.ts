@@ -6,7 +6,7 @@ describe("getOscilloscopeSupport", () => {
   test("returns unsupported when navigator.gpu is missing", () => {
     expect(getOscilloscopeSupport({ navigator: {} })).toEqual({
       reason: "WebGPU is not available in this browser.",
-      supported: false,
+      status: "unsupported",
     });
   });
 
@@ -16,8 +16,7 @@ describe("getOscilloscopeSupport", () => {
         navigator: { gpu: {} },
       }),
     ).toEqual({
-      reason: null,
-      supported: true,
+      status: "supported",
     });
   });
 });

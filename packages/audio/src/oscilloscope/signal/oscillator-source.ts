@@ -49,12 +49,10 @@ export const createOscillatorSignalProvider = (
   const fftSize = options.fftSize ?? 1024;
   const clock = options.clock ?? (() => performance.now() / 1000);
   const emptyFrequencyData = new Float32Array(fftSize / 2);
-  let frameSamples:
-    | {
-        left: Float32Array;
-        right: Float32Array;
-      }
-    | null = null;
+  let frameSamples: {
+    left: Float32Array;
+    right: Float32Array;
+  } | null = null;
   let servedChannels = {
     left: false,
     right: false,
