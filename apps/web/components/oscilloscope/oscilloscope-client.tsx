@@ -3,7 +3,7 @@
 import { OSCILLOSCOPE_PRESETS } from "@kkb/audio/oscilloscope/presets";
 import { getOscilloscopeSupport } from "@kkb/audio/oscilloscope/support";
 import type { OscilloscopeConfig, OscilloscopeSupport } from "@kkb/audio/oscilloscope/types";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { createMicProvider, type MicInputMode } from "@/lib/oscilloscope/create-mic-provider";
 
@@ -67,6 +67,55 @@ const getMicInputMode = (): MicInputMode => {
   return "live";
 };
 
+const readHashConfig = (): { config: OscilloscopeConfig; presetId: string } | null => {
+  if (typeof window === "undefined") return null;
+  const hash = window.location.hash.slice(1);
+  if (!hash) return null;
+
+  const params = new URLSearchParams(hash);
+  const presetId = params.get("preset");
+  const preset = presetId ? OSCILLOSCOPE_PRESETS.find((p) => p.id === presetId) : null;
+  const base = preset?.config ?? defaultPreset.config;
+
+  const num = (key: string, fallback: number) => {
+    const raw = params.get(key);
+    if (raw === null) return fallback;
+    const v = Number(raw);
+    return Number.isFinite(v) ? v : fallback;
+  };
+
+  return {
+    config: {
+      ...base,
+      source: {
+        ...base.source,
+        type: params.get("source") === "mic" ? "mic" : "oscillators",
+        a: { ...base.source.a, frequency: num("freqA", base.source.a.frequency) },
+        b: { ...base.source.b, frequency: num("freqB", base.source.b.frequency) },
+      },
+      phosphor: {
+        ...base.phosphor,
+        trailLength: num("trail", base.phosphor.trailLength),
+        bloom: num("bloom", base.phosphor.bloom),
+      },
+    },
+    presetId: preset?.id ?? defaultPreset.id,
+  };
+};
+
+const writeHashConfig = (cfg: OscilloscopeConfig, presetId: string) => {
+  const p = new URLSearchParams();
+  p.set("preset", presetId);
+  p.set("source", cfg.source.type);
+  if (cfg.source.type === "oscillators") {
+    p.set("freqA", String(cfg.source.a.frequency));
+    p.set("freqB", String(cfg.source.b.frequency));
+  }
+  p.set("trail", String(cfg.phosphor.trailLength));
+  p.set("bloom", String(cfg.phosphor.bloom));
+  window.history.replaceState(null, "", `#${p.toString()}`);
+};
+
 export function OscilloscopeClient({
   createMicProvider: createMicProviderOverride = createMicProvider,
   createScope,
@@ -84,6 +133,23 @@ export function OscilloscopeClient({
   const latestConfigRef = useRef(config);
 
   latestConfigRef.current = config;
+
+  const applyPreset = useCallback((preset: (typeof OSCILLOSCOPE_PRESETS)[number]) => {
+    setConfig((current) => ({
+      ...preset.config,
+      source: { ...preset.config.source, type: current.source.type },
+    }));
+    setSelectedPresetId(preset.id);
+  }, []);
+
+  const handleResetVisual = useCallback(() => {
+    const preset = OSCILLOSCOPE_PRESETS.find((p) => p.id === selectedPresetId);
+    if (!preset) return;
+    setConfig((current) => ({
+      ...current,
+      phosphor: { ...preset.config.phosphor },
+    }));
+  }, [selectedPresetId]);
 
   const destroyMicRuntime = (runtime: MicRuntime | null) => {
     runtime?.destroy().catch((error) => {
@@ -228,6 +294,31 @@ export function OscilloscopeClient({
     return syncSignalSource(scope, config.source.type);
   }, [config.source.type, createMicProviderOverride]);
 
+  useEffect(() => {
+    const initial = readHashConfig();
+    if (initial) {
+      setConfig(initial.config);
+      setSelectedPresetId(initial.presetId);
+    }
+  }, []);
+
+  useEffect(() => {
+    writeHashConfig(config, selectedPresetId);
+  }, [config, selectedPresetId]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const index = Number(e.key) - 1;
+      if (index >= 0 && index < OSCILLOSCOPE_PRESETS.length) {
+        const preset = OSCILLOSCOPE_PRESETS[index];
+        if (preset) applyPreset(preset);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [applyPreset]);
+
   return (
     <OscilloscopeShell
       canvasRef={canvasRef}
@@ -239,17 +330,9 @@ export function OscilloscopeClient({
       }}
       onPresetChange={(presetId) => {
         const preset = OSCILLOSCOPE_PRESETS.find((item) => item.id === presetId);
-        if (preset) {
-          setConfig((current) => ({
-            ...preset.config,
-            source: {
-              ...preset.config.source,
-              type: current.source.type,
-            },
-          }));
-          setSelectedPresetId(preset.id);
-        }
+        if (preset) applyPreset(preset);
       }}
+      onResetVisual={handleResetVisual}
       onSourceChange={(source) => {
         setConfig((current) => ({
           ...current,

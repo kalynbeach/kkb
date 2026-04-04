@@ -9,7 +9,6 @@ describe("/oscilloscope page", () => {
 
     expect(html).toContain("Audio experiments");
     expect(html).toContain("Oscilloscope");
-    expect(html).toContain("Stage");
     expect(html).toContain("Source");
     expect(html).toContain("Preset");
     expect(html).toContain("Visual");

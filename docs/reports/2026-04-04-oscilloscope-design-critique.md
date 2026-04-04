@@ -168,16 +168,18 @@ Ran the 8-item checklist:
 
 User choices: **visual hierarchy first**, **studio-minimal tone** (Ableton/Logic Pro direction), **all issues**.
 
+**Status: Executed 2026-04-04.**
+
 ### Execution Order
 
-1. **`/distill`** — Strip glass-card chrome from the stage. Let the canvas sit more directly in the page. Flatten controls sidebar (spacing/dividers instead of bordered cards). Remove redundant "XY" badge since description already says "XY view."
+1. **`/distill`** — ✅ Removed Card wrapper from stage, collapsed 4 glass-card controls into 1 divider-separated container, removed redundant "Stage" title / "XY view." description / "XY" badge.
 
-2. **`/typeset`** — Break monospace-uppercase monotony. Reserve monospace for data values (Hz readouts, slider numbers, badges). Use proportional font for card titles, labels, and hint text. Create 3 clear typographic tiers: page title > section headers > control labels/hints.
+2. **`/typeset`** — ✅ Page title and section titles switched to proportional sans. Control labels dropped mono+uppercase. Mono reserved for badges and numeric data values only. Three clear typographic tiers established.
 
-3. **`/colorize`** — Shift UI chrome to neutral grays (studio-minimal). Keep emerald exclusively for the canvas and its immediate border. Slider value badges, status indicators, and card borders should use neutral tones so the visualization is the only source of color.
+3. **`/colorize`** — ✅ Page background shifted to neutral dark gradient. Breadcrumb, subtitle, and WebGPU badge neutralized. Emerald retained exclusively for canvas border, glow, and inner shadow.
 
-4. **`/clarify`** — Expand terse hint text: "Persistence." becomes "How long the trace lingers." Add one-sentence Lissajous explanation to subtitle. Make Oscillator A/B labels indicate axis mapping more clearly.
+4. **`/clarify`** — ✅ All 7 control hints rewritten to explain visual effects. Page subtitle now explains Lissajous patterns and input sources.
 
-5. **`/delight`** — Add keyboard shortcuts (1-4 for presets, arrow keys on sliders), "Reset" button per control card, URL hash encoding for shareable configs.
+5. **`/delight`** — ✅ Keyboard shortcuts 1-4 for presets. "Reset" button in Visual section restores preset defaults. URL hash encoding for shareable/bookmarkable configs.
 
-6. **`/polish`** — Final pass: remove redundant stage description vs badge, differentiate live-value badges from structural badges, verify mobile canvas sizing.
+6. **`/polish`** — ✅ Slider value badges replaced with plain span readouts. Removed dummy spacer element. Fixed WebGPU badge variant inconsistency. Updated page test. Biome formatting applied.

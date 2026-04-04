@@ -2,8 +2,6 @@
 
 import { OSCILLOSCOPE_PRESETS } from "@kkb/audio/oscilloscope/presets";
 import type { OscilloscopeConfig } from "@kkb/audio/oscilloscope/types";
-import { Badge } from "@kkb/ui/components/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@kkb/ui/components/card";
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@kkb/ui/components/field";
 import { Input } from "@kkb/ui/components/input";
 import {
@@ -21,6 +19,7 @@ type OscilloscopeControlsProps = {
   config: OscilloscopeConfig;
   onConfigChange: (config: Partial<OscilloscopeConfig>) => void;
   onPresetChange: (presetId: string) => void;
+  onResetVisual: () => void;
   onSourceChange: (source: OscilloscopeConfig["source"]["type"]) => void;
   selectedPresetId: string;
 };
@@ -32,36 +31,29 @@ const parseNumberInput = (value: string) => {
   return Number.isFinite(nextValue) ? nextValue : null;
 };
 
-function ControlsCard({
+function ControlsSection({
+  action,
   children,
-  description,
   title,
 }: {
+  action?: React.ReactNode;
   children: React.ReactNode;
-  description?: string;
   title: string;
 }) {
   return (
-    <Card className="border-white/10 bg-black/20 py-0 backdrop-blur-sm">
-      <CardHeader className="gap-1 border-b border-white/10 py-3.5">
-        <CardTitle className="font-mono text-xs uppercase tracking-[0.16em] text-white/90">
-          {title}
-        </CardTitle>
-        {description ? (
-          <CardDescription className="text-sm text-white/55">{description}</CardDescription>
-        ) : null}
-      </CardHeader>
-      <CardContent className="py-3.5">{children}</CardContent>
-    </Card>
+    <div className="flex flex-col gap-3.5 px-4 py-3.5">
+      <div className="flex items-center justify-between">
+        <p className="text-xs font-medium uppercase tracking-wide text-white/50">{title}</p>
+        {action}
+      </div>
+      {children}
+    </div>
   );
 }
 
 function ControlLabel({ children, htmlFor }: { children: React.ReactNode; htmlFor?: string }) {
   return (
-    <FieldLabel
-      className="font-mono text-[11px] uppercase tracking-[0.14em] text-white/75"
-      htmlFor={htmlFor}
-    >
+    <FieldLabel className="text-[11px] font-medium text-white/75" htmlFor={htmlFor}>
       {children}
     </FieldLabel>
   );
@@ -75,19 +67,20 @@ export function OscilloscopeControls({
   config,
   onConfigChange,
   onPresetChange,
+  onResetVisual,
   onSourceChange,
   selectedPresetId,
 }: OscilloscopeControlsProps) {
   return (
-    <aside className="flex min-w-0 flex-col gap-2.5 xl:sticky xl:top-6">
-      <ControlsCard title="Source">
+    <aside className="flex min-w-0 flex-col divide-y divide-white/[0.06] rounded-xl border border-white/[0.06] xl:sticky xl:top-6">
+      <ControlsSection title="Source">
         <FieldGroup className="gap-4">
           <Field>
             <FieldContent>
               <ControlLabel>Input source</ControlLabel>
               <ToggleGroup
                 aria-label="Oscilloscope source"
-                className="w-full font-mono text-xs uppercase tracking-[0.14em]"
+                className="w-full text-sm"
                 data-testid="oscilloscope-source-toggle"
                 onValueChange={(value) => {
                   if (value === "oscillators" || value === "mic") {
@@ -117,15 +110,15 @@ export function OscilloscopeControls({
               </ToggleGroup>
               <ControlHint>
                 {config.source.type === "mic"
-                  ? "Live analyser input."
-                  : "Built-in dual oscillator."}
+                  ? "Routes microphone signal to the display"
+                  : "Two internal oscillators mapped to X and Y axes"}
               </ControlHint>
             </FieldContent>
           </Field>
         </FieldGroup>
-      </ControlsCard>
+      </ControlsSection>
 
-      <ControlsCard title="Preset">
+      <ControlsSection title="Preset">
         <FieldGroup className="gap-4">
           <Field>
             <FieldContent>
@@ -133,7 +126,7 @@ export function OscilloscopeControls({
               <Select onValueChange={onPresetChange} value={selectedPresetId}>
                 <SelectTrigger
                   aria-label="Preset"
-                  className="w-full font-mono text-xs uppercase tracking-[0.14em]"
+                  className="w-full text-sm"
                   data-testid="oscilloscope-preset-trigger"
                   id="oscilloscope-preset"
                 >
@@ -169,14 +162,16 @@ export function OscilloscopeControls({
                   </option>
                 ))}
               </select>
-              <ControlHint>Presets keep the active source.</ControlHint>
+              <ControlHint>
+                Loads frequency and visual settings. Keeps your current source.
+              </ControlHint>
             </FieldContent>
           </Field>
         </FieldGroup>
-      </ControlsCard>
+      </ControlsSection>
 
       {config.source.type === "oscillators" ? (
-        <ControlsCard title="Signal">
+        <ControlsSection title="Signal">
           <FieldGroup className="gap-4">
             <Field>
               <FieldContent>
@@ -201,7 +196,7 @@ export function OscilloscopeControls({
                   type="number"
                   value={config.source.a.frequency}
                 />
-                <ControlHint>X axis, Hz.</ControlHint>
+                <ControlHint>Controls the horizontal frequency, in Hz</ControlHint>
               </FieldContent>
             </Field>
 
@@ -228,22 +223,33 @@ export function OscilloscopeControls({
                   type="number"
                   value={config.source.b.frequency}
                 />
-                <ControlHint>Y axis, Hz.</ControlHint>
+                <ControlHint>Controls the vertical frequency, in Hz</ControlHint>
               </FieldContent>
             </Field>
           </FieldGroup>
-        </ControlsCard>
+        </ControlsSection>
       ) : null}
 
-      <ControlsCard title="Visual">
+      <ControlsSection
+        action={
+          <button
+            className="text-[11px] text-white/30 transition-colors hover:text-white/60"
+            onClick={onResetVisual}
+            type="button"
+          >
+            Reset
+          </button>
+        }
+        title="Visual"
+      >
         <FieldGroup className="gap-4">
           <Field>
             <FieldContent>
               <div className="flex items-center justify-between gap-3">
                 <ControlLabel>Trail</ControlLabel>
-                <Badge className="font-mono text-[11px] tabular-nums" variant="outline">
+                <span className="font-mono text-[11px] tabular-nums text-white/50">
                   {config.phosphor.trailLength}
-                </Badge>
+                </span>
               </div>
               <Slider
                 aria-label="Trail length"
@@ -261,7 +267,7 @@ export function OscilloscopeControls({
                 step={1}
                 value={[config.phosphor.trailLength]}
               />
-              <ControlHint>Persistence.</ControlHint>
+              <ControlHint>How long the trace lingers on screen</ControlHint>
             </FieldContent>
           </Field>
 
@@ -269,9 +275,9 @@ export function OscilloscopeControls({
             <FieldContent>
               <div className="flex items-center justify-between gap-3">
                 <ControlLabel>Bloom</ControlLabel>
-                <Badge className="font-mono text-[11px] tabular-nums" variant="outline">
+                <span className="font-mono text-[11px] tabular-nums text-white/50">
                   {formatBloomValue(config.phosphor.bloom)}
-                </Badge>
+                </span>
               </div>
               <Slider
                 aria-label="Bloom intensity"
@@ -289,11 +295,11 @@ export function OscilloscopeControls({
                 step={0.05}
                 value={[config.phosphor.bloom]}
               />
-              <ControlHint>Glow.</ControlHint>
+              <ControlHint>Intensity of the phosphor glow effect</ControlHint>
             </FieldContent>
           </Field>
         </FieldGroup>
-      </ControlsCard>
+      </ControlsSection>
     </aside>
   );
 }
