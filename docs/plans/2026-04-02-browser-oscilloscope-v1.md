@@ -8,17 +8,275 @@
 
 **Tech Stack:** Bun, Turborepo, TypeScript 6, React 19, Next.js 16, WebGPU, Web Audio API, `bun:test`, `happy-dom`, Biome.
 
+## Status Update (2026-04-05)
+
+This plan is now effectively implemented on `feature/oscilloscope-v1` and the branch is in merge-ready cleanup state.
+
+### Implemented outcome
+- package-level oscilloscope types, presets, support detection, signal providers, XY mode, runtime, and focused tests landed in `packages/audio/src/oscilloscope/*`
+- `/oscilloscope` exists in `apps/web` with a client-owned runtime lifecycle, support fallback, preset switching, source switching, mic integration, and home-page navigation
+- the active renderer is the branch's simplified single-history fade/trace/composite WebGPU pipeline rather than the earlier ping-pong persistence experiment
+- mono mic input now derives a more useful second axis instead of collapsing into a weak duplicated diagonal
+- browser verification is repeatable via `scripts/oscilloscope-agent-browser-smoke.sh` plus the checked-in smoke reports and template
+- the UI refactor/design-critique pass landed: the page now leans on `@kkb/ui`, keeps the stage primary, hides oscillator-only controls in mic mode, adds clearer status handling, supports lightweight URL-hash state persistence, preset keyboard shortcuts, and a visual reset action
+- PR review hardening landed: the support state uses a discriminated union, config merge logic is shared, redundant startup config replay is gone, and renderer/runtime trace-size guards are in place
+
+### Final verification status
+- `bun run test -- --filter=@kkb/audio --filter=@kkb/web`: passing
+- `bun run check-types -- --filter=@kkb/audio --filter=@kkb/web`: passing
+- `bun run format-and-lint`: passing with the existing non-blocking `packages/ui/src/components/sidebar.tsx` cookie warning only
+- browser verification: passing in `docs/reports/2026-04-04-oscilloscope-browser-smoke.md`
+- design critique follow-through: captured in `docs/reports/2026-04-04-oscilloscope-design-critique.md`
+
+### Non-blocking follow-ups after merge
+- cache the composite bind group in `packages/audio/src/oscilloscope/renderer/pipeline.ts` instead of recreating it every frame
+- decide whether `renderer.destroy()` should explicitly call `device.destroy()` for stricter GPU resource cleanup
+- optionally deduplicate the remaining small `clamp(...)` helpers across oscilloscope/browser-host files
+- keep future scope expansion separate from this PR: Y-T mode, track visualization, worklet/SAB transport, and higher-fidelity CRT effects remain follow-up work
+
+### Note on the historical plan below
+The remaining sections of this document are preserved as the original execution plan and implementation record for the branch. They are useful context, but the status summary above reflects the final branch state more accurately than the unchecked planning checklist below.
+
+## Next Slice Execution Plan (2026-04-03)
+
+### Goal
+Make mic input visually credible in the browser, continue tuning the phosphor renderer against live and deterministic input, and add a repeatable browser-verification loop using the `agent-browser` skill and the `agent-browser` CLI.
+
+### Scope for this slice
+
+#### In scope
+- mic-input signal conditioning and XY presentation quality
+- phosphor renderer tuning for both oscillator presets and mic input
+- browser-based verification with `agent-browser`
+- mic testing across all currently shipped visual states in the browser; for V1 today that means XY mode across all presets and relevant control extremes, and any additional visual modes introduced during this slice must also be covered
+- a lightweight checked-in browser smoke script, checklist, or both
+- formatter and doc cleanup directly related to this oscilloscope work
+
+#### Out of scope
+- new oscilloscope display families beyond current V1 scope unless explicitly added as part of the same renderer/mic verification effort
+- track playback visualization
+- Y-T / trigger logic
+- CRT simulation
+- `@kkb/ui` abstraction work for oscilloscope wrappers
+
+### Why this is the right next slice
+The architecture work is already in place. The biggest remaining quality gap is that mic input visuals still look poor, borderline broken, and the current renderer tuning has been validated more heavily against oscillator presets than against live mic behavior. The next slice should therefore optimize for mic readability first, then finish a repeatable `agent-browser` verification loop that exercises both oscillator and mic paths in-browser.
+
+### Concrete execution plan
+
+#### 1. Clean the baseline first
+
+**Files:**
+- `packages/audio/src/oscilloscope/renderer/uniforms.ts`
+- `docs/plans/2026-04-02-browser-oscilloscope-v1.md`
+- optionally `docs/reports/2026-04-02-browser-oscilloscope-branch-review.md`
+
+**Tasks:**
+- fix the current formatter failure in `packages/audio/src/oscilloscope/renderer/uniforms.ts`
+- rerun:
+  - `bun run format-and-lint`
+  - `bun run test -- --filter=@kkb/audio --filter=@kkb/web`
+  - `bun run check-types -- --filter=@kkb/audio --filter=@kkb/web`
+- update docs so they reflect the current active single-history renderer rather than the older direct-to-swapchain checkpoint description
+
+**Acceptance:**
+- formatter passes
+- docs no longer describe stale renderer architecture as current
+
+#### 2. Fix mic input visuals before more glow polish
+
+**Files:**
+- `apps/web/lib/oscilloscope/create-mic-provider.ts`
+- `packages/audio/src/oscilloscope/signal/analyser-source.ts`
+- `packages/audio/src/oscilloscope/modes/xy.ts`
+- `packages/audio/src/oscilloscope/runtime.ts`
+- `packages/audio/src/oscilloscope/types.ts` only if a minimal new config or source flag is required
+
+**Tasks:**
+- inspect whether current mic samples are too quiet, too noisy, poorly centered, or visually collapsed in XY
+- improve mic-specific signal conditioning with the smallest possible change set, such as:
+  - centering / DC offset rejection if needed
+  - light gain normalization or simple auto-gain for mic input if needed
+  - revisiting analyser smoothing or related settings if they hurt responsiveness
+- specifically re-evaluate the current mono-mic-to-both-axes duplication behavior; if that is the main reason the trace collapses into a weak diagonal or blob, replace it with a minimal XY-friendly derived second axis for mono mic input
+- keep this fix targeted to the mic path rather than widening scope into a larger mode system
+
+**Acceptance:**
+- mic mode no longer looks broken for common speech/noise input
+- mono mic input produces a visually meaningful XY trace
+- oscillator visuals do not regress
+
+#### 3. Tune the renderer against mic input, not just oscillator presets
+
+**Files:**
+- `packages/audio/src/oscilloscope/renderer/uniforms.ts`
+- `packages/audio/src/oscilloscope/renderer/shaders/trace.ts`
+- `packages/audio/src/oscilloscope/renderer/shaders/fade.ts`
+- `packages/audio/src/oscilloscope/renderer/shaders/composite.ts`
+- `packages/audio/src/oscilloscope/renderer/pipeline.ts`
+
+**Tasks:**
+- tune the renderer for these visual goals:
+  - preserve a hot, bright core
+  - keep the glow soft and narrow
+  - avoid milky washout on dense motion
+  - keep long trails visibly decaying
+  - make mic input feel alive instead of fogged or dead
+- validate tuning against all of the following cases:
+  - stable oscillator preset
+  - detuned / dense oscillator preset
+  - live mic input
+  - quiet mic input
+  - louder or transient mic input
+
+**Acceptance:**
+- no white or foggy washout under dense presets
+- no dead or overly dim trace under mic input
+- trails remain visible without burying the current motion
+
+#### 4. Add a browser-verification harness using `agent-browser`
+
+Use the `agent-browser` skill and the `agent-browser` CLI for all browser-based testing and verification in this slice. Because the oscilloscope output is canvas-driven, screenshots are the source of truth; text snapshots alone are not sufficient.
+
+**Recommended work:**
+- add one lightweight, checked-in verification artifact:
+  - a script in `scripts/`, and/or
+  - a checklist/report in `docs/`
+- prefer `agent-browser screenshot`, `agent-browser screenshot --annotate`, and `agent-browser diff screenshot` for visual verification
+
+**Suggested files:**
+- `scripts/oscilloscope-agent-browser-smoke.sh`
+- `docs/reports/2026-04-03-oscilloscope-browser-smoke.md`
+- `docs/reports/2026-04-03-oscilloscope-agent-browser-smoke-template.md` (checked-in template for future smoke runs)
+
+**Acceptance:**
+- a future worker can rerun the oscilloscope browser smoke flow without reconstructing the steps from memory
+
+#### 5. Ensure mic is testable with `agent-browser` across all visual modes / states
+
+Real hardware mic automation is often flaky or unavailable in headless environments, so this slice should add a deterministic browser-test path for the mic visualization flow.
+
+**Recommended approach:**
+- add a dev/test-only fake mic path that still exercises the same browser mic visualization path
+- make it triggerable by a query param, dev-only toggle, or test-only override in the mic provider layer
+- keep it out of user-facing product scope
+
+**Why this matters:**
+- without a deterministic fake mic feed, mic verification will remain difficult to compare from run to run
+- this is especially important because mic visuals currently look borderline broken and need repeatable before/after browser review
+
+**Acceptance:**
+- `agent-browser` can drive and verify the mic path in a repeatable way
+- mic behavior can be captured in screenshots and diffs without depending solely on real hardware permissions
+
+### Browser verification matrix for this slice
+
+Use `agent-browser` to cover all currently shipped visual states. For V1 today, that means the current XY renderer across all presets and relevant control extremes; if any new visual mode is introduced during this slice, it must be added to the same matrix before the slice is considered complete.
+
+#### Oscillator states
+- Circle preset
+- Figure Eight preset
+- Lissajous 3:2 preset
+- Breathing Detune preset
+
+#### Mic states
+Test mic input across the same browser-visible states wherever applicable, plus:
+- low bloom / short trail
+- high bloom / long trail
+- mono mic path
+- stereo mic path if available
+- permission-denied flow
+- switch mic → oscillators recovery flow
+
+### Suggested `agent-browser` workflow
+
+Assuming local development on `http://localhost:3000/oscilloscope`:
+
+```bash
+agent-browser --session osc close || true
+agent-browser --session osc --headed open http://localhost:3000/oscilloscope
+agent-browser --session osc wait --load networkidle
+agent-browser --session osc screenshot --annotate --screenshot-dir .artifacts/oscilloscope
+agent-browser --session osc snapshot -i
+```
+
+For each preset / mic state:
+1. select the preset or source
+2. wait briefly for stabilization
+3. take a screenshot
+4. optionally diff against a baseline screenshot
+5. record whether the trace is visible, centered, not washed out, and not collapsed into a broken-looking line or blob
+
+Example pattern:
+
+```bash
+agent-browser --session osc screenshot state-01.png
+agent-browser --session osc wait 1000
+agent-browser --session osc screenshot state-02.png
+agent-browser --session osc diff screenshot --baseline state-01.png
+```
+
+For mic verification:
+- if a deterministic fake mic path exists, activate mic mode and run the same screenshot loop across all presets / states
+- if real mic access is available in headed mode, keep one real-mic smoke pass, but do not rely on that as the only automated verification path
+
+### Deliverables for this slice
+- mic visuals improved
+- renderer tuned against both oscillators and mic input
+- a checked-in `agent-browser` verification workflow
+- mic tested across all currently shipped visual modes / states and across any additional visual mode introduced during this slice
+- docs updated to reflect the current renderer and verification flow
+- all checks green:
+  - `bun run format-and-lint`
+  - `bun run test -- --filter=@kkb/audio --filter=@kkb/web`
+  - `bun run check-types -- --filter=@kkb/audio --filter=@kkb/web`
+
+### Definition of done
+- mic mode no longer looks broken
+- mono mic input produces a meaningful XY visualization
+- oscillator presets still look good
+- renderer retains hot core + visible decay without milky washout
+- browser validation is reproducible with `agent-browser`
+- mic path is tested across all shipped visual modes / states in browser automation
+- docs reflect current behavior
+
+## Next Slice Checkbox Plan (2026-04-03)
+
+- [ ] Fix the formatter failure in `packages/audio/src/oscilloscope/renderer/uniforms.ts`
+- [ ] Rerun `bun run format-and-lint`
+- [ ] Rerun `bun run test -- --filter=@kkb/audio --filter=@kkb/web`
+- [ ] Rerun `bun run check-types -- --filter=@kkb/audio --filter=@kkb/web`
+- [ ] Update oscilloscope docs so they describe the current single-history fade/trace/composite renderer accurately
+- [ ] Audit the current mic path in `apps/web/lib/oscilloscope/create-mic-provider.ts` and `packages/audio/src/oscilloscope/signal/analyser-source.ts` for level, noise, centering, and smoothing issues
+- [ ] Decide whether mono mic duplication into both axes is the main cause of the poor visuals
+- [ ] If mono duplication is the problem, implement a minimal XY-friendly derived second-axis strategy for mono mic input
+- [ ] Add the smallest mic-specific conditioning needed to make speech/noise visually meaningful without regressing oscillator rendering
+- [ ] Validate the mic-path changes against common speech/noise behavior in-browser
+- [ ] Retune `renderer/uniforms.ts` and the active WGSL shaders against both oscillator presets and mic input
+- [ ] Verify that dense oscillator presets no longer wash out into a milky fog
+- [ ] Verify that mic input remains visible and lively rather than dead, dim, or smeared
+- [ ] Add a lightweight checked-in `agent-browser` smoke artifact (`scripts/` script, `docs/` checklist/report, or both)
+- [ ] Use the `agent-browser` skill and `agent-browser` CLI for browser verification instead of relying only on local visual inspection
+- [ ] Add or expose a deterministic fake-mic / test-mic path suitable for browser automation if real mic permissions are not reliable in headless runs
+- [ ] Run `agent-browser` verification for all oscillator presets
+- [ ] Run `agent-browser` verification for mic mode across all currently shipped visual states in XY mode
+- [ ] If any new visual mode is introduced during this slice, add it to the same `agent-browser` verification matrix before finishing
+- [ ] Capture screenshots and screenshot diffs for before/after comparison during the tuning pass
+- [ ] Verify the permission-denied mic flow in-browser
+- [ ] Verify switching from mic back to oscillators recovers cleanly in-browser
+- [ ] Update this plan with the latest verification results and any branch-level decisions
+
 ---
 
 ## Scope Lock
 
 ### In scope
-- `@kkb/audio/oscilloscope` public entrypoint
+- `@kkb/audio/oscilloscope/*` direct subpath exports (no barrel entrypoint)
 - WebGPU support detection helper
 - internal dual-oscillator source
 - analyser-backed external provider wrapper
 - XY / Lissajous mode only
-- ping-pong WebGPU history pipeline with basic persistence and simple glow composite
+- initial WebGPU phosphor renderer using a single accumulated history texture plus lightweight composite glow, with further visual tuning still treated as follow-up work
 - `apps/web/app/oscilloscope/page.tsx`
 - oscillator controls, preset picker, source switch, unsupported-state UI
 - mic input via host-owned `AudioContext` + `AnalyserNode`
@@ -29,16 +287,14 @@
 - Harmonic Orbits / Tunnel / Polar / Spectrum
 - `SharedArrayBuffer` / oscilloscope worklet transport
 - `@kkb/ui` package expansion for oscilloscope wrappers
-- deep link sharing / URL state
+- deep link sharing beyond the lightweight demo URL-hash state that now ships on `/oscilloscope`
 - physically exact CRT simulation
 
 ## File Map
 
 ### `packages/audio`
 - `packages/audio/package.json`
-  Add `./oscilloscope` subpath exports.
-- `packages/audio/src/oscilloscope/index.ts`
-  Public exports for the oscilloscope runtime, presets, and support helper.
+  Add `./oscilloscope/*` direct subpath exports without a barrel export.
 - `packages/audio/src/oscilloscope/runtime.ts`
   Headless controller that owns config, render loop, provider attachment, and cleanup.
 - `packages/audio/src/oscilloscope/types.ts`
@@ -60,13 +316,19 @@
 - `packages/audio/src/oscilloscope/renderer/types.ts`
   Renderer interface and GPU resource type declarations.
 - `packages/audio/src/oscilloscope/renderer/pipeline.ts`
-  WebGPU init, ping-pong history textures, trace pass, and composite pass.
+  WebGPU init plus the active single-history phosphor renderer: fade accumulated history, redraw the trace into HDR history, then composite a lightweight glow pass to screen.
+- `packages/audio/src/oscilloscope/renderer/uniforms.ts`
+  Pure helpers that derive safe renderer uniform values from oscilloscope config.
 - `packages/audio/src/oscilloscope/renderer/shaders/trace.ts`
-  WGSL trace shader strings.
+  WGSL trace shader strings tuned for additive phosphor accumulation.
+- `packages/audio/src/oscilloscope/renderer/shaders/fade.ts`
+  WGSL fullscreen fade shader used to decay the accumulated history texture.
 - `packages/audio/src/oscilloscope/renderer/shaders/composite.ts`
-  WGSL fullscreen composite shader strings.
+  WGSL fullscreen composite shader used by the active glow/composite pass.
 - `packages/audio/src/oscilloscope/__tests__/support.test.ts`
   Support detection tests.
+- `packages/audio/src/oscilloscope/renderer/__tests__/uniforms.test.ts`
+  Renderer-uniform mapping and packing tests.
 - `packages/audio/src/oscilloscope/signal/__tests__/oscillator-source.test.ts`
   Oscillator provider tests.
 - `packages/audio/src/oscilloscope/signal/__tests__/analyser-source.test.ts`
@@ -80,9 +342,9 @@
 - `apps/web/app/oscilloscope/page.tsx`
   Dedicated server route that mounts the client shell.
 - `apps/web/components/oscilloscope/oscilloscope-client.tsx`
-  Client owner for runtime lifecycle, preset state, source switching, and mic attach/detach.
+  Client owner for runtime lifecycle, preset state, source switching, and mic attach/detach; now lazy-loads the default oscilloscope runtime and converts both sync and async startup failures into the same fallback UI.
 - `apps/web/components/oscilloscope/oscilloscope-shell.tsx`
-  Presentational shell: canvas, support state, and mic status banner.
+  Presentational shell: canvas, support state, and mic status banner, with startup failures mirrored in the banner instead of misleading source-active copy.
 - `apps/web/components/oscilloscope/oscilloscope-controls.tsx`
   Pure control surface for presets, source toggle, and oscillator/phosphor settings.
 - `apps/web/lib/oscilloscope/create-mic-provider.ts`
@@ -90,7 +352,7 @@
 - `apps/web/lib/oscilloscope/__tests__/create-mic-provider.test.ts`
   Mic provider factory tests.
 - `apps/web/components/oscilloscope/__tests__/oscilloscope-client.test.tsx`
-  Server-render safety test for the client component.
+  Server-render safety plus runtime-startup failure coverage for the client component.
 - `apps/web/app/oscilloscope/__tests__/page.test.tsx`
   Route render test for page copy and controls.
 - `apps/web/app/page.tsx`

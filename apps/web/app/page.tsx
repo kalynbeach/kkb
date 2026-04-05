@@ -25,6 +25,12 @@ export default function Home() {
         >
           json-render
         </Link>
+        <Link
+          href="/oscilloscope"
+          className="font-mono text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          oscilloscope
+        </Link>
       </nav>
     </div>
   );

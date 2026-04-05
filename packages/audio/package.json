@@ -8,7 +8,8 @@
     "./engine/*": "./src/engine/*.ts",
     "./sources/*": "./src/sources/*.ts",
     "./worklet/*": "./src/worklet/*.ts",
-    "./metrics/*": "./src/metrics/*.ts"
+    "./metrics/*": "./src/metrics/*.ts",
+    "./oscilloscope/*": "./src/oscilloscope/*.ts"
   },
   "scripts": {
     "check-types": "tsc --noEmit",

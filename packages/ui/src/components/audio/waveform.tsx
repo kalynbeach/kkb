@@ -190,8 +190,7 @@ function Waveform({
           ? null
           : bufferedRanges.map((range) => {
               const left = safeDuration > 0 ? (range.start / safeDuration) * 100 : 0;
-              const width =
-                safeDuration > 0 ? ((range.end - range.start) / safeDuration) * 100 : 0;
+              const width = safeDuration > 0 ? ((range.end - range.start) / safeDuration) * 100 : 0;
 
               return (
                 <div
