@@ -8,34 +8,34 @@
 
 **Tech Stack:** Bun, Turborepo, TypeScript 6, React 19, Next.js 16, WebGPU, Web Audio API, `bun:test`, `happy-dom`, Biome.
 
-## Status Update (2026-04-03)
+## Status Update (2026-04-05)
 
-This plan is partially implemented on `feature/oscilloscope-v1`.
+This plan is now effectively implemented on `feature/oscilloscope-v1` and the branch is in merge-ready cleanup state.
 
-### Completed implementation slices
-- package-level oscilloscope types, presets, support detection, signal providers, XY mode, runtime, and tests
-- first `apps/web` oscilloscope route, shell, controls, preset switching, support fallback, mic integration, and home-page link
-- mono mic behavior duplicates into both axes
-- hydration mismatch fix for the `/oscilloscope` route
-- barrel export removal in favor of direct `@kkb/audio/oscilloscope/*` imports
-- renderer-quality follow-up started: the direct-to-swapchain trace baseline has been replaced with a simpler single-history-texture renderer that fades accumulated phosphor, redraws the trace into HDR history, and composites a lightweight glow pass back to the screen
-- renderer uniform plumbing has been aligned across `uniforms.ts`, `pipeline.ts`, and the active WGSL shaders so trace, fade, and composite passes now share one explicit uniform contract; the trace pass also binds its own uniform bind group correctly in-browser
-- renderer uniform mapping now has focused unit coverage in `packages/audio/src/oscilloscope/renderer/__tests__/uniforms.test.ts`
-- the next renderer-quality slice is underway on top of that baseline: composite glow has been narrowed to reduce milky detune washout, and the fade curve now keeps long trails visibly decaying instead of flattening dense motion into a fogged background
-- `apps/web/components/oscilloscope/oscilloscope-client.tsx` now hardens startup failures in two additional ways: synchronous `createScope(...)` exceptions are converted into the same readable fallback state as async `scope.start()` failures, and the default oscilloscope runtime is loaded lazily instead of being imported eagerly at module evaluation time
-- startup-failure UI is now less misleading: when renderer startup fails, the status banner mirrors the renderer failure reason instead of claiming the internal oscillators are active
+### Implemented outcome
+- package-level oscilloscope types, presets, support detection, signal providers, XY mode, runtime, and focused tests landed in `packages/audio/src/oscilloscope/*`
+- `/oscilloscope` exists in `apps/web` with a client-owned runtime lifecycle, support fallback, preset switching, source switching, mic integration, and home-page navigation
+- the active renderer is the branch's simplified single-history fade/trace/composite WebGPU pipeline rather than the earlier ping-pong persistence experiment
+- mono mic input now derives a more useful second axis instead of collapsing into a weak duplicated diagonal
+- browser verification is repeatable via `scripts/oscilloscope-agent-browser-smoke.sh` plus the checked-in smoke reports and template
+- the UI refactor/design-critique pass landed: the page now leans on `@kkb/ui`, keeps the stage primary, hides oscillator-only controls in mic mode, adds clearer status handling, supports lightweight URL-hash state persistence, preset keyboard shortcuts, and a visual reset action
+- PR review hardening landed: the support state uses a discriminated union, config merge logic is shared, redundant startup config replay is gone, and renderer/runtime trace-size guards are in place
 
-### Current branch deviations from the original plan
-- the `@kkb/audio/oscilloscope` barrel entrypoint and `packages/audio/src/oscilloscope/index.ts` were intentionally removed; consumers now use direct subpath imports
-- the original ping-pong persistence/composite renderer path proved unstable in-browser; the current renderer direction is now a simpler single-history fade/composite pipeline rather than the original ping-pong design
-- `agent-browser` verification is now working again when exercised against `http://localhost:3000/oscilloscope` after the dev-server restart; the route hydrates, mounts the `<canvas>`, and runs the WebGPU renderer in fresh sessions
-
-### Verification status
+### Final verification status
 - `bun run test -- --filter=@kkb/audio --filter=@kkb/web`: passing
 - `bun run check-types -- --filter=@kkb/audio --filter=@kkb/web`: passing
-- `bun run format-and-lint`: currently failing because Biome would reformat `packages/audio/src/oscilloscope/renderer/uniforms.ts`; there is also one existing non-blocking warning in `packages/ui/src/components/sidebar.tsx`
-- `agent-browser` review on `http://localhost:3000/oscilloscope`: passing for oscillator-mode smoke coverage; the route hydrates, mounts the canvas, and the renderer produces frame-to-frame pixel diffs in screenshots
-- `agent-browser` mic-mode review: browser media permission is denied in this headless environment, but the UI surfaces `Permission denied` and cleanly recovers when switching back to oscillators
+- `bun run format-and-lint`: passing with the existing non-blocking `packages/ui/src/components/sidebar.tsx` cookie warning only
+- browser verification: passing in `docs/reports/2026-04-04-oscilloscope-browser-smoke.md`
+- design critique follow-through: captured in `docs/reports/2026-04-04-oscilloscope-design-critique.md`
+
+### Non-blocking follow-ups after merge
+- cache the composite bind group in `packages/audio/src/oscilloscope/renderer/pipeline.ts` instead of recreating it every frame
+- decide whether `renderer.destroy()` should explicitly call `device.destroy()` for stricter GPU resource cleanup
+- optionally deduplicate the remaining small `clamp(...)` helpers across oscilloscope/browser-host files
+- keep future scope expansion separate from this PR: Y-T mode, track visualization, worklet/SAB transport, and higher-fidelity CRT effects remain follow-up work
+
+### Note on the historical plan below
+The remaining sections of this document are preserved as the original execution plan and implementation record for the branch. They are useful context, but the status summary above reflects the final branch state more accurately than the unchecked planning checklist below.
 
 ## Next Slice Execution Plan (2026-04-03)
 
@@ -287,7 +287,7 @@ For mic verification:
 - Harmonic Orbits / Tunnel / Polar / Spectrum
 - `SharedArrayBuffer` / oscilloscope worklet transport
 - `@kkb/ui` package expansion for oscilloscope wrappers
-- deep link sharing / URL state
+- deep link sharing beyond the lightweight demo URL-hash state that now ships on `/oscilloscope`
 - physically exact CRT simulation
 
 ## File Map

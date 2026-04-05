@@ -24,11 +24,15 @@ type OscilloscopeControlsProps = {
   selectedPresetId: string;
 };
 
+const MIN_FREQUENCY = 1;
+const MAX_FREQUENCY = 20_000;
+
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const formatBloomValue = (value: number) => value.toFixed(2);
 
 const parseNumberInput = (value: string) => {
   const nextValue = Number(value);
-  return Number.isFinite(nextValue) ? nextValue : null;
+  return Number.isFinite(nextValue) ? clamp(nextValue, MIN_FREQUENCY, MAX_FREQUENCY) : null;
 };
 
 function ControlsSection({
@@ -182,6 +186,8 @@ export function OscilloscopeControls({
                   id="oscilloscope-frequency-a"
                   inputMode="decimal"
                   name="oscillatorAFrequency"
+                  max={MAX_FREQUENCY}
+                  min={MIN_FREQUENCY}
                   onChange={(event) => {
                     const nextValue = parseNumberInput(event.target.value);
                     if (nextValue !== null) {
@@ -193,6 +199,7 @@ export function OscilloscopeControls({
                       });
                     }
                   }}
+                  step="any"
                   type="number"
                   value={config.source.a.frequency}
                 />
@@ -209,6 +216,8 @@ export function OscilloscopeControls({
                   id="oscilloscope-frequency-b"
                   inputMode="decimal"
                   name="oscillatorBFrequency"
+                  max={MAX_FREQUENCY}
+                  min={MIN_FREQUENCY}
                   onChange={(event) => {
                     const nextValue = parseNumberInput(event.target.value);
                     if (nextValue !== null) {
@@ -220,6 +229,7 @@ export function OscilloscopeControls({
                       });
                     }
                   }}
+                  step="any"
                   type="number"
                   value={config.source.b.frequency}
                 />
