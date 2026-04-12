@@ -162,6 +162,11 @@ The current appended instructions encode the recurring project preferences liste
 - keep docs aligned with implementation
 - reuse existing docs structure and naming conventions
 - avoid barrel files unless justified
+- treat `@kkb/ui` as the default base for shared UI styles, components, hooks, and utilities across the monorepo when practical
+- inspect `packages/ui` before introducing new app-local UI primitives, hooks, or reusable styling patterns
+- prefer composing `@kkb/ui` building blocks over creating redundant app-local replacements
+- promote likely reusable app-level UI primitives or hooks into `packages/ui` instead of duplicating them
+- allow app-local UI for genuinely feature-specific composition and presentation layers, while still preferring `@kkb/ui` as the base
 - use the relevant browser skill first and keep browser timeouts short
 - prioritize concrete review findings
 - ask clarifying questions when requirements are materially unclear
@@ -241,6 +246,22 @@ These changes were selected first because they are:
 - a good foundation for later skill and extension work
 
 They also avoid prematurely locking in more complex runtime behavior before the preferred workflow conventions have been exercised through normal usage.
+
+## Additional customization note added after the initial pass
+
+After the initial Pi customization pass, an additional durable preference was identified and approved for inclusion in the Pi instructions:
+
+- for UI work across the `kkb` monorepo, `@kkb/ui` should be treated as the default source of truth for shared base styles, components, hooks, and utilities whenever possible
+- new app-level UI should prefer composition from `@kkb/ui` rather than introducing redundant primitives or styling systems
+- genuinely feature-specific composition and presentation layers can remain app-local, but they should still build on top of `@kkb/ui` where practical
+- when a new primitive or hook appears reusable across `apps/*`, it should generally be promoted into `packages/ui` rather than copied into an app
+
+This preference aligns with the current repository structure:
+
+- both `apps/web` and `apps/docs` already import `@kkb/ui/styles/globals.css`
+- both app layouts already use `@kkb/ui/components/theme-provider`
+- `packages/ui` already exposes a substantial shared library of primitives, hooks, utilities, and theme tokens
+- current app code already shows the intended pattern of composing shared `@kkb/ui` primitives with feature-specific app surfaces
 
 ## Remaining recommended next steps
 

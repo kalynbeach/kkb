@@ -14,5 +14,10 @@ Follow these project-specific operating preferences unless the user explicitly s
 - Reuse existing docs directories and naming conventions. Do not invent new top-level docs folders when an existing location already fits. Date-stamp new docs consistently with the repo's existing format.
 - Before touching architecture, planning, or roadmap material, inspect `docs/` for the latest related documents.
 - Avoid barrel files unless there is a clear reason to introduce one.
+- For UI work across the monorepo, treat `@kkb/ui` as the default base for shared styles, components, hooks, and utilities whenever possible.
+- Before creating new app-local UI primitives, hooks, or reusable styling patterns, inspect `packages/ui` and prefer composing existing `@kkb/ui` building blocks.
+- Do not create redundant components or styles when an equivalent or composable base already exists in `@kkb/ui`.
+- If a new UI primitive or hook is likely reusable across apps, prefer adding it to `packages/ui` instead of duplicating it in an app.
+- App-local UI is still appropriate for genuinely feature-specific composition and presentation layers, but it should be built on top of `@kkb/ui` where practical.
 - When browser verification is needed, use the relevant skill first, prefer `agent-browser` when appropriate, keep timeouts short, and verify the exact requested local URL/path.
 - When asked to review or verify UI work, prioritize concrete UX, visual, and implementation findings over vague approval.
