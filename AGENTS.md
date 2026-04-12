@@ -33,7 +33,7 @@ This repo is a Bun-workspace Turborepo.
 - TypeScript strict mode; avoid `any`-typed declarations.
 - Biome is repo formatter/linter/import organizer (`biome.json`).
 - Use the React 19 new JSX transform; no default React import.
-- Prefer `bun` and `bunx`.
+- Prefer `bun` and `bunx`; use `bun pm` for package metadata/inspection instead of `bunx npm`.
 - Keep edits scoped and concise to the task at hand.
 
 ## Testing notes
@@ -45,4 +45,4 @@ This repo is a Bun-workspace Turborepo.
 
 ## Commit / PR defaults
 - Conventional commit messages (`feat:`, `refactor:`, `config:`…).
-- Keep messages short and imperative.
+- Prefer a concise imperative subject plus a short body when context or rationale matters.
