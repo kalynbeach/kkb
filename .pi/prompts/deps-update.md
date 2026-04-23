@@ -1,9 +1,10 @@
 ---
 description: Review and plan dependency updates carefully
 ---
-Inspect current dependency state and relevant workspace/package context.
+Inspect current dependency state and relevant workspace/package context using Bun-native commands and workflows.
 
-Prefer Bun-native commands and workflows.
+1) Check outdated monorepo root dependencies: `bun outdated`
+2) Check outdated monorepo workspace and catalog dependencies: `bun outdated --filter="*"`
 
 Then provide:
 - the recommended update strategy

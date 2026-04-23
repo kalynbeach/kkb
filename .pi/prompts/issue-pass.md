@@ -5,6 +5,7 @@ Inspect the relevant docs, plans, TODOs, and recent work, then identify actionab
 
 For each recommended issue, provide:
 - title
+- labels
 - problem / motivation
 - proposed scope
 - acceptance criteria
