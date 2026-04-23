@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1080" viewBox="0 0 1600 1080" role="img" aria-labelledby="title desc">
+  <title id="title">KKB audio player data flow</title>
+  <desc id="desc">Data flow from track catalog and UI actions through the web controller, WebPlayer facade, AudioEngine, selected source, store updates, and timeline polling.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#2563eb" />
+    </marker>
+    <marker id="return" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#7c3aed" />
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { fill: #0f172a; font: 700 34px Arial, sans-serif; }
+      .subtitle { fill: #475569; font: 400 18px Arial, sans-serif; }
+      .lane { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 20; }
+      .lane-title { fill: #0f172a; font: 700 20px Arial, sans-serif; }
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; rx: 12; }
+      .web { fill: #dbeafe; stroke: #60a5fa; }
+      .audio { fill: #dcfce7; stroke: #22c55e; }
+      .source { fill: #fef3c7; stroke: #f59e0b; }
+      .ui { fill: #ede9fe; stroke: #8b5cf6; }
+      .muted { fill: #f1f5f9; stroke: #94a3b8; }
+      .box-title { fill: #0f172a; font: 700 16px Arial, sans-serif; }
+      .box-text { fill: #1e293b; font: 400 14px Arial, sans-serif; }
+      .small { fill: #475569; font: 600 13px Arial, sans-serif; }
+      .step { fill: #2563eb; font: 700 13px Arial, sans-serif; }
+      .line { fill: none; stroke: #2563eb; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
+      .return-line { fill: none; stroke: #7c3aed; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#return); stroke-dasharray: 8 6; }
+      .thin { stroke-width: 1.8; }
+    </style>
+  </defs>
+  <rect class="bg" width="1600" height="1080" />
+  <text class="title" x="70" y="70">Audio player data flow</text>
+  <text class="subtitle" x="70" y="101">/audio uses web-owned catalog and controller state around a headless @kkb/audio engine. Live timeline reads stay off React state.</text>
+
+  <rect class="lane" x="60" y="145" width="1480" height="200" rx="20" />
+  <text class="lane-title" x="90" y="183">1. Web host setup</text>
+  <rect class="box web" x="90" y="215" width="205" height="90" rx="12" />
+  <text class="box-title" x="112" y="244">PlayerClient</text>
+  <text class="box-text" x="112" y="268">render creates catalog;</text>
+  <text class="box-text" x="112" y="288">effect creates player/controller</text>
+  <rect class="box web" x="345" y="215" width="205" height="90" rx="12" />
+  <text class="box-title" x="367" y="244">Static catalog</text>
+  <text class="box-text" x="367" y="268">AAC + Opus fixtures</text>
+  <text class="box-text" x="367" y="288">default track id</text>
+  <rect class="box web" x="600" y="215" width="225" height="90" rx="12" />
+  <text class="box-title" x="622" y="244">PlayerController</text>
+  <text class="box-text" x="622" y="268">selection + queue flags</text>
+  <text class="box-text" x="622" y="288">mirrors runtime snapshot</text>
+  <rect class="box web" x="875" y="215" width="225" height="90" rx="12" />
+  <text class="box-title" x="897" y="244">createWebPlayer()</text>
+  <text class="box-text" x="897" y="268">creates HTMLAudioElements</text>
+  <text class="box-text" x="897" y="288">builds source array</text>
+  <rect class="box audio" x="1150" y="215" width="225" height="90" rx="12" />
+  <text class="box-title" x="1172" y="244">AudioEngine</text>
+  <text class="box-text" x="1172" y="268">owns store/checkpoint</text>
+  <text class="box-text" x="1172" y="288">subscribable snapshot</text>
+  <path class="line" d="M295 260 L345 260" />
+  <path class="line" d="M550 260 L600 260" />
+  <path class="line" d="M825 260 L875 260" />
+  <path class="line" d="M1100 260 L1150 260" />
+
+  <rect class="lane" x="60" y="385" width="1480" height="265" rx="20" />
+  <text class="lane-title" x="90" y="423">2. Track load and source selection</text>
+  <rect class="box web" x="90" y="460" width="210" height="110" rx="12" />
+  <text class="box-title" x="112" y="489">selectTrack(trackId)</text>
+  <text class="box-text" x="112" y="513">selectTrackAsset()</text>
+  <text class="box-text" x="112" y="533">optimistic selection</text>
+  <text class="box-text" x="112" y="553">rollback on load fail</text>
+  <rect class="box web" x="345" y="460" width="210" height="110" rx="12" />
+  <text class="box-title" x="367" y="489">TrackInput</text>
+  <text class="box-text" x="367" y="513">src</text>
+  <text class="box-text" x="367" y="533">mimeType</text>
+  <text class="box-text" x="367" y="553">from selected asset</text>
+  <rect class="box audio" x="600" y="460" width="230" height="110" rx="12" />
+  <text class="box-title" x="622" y="489">engine.load()</text>
+  <text class="box-text" x="622" y="513">teardown active source</text>
+  <text class="box-text" x="622" y="533">transition loading</text>
+  <text class="box-text" x="622" y="553">filter canPlay()</text>
+  <rect class="box source" x="875" y="430" width="520" height="182" rx="12" />
+  <text class="box-title" x="897" y="459">Rank playable sources by score</text>
+  <text class="box-text" x="897" y="485">WebCodecsSource — score 100 — inert with default demuxer</text>
+  <text class="box-text" x="897" y="509">MediaElementSource — score 70 — active audible path</text>
+  <text class="box-text" x="897" y="533">WorkletPCMSource — score 50 — opt-in disabled in host</text>
+  <text class="box-text" x="897" y="557">FallbackSource — score 1 — second HTMLAudioElement path</text>
+  <text class="small" x="897" y="586">web factory order is not the final selection order; score decides.</text>
+  <rect class="box audio" x="1110" y="620" width="285" height="80" rx="12" />
+  <text class="box-title" x="1132" y="649">ready or error</text>
+  <text class="box-text" x="1132" y="673">activeSource + sourceId stored</text>
+  <path class="line" d="M300 515 L345 515" />
+  <path class="line" d="M555 515 L600 515" />
+  <path class="line" d="M830 515 L875 515" />
+  <path class="line" d="M1135 600 L1215 620" />
+
+  <rect class="lane" x="60" y="715" width="1480" height="265" rx="20" />
+  <text class="lane-title" x="90" y="753">3. Runtime controls, events, and UI updates</text>
+  <rect class="box ui" x="90" y="790" width="210" height="100" rx="12" />
+  <text class="box-title" x="112" y="819">PlayerShell</text>
+  <text class="box-text" x="112" y="843">play/pause/seek/rate</text>
+  <text class="box-text" x="112" y="863">volume + track buttons</text>
+  <rect class="box web" x="345" y="790" width="210" height="100" rx="12" />
+  <text class="box-title" x="367" y="819">Controller actions</text>
+  <text class="box-text" x="367" y="843">delegate to WebPlayer</text>
+  <text class="box-text" x="367" y="863">sync snapshot when needed</text>
+  <rect class="box audio" x="600" y="790" width="210" height="100" rx="12" />
+  <text class="box-title" x="622" y="819">AudioEngine controls</text>
+  <text class="box-text" x="622" y="843">source operation</text>
+  <text class="box-text" x="622" y="863">checkpoint + store</text>
+  <rect class="box source" x="855" y="790" width="225" height="100" rx="12" />
+  <text class="box-title" x="877" y="819">Active source</text>
+  <text class="box-text" x="877" y="843">HTMLAudioElement in current host</text>
+  <text class="box-text" x="877" y="863">emits play/pause/ended/error</text>
+  <rect class="box audio" x="1125" y="790" width="180" height="100" rx="12" />
+  <text class="box-title" x="1147" y="819">PlayerStore</text>
+  <text class="box-text" x="1147" y="843">status, time</text>
+  <text class="box-text" x="1147" y="863">duration, error</text>
+  <rect class="box ui" x="1350" y="790" width="160" height="100" rx="12" />
+  <text class="box-title" x="1372" y="819">React UI</text>
+  <text class="box-text" x="1372" y="843">useSyncExternalStore</text>
+  <text class="box-text" x="1372" y="863">coarse state render</text>
+  <path class="line" d="M300 840 L345 840" />
+  <path class="line" d="M555 840 L600 840" />
+  <path class="line" d="M810 840 L855 840" />
+  <path class="return-line" d="M1080 840 L1125 840" />
+  <path class="return-line" d="M1305 840 L1350 840" />
+
+  <rect class="box muted" x="345" y="914" width="735" height="104" rx="12" />
+  <text class="box-title" x="367" y="943">Imperative live timeline path</text>
+  <text class="box-text" x="367" y="969">While status is playing, PlayerShell uses requestAnimationFrame to call</text>
+  <text class="box-text" x="367" y="991">getTimeline() and getBufferedRanges(). It updates refs for labels, progress,</text>
+  <text class="box-text" x="367" y="1013">waveform playhead, aria values, and buffered segments without per-frame React state.</text>
+  <path class="return-line thin" d="M967 890 C967 908, 930 916, 892 922" />
+  <path class="return-line thin" d="M345 969 C292 969, 225 940, 195 890" />
+
+  <text class="small" x="70" y="1040">Key source files: apps/web/lib/audio/create-web-player.ts, apps/web/lib/audio/controller/player-controller.ts, apps/web/components/audio/player-shell.tsx, packages/audio/src/engine/engine.ts, packages/audio/src/sources/*.</text>
+</svg>

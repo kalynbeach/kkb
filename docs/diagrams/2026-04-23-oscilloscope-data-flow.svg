@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1120" viewBox="0 0 1600 1120" role="img" aria-labelledby="title desc">
+  <title id="title">KKB oscilloscope data flow</title>
+  <desc id="desc">Data flow for the web oscilloscope route, mic provider, @kkb/audio oscilloscope runtime, signal providers, XY mode, and WebGPU renderer.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#059669" />
+    </marker>
+    <marker id="arrow-blue" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#2563eb" />
+    </marker>
+    <marker id="arrow-amber" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#d97706" />
+    </marker>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { fill: #0f172a; font: 700 34px Arial, sans-serif; }
+      .subtitle { fill: #475569; font: 400 18px Arial, sans-serif; }
+      .group { fill: #ffffff; stroke: #cbd5e1; stroke-width: 2; rx: 20; }
+      .group-title { fill: #0f172a; font: 700 20px Arial, sans-serif; }
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; rx: 12; }
+      .web { fill: #dbeafe; stroke: #60a5fa; }
+      .audio { fill: #dcfce7; stroke: #22c55e; }
+      .mic { fill: #fef3c7; stroke: #f59e0b; }
+      .render { fill: #ecfeff; stroke: #06b6d4; }
+      .muted { fill: #f1f5f9; stroke: #94a3b8; }
+      .box-title { fill: #0f172a; font: 700 16px Arial, sans-serif; }
+      .box-text { fill: #1e293b; font: 400 14px Arial, sans-serif; }
+      .small { fill: #475569; font: 600 13px Arial, sans-serif; }
+      .line { fill: none; stroke: #059669; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow); }
+      .line-blue { fill: none; stroke: #2563eb; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-blue); }
+      .line-amber { fill: none; stroke: #d97706; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; marker-end: url(#arrow-amber); }
+      .dash { stroke-dasharray: 8 6; }
+    </style>
+  </defs>
+  <rect class="bg" width="1600" height="1120" />
+  <text class="title" x="70" y="70">Oscilloscope data flow</text>
+  <text class="subtitle" x="70" y="101">/oscilloscope owns browser permissions and UI state; @kkb/audio owns signal abstraction, XY geometry, frame loop, and WebGPU rendering.</text>
+
+  <rect class="group" x="60" y="145" width="480" height="835" rx="20" />
+  <text class="group-title" x="90" y="183">apps/web route and client lifecycle</text>
+  <rect class="box web" x="90" y="220" width="195" height="90" rx="12" />
+  <text class="box-title" x="112" y="249">/oscilloscope route</text>
+  <text class="box-text" x="112" y="273">renders client surface</text>
+  <rect class="box web" x="315" y="220" width="195" height="90" rx="12" />
+  <text class="box-title" x="337" y="249">OscilloscopeShell</text>
+  <text class="box-text" x="337" y="273">canvas + status + controls</text>
+
+  <rect class="box web" x="90" y="350" width="420" height="150" rx="12" />
+  <text class="box-title" x="112" y="379">OscilloscopeClient</text>
+  <text class="box-text" x="112" y="403">getOscilloscopeSupport() on client</text>
+  <text class="box-text" x="112" y="423">read/write hash config</text>
+  <text class="box-text" x="112" y="443">lazy import @kkb/audio/oscilloscope/runtime</text>
+  <text class="box-text" x="112" y="463">scopeRef, latestConfigRef, micRequestIdRef</text>
+
+  <rect class="box web" x="90" y="540" width="195" height="132" rx="12" />
+  <text class="box-title" x="112" y="569">Controls</text>
+  <text class="box-text" x="112" y="593">source toggle</text>
+  <text class="box-text" x="112" y="613">preset select</text>
+  <text class="box-text" x="112" y="633">freq, trail, bloom</text>
+  <text class="box-text" x="112" y="653">plain React state</text>
+
+  <rect class="box web" x="315" y="540" width="195" height="132" rx="12" />
+  <text class="box-title" x="337" y="569">syncSignalSource()</text>
+  <text class="box-text" x="337" y="593">oscillators: clear provider</text>
+  <text class="box-text" x="337" y="613">mic: create provider</text>
+  <text class="box-text" x="337" y="633">stale request guard</text>
+  <text class="box-text" x="337" y="653">replace mic runtime/provider</text>
+
+  <rect class="box mic" x="90" y="720" width="420" height="210" rx="12" />
+  <text class="box-title" x="112" y="749">createMicProvider()</text>
+  <text class="box-text" x="112" y="773">fake-mono/fake-stereo: synthetic AnalyserLike</text>
+  <text class="box-text" x="112" y="797">live: getUserMedia({ channelCount ideal 2 })</text>
+  <text class="box-text" x="112" y="821">AudioContext.createMediaStreamSource(stream)</text>
+  <text class="box-text" x="112" y="845">mono: source -> left analyser -> derived stereo</text>
+  <text class="box-text" x="112" y="869">stereo: source -> splitter -> left/right analysers</text>
+  <text class="box-text" x="112" y="893">destroy stops tracks, disconnects nodes, closes context</text>
+
+  <rect class="group" x="600" y="145" width="445" height="835" rx="20" />
+  <text class="group-title" x="630" y="183">@kkb/audio oscilloscope runtime</text>
+  <rect class="box audio" x="630" y="220" width="385" height="112" rx="12" />
+  <text class="box-title" x="652" y="249">createOscilloscope(canvas, config)</text>
+  <text class="box-text" x="652" y="273">creates renderer on start()</text>
+  <text class="box-text" x="652" y="293">owns running flag, RAF handle, last frame time</text>
+  <text class="box-text" x="652" y="313">destroy releases renderer and provider refs</text>
+
+  <rect class="box audio" x="630" y="370" width="180" height="132" rx="12" />
+  <text class="box-title" x="652" y="399">Config</text>
+  <text class="box-text" x="652" y="423">mode: xy</text>
+  <text class="box-text" x="652" y="443">source type</text>
+  <text class="box-text" x="652" y="463">phosphor trail/bloom</text>
+  <text class="box-text" x="652" y="483">merge update</text>
+
+  <rect class="box audio" x="835" y="370" width="180" height="132" rx="12" />
+  <text class="box-title" x="857" y="399">Provider choice</text>
+  <text class="box-text" x="857" y="423">oscillator provider</text>
+  <text class="box-text" x="857" y="443">or injected mic provider</text>
+  <text class="box-text" x="857" y="463">null provider blanks trace</text>
+
+  <rect class="box audio" x="630" y="550" width="180" height="165" rx="12" />
+  <text class="box-title" x="652" y="579">Oscillator</text>
+  <text class="box-title" x="652" y="599">SignalProvider</text>
+  <text class="box-text" x="652" y="627">2 channels</text>
+  <text class="box-text" x="652" y="647">sine/square/saw/triangle</text>
+  <text class="box-text" x="652" y="667">detune + phase</text>
+  <text class="box-text" x="652" y="687">one cached frame until</text>
+  <text class="box-text" x="652" y="707">both channels read</text>
+
+  <rect class="box audio" x="835" y="550" width="180" height="165" rx="12" />
+  <text class="box-title" x="857" y="579">Analyser</text>
+  <text class="box-title" x="857" y="599">SignalProvider</text>
+  <text class="box-text" x="857" y="627">wraps AnalyserLike</text>
+  <text class="box-text" x="857" y="647">frequency/time data</text>
+  <text class="box-text" x="857" y="667">sample conditioning</text>
+  <text class="box-text" x="857" y="687">duplicate or derived</text>
+  <text class="box-text" x="857" y="707">stereo for mono input</text>
+
+  <rect class="box audio" x="630" y="750" width="385" height="150" rx="12" />
+  <text class="box-title" x="652" y="779">RAF tick -> XY geometry</text>
+  <text class="box-text" x="652" y="803">now() -> deltaSeconds</text>
+  <text class="box-text" x="652" y="823">resize(canvas.clientWidth, clientHeight, DPR)</text>
+  <text class="box-text" x="652" y="843">sampleCount = clamp(trailLength * 8, 256..4096)</text>
+  <text class="box-text" x="652" y="863">createXyMode().generateFrame()</text>
+  <text class="box-text" x="652" y="883">left samples -> X, right/left samples -> Y</text>
+
+  <rect class="group" x="1105" y="145" width="435" height="835" rx="20" />
+  <text class="group-title" x="1135" y="183">WebGPU render path</text>
+  <rect class="box render" x="1135" y="220" width="375" height="130" rx="12" />
+  <text class="box-title" x="1157" y="249">createWebGpuRenderer()</text>
+  <text class="box-text" x="1157" y="273">requestAdapter() -> requestDevice()</text>
+  <text class="box-text" x="1157" y="293">canvas.getContext("webgpu")</text>
+  <text class="box-text" x="1157" y="313">uniform + vertex buffers</text>
+  <text class="box-text" x="1157" y="333">shader modules and pipelines</text>
+
+  <rect class="box render" x="1135" y="390" width="375" height="150" rx="12" />
+  <text class="box-title" x="1157" y="419">Persistent history texture</text>
+  <text class="box-text" x="1157" y="443">rgba16float texture</text>
+  <text class="box-text" x="1157" y="463">recreated on resize</text>
+  <text class="box-text" x="1157" y="483">load when primed, clear first frame</text>
+  <text class="box-text" x="1157" y="503">stores phosphor trail between frames</text>
+
+  <rect class="box render" x="1135" y="580" width="375" height="190" rx="12" />
+  <text class="box-title" x="1157" y="609">drawFrame(geometry, config, deltaSeconds)</text>
+  <text class="box-text" x="1157" y="633">pack uniforms from config + frame time</text>
+  <text class="box-text" x="1157" y="657">write vertex buffer, max 8192 floats</text>
+  <text class="box-text" x="1157" y="681">fade pass over history texture</text>
+  <text class="box-text" x="1157" y="705">trace pass adds line strip</text>
+  <text class="box-text" x="1157" y="729">composite pass draws history to canvas</text>
+  <text class="box-text" x="1157" y="753">submit GPU command encoder</text>
+
+  <rect class="box render" x="1135" y="820" width="375" height="80" rx="12" />
+  <text class="box-title" x="1157" y="849">Visible canvas</text>
+  <text class="box-text" x="1157" y="873">phosphor-style XY/Lissajous trace</text>
+
+  <path class="line-blue" d="M285 265 L315 265" />
+  <path class="line-blue" d="M300 500 L300 540" />
+  <path class="line-blue" d="M412 672 L412 720" />
+  <path class="line" d="M510 425 C555 395, 580 276, 630 276" />
+  <path class="line" d="M510 606 C610 606, 720 500, 835 436" />
+  <path class="line-amber" d="M510 860 C655 860, 770 785, 835 700" />
+  <path class="line" d="M720 502 L720 550" />
+  <path class="line" d="M925 502 L925 550" />
+  <path class="line" d="M720 715 C720 732, 735 742, 760 750" />
+  <path class="line" d="M925 715 C925 732, 910 742, 885 750" />
+  <path class="line" d="M1015 825 C1065 825, 1085 670, 1135 670" />
+  <path class="line" d="M1322 770 L1322 820" />
+  <path class="line-blue dash" d="M510 395 C555 395, 585 435, 630 435" />
+  <text class="small" x="548" y="378">updateConfig(config)</text>
+  <path class="line-blue dash" d="M1015 255 C1065 255, 1085 285, 1135 285" />
+  <text class="small" x="1038" y="239">start() creates renderer</text>
+
+  <rect class="box muted" x="60" y="1000" width="1480" height="92" rx="12" />
+  <text class="box-title" x="90" y="1030">Important ownership detail</text>
+  <text class="box-text" x="90" y="1056">The web app owns permission prompts, AudioContext lifetime, hash persistence, React controls,</text>
+  <text class="box-text" x="90" y="1076">stale async mic guards, and canvas ref. @kkb/audio owns SignalProvider shape, oscillator/analyser adapters, XY geometry, frame scheduling, renderer resources, and WebGPU passes.</text>
+</svg>
