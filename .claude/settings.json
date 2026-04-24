@@ -1,9 +1,5 @@
 {
   "worktree": {
-    "sparsePaths": [
-      ".github",
-      "docs",
-      "packages/typescript-config"
-    ]
+    "sparsePaths": [".github", "docs", "packages/typescript-config"]
   }
 }
