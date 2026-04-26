@@ -141,8 +141,15 @@ export const createWebGpuRenderer = async (
     layout: tracePipeline.getBindGroupLayout(0),
     entries: [{ binding: 0, resource: { buffer: uniformBuffer } }],
   });
+  const compositeBindGroupLayout = compositePipeline.getBindGroupLayout(0);
 
-  let historyTexture: GPUTexture | null = null;
+  type HistoryTarget = {
+    compositeBindGroup: GPUBindGroup;
+    texture: GPUTexture;
+    view: GPUTextureView;
+  };
+
+  let historyTarget: HistoryTarget | null = null;
   let historyPrimed = false;
 
   const createHistoryTexture = () =>
@@ -155,13 +162,33 @@ export const createWebGpuRenderer = async (
       usage: GPU_TEXTURE_USAGE_RENDER_ATTACHMENT | GPU_TEXTURE_USAGE_TEXTURE_BINDING,
     });
 
-  const rebuildHistoryTexture = () => {
-    historyTexture?.destroy();
-    historyTexture = createHistoryTexture();
+  const createHistoryTarget = (): HistoryTarget => {
+    const texture = createHistoryTexture();
+    const view = texture.createView();
+    const compositeBindGroup = device.createBindGroup({
+      layout: compositeBindGroupLayout,
+      entries: [
+        { binding: 0, resource: view },
+        { binding: 1, resource: sampler },
+        { binding: 2, resource: { buffer: uniformBuffer } },
+      ],
+    });
+
+    return { compositeBindGroup, texture, view };
+  };
+
+  const destroyHistoryTarget = () => {
+    historyTarget?.texture.destroy();
+    historyTarget = null;
     historyPrimed = false;
   };
 
-  rebuildHistoryTexture();
+  const rebuildHistoryTarget = () => {
+    destroyHistoryTarget();
+    historyTarget = createHistoryTarget();
+  };
+
+  rebuildHistoryTarget();
 
   const resize = (width: number, height: number, devicePixelRatio: number) => {
     const nextWidth = Math.max(1, Math.floor(width * devicePixelRatio));
@@ -174,17 +201,17 @@ export const createWebGpuRenderer = async (
     canvas.width = nextWidth;
     canvas.height = nextHeight;
     context.configure({ alphaMode: "opaque", device, format });
-    rebuildHistoryTexture();
+    rebuildHistoryTarget();
   };
 
   const drawFrame = (geometry: FrameGeometry, config: OscilloscopeConfig, deltaSeconds: number) => {
     const uniforms = packRendererUniforms(
       createRendererUniformValues(config, canvas.width, canvas.height, deltaSeconds),
     );
-    const history = historyTexture;
+    const history = historyTarget;
 
     if (!history) {
-      throw new Error("Oscilloscope history texture is not initialized.");
+      throw new Error("Oscilloscope history target is not initialized.");
     }
 
     const tracePoints =
@@ -195,21 +222,11 @@ export const createWebGpuRenderer = async (
     device.queue.writeBuffer(uniformBuffer, 0, uniforms);
     device.queue.writeBuffer(vertexBuffer, 0, tracePoints);
 
-    const historyView = history.createView();
-    const compositeBindGroup = device.createBindGroup({
-      layout: compositePipeline.getBindGroupLayout(0),
-      entries: [
-        { binding: 0, resource: historyView },
-        { binding: 1, resource: sampler },
-        { binding: 2, resource: { buffer: uniformBuffer } },
-      ],
-    });
-
     const encoder = device.createCommandEncoder();
     const historyPass = encoder.beginRenderPass({
       colorAttachments: [
         {
-          view: historyView,
+          view: history.view,
           loadOp: historyPrimed ? "load" : "clear",
           clearValue: {
             r: config.canvas.background,
@@ -250,7 +267,7 @@ export const createWebGpuRenderer = async (
     });
 
     screenPass.setPipeline(compositePipeline);
-    screenPass.setBindGroup(0, compositeBindGroup);
+    screenPass.setBindGroup(0, history.compositeBindGroup);
     screenPass.draw(3);
     screenPass.end();
 
@@ -259,9 +276,10 @@ export const createWebGpuRenderer = async (
 
   return {
     destroy: () => {
-      historyTexture?.destroy();
-      historyTexture = null;
-      historyPrimed = false;
+      destroyHistoryTarget();
+      // The renderer releases explicit resources it owns, but intentionally does not call
+      // device.destroy(). Device lifetime is kept separate so future shared-device or
+      // injected-device paths are not invalidated by renderer teardown.
     },
     drawFrame,
     resize,
