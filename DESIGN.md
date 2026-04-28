@@ -28,19 +28,19 @@ colors:
   audio-control: "#c7cbd4"
 typography:
   headline-lg:
-    fontFamily: Geist
+    fontFamily: TX-02
     fontSize: 32px
     fontWeight: 600
     lineHeight: 40px
     letterSpacing: -0.02em
   headline-md:
-    fontFamily: Geist
+    fontFamily: TX-02
     fontSize: 24px
     fontWeight: 600
     lineHeight: 32px
     letterSpacing: -0.01em
   headline-sm:
-    fontFamily: Geist
+    fontFamily: TX-02
     fontSize: 20px
     fontWeight: 600
     lineHeight: 28px
@@ -61,22 +61,22 @@ typography:
     fontWeight: 400
     lineHeight: 20px
   label-md:
-    fontFamily: Geist
+    fontFamily: TX-02
     fontSize: 14px
     fontWeight: 500
     lineHeight: 20px
   label-sm:
-    fontFamily: Geist
+    fontFamily: TX-02
     fontSize: 12px
     fontWeight: 500
     lineHeight: 16px
   code-sm:
-    fontFamily: Berkeley Mono
+    fontFamily: TX-02
     fontSize: 12px
     fontWeight: 500
     lineHeight: 16px
   audio-label:
-    fontFamily: Berkeley Mono
+    fontFamily: TX-02
     fontSize: 10px
     fontWeight: 500
     lineHeight: 12px
@@ -164,15 +164,17 @@ Dark mode mirrors the same semantic roles: backgrounds become near-black, cards 
 
 ## Typography
 
-The system uses **Geist** as the default sans-serif family through `--font-sans`. It should carry product UI, docs text, labels, and most component content.
+The system uses two primary type roles: **Geist** for readable continuous text and **TX-02** for structural, technical, and interface chrome.
 
-Use **Berkeley Mono** through `--font-mono` for code, technical metadata, timestamps, audio telemetry, and compact hardware-style labels. The checked-in font file is `TX-02-VF.woff2`, but components should reference the `font-mono` token rather than hard-coding the file name.
+Use **Geist** through `--font-sans` for body copy, docs prose, descriptions, paragraphs, and other text that benefits from a neutral sans-serif reading rhythm.
+
+Use **TX-02** through `--font-mono` for headings, labels, code, technical metadata, timestamps, audio telemetry, and compact hardware-style UI. The checked-in font file is `TX-02-VF.woff2`, but components should reference the `font-mono` token rather than hard-coding the file name.
 
 Keep type compact but readable:
 
-- Headlines are semibold with slight negative tracking.
-- Body text should use normal weight and a comfortable line height.
-- Labels should stay medium-weight, concise, and sentence case unless the component is explicitly instrument-like.
+- Headlines use TX-02, semibold weight, and slight negative tracking for a precise technical voice.
+- Body text uses Geist at normal weight with comfortable line height.
+- Labels use TX-02 at medium weight; keep them concise and sentence case unless the component is explicitly instrument-like.
 - Audio labels may use uppercase, small type, and wider tracking for a control-panel feel.
 
 ## Layout & Spacing
@@ -238,7 +240,7 @@ Keep audio-specific color and depth decisions inside `packages/ui` audio present
 - Do keep DESIGN.md frontmatter tokens in hex so Google DESIGN.md consumers can parse them.
 - Do pair filled colors with their matching foreground tokens, especially `primary` with `primary-foreground`.
 - Do use the 4px spacing rhythm for component dimensions and layout gaps.
-- Do use Geist for general UI and Berkeley Mono for code, telemetry, and audio metadata.
+- Do use Geist for prose and body copy; use TX-02 for headings, labels, code, telemetry, and audio metadata.
 - Don't use the audio blue accent as a general-purpose brand color.
 - Don't add shadows where borders, spacing, or tonal contrast are enough.
 - Don't hard-code OKLCH values in components when a semantic CSS variable already exists.

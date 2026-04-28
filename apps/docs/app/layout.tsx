@@ -12,9 +12,9 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
 });
 
-const berkeleyMono = localFont({
+const tx02 = localFont({
   src: "./fonts/TX-02-VF.woff2",
-  variable: "--font-berkeley-mono",
+  variable: "--font-tx-02",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +29,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} ${berkeleyMono.variable}`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} ${tx02.variable}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

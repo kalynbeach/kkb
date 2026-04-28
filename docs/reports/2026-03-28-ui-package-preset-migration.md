@@ -27,7 +27,7 @@ Refactor `@kkb/ui` to adopt the `b3XotzR0pG` preset as the foundation, migrating
 - **~80 `--audio-*` CSS custom properties** across `:root` and `.dark` (shell, titlebar, panel, waveform, control, status tokens)
 - **`--color-audio-*` mappings** in `@theme inline` block
 - **`@layer components`** block with `.audio-shell`, `.audio-subshell`, `.audio-titlebar`, `.audio-panel`, `.audio-scanlines`, `.audio-buffered-segment`, `.audio-transport-button` classes
-- **`--font-mono`** mapped to `var(--font-berkeley-mono)` (custom font)
+- **`--font-mono`** mapped to `var(--font-tx-02)` (custom font)
 - **`@source "../components"`** directive
 - **Marquee keyframe** animation
 - **`--animate-marquee`** theme variable
@@ -67,7 +67,7 @@ Refactor `@kkb/ui` to adopt the `b3XotzR0pG` preset as the foundation, migrating
 | Area | Current | Preset |
 |------|---------|--------|
 | `@custom-variant dark` | `(&:where(.dark, .dark *))` | `(&:is(.dark *))` |
-| `@theme inline` fonts | `--font-sans`, `--font-mono` (Berkeley Mono) | `--font-mono` (circular), `--font-heading` (new) |
+| `@theme inline` fonts | `--font-sans`, `--font-mono` (TX-02) | `--font-mono` (circular), `--font-heading` (new) |
 | `@layer base html` | not set | `@apply font-mono` (mono-first typography) |
 | `--destructive-foreground` | defined (`oklch(0.985 0 0)`) | **removed** |
 | `@source` | `@source "../components"` | not present |
@@ -99,7 +99,7 @@ Before any changes, extract and preserve:
 - Entire `@layer components` block (audio component styles)
 - `@source "../components"` directive
 - Marquee keyframe and `--animate-marquee` variable
-- Custom font mappings (`--font-sans` -> Geist Sans, `--font-mono` -> Berkeley Mono)
+- Custom font mappings (`--font-sans` -> Geist Sans, `--font-mono` -> TX-02)
 
 ### 2. Apply preset
 
@@ -113,7 +113,7 @@ This updates `components.json` and `globals.css` without touching installed comp
 
 Re-add to `globals.css`:
 - `@source "../components"` after imports
-- Custom font mappings in `@theme inline` (keep `--font-heading` from preset, restore `--font-sans` and Berkeley Mono `--font-mono`)
+- Custom font mappings in `@theme inline` (keep `--font-heading` from preset, restore `--font-sans` and TX-02 `--font-mono`)
 - All `--audio-*` tokens in `:root` and `.dark`
 - All `--color-audio-*` in `@theme inline`
 - Marquee keyframe and `--animate-marquee`
@@ -158,9 +158,9 @@ Audit all component usage in `apps/web` and `apps/docs` for Radix-specific patte
 ### 7. Font decisions
 
 Decide:
-- Keep Berkeley Mono as `--font-mono` or adopt preset's default? -> Keep Berkeley Mono.
+- Keep TX-02 as `--font-mono` or adopt preset's default? -> Keep TX-02.
 - Keep Geist Sans as `--font-sans` or drop it? -> Keep Geist Sans (for now).
-- Adopt `--font-heading` — which font? -> Berkeley Mono.
+- Adopt `--font-heading` — which font? -> TX-02.
 - Apply `font-mono` to `html` (preset default) or keep current approach? -> Keep current approach.
 
 ### 8. Chart color decision
