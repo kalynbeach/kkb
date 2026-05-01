@@ -6,29 +6,44 @@
 
 ## Summary
 
-The preferred architecture is **two runtimes plus thin adapters**:
+The preferred architecture is **two runtimes, framework-agnostic session/controllers, and thin adapters**:
 
 ```text
 playback runtime
+playback session/controller
 visualization runtime
+visualization browser providers/controllers
 React lifecycle adapters
 presentation UI
 demo app
 ```
 
-This keeps the architecture deep where behavior is complex, and shallow where code should only adapt or present state.
+This keeps the architecture deep where behavior is complex, and shallow where code should only adapt or present state. React hooks should subscribe to and dispose framework-agnostic objects; they should not become the place where transport, source, selection, cancellation, mic graph, or renderer state machines live.
 
-The target is not to split packages first. The target is to define stable runtime/session module boundaries first, then let package boundaries follow once imports and tests prove the shape.
+The target is not to split packages first. The target is to define stable runtime/session/resource module boundaries first, then let package boundaries follow once imports and tests prove the shape.
+
+## Adoption Note
+
+This report intentionally revises the current ownership model in `AGENTS.md`, which says `apps/web` owns browser/session orchestration and mic access. If this direction is adopted, the durable repo guidance should be updated to say:
+
+- `apps/web` owns demo orchestration: routes, layouts, copy, fixtures, URL/hash/query state, and integration examples.
+- `packages/audio` owns reusable browser audio orchestration: playback source selection, transport semantics, reusable session controllers, visualization lifecycle, mic graph setup, analysis taps, and renderer/runtime resource management.
+- React modules in `packages/audio` own lifecycle/subscription adapters only.
+- `packages/ui` remains presentation-only.
+
+Until that guidance is updated, this report should be treated as a proposed architecture pivot rather than an implementation mandate.
 
 ## Architecture Principles
 
-1. Deep runtime modules own audio behavior.
-2. React modules own lifecycle and subscriptions only.
-3. UI modules are dumb presentation.
-4. Demo app owns routes, copy, fixtures, and URL decisions.
-5. Playback and visualization remain independent products.
-6. Package splits happen after stable module interfaces exist.
-7. Avoid generalized plugin systems, broad core packages, and prebuilt UI products until real pressure appears.
+1. Deep runtime modules own low-level audio behavior.
+2. Framework-agnostic session/controllers own reusable state machines, command ordering, cancellation, and resource disposal.
+3. React modules own lifecycle and subscriptions only.
+4. UI modules are dumb presentation.
+5. Demo app owns routes, copy, fixtures, and URL decisions.
+6. Playback and visualization remain independent products.
+7. Package splits happen after stable module interfaces exist.
+8. Avoid generalized plugin systems, broad core packages, and prebuilt UI products until real pressure appears.
+9. Browser APIs must be lazy: no `window`, `Audio`, `navigator`, WebGPU, DOM, or media element access at module import time.
 
 ## Preferred Module Shape
 
@@ -42,6 +57,8 @@ audio/
 
   playback/
     create-playback-runtime.ts
+    create-playback-session.ts
+    command-queue.ts
     sources/
       media-element-source.ts
       fallback-source.ts
@@ -52,6 +69,10 @@ audio/
 
   visualization/
     create-visualization-runtime.ts
+    create-oscilloscope-session.ts
+    browser/
+      create-mic-signal-provider.ts
+      audio-context-owner.ts
     signal/
       oscillator-provider.ts
       analyser-provider.ts
@@ -69,7 +90,6 @@ audio/
       use-playback-session.ts
     visualization/
       use-oscilloscope-session.ts
-      use-mic-provider.ts
 ```
 
 This shape can live inside the current `packages/audio` package while interfaces stabilize. Physical package splits are optional later.
@@ -90,21 +110,60 @@ await runtime.play();
 await runtime.pause();
 await runtime.seek(42);
 runtime.subscribe(listener);
-runtime.destroy();
+await runtime.destroy();
 ```
 
 It owns:
 
 - source construction defaults
 - source selection
-- fallback and recovery
+- load-time fallback
 - transport state
 - timeline state
 - buffered range normalization
 - load/play/pause/seek semantics
 - optional analysis tap
 
+It should not promise mid-playback recovery unless that behavior is explicitly designed, tested, and represented in the error model. Load-time fallback and runtime recovery are separate features.
+
 Callers should not know which source is active unless the runtime exposes it as diagnostic state.
+
+### Playback Session / Controller
+
+The playback session is framework-agnostic and sits above the runtime.
+
+```ts
+const session = createPlaybackSession({
+  assets,
+  createRuntime,
+});
+
+await session.selectAsset(assetId);
+await session.play();
+await session.pause();
+session.subscribe(listener);
+await session.destroy();
+```
+
+It owns reusable app-like playback behavior:
+
+- selected asset state
+- asset loading state
+- command serialization
+- stale async cancellation
+- derived session view model
+- user-facing playback state transitions
+- runtime creation and replacement policy
+- runtime disposal policy
+
+It does not own:
+
+- React lifecycle
+- demo catalog contents
+- URL/hash/query state
+- page layout or copy
+
+The React hook should wrap this controller; it should not be the controller.
 
 ### Visualization
 
@@ -129,9 +188,25 @@ It owns:
 - XY frame generation
 - renderer lifecycle
 - WebGPU renderer
+- WebGPU support, adapter/device loss, and renderer startup failure semantics
 - config defaults and validation
 
 It should not know playback internals.
+
+### Visualization Browser Providers / Controllers
+
+Reusable browser source setup belongs in framework-agnostic visualization modules, not React hooks.
+
+```ts
+const micProvider = await createMicSignalProvider({
+  audioContext,
+  constraints,
+});
+
+scope.setSignalProvider(micProvider);
+```
+
+These modules own reusable browser audio graph behavior such as mic setup, analyser nodes, media stream teardown, audio context ownership policy, and normalization. React owns only when to create, subscribe, swap, and dispose them.
 
 ## Playback To Visualization Integration
 
@@ -146,11 +221,23 @@ playback runtime
 visualization
   adapts analysis tap into signal provider
 
-consumer
+consumer/session layer
   composes them
 ```
 
 This supports track playback visualization without coupling the playback product to the oscilloscope product.
+
+The seam must specify:
+
+- sample rate
+- clock source and timestamp semantics
+- channel count and channel layout
+- buffer ownership and allocation policy
+- latency expectations
+- behavior when the active playback source cannot expose analysis
+- teardown behavior when playback source changes
+
+The visualization runtime should consume a signal-provider abstraction, not playback runtime internals.
 
 ## React Adapter Design
 
@@ -167,8 +254,12 @@ const session = usePlaybackSession({
 
 Owns:
 
-- runtime creation and teardown
+- session/controller creation and teardown
 - `useSyncExternalStore` subscription
+- forwarding user commands to the session/controller
+
+The framework-agnostic playback session/controller owns:
+
 - selected asset/session state
 - stale async cancellation
 - derived view model
@@ -193,7 +284,12 @@ const scope = useOscilloscopeSession({
 
 Owns:
 
-- canvas/runtime lifecycle
+- canvas/runtime/session lifecycle
+- `useSyncExternalStore` subscription where needed
+- forwarding user commands to the visualization session/controller
+
+The framework-agnostic visualization runtime/session owns:
+
 - renderer startup failure handling
 - mic/source switching lifecycle
 - stale async source request cancellation
@@ -208,17 +304,18 @@ Does not own:
 
 ## Mic Provider
 
-Reusable mic graph setup belongs with visualization adapters.
+Reusable mic graph setup belongs with framework-agnostic visualization browser modules, not React-specific adapters.
 
 It should own:
 
 - `getUserMedia`
-- `AudioContext`
+- `AudioContext` creation or explicit reuse policy
 - `MediaStreamAudioSourceNode`
 - analyser setup
 - stereo/mono normalization
 - stream track teardown
-- context close
+- context close or release policy
+- permission denial and device-change error reporting
 
 Demo-only behavior stays outside:
 
@@ -275,6 +372,19 @@ It should not own:
 - mic cancellation races
 - renderer lifecycle
 
+## Runtime Contracts To Define Before Implementation
+
+Before moving behavior out of `apps/web`, define these contracts in code comments, types, and tests:
+
+- Command model: how `load`, `play`, `pause`, `seek`, source switches, and `destroy` serialize or cancel each other.
+- Disposal model: whether `destroy` is async, idempotent, and allowed while commands are pending.
+- Error model: typed errors for unsupported source, decode failure, autoplay rejection, permission denial, WebGPU/device loss, CORS/fetch failure, and unexpected runtime faults.
+- Diagnostic model: source selection, fallback reason, renderer backend, browser capability decisions, and analysis support.
+- Browser resource ownership: `AudioContext`, media elements, worklet module URLs, WebCodecs objects, media streams, animation frames, and GPU devices.
+- Autoplay/user gesture policy: which commands can reject and how sessions surface the rejection.
+- Import safety: all browser access must happen inside constructors/functions called in the browser, not at module import time.
+- Analysis contract: sample rate, clock, channels, buffer ownership, latency, allocation policy, and unsupported-source behavior.
+
 ## What Not To Build Yet
 
 - No physical package split first.
@@ -283,6 +393,7 @@ It should not own:
 - No prebuilt complete player UI package.
 - No generalized plugin system.
 - No premature WebCodecs abstraction beyond one source adapter.
+- No mid-playback recovery API until the semantics are specified and tested.
 - No app-specific URL persistence inside audio packages.
 
 ## Package Strategy
@@ -303,20 +414,24 @@ Only create `@kkb/audio-core` after at least two packages share real invariants,
 
 ## Implementation Order
 
-1. Rename/deepen `createWebPlayer` into `createPlaybackRuntime`.
-2. Move player controller behavior into a headless playback session.
-3. Add `usePlaybackSession` as a thin React adapter.
-4. Extract oscilloscope lifecycle from `OscilloscopeClient` into `useOscilloscopeSession`.
-5. Move reusable mic graph setup behind an injectable visualization signal provider.
-6. Define playback analysis tap and visualization signal-provider adapter.
-7. Add stable package entrypoints.
-8. Split packages only after imports prove the dependency direction.
+1. Adopt this ownership pivot explicitly by updating durable repo guidance after review.
+2. Define runtime contracts for commands, disposal, errors, diagnostics, resources, import safety, and analysis taps.
+3. Rename/deepen `createWebPlayer` into `createPlaybackRuntime` only after the command/disposal contracts are clear.
+4. Move player controller behavior into a framework-agnostic playback session.
+5. Add `usePlaybackSession` as a thin React adapter over that session.
+6. Extract oscilloscope lifecycle from `OscilloscopeClient` into a framework-agnostic visualization session/runtime.
+7. Move reusable mic graph setup behind an injectable framework-agnostic visualization signal provider.
+8. Define playback analysis tap and visualization signal-provider adapter.
+9. Add stable package entrypoints.
+10. Split packages only after imports prove the dependency direction.
 
 ## Success Criteria
 
 - `@kkb/web` reads like an integration demo.
 - Playback behavior is testable without React.
+- Playback session/controller behavior is testable without React.
 - Visualization behavior is testable without React.
+- Mic graph setup is reusable without React.
 - React tests focus on lifecycle and adapter behavior.
 - UI tests focus on presentation.
 - Playback visualization works through an analysis-tap seam.

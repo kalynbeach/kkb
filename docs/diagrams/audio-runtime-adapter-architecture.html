@@ -1,0 +1,1347 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Audio Runtime Adapter Architecture</title>
+
+        <style>
+            :root {
+                --font-body: "Geist", ui-sans-serif, system-ui, sans-serif;
+                --font-mono: "TX-02", ui-monospace, monospace;
+
+                /* Palette copied from packages/ui/src/styles/globals.css audio-player tokens. */
+                --audio-shell-border-token: oklch(0.652 0.026 264.382);
+                --audio-shell-top-token: oklch(0.809 0.035 270.957);
+                --audio-shell-upper-token: oklch(0.678 0.025 264.392);
+                --audio-shell-mid-token: oklch(0.73 0.025 264.41);
+                --audio-shell-lower-token: oklch(0.652 0.026 264.382);
+                --audio-shell-bottom-token: oklch(0.575 0.038 270.671);
+                --audio-titlebar-border-token: oklch(0.471 0.066 274.924);
+                --audio-titlebar-start-token: oklch(0.558 0.075 276.408);
+                --audio-titlebar-mid-token: oklch(0.638 0.073 276.818);
+                --audio-titlebar-end-token: oklch(0.558 0.075 276.408);
+                --audio-title-token: oklch(0.881 0.024 264.446);
+                --audio-meta-token: oklch(0.733 0.036 270.889);
+                --audio-label-token: oklch(0.463 0.04 270.395);
+                --audio-divider-token: oklch(0.405 0.042 270.17);
+                --audio-panel-border-token: oklch(0.344 0.044 269.831);
+                --audio-panel-start-token: oklch(0.183 0.05 270.309);
+                --audio-panel-mid-token: oklch(0.209 0.053 268.661);
+                --audio-panel-end-token: oklch(0.183 0.05 270.309);
+                --audio-grid-line-token: oklch(0.768 0.122 252.001 / 0.15);
+                --audio-accent-token: oklch(0.768 0.122 252.001);
+                --audio-accent-muted-token: oklch(0.768 0.122 252.001 / 0.75);
+                --audio-accent-faint-token: oklch(0.768 0.122 252.001 / 0.4);
+                --audio-accent-dim-token: oklch(0.768 0.122 252.001 / 0.35);
+                --audio-accent-soft-token: oklch(0.768 0.122 252.001 / 0.12);
+                --audio-accent-softer-token: oklch(0.768 0.122 252.001 / 0.08);
+                --audio-buffered-token: oklch(0.768 0.122 252.001 / 0.06);
+                --audio-waveform-played-token: oklch(
+                    0.786 0.112 251.282 / 0.95
+                );
+                --audio-waveform-idle-token: oklch(0.69 0.109 249.664 / 0.25);
+                --audio-window-dot-token: oklch(0.807 0.096 263.53);
+                --audio-control-icon-token: oklch(0.443 0.07 274.957);
+                --audio-control-icon-muted-token: oklch(0.605 0.05 273.873);
+                --audio-status-info-token: oklch(0.706 0.155 258.133);
+                --audio-status-warning-token: oklch(0.837 0.164 84.429);
+                --audio-status-error-token: oklch(0.637 0.208 25.331);
+
+                --bg: var(--audio-panel-start-token);
+                --paper: var(--audio-panel-mid-token);
+                --paper-2: var(--audio-panel-end-token);
+                --ink: var(--audio-title-token);
+                --ink-dim: var(--audio-meta-token);
+                --border: var(--audio-panel-border-token);
+                --border-strong: var(--audio-titlebar-border-token);
+                --audio: var(--audio-accent-token);
+                --audio-dim: var(--audio-accent-soft-token);
+                --viz: var(--audio-waveform-played-token);
+                --viz-dim: var(--audio-buffered-token);
+                --react: var(--audio-window-dot-token);
+                --react-dim: var(--audio-accent-softer-token);
+                --ui: var(--audio-control-icon-token);
+                --ui-dim: var(--audio-waveform-idle-token);
+                --warn: var(--audio-control-icon-muted-token);
+                --warn-dim: var(--audio-accent-softer-token);
+                --shadow:
+                    0 18px 50px oklch(0 0 0 / 0.42),
+                    0 2px 8px oklch(0 0 0 / 0.25),
+                    inset 0 1px 0 oklch(1 0 0 / 0.03);
+            }
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    --audio-shell-border-token: oklch(0.432 0.026 264.382);
+                    --audio-shell-top-token: oklch(0.53 0.044 271.2);
+                    --audio-shell-upper-token: oklch(0.482 0.034 267.8);
+                    --audio-shell-mid-token: oklch(0.44 0.03 265.8);
+                    --audio-shell-lower-token: oklch(0.39 0.028 265.4);
+                    --audio-shell-bottom-token: oklch(0.33 0.024 266.1);
+                    --audio-titlebar-border-token: oklch(0.412 0.062 274.2);
+                    --audio-titlebar-start-token: oklch(0.47 0.079 275.1);
+                    --audio-titlebar-mid-token: oklch(0.56 0.074 274.1);
+                    --audio-titlebar-end-token: oklch(0.47 0.079 275.1);
+                    --audio-title-token: oklch(0.93 0.02 264.4);
+                    --audio-meta-token: oklch(0.79 0.022 267.2);
+                    --audio-label-token: oklch(0.67 0.019 266.3);
+                    --audio-divider-token: oklch(0.6 0.02 266.5);
+                    --audio-panel-border-token: oklch(0.305 0.034 267.8);
+                    --audio-panel-start-token: oklch(0.205 0.04 265.8);
+                    --audio-panel-mid-token: oklch(0.24 0.043 261.5);
+                    --audio-panel-end-token: oklch(0.205 0.04 265.8);
+                    --audio-grid-line-token: oklch(0.8 0.122 252.001 / 0.16);
+                    --audio-accent-token: oklch(0.8 0.122 252.001);
+                    --audio-accent-muted-token: oklch(0.8 0.122 252.001 / 0.78);
+                    --audio-accent-faint-token: oklch(0.8 0.122 252.001 / 0.45);
+                    --audio-accent-dim-token: oklch(0.8 0.122 252.001 / 0.4);
+                    --audio-accent-soft-token: oklch(0.8 0.122 252.001 / 0.15);
+                    --audio-accent-softer-token: oklch(0.8 0.122 252.001 / 0.1);
+                    --audio-buffered-token: oklch(0.8 0.122 252.001 / 0.08);
+                    --audio-waveform-played-token: oklch(
+                        0.82 0.11 251.282 / 0.97
+                    );
+                    --audio-waveform-idle-token: oklch(
+                        0.73 0.108 249.664 / 0.3
+                    );
+                    --audio-window-dot-token: oklch(0.82 0.102 254.3);
+                    --audio-control-icon-token: oklch(0.91 0.028 259.4);
+                    --audio-control-icon-muted-token: oklch(0.78 0.026 264.2);
+                    --audio-status-info-token: oklch(0.78 0.128 252.8);
+                    --audio-status-warning-token: oklch(0.86 0.144 84.4);
+                    --audio-status-error-token: oklch(0.71 0.188 25.3);
+                }
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                scroll-behavior: smooth;
+            }
+            body {
+                margin: 0;
+                font-family: var(--font-body);
+                color: var(--ink);
+                background-color: var(--bg);
+                background-image:
+                    linear-gradient(90deg, var(--border) 1px, transparent 1px),
+                    linear-gradient(0deg, var(--border) 1px, transparent 1px),
+                    radial-gradient(
+                        circle at 18% 10%,
+                        var(--audio-dim),
+                        transparent 34%
+                    ),
+                    radial-gradient(
+                        circle at 92% 34%,
+                        var(--viz-dim),
+                        transparent 30%
+                    );
+                background-size:
+                    34px 34px,
+                    34px 34px,
+                    auto,
+                    auto;
+                padding: 34px;
+                overflow-wrap: break-word;
+            }
+            .wrap {
+                max-width: 1420px;
+                margin: 0 auto;
+                display: grid;
+                grid-template-columns: 190px 1fr;
+                gap: 38px;
+            }
+            .main {
+                min-width: 0;
+            }
+            .toc {
+                position: sticky;
+                top: 24px;
+                align-self: start;
+                max-height: calc(100dvh - 48px);
+                overflow-y: auto;
+                padding: 16px 0;
+            }
+            .toc-title {
+                font-family: var(--font-mono);
+                font-size: 10px;
+                letter-spacing: 2px;
+                text-transform: uppercase;
+                color: var(--ink-dim);
+                padding-bottom: 12px;
+                margin-bottom: 12px;
+                border-bottom: 1px solid var(--border);
+            }
+            .toc a {
+                display: block;
+                color: var(--ink-dim);
+                text-decoration: none;
+                font-size: 12px;
+                line-height: 1.35;
+                padding: 6px 9px;
+                border-left: 2px solid transparent;
+                border-radius: 6px;
+            }
+            .toc a:hover,
+            .toc a.active {
+                color: var(--ink);
+                background: var(--audio-accent-softer-token);
+                border-left-color: var(--audio);
+            }
+            .hero {
+                position: relative;
+                padding: clamp(34px, 6vw, 74px);
+                background: color-mix(
+                    in srgb,
+                    var(--paper) 88%,
+                    var(--audio) 12%
+                );
+                border: 1px solid var(--border-strong);
+                border-radius: 28px;
+                box-shadow: var(--shadow);
+                overflow: hidden;
+                animation: fadeUp 0.45s ease-out both;
+            }
+            .hero:after {
+                content: "";
+                position: absolute;
+                right: -60px;
+                bottom: -80px;
+                width: 330px;
+                height: 330px;
+                border: 1px solid var(--border-strong);
+                border-radius: 50%;
+                box-shadow:
+                    inset 0 0 0 28px var(--viz-dim),
+                    inset 0 0 0 58px transparent,
+                    inset 0 0 0 86px var(--react-dim);
+                opacity: 0.9;
+            }
+            .eyebrow,
+            .section-label {
+                font-family: var(--font-mono);
+                font-size: 11px;
+                letter-spacing: 1.9px;
+                text-transform: uppercase;
+                color: var(--audio);
+            }
+            h1 {
+                margin: 14px 0 18px;
+                max-width: 860px;
+                font-size: clamp(44px, 8vw, 92px);
+                line-height: 0.9;
+                letter-spacing: -3px;
+            }
+            .lead {
+                max-width: 720px;
+                font-size: clamp(18px, 2vw, 24px);
+                line-height: 1.45;
+                color: var(--ink-dim);
+                margin: 0;
+            }
+            .hero-meta {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                margin-top: 28px;
+                position: relative;
+                z-index: 1;
+            }
+            .tag {
+                font-family: var(--font-mono);
+                font-size: 11px;
+                color: var(--ink);
+                background: var(--paper);
+                border: 1px solid var(--border);
+                border-radius: 999px;
+                padding: 7px 11px;
+            }
+            section {
+                margin-top: 34px;
+                scroll-margin-top: 24px;
+            }
+            .sec-head {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                margin: 0 0 14px;
+            }
+            .sec-num {
+                font-family: var(--font-mono);
+                color: var(--ink-dim);
+                border: 1px solid var(--border);
+                border-radius: 999px;
+                padding: 5px 9px;
+                font-size: 11px;
+            }
+            h2 {
+                margin: 0;
+                font-size: clamp(24px, 3vw, 38px);
+                letter-spacing: -0.8px;
+            }
+            .card {
+                background: var(--paper);
+                border: 1px solid var(--border);
+                border-radius: 18px;
+                padding: 20px;
+                min-width: 0;
+                animation: fadeUp 0.45s ease-out both;
+                animation-delay: calc(var(--i, 0) * 0.055s);
+            }
+            .card.elevated {
+                box-shadow: var(--shadow);
+                border-color: var(--border-strong);
+            }
+            .card.recessed {
+                background: var(--paper-2);
+                box-shadow: inset 0 1px 6px oklch(0 0 0 / 0.18);
+            }
+            .card h3 {
+                margin: 0 0 10px;
+                font-size: 20px;
+                letter-spacing: -0.25px;
+            }
+            .card p {
+                color: var(--ink-dim);
+                line-height: 1.55;
+                margin: 0;
+            }
+            code {
+                font-family: var(--font-mono);
+                font-size: 0.86em;
+                background: var(--audio-dim);
+                color: var(--audio);
+                border-radius: 5px;
+                padding: 2px 5px;
+            }
+            .stack {
+                display: grid;
+                gap: 12px;
+            }
+            .layer {
+                display: grid;
+                grid-template-columns: 230px 1fr 250px;
+                gap: 14px;
+                align-items: stretch;
+            }
+            .layer > * {
+                min-width: 0;
+            }
+            .layer-name {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                border-left: 5px solid var(--accent);
+            }
+            .layer-name .kind {
+                font-family: var(--font-mono);
+                font-size: 10px;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+                color: var(--accent);
+                margin-bottom: 8px;
+            }
+            .layer-name strong {
+                font-size: 22px;
+                line-height: 1.05;
+            }
+            .layer.audio {
+                --accent: var(--audio);
+                --dim: var(--audio-dim);
+            }
+            .layer.viz {
+                --accent: var(--viz);
+                --dim: var(--viz-dim);
+            }
+            .layer.react {
+                --accent: var(--react);
+                --dim: var(--react-dim);
+            }
+            .layer.ui {
+                --accent: var(--ui);
+                --dim: var(--ui-dim);
+            }
+            .layer.app {
+                --accent: var(--warn);
+                --dim: var(--warn-dim);
+            }
+            .layer .card {
+                background: color-mix(
+                    in srgb,
+                    var(--paper) 88%,
+                    var(--accent) 12%
+                );
+            }
+            .flow-arrow {
+                text-align: center;
+                font-family: var(--font-mono);
+                color: var(--ink-dim);
+                padding: 2px 0;
+            }
+            .flow-arrow svg {
+                width: 20px;
+                height: 20px;
+                stroke: currentColor;
+                fill: none;
+                stroke-width: 2;
+                vertical-align: middle;
+            }
+            .grid-2 {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+            .grid-3 {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+            }
+            .runtime-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 16px;
+            }
+            .runtime-card {
+                border-top: 5px solid var(--accent);
+                background: color-mix(
+                    in srgb,
+                    var(--paper) 88%,
+                    var(--accent) 12%
+                );
+            }
+            .runtime-card.audio {
+                --accent: var(--audio);
+            }
+            .runtime-card.viz {
+                --accent: var(--viz);
+            }
+            .runtime-card .kind {
+                display: block;
+                font-family: var(--font-mono);
+                font-size: 10px;
+                letter-spacing: 1.5px;
+                text-transform: uppercase;
+                color: var(--accent);
+                margin-bottom: 10px;
+            }
+            .runtime-card h3 {
+                font-size: 26px;
+                line-height: 1;
+                margin-bottom: 14px;
+            }
+            .list {
+                list-style: none;
+                margin: 0;
+                padding: 0;
+                color: var(--ink-dim);
+                font-size: 14px;
+                line-height: 1.6;
+            }
+            .list li {
+                position: relative;
+                padding-left: 16px;
+                margin: 6px 0;
+            }
+            .list li:before {
+                content: "—";
+                position: absolute;
+                left: 0;
+                color: var(--accent, var(--audio));
+            }
+            .owner-grid {
+                display: grid;
+                grid-template-columns: 1.1fr 0.9fr;
+                gap: 16px;
+            }
+            .owner-card {
+                border-top: 4px solid var(--accent);
+            }
+            .owner-card.audio {
+                --accent: var(--audio);
+            }
+            .owner-card.web {
+                --accent: var(--warn);
+            }
+            .owner-card.react {
+                --accent: var(--react);
+            }
+            .owner-card.ui {
+                --accent: var(--ui);
+            }
+            .seam {
+                position: relative;
+                display: grid;
+                grid-template-columns: 1fr 90px 1fr 90px 1fr;
+                gap: 10px;
+                align-items: center;
+            }
+            .seam-box {
+                min-height: 150px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                border-top: 4px solid var(--accent);
+            }
+            .seam-box.play {
+                --accent: var(--audio);
+            }
+            .seam-box.adapt {
+                --accent: var(--viz);
+            }
+            .seam-box.compose {
+                --accent: var(--warn);
+            }
+            .connector {
+                text-align: center;
+                color: var(--ink-dim);
+                font-family: var(--font-mono);
+                font-size: 12px;
+            }
+            .connector:before {
+                content: "⟶";
+                display: block;
+                font-size: 30px;
+                color: var(--border-strong);
+            }
+            .table-wrap {
+                background: var(--paper);
+                border: 1px solid var(--border);
+                border-radius: 18px;
+                overflow: hidden;
+            }
+            .table-scroll {
+                overflow-x: auto;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 14px;
+            }
+            th {
+                font-family: var(--font-mono);
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 1.2px;
+                text-align: left;
+                color: var(--ink-dim);
+                background: var(--paper-2);
+                padding: 13px 16px;
+                border-bottom: 1px solid var(--border-strong);
+                white-space: nowrap;
+            }
+            td {
+                padding: 14px 16px;
+                border-bottom: 1px solid var(--border);
+                vertical-align: top;
+                line-height: 1.45;
+            }
+            tr:last-child td {
+                border-bottom: none;
+            }
+            tbody tr:nth-child(even) {
+                background: color-mix(in srgb, var(--paper) 94%, var(--viz) 6%);
+            }
+            .status {
+                display: inline-flex;
+                font-family: var(--font-mono);
+                font-size: 11px;
+                border-radius: 999px;
+                padding: 4px 8px;
+                white-space: nowrap;
+            }
+            .status.keep {
+                background: var(--viz-dim);
+                color: var(--viz);
+            }
+            .status.warn {
+                background: var(--warn-dim);
+                color: var(--warn);
+            }
+            .dir-tree {
+                font-family: var(--font-mono);
+                font-size: 13px;
+                line-height: 1.65;
+                white-space: pre;
+                overflow-x: auto;
+                background: var(--paper-2);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 18px;
+            }
+            .hl-a {
+                color: var(--audio);
+                font-weight: 600;
+            }
+            .hl-v {
+                color: var(--viz);
+                font-weight: 600;
+            }
+            .hl-r {
+                color: var(--react);
+                font-weight: 600;
+            }
+            .ann {
+                color: var(--ink-dim);
+            }
+            .callout {
+                border-left: 5px solid var(--warn);
+                background: var(--warn-dim);
+            }
+            .pipeline {
+                display: flex;
+                gap: 0;
+                overflow-x: auto;
+                padding-bottom: 8px;
+            }
+            .step {
+                min-width: 170px;
+                background: var(--paper);
+                border: 1px solid var(--border);
+                border-radius: 14px;
+                padding: 14px;
+                flex-shrink: 0;
+            }
+            .step b {
+                display: block;
+                font-size: 14px;
+                margin: 7px 0;
+            }
+            .step small {
+                color: var(--ink-dim);
+                line-height: 1.4;
+                display: block;
+            }
+            .step-num {
+                font-family: var(--font-mono);
+                font-size: 10px;
+                color: var(--audio);
+            }
+            .pipe-arrow {
+                display: flex;
+                align-items: center;
+                padding: 0 5px;
+                color: var(--border-strong);
+            }
+            @keyframes fadeUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(14px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                *,
+                *:before,
+                *:after {
+                    animation-duration: 0.01ms;
+                    transition-duration: 0.01ms;
+                    scroll-behavior: auto;
+                }
+            }
+            @media (max-width: 1000px) {
+                body {
+                    padding: 0 20px 24px;
+                }
+                .wrap {
+                    grid-template-columns: 1fr;
+                    gap: 0;
+                }
+                .toc {
+                    position: sticky;
+                    top: 0;
+                    z-index: 10;
+                    display: flex;
+                    gap: 4px;
+                    max-height: none;
+                    overflow-x: auto;
+                    background: var(--bg);
+                    border-bottom: 1px solid var(--border);
+                    margin: 0 -20px 20px;
+                    padding: 10px 20px;
+                }
+                .toc-title {
+                    display: none;
+                }
+                .toc a {
+                    white-space: nowrap;
+                    flex-shrink: 0;
+                    border-left: 0;
+                    border-bottom: 2px solid transparent;
+                }
+                .toc a.active {
+                    border-bottom-color: var(--audio);
+                }
+                .hero {
+                    margin-top: 20px;
+                }
+                section {
+                    scroll-margin-top: 60px;
+                }
+                .layer,
+                .owner-grid,
+                .grid-2,
+                .grid-3,
+                .runtime-grid,
+                .seam {
+                    grid-template-columns: 1fr;
+                }
+                .connector:before {
+                    content: "↓";
+                }
+            }
+            @media (max-width: 720px) {
+                h1 {
+                    letter-spacing: -1.4px;
+                }
+                .pipeline {
+                    flex-wrap: wrap;
+                    gap: 8px;
+                }
+                .pipe-arrow {
+                    display: none;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <nav class="toc" id="toc">
+                <div class="toc-title">Contents</div>
+                <a href="#summary">1. Shape</a>
+                <a href="#ownership">2. Ownership</a>
+                <a href="#layers">3. Layers</a>
+                <a href="#seam">4. Analysis seam</a>
+                <a href="#contracts">5. Contracts</a>
+                <a href="#modules">6. Modules</a>
+                <a href="#order">7. Order</a>
+            </nav>
+
+            <main class="main">
+                <header class="hero" id="summary">
+                    <div class="eyebrow">2026-04-30 · preferred direction</div>
+                    <h1>Audio Runtime Architecture</h1>
+                    <p class="lead">
+                        The proposal pivots from app-owned audio orchestration
+                        to reusable runtime modules with framework-agnostic
+                        controllers. React becomes a lifecycle adapter, UI stays
+                        presentation-only, and the demo app becomes a consumer.
+                    </p>
+                    <div class="hero-meta">
+                        <span class="tag">two runtimes</span>
+                        <span class="tag">headless sessions</span>
+                        <span class="tag">thin React hooks</span>
+                        <span class="tag">no package split first</span>
+                    </div>
+                </header>
+
+                <section id="ownership">
+                    <div class="sec-head">
+                        <span class="sec-num">01</span>
+                        <h2>The ownership pivot</h2>
+                    </div>
+                    <div class="owner-grid">
+                        <div
+                            class="card elevated owner-card audio"
+                            style="--i: 1"
+                        >
+                            <div class="section-label">
+                                moves into packages/audio
+                            </div>
+                            <h3>Reusable browser audio orchestration</h3>
+                            <ul class="list" style="--accent: var(--audio)">
+                                <li>
+                                    playback source selection and transport
+                                    semantics
+                                </li>
+                                <li>
+                                    framework-agnostic playback sessions and
+                                    command queues
+                                </li>
+                                <li>
+                                    visualization lifecycle and
+                                    renderer/resource ownership
+                                </li>
+                                <li>
+                                    mic graph setup, analysis taps, signal
+                                    providers
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="stack">
+                            <div class="card owner-card web" style="--i: 2">
+                                <div class="section-label">
+                                    stays in apps/web
+                                </div>
+                                <h3>Demo orchestration</h3>
+                                <p>
+                                    Routes, copy, fixtures, URL/hash/query
+                                    state, demo defaults, integration examples,
+                                    deployment concerns.
+                                </p>
+                            </div>
+                            <div class="card callout" style="--i: 3">
+                                <h3>Adoption gate</h3>
+                                <p>
+                                    This report intentionally supersedes current
+                                    repo guidance. Update durable ownership docs
+                                    before treating it as implementation
+                                    mandate.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="layers">
+                    <div class="sec-head">
+                        <span class="sec-num">02</span>
+                        <h2>Runtime stack: deep where behavior is hard</h2>
+                    </div>
+                    <div class="stack">
+                        <div class="layer app">
+                            <div class="card layer-name">
+                                <span class="kind">consumer</span
+                                ><strong>@kkb/web demo app</strong>
+                            </div>
+                            <div class="card">
+                                <p>
+                                    Chooses assets, page layout, URL state,
+                                    copy, and integration examples. It composes
+                                    products; it does not implement reusable
+                                    audio behavior.
+                                </p>
+                            </div>
+                            <div class="card recessed">
+                                <ul class="list">
+                                    <li>routes</li>
+                                    <li>fixtures</li>
+                                    <li>query/hash</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="flow-arrow">
+                            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                                <path d="M10 4 L10 16 M6 12 L10 16 L14 12" />
+                            </svg>
+                            consumes
+                        </div>
+                        <div class="layer ui">
+                            <div class="card layer-name">
+                                <span class="kind">presentation</span
+                                ><strong>@kkb/ui surfaces</strong>
+                            </div>
+                            <div class="card">
+                                <p>
+                                    Player controls, playhead, waveform
+                                    surfaces, badges, and layout primitives. No
+                                    runtime/session/catalog ownership.
+                                </p>
+                            </div>
+                            <div class="card recessed">
+                                <ul class="list">
+                                    <li>dumb props</li>
+                                    <li>visual state</li>
+                                    <li>no URL state</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="flow-arrow">
+                            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                                <path d="M10 4 L10 16 M6 12 L10 16 L14 12" />
+                            </svg>
+                            rendered by
+                        </div>
+                        <div class="layer react">
+                            <div class="card layer-name">
+                                <span class="kind">adapter</span
+                                ><strong>React lifecycle hooks</strong>
+                            </div>
+                            <div class="card">
+                                <p>
+                                    Hooks create, dispose, subscribe with
+                                    <code>useSyncExternalStore</code>, and
+                                    forward commands. They do not become
+                                    controllers.
+                                </p>
+                            </div>
+                            <div class="card recessed">
+                                <ul class="list">
+                                    <li><code>usePlaybackSession</code></li>
+                                    <li><code>useOscilloscopeSession</code></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="flow-arrow">
+                            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                                <path d="M10 4 L10 16 M6 12 L10 16 L14 12" />
+                            </svg>
+                            wraps
+                        </div>
+                        <div class="layer audio">
+                            <div class="card layer-name">
+                                <span class="kind">controller</span
+                                ><strong>Playback session</strong>
+                            </div>
+                            <div class="card">
+                                <p>
+                                    Owns selected asset state, stale async
+                                    cancellation, user-facing playback
+                                    transitions, runtime replacement, and
+                                    disposal policy.
+                                </p>
+                            </div>
+                            <div class="card recessed">
+                                <ul class="list">
+                                    <li>command serialization</li>
+                                    <li>derived view model</li>
+                                    <li>asset loading state</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="flow-arrow">
+                            <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                                <path d="M10 4 L10 16 M6 12 L10 16 L14 12" />
+                            </svg>
+                            commands
+                        </div>
+                        <div class="runtime-grid">
+                            <div class="card runtime-card audio">
+                                <span class="kind">runtime</span>
+                                <h3>Playback runtime</h3>
+                                <p>
+                                    Owns source construction, source selection,
+                                    load-time fallback, transport state,
+                                    buffered ranges, timeline, and optional
+                                    analysis tap.
+                                </p>
+                                <ul
+                                    class="list"
+                                    style="
+                                        --accent: var(--audio);
+                                        margin-top: 12px;
+                                    "
+                                >
+                                    <li>media element</li>
+                                    <li>fallback</li>
+                                    <li>WebCodecs</li>
+                                    <li>worklet</li>
+                                </ul>
+                            </div>
+                            <div class="card runtime-card viz">
+                                <span class="kind">runtime</span>
+                                <h3>Visualization runtime</h3>
+                                <p>
+                                    Owns signal provider contract, XY frame
+                                    generation, renderer lifecycle, WebGPU
+                                    support/device loss, and config validation.
+                                </p>
+                                <ul
+                                    class="list"
+                                    style="
+                                        --accent: var(--viz);
+                                        margin-top: 12px;
+                                    "
+                                >
+                                    <li>oscillator</li>
+                                    <li>analyser</li>
+                                    <li>mic provider</li>
+                                    <li>playback analysis provider</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="seam">
+                    <div class="sec-head">
+                        <span class="sec-num">03</span>
+                        <h2>Playback-to-visualization seam</h2>
+                    </div>
+                    <div class="seam">
+                        <div class="card seam-box play" style="--i: 1">
+                            <div class="section-label">playback</div>
+                            <h3>Expose analysis tap</h3>
+                            <p>
+                                No visualization imports. Active source may or
+                                may not support analysis.
+                            </p>
+                        </div>
+                        <div class="connector">tap contract</div>
+                        <div class="card seam-box adapt" style="--i: 2">
+                            <div class="section-label">visualization</div>
+                            <h3>Adapt into signal provider</h3>
+                            <p>
+                                Translate buffers, clocks, channel layout, and
+                                teardown into the visualization provider
+                                contract.
+                            </p>
+                        </div>
+                        <div class="connector">composition</div>
+                        <div class="card seam-box compose" style="--i: 3">
+                            <div class="section-label">consumer/session</div>
+                            <h3>Compose products</h3>
+                            <p>
+                                Consumer wires playback and oscilloscope
+                                together without either product knowing
+                                internals of the other.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="grid-3" style="margin-top: 16px">
+                        <div class="card recessed">
+                            <h3>Clock</h3>
+                            <p>
+                                Define timestamp semantics, sample rate,
+                                latency, and drift expectations.
+                            </p>
+                        </div>
+                        <div class="card recessed">
+                            <h3>Buffers</h3>
+                            <p>
+                                Define channel count, ownership, reuse,
+                                allocation policy, and unsupported-source
+                                behavior.
+                            </p>
+                        </div>
+                        <div class="card recessed">
+                            <h3>Teardown</h3>
+                            <p>
+                                Define behavior when playback source changes or
+                                the visualization provider is swapped.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="contracts">
+                    <div class="sec-head">
+                        <span class="sec-num">04</span>
+                        <h2>Contracts to define before refactoring</h2>
+                    </div>
+                    <div
+                        class="table-wrap card elevated"
+                        style="padding: 0; --i: 1"
+                    >
+                        <div class="table-scroll">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Contract</th>
+                                        <th>Decision needed</th>
+                                        <th>Why it matters</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><code>Command model</code></td>
+                                        <td>
+                                            How load/play/pause/seek/source
+                                            switch/destroy serialize or cancel.
+                                        </td>
+                                        <td>
+                                            Prevents interleaved async calls
+                                            from corrupting transport state.
+                                        </td>
+                                        <td>
+                                            <span class="status warn"
+                                                >define first</span
+                                            >
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Disposal model</code></td>
+                                        <td>
+                                            Whether destroy is async,
+                                            idempotent, and legal during pending
+                                            commands.
+                                        </td>
+                                        <td>
+                                            Resource leaks and double-dispose
+                                            bugs are likely without this.
+                                        </td>
+                                        <td>
+                                            <span class="status warn"
+                                                >define first</span
+                                            >
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Error model</code></td>
+                                        <td>
+                                            Typed errors for unsupported source,
+                                            decode, autoplay, permission, CORS,
+                                            WebGPU loss.
+                                        </td>
+                                        <td>
+                                            Lets sessions surface recoverable vs
+                                            fatal states without guessing.
+                                        </td>
+                                        <td>
+                                            <span class="status warn"
+                                                >define first</span
+                                            >
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Diagnostics</code></td>
+                                        <td>
+                                            Expose source, fallback reason,
+                                            renderer backend, capability
+                                            decisions, analysis support.
+                                        </td>
+                                        <td>
+                                            Keeps internals hidden while
+                                            preserving debuggability.
+                                        </td>
+                                        <td>
+                                            <span class="status keep"
+                                                >runtime-owned</span
+                                            >
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Resource ownership</code></td>
+                                        <td>
+                                            AudioContext, media elements,
+                                            worklets, streams, GPU devices,
+                                            animation frames.
+                                        </td>
+                                        <td>
+                                            Clarifies who creates, reuses, and
+                                            tears down browser resources.
+                                        </td>
+                                        <td>
+                                            <span class="status warn"
+                                                >define first</span
+                                            >
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Import safety</code></td>
+                                        <td>
+                                            No browser globals at module import
+                                            time.
+                                        </td>
+                                        <td>
+                                            Keeps Next/server imports safe and
+                                            package entrypoints usable.
+                                        </td>
+                                        <td>
+                                            <span class="status keep"
+                                                >hard rule</span
+                                            >
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><code>Analysis tap</code></td>
+                                        <td>
+                                            Sample rate, clocks, channels,
+                                            buffers, latency, unsupported-source
+                                            behavior.
+                                        </td>
+                                        <td>
+                                            Prevents playback visualization from
+                                            becoming hidden coupling.
+                                        </td>
+                                        <td>
+                                            <span class="status warn"
+                                                >define first</span
+                                            >
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="modules">
+                    <div class="sec-head">
+                        <span class="sec-num">05</span>
+                        <h2>Proposed module map inside packages/audio</h2>
+                    </div>
+                    <pre
+                        class="dir-tree card recessed"
+                    ><span class="hl-a">audio/</span>
+├── core/                         <span class="ann">shared invariants only</span>
+│   ├── disposable.ts
+│   ├── observable.ts
+│   ├── errors.ts
+│   └── timeline.ts
+├── <span class="hl-a">playback/</span>
+│   ├── create-playback-runtime.ts
+│   ├── create-playback-session.ts
+│   ├── command-queue.ts
+│   ├── sources/                  <span class="ann">media element, fallback, WebCodecs, worklet</span>
+│   └── analysis/playback-analysis-tap.ts
+├── <span class="hl-v">visualization/</span>
+│   ├── create-visualization-runtime.ts
+│   ├── create-oscilloscope-session.ts
+│   ├── browser/                  <span class="ann">mic signal provider, AudioContext owner</span>
+│   ├── signal/                   <span class="ann">oscillator, analyser, playback-analysis</span>
+│   ├── renderer/webgpu-renderer.ts
+│   └── oscilloscope/             <span class="ann">xy-mode, presets, config</span>
+└── <span class="hl-r">react/</span>
+    ├── playback/use-playback-session.ts
+    └── visualization/use-oscilloscope-session.ts</pre>
+                </section>
+
+                <section id="order">
+                    <div class="sec-head">
+                        <span class="sec-num">06</span>
+                        <h2>
+                            Implementation order: contract-first,
+                            package-split-last
+                        </h2>
+                    </div>
+                    <div class="card elevated" style="--i: 1">
+                        <div class="pipeline">
+                            <div class="step">
+                                <span class="step-num">01</span
+                                ><b>Adopt pivot</b
+                                ><small
+                                    >Update durable repo ownership guidance
+                                    after review.</small
+                                >
+                            </div>
+                            <div class="pipe-arrow">→</div>
+                            <div class="step">
+                                <span class="step-num">02</span
+                                ><b>Define contracts</b
+                                ><small
+                                    >Commands, disposal, errors, diagnostics,
+                                    resources, import safety, analysis.</small
+                                >
+                            </div>
+                            <div class="pipe-arrow">→</div>
+                            <div class="step">
+                                <span class="step-num">03</span
+                                ><b>Deepen runtime</b
+                                ><small
+                                    >Rename createWebPlayer only when semantics
+                                    are clear.</small
+                                >
+                            </div>
+                            <div class="pipe-arrow">→</div>
+                            <div class="step">
+                                <span class="step-num">04</span
+                                ><b>Add sessions</b
+                                ><small
+                                    >Move controller behavior into
+                                    framework-agnostic playback/visualization
+                                    sessions.</small
+                                >
+                            </div>
+                            <div class="pipe-arrow">→</div>
+                            <div class="step">
+                                <span class="step-num">05</span><b>Thin React</b
+                                ><small
+                                    >Hooks wrap sessions with lifecycle and
+                                    subscriptions.</small
+                                >
+                            </div>
+                            <div class="pipe-arrow">→</div>
+                            <div class="step">
+                                <span class="step-num">06</span
+                                ><b>Entrypoints</b
+                                ><small
+                                    >Stabilize imports; split packages only
+                                    after dependency direction proves
+                                    itself.</small
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid-3" style="margin-top: 16px">
+                        <div class="card">
+                            <div class="section-label">do not build yet</div>
+                            <p>
+                                Physical package splits, broad
+                                <code>audio-core</code>, context providers,
+                                complete player UI, generalized plugin system.
+                            </p>
+                        </div>
+                        <div class="card">
+                            <div class="section-label">defer explicitly</div>
+                            <p>
+                                Mid-playback recovery API and premature
+                                WebCodecs abstraction beyond one source adapter.
+                            </p>
+                        </div>
+                        <div class="card">
+                            <div class="section-label">success reads like</div>
+                            <p>
+                                <code>@kkb/web</code> is an integration demo;
+                                runtime, session, visualization, mic, React, and
+                                UI tests each target their own layer.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+        <script>
+            (() => {
+                const toc = document.getElementById("toc");
+                const links = toc.querySelectorAll("a");
+                const sections = [];
+                links.forEach((link) => {
+                    const id = link.getAttribute("href").slice(1);
+                    const el = document.getElementById(id);
+                    if (el) sections.push({ id, el, link });
+                });
+                const observer = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach((entry) => {
+                            if (entry.isIntersecting) {
+                                links.forEach((link) => {
+                                    link.classList.remove("active");
+                                });
+                                const match = sections.find(
+                                    (section) => section.el === entry.target,
+                                );
+                                if (match) {
+                                    match.link.classList.add("active");
+                                    if (window.innerWidth <= 1000) {
+                                        match.link.scrollIntoView({
+                                            behavior: "smooth",
+                                            block: "nearest",
+                                            inline: "center",
+                                        });
+                                    }
+                                }
+                            }
+                        });
+                    },
+                    { rootMargin: "-10% 0px -80% 0px" },
+                );
+                sections.forEach((section) => {
+                    observer.observe(section.el);
+                });
+                links.forEach((link) => {
+                    link.addEventListener("click", (event) => {
+                        event.preventDefault();
+                        const el = document.getElementById(
+                            link.getAttribute("href").slice(1),
+                        );
+                        if (el) {
+                            el.scrollIntoView({
+                                behavior: "smooth",
+                                block: "start",
+                            });
+                            history.replaceState(
+                                null,
+                                "",
+                                link.getAttribute("href"),
+                            );
+                        }
+                    });
+                });
+            })();
+        </script>
+    </body>
+</html>
