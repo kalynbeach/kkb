@@ -26,9 +26,18 @@ type BinauralBeatGraph = {
   rightOscillator: OscillatorNode;
 };
 
+const cancelAndHoldParam = (param: AudioParam, time: number) => {
+  if ("cancelAndHoldAtTime" in param && typeof param.cancelAndHoldAtTime === "function") {
+    param.cancelAndHoldAtTime(time);
+    return;
+  }
+
+  param.cancelScheduledValues(time);
+  param.setValueAtTime(param.value, time);
+};
+
 const scheduleParam = (param: AudioParam, value: number, startTime: number, endTime: number) => {
-  param.cancelScheduledValues(startTime);
-  param.setValueAtTime(param.value, startTime);
+  cancelAndHoldParam(param, startTime);
   param.linearRampToValueAtTime(value, endTime);
 };
 
@@ -108,7 +117,16 @@ export const createBinauralBeatEngine = ({
 
   return {
     destroy: () => {
+      if (audioContext && graph) {
+        const now = audioContext.currentTime;
+        cancelAndHoldParam(graph.masterGain.gain, now);
+        graph.masterGain.gain.setValueAtTime(0, now);
+        graph.leftOscillator.stop(now);
+        graph.rightOscillator.stop(now);
+      }
+
       clearGraph();
+      stoppingPromise = null;
       void audioContext?.close();
       audioContext = null;
     },
@@ -167,8 +185,7 @@ export const createBinauralBeatEngine = ({
       const now = audioContext.currentTime;
       const stopAt = now + currentConfig.fadeSeconds;
 
-      currentGraph.masterGain.gain.cancelScheduledValues(now);
-      currentGraph.masterGain.gain.setValueAtTime(currentGraph.masterGain.gain.value, now);
+      cancelAndHoldParam(currentGraph.masterGain.gain, now);
       currentGraph.masterGain.gain.linearRampToValueAtTime(0, stopAt);
       currentGraph.leftOscillator.stop(stopAt);
       currentGraph.rightOscillator.stop(stopAt);

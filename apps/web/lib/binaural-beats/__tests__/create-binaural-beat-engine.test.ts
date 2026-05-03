@@ -10,6 +10,10 @@ type Deferred = {
 type ParamCall =
   | {
       time: number;
+      type: "cancelAndHoldAtTime";
+    }
+  | {
+      time: number;
       type: "cancelScheduledValues";
     }
   | {
@@ -38,6 +42,10 @@ const createDeferred = (): Deferred => {
 class FakeAudioParam {
   calls: ParamCall[] = [];
   value = 0;
+
+  cancelAndHoldAtTime(time: number) {
+    this.calls.push({ time, type: "cancelAndHoldAtTime" });
+  }
 
   cancelScheduledValues(time: number) {
     this.calls.push({ time, type: "cancelScheduledValues" });
@@ -90,6 +98,8 @@ class FakeGainNode extends FakeAudioNode {
 class FakeChannelMergerNode extends FakeAudioNode {}
 
 class FakeAudioContext {
+  channelMergerInputCounts: number[] = [];
+  closeCalls = 0;
   currentTime = 4;
   destination = new FakeAudioNode();
   gainNodes: FakeGainNode[] = [];
@@ -98,10 +108,12 @@ class FakeAudioContext {
   resumeCalls = 0;
 
   close() {
+    this.closeCalls += 1;
     return Promise.resolve();
   }
 
-  createChannelMerger() {
+  createChannelMerger(numberOfInputs?: number) {
+    this.channelMergerInputCounts.push(numberOfInputs ?? 6);
     const mergerNode = new FakeChannelMergerNode();
     this.mergerNodes.push(mergerNode);
     return mergerNode as unknown as ChannelMergerNode;
@@ -156,6 +168,37 @@ describe("createBinauralBeatEngine", () => {
     });
     expect(audioContext.oscillatorNodes[0]?.startCalls).toEqual([4]);
     expect(audioContext.oscillatorNodes[1]?.startCalls).toEqual([4]);
+    expect(audioContext.channelMergerInputCounts).toEqual([2]);
+    expect(audioContext.oscillatorNodes[0]?.connectCalls).toContainEqual({
+      input: undefined,
+      output: undefined,
+      target: audioContext.gainNodes[0],
+    });
+    expect(audioContext.oscillatorNodes[1]?.connectCalls).toContainEqual({
+      input: undefined,
+      output: undefined,
+      target: audioContext.gainNodes[1],
+    });
+    expect(audioContext.gainNodes[0]?.connectCalls).toContainEqual({
+      input: 0,
+      output: 0,
+      target: audioContext.mergerNodes[0],
+    });
+    expect(audioContext.gainNodes[1]?.connectCalls).toContainEqual({
+      input: 1,
+      output: 0,
+      target: audioContext.mergerNodes[0],
+    });
+    expect(audioContext.mergerNodes[0]?.connectCalls).toContainEqual({
+      input: undefined,
+      output: undefined,
+      target: audioContext.gainNodes[2],
+    });
+    expect(audioContext.gainNodes[2]?.connectCalls).toContainEqual({
+      input: undefined,
+      output: undefined,
+      target: audioContext.destination,
+    });
 
     engine.update({
       beatFrequencyHz: 12,
@@ -225,6 +268,38 @@ describe("createBinauralBeatEngine", () => {
       type: "setValueAtTime",
       value: 308,
     });
+  });
+
+  test("stops and disconnects the active graph on destroy", async () => {
+    const audioContext = new FakeAudioContext();
+    const engine = createBinauralBeatEngine({
+      createAudioContext: () => audioContext as unknown as AudioContext,
+      wait: () => Promise.resolve(),
+    });
+
+    await engine.play({
+      beatFrequencyHz: 10,
+      carrierFrequencyHz: 400,
+      fadeSeconds: 0.8,
+      volume: 0.15,
+    });
+
+    engine.destroy();
+
+    expect(audioContext.gainNodes[2]?.gain.calls).toContainEqual({
+      time: 4,
+      type: "cancelAndHoldAtTime",
+    });
+    expect(audioContext.gainNodes[2]?.gain.calls).toContainEqual({
+      time: 4,
+      type: "setValueAtTime",
+      value: 0,
+    });
+    expect(audioContext.oscillatorNodes[0]?.stopCalls).toEqual([4]);
+    expect(audioContext.oscillatorNodes[1]?.stopCalls).toEqual([4]);
+    expect(audioContext.oscillatorNodes[0]?.disconnectCalls).toBe(1);
+    expect(audioContext.oscillatorNodes[1]?.disconnectCalls).toBe(1);
+    expect(audioContext.closeCalls).toBe(1);
   });
 
   test("keeps stop idempotent while a graph is already stopping", async () => {
