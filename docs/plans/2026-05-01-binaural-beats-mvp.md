@@ -41,10 +41,16 @@ type BinauralBeatConfig = {
 type BinauralBeatEngine = {
   play(config: BinauralBeatConfig): Promise<void>;
   update(config: BinauralBeatConfig): void;
-  stop(): void;
+  stop(): Promise<void>;
   destroy(): void;
 };
 ```
+
+Implementation rules:
+
+- Sanitize once per `play`/`update`; use sanitized values for frequencies, volume, and fade.
+- Treat `OscillatorNode`s as one-shot. After `stop()`, fade out, stop/disconnect nodes, clear graph refs, and create fresh oscillators on the next `play()`.
+- Reuse at most the `AudioContext`; never reuse stopped oscillators.
 
 ### Web Audio graph
 
@@ -67,6 +73,7 @@ Use:
 - `AudioContext.resume()` inside the user-triggered play handler
 - `AudioParam` automation for frequency/gain updates
 - fade in/out to avoid clicks
+- clear graph refs after stop so replay creates a fresh graph
 
 ## Controls
 
@@ -142,6 +149,16 @@ If `OfflineAudioContext` is not available in the test environment, isolate graph
 - integrated player source
 - generated visualizer unless separately scoped
 - “brainwave entrainment” as product-facing language
+
+## Accepted v1 scope risk
+
+Research recommends monaural/isochronic support, a stereo check, and mono fallback for broad speaker/mobile reliability. This MVP intentionally ships binaural-only first as a constrained headphone experiment.
+
+Required mitigation:
+
+- make headphone requirement visible
+- warn that mono/speaker output may not work as intended
+- include stereo check / mono fallback in next slice before broader release
 
 ## Likely file changes
 
