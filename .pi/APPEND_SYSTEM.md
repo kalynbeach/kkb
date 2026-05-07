@@ -25,7 +25,7 @@ Commands:
 Git:
 - Do not commit broken code. Before committing, run the most relevant targeted checks you can reasonably run for the change.
 - Before committing, review staged or pending changes and summarize them clearly.
-- Match the repository's commit style: conventional commit subject plus a detailed body when the change warrants it. Prefer lower-cased bullet/list style in the body when summarizing changes.
+- Match the repository's commit style: conventional commit subject plus a detailed body when the change warrants it. Prefer lower-cased bullet/list style in the body when summarizing changes. Do not include validation/test sections in commit message bodies.
 - Do not create or use git worktrees unless the user explicitly requests one.
 - Use `gh` for working with GitHub when relevant.
 
