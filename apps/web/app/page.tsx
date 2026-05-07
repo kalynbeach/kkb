@@ -14,6 +14,12 @@ export default function Home() {
           audio
         </Link>
         <Link
+          href="/binaural-beats"
+          className="font-mono text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          binaural
+        </Link>
+        <Link
           href="/ui"
           className="font-mono text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
