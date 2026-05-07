@@ -41,6 +41,8 @@ const scheduleParam = (param: AudioParam, value: number, startTime: number, endT
   param.linearRampToValueAtTime(value, endTime);
 };
 
+const DESTROY_FADE_SECONDS = 0.025;
+
 const disconnectGraph = (graph: BinauralBeatGraph) => {
   graph.leftOscillator.disconnect();
   graph.rightOscillator.disconnect();
@@ -99,6 +101,8 @@ export const createBinauralBeatEngine = ({
   let audioContext: AudioContext | null = null;
   let graph: BinauralBeatGraph | null = null;
   let currentConfig = sanitizeBinauralBeatConfig(DEFAULT_BINAURAL_BEAT_CONFIG);
+  let destroyed = false;
+  let playingPromise: Promise<void> | null = null;
   let stoppingPromise: Promise<void> | null = null;
 
   const getAudioContext = () => {
@@ -106,70 +110,110 @@ export const createBinauralBeatEngine = ({
     return audioContext;
   };
 
-  const clearGraph = () => {
-    if (!graph) {
+  const playNext = async (config: BinauralBeatConfig) => {
+    if (stoppingPromise) {
+      await stoppingPromise;
+    }
+
+    if (destroyed) {
       return;
     }
 
-    disconnectGraph(graph);
-    graph = null;
+    const context = getAudioContext();
+
+    await context.resume();
+
+    if (destroyed) {
+      return;
+    }
+
+    if (graph) {
+      const sanitizedConfig = sanitizeBinauralBeatConfig(config);
+      const now = context.currentTime;
+
+      currentConfig = sanitizedConfig;
+      const frequencies = getBinauralBeatFrequencies(sanitizedConfig);
+      const rampEnd = now + Math.min(sanitizedConfig.fadeSeconds, 0.25);
+      scheduleParam(graph.leftOscillator.frequency, frequencies.leftFrequencyHz, now, rampEnd);
+      scheduleParam(graph.rightOscillator.frequency, frequencies.rightFrequencyHz, now, rampEnd);
+      scheduleParam(
+        graph.masterGain.gain,
+        sanitizedConfig.volume,
+        now,
+        now + sanitizedConfig.fadeSeconds,
+      );
+      return;
+    }
+
+    const nextGraph = createGraph(context, config);
+    graph = nextGraph.graph;
+    currentConfig = nextGraph.sanitizedConfig;
+
+    const now = context.currentTime;
+    graph.leftOscillator.start(now);
+    graph.rightOscillator.start(now);
+    scheduleParam(
+      graph.masterGain.gain,
+      nextGraph.sanitizedConfig.volume,
+      now,
+      now + nextGraph.sanitizedConfig.fadeSeconds,
+    );
   };
 
   return {
     destroy: () => {
-      if (audioContext && graph) {
-        const now = audioContext.currentTime;
-        cancelAndHoldParam(graph.masterGain.gain, now);
-        graph.masterGain.gain.setValueAtTime(0, now);
-        graph.leftOscillator.stop(now);
-        graph.rightOscillator.stop(now);
-      }
-
-      clearGraph();
+      destroyed = true;
+      playingPromise = null;
       stoppingPromise = null;
-      void audioContext?.close();
-      audioContext = null;
-    },
-    play: async (config) => {
-      if (stoppingPromise) {
-        await stoppingPromise;
-      }
 
-      const context = getAudioContext();
-
-      await context.resume();
-
-      if (graph) {
-        const sanitizedConfig = sanitizeBinauralBeatConfig(config);
-        const now = context.currentTime;
-
-        currentConfig = sanitizedConfig;
-        const frequencies = getBinauralBeatFrequencies(sanitizedConfig);
-        const rampEnd = now + Math.min(sanitizedConfig.fadeSeconds, 0.25);
-        scheduleParam(graph.leftOscillator.frequency, frequencies.leftFrequencyHz, now, rampEnd);
-        scheduleParam(graph.rightOscillator.frequency, frequencies.rightFrequencyHz, now, rampEnd);
-        scheduleParam(
-          graph.masterGain.gain,
-          sanitizedConfig.volume,
-          now,
-          now + sanitizedConfig.fadeSeconds,
-        );
+      if (!audioContext) {
         return;
       }
 
-      const nextGraph = createGraph(context, config);
-      graph = nextGraph.graph;
-      currentConfig = nextGraph.sanitizedConfig;
+      const context = audioContext;
+      const currentGraph = graph;
+      graph = null;
+      audioContext = null;
+
+      if (!currentGraph) {
+        void context.close();
+        return;
+      }
 
       const now = context.currentTime;
-      graph.leftOscillator.start(now);
-      graph.rightOscillator.start(now);
-      scheduleParam(
-        graph.masterGain.gain,
-        nextGraph.sanitizedConfig.volume,
-        now,
-        now + nextGraph.sanitizedConfig.fadeSeconds,
-      );
+      const stopAt = now + DESTROY_FADE_SECONDS;
+      cancelAndHoldParam(currentGraph.masterGain.gain, now);
+      currentGraph.masterGain.gain.linearRampToValueAtTime(0, stopAt);
+      currentGraph.leftOscillator.stop(stopAt);
+      currentGraph.rightOscillator.stop(stopAt);
+
+      void wait(DESTROY_FADE_SECONDS * 1000 + 30).then(() => {
+        disconnectGraph(currentGraph);
+        void context.close();
+      });
+    },
+    play: async (config) => {
+      const previousPlayPromise = playingPromise;
+      const nextPlayPromise = (async () => {
+        if (previousPlayPromise) {
+          try {
+            await previousPlayPromise;
+          } catch {
+            // Continue so a later play request is not permanently blocked by an earlier failure.
+          }
+        }
+
+        await playNext(config);
+      })();
+      playingPromise = nextPlayPromise;
+
+      try {
+        await nextPlayPromise;
+      } finally {
+        if (playingPromise === nextPlayPromise) {
+          playingPromise = null;
+        }
+      }
     },
     stop: async () => {
       if (stoppingPromise) {
@@ -191,8 +235,8 @@ export const createBinauralBeatEngine = ({
       currentGraph.rightOscillator.stop(stopAt);
 
       stoppingPromise = wait(currentConfig.fadeSeconds * 1000 + 30).then(() => {
-        disconnectGraph(currentGraph);
         if (graph === currentGraph) {
+          disconnectGraph(currentGraph);
           graph = null;
         }
         stoppingPromise = null;

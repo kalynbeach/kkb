@@ -111,14 +111,17 @@ export function BinauralBeatsClient() {
   const [config, setConfig] = useState<BinauralBeatConfig>(DEFAULT_BINAURAL_BEAT_CONFIG);
   const [engine, setEngine] = useState<BinauralBeatEngine | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isStarting, setIsStarting] = useState(false);
   const [isStopping, setIsStopping] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const frequencies = getBinauralBeatFrequencies(config);
-  const playbackStatus = isStopping
-    ? "Audio is stopping."
-    : isPlaying
-      ? `Audio is playing. Left channel ${formatNumber(frequencies.leftFrequencyHz)} Hz. Right channel ${formatNumber(frequencies.rightFrequencyHz)} Hz.`
-      : "Audio is stopped.";
+  const playbackStatus = isStarting
+    ? "Audio is starting."
+    : isStopping
+      ? "Audio is stopping."
+      : isPlaying
+        ? `Audio is playing. Left channel ${formatNumber(frequencies.leftFrequencyHz)} Hz. Right channel ${formatNumber(frequencies.rightFrequencyHz)} Hz.`
+        : "Audio is stopped.";
 
   useEffect(() => {
     const nextEngine = createBinauralBeatEngine();
@@ -192,16 +195,20 @@ export function BinauralBeatsClient() {
     try {
       if (isPlaying) {
         setIsStopping(true);
+        setIsStarting(false);
         setIsPlaying(false);
         await engine.stop();
         setIsStopping(false);
         return;
       }
 
+      setIsStarting(true);
       await engine.play(config);
       setIsPlaying(true);
+      setIsStarting(false);
     } catch (nextError) {
       setIsPlaying(false);
+      setIsStarting(false);
       setIsStopping(false);
       setError(nextError instanceof Error ? nextError.message : "Unable to start audio.");
     }
@@ -262,10 +269,11 @@ export function BinauralBeatsClient() {
 
             <Button
               className="h-11 w-fit bg-white text-black hover:bg-white/90"
-              disabled={!engine || isStopping}
+              disabled={!engine || isStarting || isStopping}
               onClick={() => {
                 togglePlayback().catch((nextError: unknown) => {
                   setIsPlaying(false);
+                  setIsStarting(false);
                   setError(
                     nextError instanceof Error ? nextError.message : "Unable to control audio.",
                   );
@@ -274,7 +282,7 @@ export function BinauralBeatsClient() {
               type="button"
             >
               {isPlaying || isStopping ? <Pause /> : <Play />}
-              {isStopping ? "Stopping" : isPlaying ? "Stop" : "Play"}
+              {isStarting ? "Starting" : isStopping ? "Stopping" : isPlaying ? "Stop" : "Play"}
             </Button>
           </div>
         </div>

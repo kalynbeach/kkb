@@ -104,6 +104,7 @@ class FakeAudioContext {
   destination = new FakeAudioNode();
   gainNodes: FakeGainNode[] = [];
   mergerNodes: FakeChannelMergerNode[] = [];
+  resumePromise: Promise<void> = Promise.resolve();
   oscillatorNodes: FakeOscillatorNode[] = [];
   resumeCalls = 0;
 
@@ -133,7 +134,7 @@ class FakeAudioContext {
 
   resume() {
     this.resumeCalls += 1;
-    return Promise.resolve();
+    return this.resumePromise;
   }
 }
 
@@ -270,11 +271,62 @@ describe("createBinauralBeatEngine", () => {
     });
   });
 
-  test("stops and disconnects the active graph on destroy", async () => {
+  test("serializes concurrent play calls so only one graph starts", async () => {
     const audioContext = new FakeAudioContext();
+    const resumeWait = createDeferred();
+    audioContext.resumePromise = resumeWait.promise;
     const engine = createBinauralBeatEngine({
       createAudioContext: () => audioContext as unknown as AudioContext,
       wait: () => Promise.resolve(),
+    });
+
+    const firstPlayPromise = engine.play({
+      beatFrequencyHz: 10,
+      carrierFrequencyHz: 400,
+      fadeSeconds: 0.8,
+      volume: 0.15,
+    });
+    const secondPlayPromise = engine.play({
+      beatFrequencyHz: 8,
+      carrierFrequencyHz: 300,
+      fadeSeconds: 0.8,
+      volume: 0.12,
+    });
+
+    expect(audioContext.resumeCalls).toBe(1);
+    expect(audioContext.oscillatorNodes).toHaveLength(0);
+
+    resumeWait.resolve();
+    await firstPlayPromise;
+    await secondPlayPromise;
+
+    expect(audioContext.resumeCalls).toBe(2);
+    expect(audioContext.oscillatorNodes).toHaveLength(2);
+    expect(audioContext.oscillatorNodes[0]?.startCalls).toEqual([4]);
+    expect(audioContext.oscillatorNodes[1]?.startCalls).toEqual([4]);
+    expect(audioContext.oscillatorNodes[0]?.frequency.calls).toContainEqual({
+      time: 4.25,
+      type: "linearRampToValueAtTime",
+      value: 300,
+    });
+    expect(audioContext.oscillatorNodes[1]?.frequency.calls).toContainEqual({
+      time: 4.25,
+      type: "linearRampToValueAtTime",
+      value: 308,
+    });
+    expect(audioContext.gainNodes[2]?.gain.calls).toContainEqual({
+      time: 4.8,
+      type: "linearRampToValueAtTime",
+      value: 0.12,
+    });
+  });
+
+  test("ramps down before disconnecting the active graph on destroy", async () => {
+    const audioContext = new FakeAudioContext();
+    const destroyWait = createDeferred();
+    const engine = createBinauralBeatEngine({
+      createAudioContext: () => audioContext as unknown as AudioContext,
+      wait: () => destroyWait.promise,
     });
 
     await engine.play({
@@ -291,12 +343,19 @@ describe("createBinauralBeatEngine", () => {
       type: "cancelAndHoldAtTime",
     });
     expect(audioContext.gainNodes[2]?.gain.calls).toContainEqual({
-      time: 4,
-      type: "setValueAtTime",
+      time: 4.025,
+      type: "linearRampToValueAtTime",
       value: 0,
     });
-    expect(audioContext.oscillatorNodes[0]?.stopCalls).toEqual([4]);
-    expect(audioContext.oscillatorNodes[1]?.stopCalls).toEqual([4]);
+    expect(audioContext.oscillatorNodes[0]?.stopCalls).toEqual([4.025]);
+    expect(audioContext.oscillatorNodes[1]?.stopCalls).toEqual([4.025]);
+    expect(audioContext.oscillatorNodes[0]?.disconnectCalls).toBe(0);
+    expect(audioContext.oscillatorNodes[1]?.disconnectCalls).toBe(0);
+    expect(audioContext.closeCalls).toBe(0);
+
+    destroyWait.resolve();
+    await Promise.resolve();
+
     expect(audioContext.oscillatorNodes[0]?.disconnectCalls).toBe(1);
     expect(audioContext.oscillatorNodes[1]?.disconnectCalls).toBe(1);
     expect(audioContext.closeCalls).toBe(1);
