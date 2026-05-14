@@ -16,6 +16,13 @@ import {
   sanitizeBinauralBeatConfig,
 } from "@/lib/binaural-beats/binaural-beat-config";
 import {
+  applyBinauralBeatPreset,
+  BINAURAL_BEAT_PRESETS,
+  type BinauralBeatPresetId,
+  getBinauralBeatPresetFromHash,
+  getHashWithBinauralBeatPreset,
+} from "@/lib/binaural-beats/binaural-beat-presets";
+import {
   type BinauralBeatEngine,
   createBinauralBeatEngine,
 } from "@/lib/binaural-beats/create-binaural-beat-engine";
@@ -113,6 +120,7 @@ export function BinauralBeatsClient() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isStarting, setIsStarting] = useState(false);
   const [isStopping, setIsStopping] = useState(false);
+  const [selectedPresetId, setSelectedPresetId] = useState<BinauralBeatPresetId | null>(null);
   const [error, setError] = useState<string | null>(null);
   const frequencies = getBinauralBeatFrequencies(config);
   const playbackStatus = isStarting
@@ -130,6 +138,17 @@ export function BinauralBeatsClient() {
     return () => {
       nextEngine.destroy();
     };
+  }, []);
+
+  useEffect(() => {
+    const preset = getBinauralBeatPresetFromHash(window.location.hash);
+
+    if (!preset) {
+      return;
+    }
+
+    setSelectedPresetId(preset.id);
+    setConfig((currentConfig) => applyBinauralBeatPreset(currentConfig, preset));
   }, []);
 
   useEffect(() => {
@@ -182,6 +201,22 @@ export function BinauralBeatsClient() {
         ...currentConfig,
         [key]: value,
       }),
+    );
+  };
+
+  const selectPreset = (presetId: BinauralBeatPresetId) => {
+    const preset = BINAURAL_BEAT_PRESETS.find((candidate) => candidate.id === presetId);
+
+    if (!preset) {
+      return;
+    }
+
+    setSelectedPresetId(preset.id);
+    setConfig((currentConfig) => applyBinauralBeatPreset(currentConfig, preset));
+    window.history.replaceState(
+      null,
+      "",
+      getHashWithBinauralBeatPreset(window.location.hash, preset.id),
     );
   };
 
@@ -291,6 +326,45 @@ export function BinauralBeatsClient() {
       <aside className="flex min-w-0 flex-col divide-y divide-white/[0.06] rounded-xl border border-white/[0.08] bg-black/10">
         <div className="px-4 py-3.5">
           <p className="text-xs font-medium uppercase tracking-wide text-white/50">Controls</p>
+        </div>
+        <div className="grid gap-3 px-4 py-4">
+          <p className="text-xs font-medium uppercase tracking-wide text-white/50">Band presets</p>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+            {BINAURAL_BEAT_PRESETS.map((preset) => {
+              const isSelected = selectedPresetId === preset.id;
+
+              return (
+                <Button
+                  aria-pressed={isSelected}
+                  className={cn(
+                    "h-auto justify-between gap-3 rounded-lg border px-3 py-2 text-left",
+                    isSelected
+                      ? "border-white/45 bg-white text-black hover:bg-white/90"
+                      : "border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.08]",
+                  )}
+                  key={preset.id}
+                  onClick={() => selectPreset(preset.id)}
+                  type="button"
+                  variant="outline"
+                >
+                  <span className="grid gap-0.5">
+                    <span className="font-medium">{preset.name}</span>
+                    <span
+                      className={cn(
+                        "font-mono text-[11px]",
+                        isSelected ? "text-black/60" : "text-white/45",
+                      )}
+                    >
+                      {preset.carrierFrequencyHz} Hz carrier
+                    </span>
+                  </span>
+                  <span className="font-mono text-xs tabular-nums">
+                    {preset.beatFrequencyHz} Hz
+                  </span>
+                </Button>
+              );
+            })}
+          </div>
         </div>
         <div className="px-4 py-4">
           <FieldGroup className="gap-5">
