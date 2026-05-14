@@ -69,10 +69,10 @@ function NumberControl({
     <Field>
       <FieldContent className="gap-2">
         <div className="flex items-center justify-between gap-3">
-          <FieldLabel className="text-xs text-white/75" htmlFor={inputId}>
+          <FieldLabel className="text-xs text-foreground/75" htmlFor={inputId}>
             {label}
           </FieldLabel>
-          <span className="font-mono text-[11px] tabular-nums text-white/50">
+          <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
             {formatNumber(value)} {suffix}
           </span>
         </div>
@@ -92,7 +92,7 @@ function NumberControl({
           />
           <Input
             autoComplete="off"
-            className="h-8 font-mono text-sm tabular-nums text-white"
+            className="h-8 font-mono text-sm tabular-nums text-foreground"
             id={inputId}
             inputMode="decimal"
             max={max}
@@ -108,7 +108,7 @@ function NumberControl({
             value={value}
           />
         </div>
-        <p className="text-xs leading-5 text-white/45">{description}</p>
+        <p className="text-xs leading-5 text-muted-foreground/80">{description}</p>
       </FieldContent>
     </Field>
   );
@@ -251,22 +251,22 @@ export function BinauralBeatsClient() {
 
   return (
     <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem] lg:items-start">
-      <section className="min-w-0 rounded-xl border border-white/[0.08] bg-black/20 p-5">
+      <section className="min-w-0 rounded-xl border border-border bg-card/60 p-5">
         <div className="flex min-h-[24rem] flex-col justify-between gap-8">
           <div className="grid gap-3">
-            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-white/35">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground/70">
               Stereo tone session
             </p>
             <div className="grid gap-2">
               <div className="flex flex-wrap items-end gap-x-5 gap-y-2">
-                <h2 className="text-5xl font-semibold tracking-tight text-white sm:text-7xl">
+                <h2 className="text-5xl font-semibold tracking-tight text-foreground sm:text-7xl">
                   {formatNumber(config.beatFrequencyHz)}
                 </h2>
-                <span className="pb-2 font-mono text-sm uppercase tracking-[0.16em] text-white/45">
+                <span className="pb-2 font-mono text-sm uppercase tracking-[0.16em] text-muted-foreground">
                   Hz beat
                 </span>
               </div>
-              <p className="max-w-xl text-sm leading-6 text-white/52">
+              <p className="max-w-xl text-sm leading-6 text-muted-foreground">
                 Left channel {formatNumber(frequencies.leftFrequencyHz)} Hz. Right channel{" "}
                 {formatNumber(frequencies.rightFrequencyHz)} Hz.
               </p>
@@ -277,21 +277,21 @@ export function BinauralBeatsClient() {
             <div
               aria-hidden="true"
               className={cn(
-                "grid h-32 grid-cols-2 overflow-hidden rounded-lg border border-white/[0.08]",
-                "bg-[linear-gradient(135deg,rgba(24,24,27,0.92),rgba(8,8,10,0.98))]",
+                "grid h-32 grid-cols-2 overflow-hidden rounded-lg border border-border",
+                "bg-[linear-gradient(135deg,var(--card),var(--muted))]",
               )}
             >
-              <div className="flex items-center justify-center border-white/[0.08] border-r">
-                <div className="h-12 w-12 rounded-full border border-sky-300/30 bg-sky-300/10 shadow-[0_0_36px_rgba(125,211,252,0.22)]" />
+              <div className="flex items-center justify-center border-border border-r">
+                <div className="h-12 w-12 rounded-full border border-chart-1/30 bg-chart-1/10 shadow-[0_0_36px] shadow-chart-1/25" />
               </div>
               <div className="flex items-center justify-center">
-                <div className="h-12 w-12 rounded-full border border-amber-300/30 bg-amber-300/10 shadow-[0_0_36px_rgba(252,211,77,0.2)]" />
+                <div className="h-12 w-12 rounded-full border border-chart-5/30 bg-chart-5/10 shadow-[0_0_36px] shadow-chart-5/25" />
               </div>
             </div>
 
             {error ? (
               <p
-                className="rounded-md border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-100"
+                className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive"
                 role="alert"
               >
                 {error}
@@ -303,7 +303,7 @@ export function BinauralBeatsClient() {
             </p>
 
             <Button
-              className="h-11 w-fit bg-white text-black hover:bg-white/90"
+              className="h-11 w-fit bg-primary text-primary-foreground hover:bg-primary/90"
               disabled={!engine || isStarting || isStopping}
               onClick={() => {
                 togglePlayback().catch((nextError: unknown) => {
@@ -323,12 +323,16 @@ export function BinauralBeatsClient() {
         </div>
       </section>
 
-      <aside className="flex min-w-0 flex-col divide-y divide-white/[0.06] rounded-xl border border-white/[0.08] bg-black/10">
+      <aside className="flex min-w-0 flex-col divide-y divide-border rounded-xl border border-border bg-card/40">
         <div className="px-4 py-3.5">
-          <p className="text-xs font-medium uppercase tracking-wide text-white/50">Controls</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Controls
+          </p>
         </div>
         <div className="grid gap-3 px-4 py-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-white/50">Band presets</p>
+          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Band presets
+          </p>
           <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
             {BINAURAL_BEAT_PRESETS.map((preset) => {
               const isSelected = selectedPresetId === preset.id;
@@ -337,22 +341,22 @@ export function BinauralBeatsClient() {
                 <Button
                   aria-pressed={isSelected}
                   className={cn(
-                    "h-auto justify-between gap-3 rounded-lg border px-3 py-2 text-left",
+                    "h-auto justify-between gap-3 border px-3 py-2 text-left text-foreground",
                     isSelected
-                      ? "border-white/45 bg-white text-black hover:bg-white/90"
-                      : "border-white/[0.08] bg-white/[0.03] text-white hover:bg-white/[0.08]",
+                      ? "border-audio-accent bg-audio-accent-softer hover:bg-audio-accent-soft"
+                      : "border-border bg-card/50 hover:border-audio-accent/50 hover:bg-muted/70",
                   )}
                   key={preset.id}
                   onClick={() => selectPreset(preset.id)}
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                 >
                   <span className="grid gap-0.5">
                     <span className="font-medium">{preset.name}</span>
                     <span
                       className={cn(
                         "font-mono text-[11px]",
-                        isSelected ? "text-black/60" : "text-white/45",
+                        isSelected ? "text-audio-accent-muted" : "text-muted-foreground",
                       )}
                     >
                       {preset.carrierFrequencyHz} Hz carrier
@@ -385,8 +389,10 @@ export function BinauralBeatsClient() {
           </FieldGroup>
         </div>
         <div className="px-4 py-4">
-          <p className="mb-3 text-xs font-medium uppercase tracking-wide text-white/50">Safety</p>
-          <ul className="grid gap-2 text-xs leading-5 text-white/55">
+          <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Safety
+          </p>
+          <ul className="grid gap-2 text-xs leading-5 text-muted-foreground">
             {SAFETY_NOTES.map((note) => (
               <li key={note}>{note}</li>
             ))}
