@@ -44,7 +44,7 @@ export const BINAURAL_BEAT_PRESETS = [
   {
     beatFrequencyHz: BINAURAL_BEAT_LIMITS.beatFrequencyHz.max,
     carrierFrequencyHz: 400,
-    description: "30 Hz beat with a 400 Hz carrier.",
+    description: `${BINAURAL_BEAT_LIMITS.beatFrequencyHz.max} Hz beat with a 400 Hz carrier.`,
     id: "gamma",
     name: "Gamma",
   },
@@ -81,4 +81,13 @@ export const getHashWithBinauralBeatPreset = (hash: string, presetId: string) =>
   const params = new URLSearchParams(hashValue);
   params.set("preset", presetId);
   return `#${params.toString()}`;
+};
+
+export const getHashWithoutBinauralBeatPreset = (hash: string) => {
+  const hashValue = hash.startsWith("#") ? hash.slice(1) : hash;
+  const params = new URLSearchParams(hashValue);
+  params.delete("preset");
+
+  const nextHash = params.toString();
+  return nextHash ? `#${nextHash}` : "";
 };

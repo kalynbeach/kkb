@@ -19,8 +19,10 @@ import {
   applyBinauralBeatPreset,
   BINAURAL_BEAT_PRESETS,
   type BinauralBeatPresetId,
+  findBinauralBeatPreset,
   getBinauralBeatPresetFromHash,
   getHashWithBinauralBeatPreset,
+  getHashWithoutBinauralBeatPreset,
 } from "@/lib/binaural-beats/binaural-beat-presets";
 import {
   type BinauralBeatEngine,
@@ -196,6 +198,11 @@ export function BinauralBeatsClient() {
   );
 
   const updateConfig = (key: NumericConfigKey, value: number) => {
+    if (key === "carrierFrequencyHz" || key === "beatFrequencyHz") {
+      setSelectedPresetId(null);
+      window.history.replaceState(null, "", getHashWithoutBinauralBeatPreset(window.location.hash));
+    }
+
     setConfig((currentConfig) =>
       sanitizeBinauralBeatConfig({
         ...currentConfig,
@@ -205,7 +212,7 @@ export function BinauralBeatsClient() {
   };
 
   const selectPreset = (presetId: BinauralBeatPresetId) => {
-    const preset = BINAURAL_BEAT_PRESETS.find((candidate) => candidate.id === presetId);
+    const preset = findBinauralBeatPreset(presetId);
 
     if (!preset) {
       return;
