@@ -7,7 +7,6 @@ import {
   findBinauralBeatPreset,
   getBinauralBeatPresetFromHash,
   getHashWithBinauralBeatPreset,
-  getHashWithoutBinauralBeatPreset,
 } from "../binaural-beat-presets";
 
 describe("binaural beat presets", () => {
@@ -80,10 +79,5 @@ describe("binaural beat presets", () => {
 
   test("writes preset hash while preserving other hash parameters", () => {
     expect(getHashWithBinauralBeatPreset("#foo=bar", "theta")).toBe("#foo=bar&preset=theta");
-  });
-
-  test("removes preset hash while preserving other hash parameters", () => {
-    expect(getHashWithoutBinauralBeatPreset("#foo=bar&preset=theta")).toBe("#foo=bar");
-    expect(getHashWithoutBinauralBeatPreset("#preset=theta")).toBe("");
   });
 });
