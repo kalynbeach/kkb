@@ -22,7 +22,6 @@ import {
   findBinauralBeatPreset,
   getBinauralBeatPresetFromHash,
   getHashWithBinauralBeatPreset,
-  getHashWithoutBinauralBeatPreset,
 } from "@/lib/binaural-beats/binaural-beat-presets";
 import {
   type BinauralBeatEngine,
@@ -198,11 +197,6 @@ export function BinauralBeatsClient() {
   );
 
   const updateConfig = (key: NumericConfigKey, value: number) => {
-    if (key === "carrierFrequencyHz" || key === "beatFrequencyHz") {
-      setSelectedPresetId(null);
-      window.history.replaceState(null, "", getHashWithoutBinauralBeatPreset(window.location.hash));
-    }
-
     setConfig((currentConfig) =>
       sanitizeBinauralBeatConfig({
         ...currentConfig,
