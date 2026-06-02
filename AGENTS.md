@@ -32,6 +32,8 @@ Use Bun for scripts (`bun`, not npm/pnpm/yarn).
 
 ## Agent skills
 
+`AGENTS.md` is the primary agent guidance file for this project. Treat `CLAUDE.md` as legacy Claude Code guidance unless explicitly asked to update it.
+
 ### Issue tracker
 
 Issues are tracked in GitHub Issues for `kalynbeach/kkb` using the `gh` CLI. See `docs/agents/issue-tracker.md`.
