@@ -275,7 +275,7 @@ Tasks:
 - Clarify how TX-02 and Geist relate to the preset's Geist Mono value.
   - Current repo intent uses TX-02 as the technical mono identity.
   - The screenshot preset uses Geist Mono.
-  - This needs a deliberate decision: adopt Geist Mono globally, keep TX-02 as KKB's variant of the mono preset, or use TX-02 only for specialized instrument surfaces.
+  - Decision: keep TX-02 as the standard KKB monospace font, remove Geist Mono, add Departure Mono only as a selective secondary lo-fi technical monospace accent, and add EB Garamond as the default serif face.
 - Add the screenshot/preset as a reference in docs.
 
 ### Stage 2 — Global token alignment
@@ -419,7 +419,7 @@ Capture visual findings in a report if the change is broad or subjective.
 ## Decisions still open
 
 1. **Font decision**
-   - Should KKB follow the preset exactly with Geist Mono, or keep TX-02 as the KKB mono identity? Keep TX-02, do not use Geist Mono.
+   - Should KKB follow the preset exactly with Geist Mono, or keep TX-02 as the KKB mono identity? Keep TX-02 as the standard KKB mono identity, remove Geist Mono, add Departure Mono as a selective secondary monospace accent, keep Geist as the default sans-serif, and add EB Garamond as the default serif face.
 
 2. **Icon decision**
    - Should `@kkb/ui` migrate from Lucide to Phosphor? Yes.

@@ -42,16 +42,18 @@ There's also version drift — root has `tailwindcss@^4.2.1` while `@kkb/ui` has
 
 ## 2. MEDIUM — Font Files Duplicated Across Apps
 
-Three identical font files exist in both apps:
+Shared local font files exist in both apps:
 
 ```
-apps/web/app/fonts/GeistVF.woff        ← duplicate
-apps/web/app/fonts/GeistMonoVF.woff    ← duplicate
-apps/web/app/fonts/TX-02-VF.woff2      ← duplicate
-apps/docs/app/fonts/GeistVF.woff       ← duplicate
-apps/docs/app/fonts/GeistMonoVF.woff   ← duplicate
-apps/docs/app/fonts/TX-02-VF.woff2     ← duplicate
+apps/web/app/fonts/GeistVF.woff                       ← duplicate
+apps/web/app/fonts/TX-02-VF.woff2                     ← duplicate
+apps/web/app/fonts/DepartureMono-Regular.woff2        ← duplicate
+apps/docs/app/fonts/GeistVF.woff                      ← duplicate
+apps/docs/app/fonts/TX-02-VF.woff2                    ← duplicate
+apps/docs/app/fonts/DepartureMono-Regular.woff2       ← duplicate
 ```
+
+Geist Mono has been intentionally removed from the KKB font system.
 
 **Options:**
 

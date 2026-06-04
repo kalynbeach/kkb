@@ -1,5 +1,6 @@
 import { ThemeProvider } from "@kkb/ui/components/theme-provider";
 import type { Metadata } from "next";
+import { EB_Garamond } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 
@@ -7,14 +8,20 @@ const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
 });
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-});
 
 const tx02 = localFont({
   src: "./fonts/TX-02-VF.woff2",
   variable: "--font-tx-02",
+});
+
+const departureMono = localFont({
+  src: "./fonts/DepartureMono-Regular.woff2",
+  variable: "--font-departure-mono",
+});
+
+const ebGaramond = EB_Garamond({
+  subsets: ["latin"],
+  variable: "--font-eb-garamond",
 });
 
 export const metadata: Metadata = {
@@ -29,7 +36,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} ${tx02.variable}`}>
+      <body
+        className={`${geistSans.variable} ${tx02.variable} ${departureMono.variable} ${ebGaramond.variable}`}
+      >
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
