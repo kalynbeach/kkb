@@ -1,0 +1,9 @@
+{
+  "extends": "@kkb/typescript-config/base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
+  },
+  "include": ["extensions", "lib"],
+  "exclude": ["node_modules", "dist", "**/__tests__/**/*", "**/*.test.ts"]
+}

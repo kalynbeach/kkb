@@ -9,6 +9,7 @@ This repo is a Bun-workspace Turborepo with Next.js 16, React 19, TypeScript 6, 
 - `apps/web` is the active demo/sandbox host.
 - `apps/docs` is a lightweight docs shell; canonical planning and research docs currently live under `docs/`.
 - `packages/audio` contains headless audio playback and oscilloscope runtime code.
+- `packages/ableton` contains Ableton Live extension experiments and related utilities.
 - `packages/ui` contains shared UI primitives, audio presentation pieces, and `json-render` integration.
 
 ## Workspace inventory
@@ -16,6 +17,7 @@ This repo is a Bun-workspace Turborepo with Next.js 16, React 19, TypeScript 6, 
 - `apps/web` (`@kkb/web`) — active integration app and verification host.
 - `apps/docs` (`@kkb/docs`) — early-stage docs shell.
 - `packages/audio` (`@kkb/audio`) — headless browser audio runtime, source contracts, worklet helpers, oscilloscope runtime, signal providers, and WebGPU renderer.
+- `packages/ableton` (`@kkb/ableton`) — Ableton Live extension experiments and shared Live utilities.
 - `packages/ui` (`@kkb/ui`) — shared React UI package with shadcn-derived primitives, audio UI presentation, and json-render adapters.
 - `packages/typescript-config` (`@kkb/typescript-config`) — shared TypeScript configs used by all workspaces.
 
