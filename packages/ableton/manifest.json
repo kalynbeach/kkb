@@ -1,7 +1,7 @@
 {
   "name": "hello-live",
   "author": "Kalyn Beach",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "entry": "extensions/hello-live/dist/extension.cjs",
   "minimumApiVersion": "1.0.0"
 }
