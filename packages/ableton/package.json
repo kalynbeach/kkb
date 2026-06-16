@@ -1,0 +1,27 @@
+{
+  "name": "@kkb/ableton",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./extensions/*": "./extensions/*/src/extension.ts",
+    "./lib/*": "./lib/*.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit",
+    "test": "bun test --pass-with-no-tests",
+    "build": "bun scripts/build-extensions.ts --production",
+    "build:dev": "bun scripts/build-extensions.ts",
+    "start": "bun run build:dev && extensions-cli run",
+    "package": "bun run build && extensions-cli package"
+  },
+  "dependencies": {
+    "@ableton-extensions/sdk": "file:./vendor/ableton-extensions-sdk-1.0.0-beta.0.tgz"
+  },
+  "devDependencies": {
+    "@ableton-extensions/cli": "file:./vendor/ableton-extensions-cli-1.0.0-beta.0.tgz",
+    "@types/bun": "catalog:",
+    "@kkb/typescript-config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
