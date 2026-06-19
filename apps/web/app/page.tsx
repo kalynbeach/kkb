@@ -1,43 +1,36 @@
 import Link from "next/link";
 
+const routes = [
+  { href: "/audio", label: "audio" },
+  { href: "/binaural-beats", label: "binaural" },
+  { href: "/oscilloscope", label: "oscilloscope" },
+  { href: "/ui", label: "ui" },
+  { href: "/json-render", label: "json-render" },
+] as const;
+
 export default function Home() {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center gap-8 p-8">
-      <div className="flex flex-col items-center gap-1 text-center">
-        <h1 className="font-mono text-2xl font-bold tracking-tight">KKB</h1>
+    <main className="flex min-h-svh items-center justify-center px-4 py-8 sm:px-8">
+      <div className="grid w-full max-w-3xl gap-5">
+        <header className="border-b border-foreground pb-3">
+          <h1 className="font-mono text-2xl font-bold tracking-tight">KKB</h1>
+        </header>
+
+        <nav aria-label="KKB routes">
+          <ul className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+            {routes.map((route) => (
+              <li key={route.href} className="min-w-0">
+                <Link
+                  href={route.href}
+                  className="flex h-20 items-end border border-border p-3 font-mono text-sm font-semibold text-foreground transition-colors hover:border-foreground hover:bg-foreground hover:text-background focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:h-24"
+                >
+                  {route.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
-      <nav className="flex gap-6">
-        <Link
-          href="/audio"
-          className="font-mono text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          audio
-        </Link>
-        <Link
-          href="/binaural-beats"
-          className="font-mono text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          binaural
-        </Link>
-        <Link
-          href="/ui"
-          className="font-mono text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          ui
-        </Link>
-        <Link
-          href="/json-render"
-          className="font-mono text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          json-render
-        </Link>
-        <Link
-          href="/oscilloscope"
-          className="font-mono text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          oscilloscope
-        </Link>
-      </nav>
-    </div>
+    </main>
   );
 }
