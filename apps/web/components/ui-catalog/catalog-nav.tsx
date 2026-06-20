@@ -139,7 +139,7 @@ export function CatalogNav({ sections, totalItemCount }: CatalogNavProps) {
                         : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
                     )}
                   >
-                    <span>{section.label}</span>
+                    <span className="font-mono">{section.label}</span>
                     {section.itemCount ? (
                       <span className="font-mono text-xs opacity-70">{section.itemCount}</span>
                     ) : null}
@@ -185,7 +185,7 @@ export function CatalogNav({ sections, totalItemCount }: CatalogNavProps) {
                           : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
                       )}
                     >
-                      <span>{section.label}</span>
+                      <span className="font-mono">{section.label}</span>
                       {section.itemCount ? (
                         <span className="font-mono text-xs text-muted-foreground">
                           {section.itemCount}
