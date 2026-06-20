@@ -267,6 +267,7 @@ import { NavigationSection } from "./sections/navigation-section";
 import { OverlaySection } from "./sections/overlay-section";
 
 type CatalogKind = "view" | "category" | "component" | "utility";
+type CatalogLane = "core" | "instrument" | "support";
 type CatalogCategory =
   | "Design System"
   | "Layout"
@@ -345,6 +346,49 @@ const categoryMeta: Record<CatalogCategory, { description: string; icon: React.E
     icon: Terminal,
   },
 };
+
+const railGroups: readonly {
+  label: string;
+  description: string;
+  categories: readonly CatalogCategory[];
+}[] = [
+  {
+    label: "Core bench",
+    description: "Daily product primitives and system rules.",
+    categories: ["Design System", "Input", "Layout", "Feedback"],
+  },
+  {
+    label: "Instrument bays",
+    description: "Scoped surfaces with stronger local identity.",
+    categories: ["Audio", "Data"],
+  },
+  {
+    label: "Interaction support",
+    description: "Navigation, overlays, menus, and utilities.",
+    categories: ["Navigation", "Overlay", "Menu", "Utilities"],
+  },
+];
+
+const corePrimitiveIds = new Set([
+  "design-system",
+  "button",
+  "field",
+  "input",
+  "select",
+  "dialog",
+  "table",
+  "tabs",
+  "sidebar",
+]);
+
+const instrumentBayIds = new Set([
+  "category-audio",
+  "audio-player-controls",
+  "audio-playhead",
+  "audio-waveform",
+  "audio-presenter",
+  "audio-theme",
+]);
 
 const catalogItems: readonly CatalogItem[] = [
   {
@@ -529,6 +573,33 @@ function groupedItems() {
   }));
 }
 
+function itemLane(item: CatalogItem): CatalogLane {
+  if (instrumentBayIds.has(item.id) || item.category === "Audio") {
+    return "instrument";
+  }
+
+  if (corePrimitiveIds.has(item.id) || item.important) {
+    return "core";
+  }
+
+  return "support";
+}
+
+function laneLabel(lane: CatalogLane) {
+  switch (lane) {
+    case "core":
+      return "core";
+    case "instrument":
+      return "bay";
+    case "support":
+      return "support";
+  }
+}
+
+function itemsForCategory(category: CatalogCategory) {
+  return catalogItems.filter((item) => item.category === category && item.id !== "preview");
+}
+
 export function CatalogWorkbench() {
   const router = useRouter();
   const pathname = usePathname();
@@ -588,7 +659,7 @@ export function CatalogWorkbench() {
             onClick={() => setSearchOpen(true)}
           >
             <Search className="size-4" />
-            Search components...
+            Search catalog...
             <KbdGroup className="ml-auto">
               <Kbd>⌘</Kbd>
               <Kbd>K</Kbd>
@@ -600,7 +671,7 @@ export function CatalogWorkbench() {
             size="icon"
             className="md:hidden"
             onClick={() => setSearchOpen(true)}
-            aria-label="Search components"
+            aria-label="Search catalog"
           >
             <Search className="size-4" />
           </Button>
@@ -619,7 +690,7 @@ export function CatalogWorkbench() {
             ) : selectedItem.id.startsWith("category-") ? (
               <CategorySurface item={selectedItem} />
             ) : (
-              <FocusedComponentSurface item={selectedItem} />
+              <FocusedComponentSurface item={selectedItem} onSelect={selectItem} />
             )}
           </div>
         </section>
@@ -728,47 +799,61 @@ function CatalogRail({
           </button>
         </div>
         <ScrollArea className="min-h-0 flex-1">
-          <nav aria-label="UI catalog" className="space-y-5 p-4">
-            {categoryOrder.map((category) => {
-              const items = catalogItems.filter(
-                (item) => item.category === category && item.id !== "preview",
-              );
-              const meta = categoryMeta[category];
-              const Icon = meta.icon;
-
-              return (
-                <div key={category} className="space-y-2">
-                  <div className="flex items-center justify-between gap-3 px-2 font-mono text-[11px] text-muted-foreground">
-                    <span className="flex min-w-0 items-center gap-2 uppercase tracking-[0.16em]">
-                      <Icon className="size-3.5" />
-                      <span className="truncate">{category}</span>
-                    </span>
-                    <span>{items.length}</span>
-                  </div>
-                  <div className="space-y-1">
-                    {items.map((item) => (
-                      <button
-                        key={item.id}
-                        type="button"
-                        onClick={() => onSelect(item.id)}
-                        className={cn(
-                          "flex min-h-9 w-full items-center gap-2 rounded-md px-2 text-left text-sm transition-colors",
-                          selectedItemId === item.id
-                            ? "bg-accent text-accent-foreground"
-                            : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
-                        )}
-                      >
-                        <CatalogItemIcon item={item} className="size-3.5" />
-                        <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                        {item.important ? (
-                          <span className="size-1.5 rounded-full bg-foreground/70" />
-                        ) : null}
-                      </button>
-                    ))}
-                  </div>
+          <nav aria-label="UI catalog" className="space-y-6 p-4">
+            {railGroups.map((group) => (
+              <div key={group.label} className="space-y-3">
+                <div className="space-y-1 px-2">
+                  <p className="font-mono text-[11px] text-foreground">{group.label}</p>
+                  <p className="text-xs leading-5 text-muted-foreground">{group.description}</p>
                 </div>
-              );
-            })}
+                <div className="space-y-4">
+                  {group.categories.map((category) => {
+                    const items = itemsForCategory(category);
+                    const meta = categoryMeta[category];
+                    const Icon = meta.icon;
+
+                    return (
+                      <div key={category} className="space-y-2">
+                        <div className="flex items-center justify-between gap-3 px-2 font-mono text-[11px] text-muted-foreground">
+                          <span className="flex min-w-0 items-center gap-2">
+                            <Icon className="size-3.5" />
+                            <span className="truncate">{category}</span>
+                          </span>
+                          <span>{items.length}</span>
+                        </div>
+                        <div className="space-y-1">
+                          {items.map((item) => {
+                            const lane = itemLane(item);
+
+                            return (
+                              <button
+                                key={item.id}
+                                type="button"
+                                onClick={() => onSelect(item.id)}
+                                className={cn(
+                                  "flex min-h-9 w-full items-center gap-2 rounded-md px-2 text-left text-sm transition-colors",
+                                  selectedItemId === item.id
+                                    ? "bg-accent text-accent-foreground"
+                                    : "text-muted-foreground hover:bg-accent/60 hover:text-foreground",
+                                )}
+                              >
+                                <CatalogItemIcon item={item} className="size-3.5" />
+                                <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                                {lane !== "support" ? (
+                                  <span className="rounded-sm border px-1.5 py-0.5 font-mono text-[10px] leading-none text-muted-foreground">
+                                    {laneLabel(lane)}
+                                  </span>
+                                ) : null}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </nav>
         </ScrollArea>
         <div className="border-t p-4">
@@ -789,28 +874,225 @@ function CatalogRail({
 }
 
 function PreviewSurface({ onSelect }: { onSelect: (id: string) => void }) {
+  const coreItems = componentItems.filter((item) => corePrimitiveIds.has(item.id));
+  const supportItems = [...componentItems, ...utilityItems].filter(
+    (item) => itemLane(item) === "support",
+  );
+
   return (
     <div>
-      <div className="flex items-center justify-between gap-4 bg-background p-4">
-        <div className="min-w-0">
-          <p className="font-mono text-xs text-muted-foreground">preview</p>
-          <h2 className="font-mono text-xl font-semibold tracking-[-0.02em]">All components</h2>
+      <div className="grid gap-4 bg-background p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+        <div className="min-w-0 space-y-2">
+          <p className="font-mono text-xs text-muted-foreground">workbench index</p>
+          <h2 className="font-mono text-2xl font-semibold tracking-[-0.02em]">
+            KKB UI surface map
+          </h2>
+          <p className="max-w-3xl text-sm leading-6 text-muted-foreground">
+            Start with the core bench primitives, then move into scoped instrument bays or
+            supporting exports. The catalog is organized for shipping decisions, not just export
+            inventory.
+          </p>
         </div>
         <Button type="button" variant="outline" onClick={() => onSelect("design-system")}>
-          Tokens
+          Inspect tokens
         </Button>
       </div>
-      <div className="grid gap-px border-t bg-border sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        {componentItems.map((item) => (
-          <ComponentPreviewTile
-            key={item.id}
-            item={item}
-            compact
-            onOpen={() => onSelect(item.id)}
-          />
-        ))}
+      <div className="grid gap-px border-t bg-border xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
+        <SignatureBays onSelect={onSelect} />
+        <CorePrimitiveIndex items={coreItems} onSelect={onSelect} />
+      </div>
+      <div className="border-t bg-muted/20 p-4 md:p-5">
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <CategoryPriorityIndex onSelect={onSelect} />
+          <SupportExportIndex items={supportItems} onSelect={onSelect} />
+        </div>
       </div>
     </div>
+  );
+}
+
+function SignatureBays({ onSelect }: { onSelect: (id: string) => void }) {
+  return (
+    <section className="bg-background p-5">
+      <div className="grid gap-4">
+        <div className="space-y-1">
+          <p className="font-mono text-xs text-muted-foreground">signature instrument bays</p>
+          <h3 className="font-mono text-lg font-semibold tracking-[-0.01em]">
+            Scoped surfaces with local physics
+          </h3>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <SignatureBayButton
+            title="Audio bay"
+            label="waveform, transport, presenter"
+            description="Uses audio blue, tactile shell depth, and runtime player composition without turning blue into a general accent."
+            action="Open audio bay"
+            icon={Gauge}
+            onOpen={() => onSelect("category-audio")}
+          />
+          <SignatureBayButton
+            title="Oscilloscope bay"
+            label="P31 trace rules"
+            description="Future scope components should inherit the trace/glow/floor language documented in the design-system tokens."
+            action="Inspect scope tokens"
+            icon={Activity}
+            onOpen={() => onSelect("design-system")}
+          />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SignatureBayButton({
+  title,
+  label,
+  description,
+  action,
+  icon: Icon,
+  onOpen,
+}: {
+  title: string;
+  label: string;
+  description: string;
+  action: string;
+  icon: React.ElementType;
+  onOpen: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      className="group grid min-h-60 content-between border border-audio-panel-border bg-[linear-gradient(180deg,var(--audio-panel-start),var(--audio-panel-mid),var(--audio-panel-end))] p-4 text-left text-audio-title transition-colors hover:border-audio-accent focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+    >
+      <span className="flex items-start justify-between gap-3">
+        <span className="space-y-1">
+          <span className="block font-mono text-xs text-audio-meta">{label}</span>
+          <span className="block font-mono text-xl font-semibold tracking-[-0.02em]">{title}</span>
+        </span>
+        <Icon className="size-5 text-audio-accent" />
+      </span>
+      <span className="space-y-4">
+        <span className="block text-sm leading-6 text-audio-meta">{description}</span>
+        <span className="inline-flex items-center gap-2 font-mono text-xs text-audio-accent">
+          {action}
+          <ChevronRight className="size-3" />
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function CorePrimitiveIndex({
+  items,
+  onSelect,
+}: {
+  items: readonly CatalogItem[];
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <section className="bg-background p-5">
+      <div className="space-y-4">
+        <div className="space-y-1">
+          <p className="font-mono text-xs text-muted-foreground">core bench primitives</p>
+          <h3 className="font-mono text-lg font-semibold tracking-[-0.01em]">
+            Start here when composing product UI
+          </h3>
+        </div>
+        <div className="divide-y border">
+          {items.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onSelect(item.id)}
+              className="grid w-full gap-3 bg-background p-3 text-left transition-colors hover:bg-accent/40 focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center"
+            >
+              <span className="min-w-0">
+                <span className="flex items-center gap-2 font-mono text-sm font-semibold">
+                  <CatalogItemIcon item={item} className="size-4" />
+                  {item.label}
+                </span>
+                <span className="mt-1 block text-sm leading-5 text-muted-foreground">
+                  {focusedIntent(item)}
+                </span>
+              </span>
+              <span className="font-mono text-[11px] text-muted-foreground">{item.source}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CategoryPriorityIndex({ onSelect }: { onSelect: (id: string) => void }) {
+  return (
+    <section className="grid gap-3 md:grid-cols-2">
+      {railGroups.map((group) => (
+        <div key={group.label} className="border bg-background p-4">
+          <div className="space-y-1">
+            <p className="font-mono text-sm font-semibold">{group.label}</p>
+            <p className="text-sm leading-6 text-muted-foreground">{group.description}</p>
+          </div>
+          <div className="mt-4 grid gap-2">
+            {group.categories.map((category) => {
+              const meta = categoryMeta[category];
+              const Icon = meta.icon;
+              const id = `category-${category.toLowerCase().replaceAll(" ", "-")}`;
+
+              return (
+                <button
+                  key={category}
+                  type="button"
+                  onClick={() => onSelect(id)}
+                  className="flex min-h-11 items-center gap-3 border px-3 text-left text-sm transition-colors hover:border-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                >
+                  <Icon className="size-4 shrink-0 text-muted-foreground" />
+                  <span className="min-w-0 flex-1">
+                    <span className="block font-medium">{category}</span>
+                    <span className="block truncate text-xs text-muted-foreground">
+                      {itemsForCategory(category).length} exports
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+function SupportExportIndex({
+  items,
+  onSelect,
+}: {
+  items: readonly CatalogItem[];
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <section className="border bg-background p-4">
+      <div className="space-y-1">
+        <p className="font-mono text-sm font-semibold">Supporting exports</p>
+        <p className="text-sm leading-6 text-muted-foreground">
+          Lower-frequency utilities remain available without dominating the first scan.
+        </p>
+      </div>
+      <div className="mt-4 grid gap-1">
+        {items.slice(0, 18).map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            onClick={() => onSelect(item.id)}
+            className="flex min-h-8 items-center gap-2 rounded-md px-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+          >
+            <CatalogItemIcon item={item} className="size-3.5 shrink-0" />
+            <span className="min-w-0 flex-1 truncate">{item.label}</span>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -835,27 +1117,212 @@ function SurfaceHeader({ item, action }: { item: CatalogItem; action?: React.Rea
   );
 }
 
-function FocusedComponentSurface({ item }: { item: CatalogItem }) {
+function FocusedComponentSurface({
+  item,
+  onSelect,
+}: {
+  item: CatalogItem;
+  onSelect: (id: string) => void;
+}) {
   return (
     <div>
-      <div className="border-b bg-background p-5">
-        <p className="font-mono text-xs text-muted-foreground">{item.source}</p>
-        <h2 className="mt-2 font-mono text-2xl font-semibold tracking-[-0.02em]">{item.label}</h2>
-      </div>
-      <div className="bg-muted/20 p-4 md:p-8">
-        <div className="mx-auto grid max-w-6xl gap-6 md:grid-cols-2">
-          {renderFocusedExamples(item)}
+      <SurfaceHeader
+        item={item}
+        action={
+          <div className="grid gap-2 rounded-md border bg-muted/20 p-3 font-mono text-xs">
+            <span className="text-muted-foreground">source</span>
+            <span className="break-all">{item.source}</span>
+          </div>
+        }
+      />
+      <div className="border-t bg-muted/20 p-4 md:p-6">
+        <div className="grid gap-5 xl:grid-cols-[340px_minmax(0,1fr)]">
+          <FocusedComponentGuide item={item} onSelect={onSelect} />
+          <div className="grid min-w-0 gap-4 md:grid-cols-2">{renderFocusedExamples(item)}</div>
         </div>
       </div>
     </div>
   );
 }
 
+function FocusedComponentGuide({
+  item,
+  onSelect,
+}: {
+  item: CatalogItem;
+  onSelect: (id: string) => void;
+}) {
+  const stateRows = focusedStateRows(item);
+  const related = relatedItems(item);
+
+  return (
+    <aside className="space-y-4">
+      <div className="border bg-background p-4">
+        <p className="font-mono text-sm font-semibold">Use when</p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{focusedIntent(item)}</p>
+        <div className="mt-4 grid gap-2">
+          <p className="font-mono text-xs text-muted-foreground">import contract</p>
+          <Code className="w-full break-all whitespace-normal">{sourceInstruction(item)}</Code>
+        </div>
+      </div>
+
+      <div className="border bg-background p-4">
+        <p className="font-mono text-sm font-semibold">State coverage</p>
+        <div className="mt-3 divide-y">
+          {stateRows.map(([label, value]) => (
+            <div key={label} className="grid gap-2 py-2 text-sm">
+              <span className="font-mono text-xs text-muted-foreground">{label}</span>
+              <span className="leading-5">{value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="border bg-background p-4">
+        <p className="font-mono text-sm font-semibold">Related components</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {related.map((relatedItem) => (
+            <Button
+              key={relatedItem.id}
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => onSelect(relatedItem.id)}
+            >
+              {relatedItem.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+function focusedIntent(item: CatalogItem) {
+  if (item.category === "Audio") {
+    return "Use inside audio runtime surfaces where waveform, transport, or presenter behavior needs the scoped instrument palette.";
+  }
+
+  if (item.id.startsWith("json-render")) {
+    return "Use for JSON-driven rendering paths where registry behavior and inspectable payload output matter.";
+  }
+
+  switch (item.category) {
+    case "Input":
+      return "Use when a user changes catalog state, filters source, confirms a choice, or enters structured data.";
+    case "Feedback":
+      return "Use when the interface needs to report status, verification progress, loading shape, or a recoverable problem.";
+    case "Overlay":
+      return "Use only when inline disclosure cannot carry the task without losing context.";
+    case "Menu":
+      return "Use for dense command surfaces where keyboard and pointer access need the same vocabulary.";
+    case "Navigation":
+      return "Use when users need route position, local orientation, or fast movement across catalog surfaces.";
+    case "Data":
+      return "Use when the surface needs dense, inspectable values without turning into prose.";
+    case "Layout":
+      return "Use to frame, group, or progressively reveal product UI without inventing app-local containers.";
+    case "Utilities":
+      return "Use as app infrastructure; keep these visible but lower priority than user-facing primitives.";
+    case "Design System":
+      return "Use as the source of truth for KKB tokens, typography, radius, and scoped instrument color.";
+  }
+}
+
+function focusedStateRows(item: CatalogItem): readonly (readonly [string, string])[] {
+  if (item.category === "Feedback") {
+    return [
+      ["default", "neutral status copy names the current system condition"],
+      ["loading", "skeleton or progress shows what is being verified"],
+      ["error", "message includes a concrete retry or inspection path"],
+      ["success", "confirmation explains what changed and what remains"],
+    ];
+  }
+
+  if (item.category === "Input") {
+    return [
+      ["default", "label, value, and help text are visible without relying on placeholder copy"],
+      ["focus", "keyboard ring stays visible against the current surface"],
+      ["disabled", "non-interactive state keeps the label legible"],
+      ["invalid", "error copy says what to fix and preserves the user's value"],
+    ];
+  }
+
+  if (item.category === "Audio") {
+    return [
+      ["idle", "transport and waveform show safe defaults before playback"],
+      ["playing", "progress and controls use audio blue only inside this bay"],
+      ["buffering", "loading feedback distinguishes unavailable audio from paused audio"],
+      ["error", "device or media failures need a recovery path before shipping"],
+    ];
+  }
+
+  return [
+    ["default", "resting state matches the shared @kkb/ui primitive"],
+    ["hover/focus", "pointer and keyboard affordances are visible"],
+    ["active/selected", "selected state uses semantic tokens, not decoration"],
+    ["edge case", "long labels and dense content must wrap or truncate deliberately"],
+  ];
+}
+
+function sourceInstruction(item: CatalogItem) {
+  if (item.source.startsWith("@kkb/ui/")) {
+    return `import from "${item.source}"`;
+  }
+
+  return item.source;
+}
+
+function relatedItems(item: CatalogItem) {
+  return catalogItems
+    .filter(
+      (candidate) =>
+        candidate.id !== item.id &&
+        candidate.kind !== "view" &&
+        candidate.category === item.category &&
+        (candidate.important || candidate.kind === item.kind),
+    )
+    .slice(0, 4);
+}
+
 function CategorySurface({ item }: { item: CatalogItem }) {
+  if (item.category === "Audio") {
+    return <InstrumentCategorySurface item={item} />;
+  }
+
   return (
     <div>
       <SurfaceHeader item={item} />
       <div className="border-t bg-muted/20 p-4 md:p-6">
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {renderCategory(item.category)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InstrumentCategorySurface({ item }: { item: CatalogItem }) {
+  return (
+    <div>
+      <div className="grid gap-5 border-b border-audio-panel-border bg-[linear-gradient(180deg,var(--audio-panel-start),var(--audio-panel-mid),var(--audio-panel-end))] p-5 text-audio-title lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div className="space-y-3">
+          <p className="font-mono text-xs text-audio-meta">{item.source}</p>
+          <h2 className="font-mono text-2xl font-semibold tracking-[-0.02em]">{item.label}</h2>
+          <p className="max-w-3xl text-sm leading-6 text-audio-meta">
+            Audio components are promoted as an instrument bay: waveform, transport, presenter, and
+            theme exports share local depth and blue signal language without changing the general
+            product palette.
+          </p>
+        </div>
+        <div className="grid content-start gap-2 border border-audio-panel-border bg-background/5 p-3 font-mono text-xs">
+          <span className="text-audio-meta">bay contract</span>
+          <span>audio blue stays scoped</span>
+          <span>transport states need recovery</span>
+          <span>presenter owns composition</span>
+        </div>
+      </div>
+      <div className="bg-muted/20 p-4 md:p-6">
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {renderCategory(item.category)}
         </div>
@@ -1106,6 +1573,14 @@ function DesignSystemSurface() {
                 ["accent", "neutral product accent, not decoration"],
               ]}
             />
+            <TokenPanel
+              title="Instrument bay queue"
+              rows={[
+                ["audio", "promoted bay in this catalog"],
+                ["oscilloscope", "future bay inherits P31 trace/glow/floor rules"],
+                ["json render", "dense data utility, not a visual theme"],
+              ]}
+            />
           </div>
         </div>
       </div>
@@ -1229,15 +1704,15 @@ function ActionExamples() {
       >
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2">
-            <Button>Deploy</Button>
-            <Button variant="secondary">Save</Button>
-            <Button variant="outline">Preview</Button>
-            <Button variant="ghost">Cancel</Button>
+            <Button>Run checks</Button>
+            <Button variant="secondary">Save note</Button>
+            <Button variant="outline">Open route</Button>
+            <Button variant="ghost">Keep editing</Button>
           </div>
           <ButtonGroup>
-            <Button variant="outline">Day</Button>
-            <Button variant="outline">Week</Button>
-            <Button variant="outline">Month</Button>
+            <Button variant="outline">Source</Button>
+            <Button variant="outline">States</Button>
+            <Button variant="outline">Tokens</Button>
           </ButtonGroup>
           <ToggleGroup type="multiple" defaultValue={["grid", "labels"]}>
             <ToggleGroupItem value="grid">Grid</ToggleGroupItem>
@@ -1257,10 +1732,11 @@ function ActionExamples() {
           </Toggle>
           <Toggle>
             <Bell className="size-4" />
-            Notify
+            Watch checks
           </Toggle>
           <Button variant="outline" size="icon">
             <Copy className="size-4" />
+            <span className="sr-only">Copy import path</span>
           </Button>
         </div>
       </CatalogSpecimen>
@@ -1275,8 +1751,10 @@ function InputExamples() {
         <div className="space-y-4">
           <div className="grid gap-2">
             <Label htmlFor="project-title">Project title</Label>
-            <Input id="project-title" defaultValue="Catalog rebuild" />
-            <p className="text-sm text-muted-foreground">Used in release summaries.</p>
+            <Input id="project-title" defaultValue="UI catalog hierarchy pass" />
+            <p className="text-sm text-muted-foreground">
+              Used in local reports and handoff notes.
+            </p>
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <div className="space-y-2">
@@ -1299,7 +1777,7 @@ function InputExamples() {
               </NativeSelect>
             </div>
           </div>
-          <Textarea defaultValue="Use shared UI primitives before creating app-local controls." />
+          <Textarea defaultValue="Favor @kkb/ui primitives first. Promote only the surfaces that carry KKB-specific instrument behavior." />
           <div className="grid gap-3 rounded-md border p-3">
             <Field orientation="horizontal">
               <Checkbox id="audit" defaultChecked />
@@ -1312,6 +1790,7 @@ function InputExamples() {
               <Switch id="sticky" defaultChecked />
               <FieldContent>
                 <FieldLabel htmlFor="sticky">Sticky rail</FieldLabel>
+                <FieldDescription>Preserve spatial browsing on wide screens.</FieldDescription>
               </FieldContent>
             </Field>
           </div>
@@ -1327,7 +1806,7 @@ function InputExamples() {
               <Search className="size-4" />
               <InputGroupText>Filter</InputGroupText>
             </InputGroupAddon>
-            <InputGroupInput defaultValue="navigation" />
+            <InputGroupInput defaultValue="audio waveform" />
             <InputGroupAddon align="inline-end">
               <InputGroupButton size="icon-xs" variant="ghost">
                 <X />
@@ -1347,11 +1826,11 @@ function InputExamples() {
               <InputOTPSlot index={5} />
             </InputOTPGroup>
           </InputOTP>
-          <Combobox items={["button", "dialog", "table"]}>
-            <ComboboxInput placeholder="Component" />
+          <Combobox items={["button", "audio waveform", "table"]}>
+            <ComboboxInput placeholder="Primitive or bay" />
             <ComboboxContent>
               <ComboboxList>
-                {["button", "dialog", "table"].map((value) => (
+                {["button", "audio waveform", "table"].map((value) => (
                   <ComboboxItem key={value} value={value}>
                     {value}
                   </ComboboxItem>
@@ -1362,11 +1841,11 @@ function InputExamples() {
           <RadioGroup defaultValue="stable">
             <div className="flex items-center gap-2">
               <RadioGroupItem value="stable" id="stable" />
-              <Label htmlFor="stable">Stable</Label>
+              <Label htmlFor="stable">Ship-ready</Label>
             </div>
             <div className="flex items-center gap-2">
               <RadioGroupItem value="preview" id="preview" />
-              <Label htmlFor="preview">Preview</Label>
+              <Label htmlFor="preview">Needs browser pass</Label>
             </div>
           </RadioGroup>
           <Slider defaultValue={[72]} max={100} />
@@ -1694,7 +2173,7 @@ function FeedbackExamples() {
     <>
       <CatalogSpecimen
         title="Status stack"
-        description="Alerts, badges, progress, spinner, skeleton, and avatar."
+        description="Alerts, badges, progress, spinner, skeleton, avatar, and recovery copy."
       >
         <div className="space-y-4">
           <Alert>
@@ -1702,6 +2181,13 @@ function FeedbackExamples() {
             <AlertTitle>Catalog coverage ready</AlertTitle>
             <AlertDescription>
               Every public component export is visible in the workbench.
+            </AlertDescription>
+          </Alert>
+          <Alert variant="destructive">
+            <CircleAlert className="size-4" />
+            <AlertTitle>Browser verification failed</AlertTitle>
+            <AlertDescription>
+              Re-run the focused browser check after fixing overflow or clipped overlay findings.
             </AlertDescription>
           </Alert>
           <div className="flex flex-wrap items-center gap-2">
