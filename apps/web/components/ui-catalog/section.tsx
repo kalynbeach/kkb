@@ -14,20 +14,26 @@ export function Section({ id, title, description, itemCount, className, children
     <section
       id={id}
       aria-labelledby={`${id}-heading`}
-      className={cn("scroll-mt-36 space-y-5 md:scroll-mt-32", className)}
+      className={cn("scroll-mt-36 space-y-6 md:scroll-mt-32", className)}
     >
-      <div className="space-y-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <h2 id={`${id}-heading`} className="text-2xl font-semibold tracking-tight">
+      <div className="grid gap-3 border-t pt-6 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
+        <div className="space-y-2">
+          <p className="font-mono text-xs text-muted-foreground">section / {id}</p>
+          <h2
+            id={`${id}-heading`}
+            className="font-mono text-2xl font-semibold tracking-[-0.01em] text-balance"
+          >
             {title}
           </h2>
-          <span className="inline-flex min-w-9 items-center justify-center rounded-full border px-2.5 py-1 text-xs font-medium text-muted-foreground">
-            {itemCount}
-          </span>
+          {description ? (
+            <p className="max-w-3xl text-sm leading-6 text-muted-foreground text-pretty">
+              {description}
+            </p>
+          ) : null}
         </div>
-        {description ? (
-          <p className="max-w-3xl text-sm leading-6 text-muted-foreground">{description}</p>
-        ) : null}
+        <span className="inline-flex min-h-9 items-center justify-center rounded-md border bg-background px-3 font-mono text-xs text-muted-foreground">
+          {itemCount} demos
+        </span>
       </div>
       <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">{children}</div>
     </section>

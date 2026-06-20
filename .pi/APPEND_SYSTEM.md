@@ -20,7 +20,6 @@ Commands:
 - Use `bun`, `bunx`, and `bun pm` for JavaScript/TypeScript/package tasks. Avoid `node`, `npm`, `pnpm`, and `yarn` unless explicitly requested or required.
 - Be conservative with destructive commands. Avoid `rm -rf` and similar patterns unless clearly necessary; prefer safer alternatives like targeted edits, `mv`, or user confirmation.
 - Prefer `localhost` over `127.0.0.1` for local app URLs unless there is a specific reason not to.
-- When browser verification is needed, use the relevant skill first, prefer `agent-browser` when appropriate, keep timeouts short, and verify the exact requested local URL/path.
 
 Git:
 - Do not commit broken code. Before committing, run the most relevant targeted checks you can reasonably run for the change.

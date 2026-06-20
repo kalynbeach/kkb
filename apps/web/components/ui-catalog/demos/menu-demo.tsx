@@ -56,7 +56,7 @@ export function DropdownMenuDemo() {
 
   return (
     <div className="space-y-4 p-6">
-      <div className="space-y-2 rounded-xl border bg-muted/20 p-4">
+      <div className="space-y-2 rounded-md bg-muted/20 p-4">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium">Button-triggered actions</p>
           <Badge variant="outline">{alignment}</Badge>
@@ -117,7 +117,7 @@ export function ContextMenuDemo() {
   return (
     <div className="p-6">
       <ContextMenu>
-        <ContextMenuTrigger className="flex min-h-52 flex-col justify-between rounded-xl border border-dashed bg-background p-4 text-left outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]">
+        <ContextMenuTrigger className="flex min-h-52 flex-col justify-between rounded-md border border-dashed bg-background p-4 text-left outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium">Context region</p>
@@ -193,7 +193,7 @@ export function MenubarDemo() {
         </MenubarMenu>
       </Menubar>
 
-      <div className="rounded-xl border bg-muted/20 p-4 text-sm text-muted-foreground">
+      <div className="rounded-md bg-muted/20 p-4 text-sm text-muted-foreground">
         Hints are {showHints ? "visible" : "hidden"} with {density} spacing.
       </div>
     </div>

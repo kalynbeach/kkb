@@ -60,7 +60,7 @@ export function FeedbackSection() {
             <Progress value={50} />
           </div>
 
-          <div className="flex items-center gap-3 rounded-xl border px-4 py-3">
+          <div className="flex items-center gap-3 rounded-md bg-muted/20 px-4 py-3">
             <Spinner className="size-4" />
             <div className="space-y-1">
               <p className="text-sm font-medium">Final verification pass</p>
@@ -77,19 +77,19 @@ export function FeedbackSection() {
         description="Low-noise placeholders for cards and loading summaries."
       >
         <div className="space-y-4 p-6">
-          <div className="space-y-3 rounded-xl border p-4">
+          <div className="space-y-3 rounded-md bg-muted/20 p-4">
             <div className="flex items-center justify-between">
               <Skeleton className="h-4 w-28" />
               <Zap className="size-4 text-muted-foreground" />
             </div>
             <Skeleton className="h-3 w-full" />
             <Skeleton className="h-3 w-5/6" />
-            <Skeleton className="h-20 w-full rounded-xl" />
+            <Skeleton className="h-20 w-full rounded-md" />
           </div>
           <div className="grid grid-cols-3 gap-3">
-            <Skeleton className="h-10 rounded-xl" />
-            <Skeleton className="h-10 rounded-xl" />
-            <Skeleton className="h-10 rounded-xl" />
+            <Skeleton className="h-10 rounded-md" />
+            <Skeleton className="h-10 rounded-md" />
+            <Skeleton className="h-10 rounded-md" />
           </div>
         </div>
       </ComponentCard>

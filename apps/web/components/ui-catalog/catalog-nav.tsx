@@ -1,15 +1,18 @@
 "use client";
 
 import { cn } from "@kkb/ui/lib/utils";
-import { useEffect, useState } from "react";
+import { Search } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 
 type CatalogSection = {
   id: string;
   label: string;
+  itemCount?: number;
 };
 
 type CatalogNavProps = {
   sections: readonly CatalogSection[];
+  totalItemCount?: number;
 };
 
 const DESKTOP_NAV_OFFSET = 144;
@@ -30,17 +33,31 @@ const getClosestSectionId = (sections: readonly CatalogSection[]) => {
 
       return {
         id: section.id,
-        distance: Math.abs(element.getBoundingClientRect().top - DESKTOP_NAV_OFFSET),
+        top: element.getBoundingClientRect().top,
       };
     })
-    .filter((section): section is { id: string; distance: number } => section !== null)
-    .sort((left, right) => left.distance - right.distance);
+    .filter((section): section is { id: string; top: number } => section !== null);
 
-  return sectionElements[0]?.id ?? sections[0]?.id ?? "";
+  const currentSection = [...sectionElements]
+    .filter((section) => section.top <= DESKTOP_NAV_OFFSET)
+    .sort((left, right) => right.top - left.top)[0];
+
+  return currentSection?.id ?? sectionElements[0]?.id ?? sections[0]?.id ?? "";
 };
 
-export function CatalogNav({ sections }: CatalogNavProps) {
+export function CatalogNav({ sections, totalItemCount }: CatalogNavProps) {
   const [activeSectionId, setActiveSectionId] = useState(sections[0]?.id ?? "");
+  const [query, setQuery] = useState("");
+
+  const filteredSections = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    if (!normalizedQuery) {
+      return sections;
+    }
+
+    return sections.filter((section) => section.label.toLowerCase().includes(normalizedQuery));
+  }, [query, sections]);
 
   useEffect(() => {
     if (sections.length === 0) {
@@ -116,13 +133,16 @@ export function CatalogNav({ sections }: CatalogNavProps) {
                     aria-current={isActive ? "location" : undefined}
                     onClick={() => setActiveSectionId(section.id)}
                     className={cn(
-                      "inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
+                      "inline-flex min-h-11 items-center gap-2 rounded-md border px-3 text-sm font-medium transition-colors",
                       isActive
                         ? "border-foreground bg-foreground text-background"
                         : "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
                     )}
                   >
-                    {section.label}
+                    <span>{section.label}</span>
+                    {section.itemCount ? (
+                      <span className="font-mono text-xs opacity-70">{section.itemCount}</span>
+                    ) : null}
                   </a>
                 </li>
               );
@@ -132,13 +152,24 @@ export function CatalogNav({ sections }: CatalogNavProps) {
       </div>
 
       <aside className="hidden lg:block">
-        <div className="sticky top-8">
-          <p className="mb-4 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
-            Sections
-          </p>
+        <div className="sticky top-8 space-y-5">
+          <div className="space-y-2">
+            <p className="font-mono text-xs text-muted-foreground">browse sections</p>
+            <label className="relative block">
+              <span className="sr-only">Filter catalog sections</span>
+              <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 size-3.5 text-muted-foreground" />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Filter sections"
+                className="h-9 w-full rounded-md border bg-background pr-3 pl-8 text-sm outline-none transition-colors placeholder:text-muted-foreground focus:border-ring focus:ring-[3px] focus:ring-ring/20"
+              />
+            </label>
+          </div>
+
           <nav aria-label="Catalog sections">
             <ul className="space-y-1.5">
-              {sections.map((section) => {
+              {filteredSections.map((section) => {
                 const isActive = section.id === activeSectionId;
 
                 return (
@@ -148,19 +179,38 @@ export function CatalogNav({ sections }: CatalogNavProps) {
                       aria-current={isActive ? "location" : undefined}
                       onClick={() => setActiveSectionId(section.id)}
                       className={cn(
-                        "flex items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors",
+                        "flex min-h-10 items-center justify-between rounded-md px-3 text-sm transition-colors",
                         isActive
                           ? "bg-accent text-accent-foreground"
                           : "text-muted-foreground hover:bg-accent/50 hover:text-foreground",
                       )}
                     >
                       <span>{section.label}</span>
+                      {section.itemCount ? (
+                        <span className="font-mono text-xs text-muted-foreground">
+                          {section.itemCount}
+                        </span>
+                      ) : null}
                     </a>
                   </li>
                 );
               })}
             </ul>
+            {filteredSections.length === 0 ? (
+              <p className="rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+                No section matches “{query}”.
+              </p>
+            ) : null}
           </nav>
+
+          {totalItemCount ? (
+            <div className="rounded-md bg-muted/20 p-3">
+              <p className="font-mono text-xs text-muted-foreground">catalog coverage</p>
+              <p className="mt-1 text-sm text-foreground">
+                {totalItemCount} primitives across {sections.length} browsable groups.
+              </p>
+            </div>
+          ) : null}
         </div>
       </aside>
     </>

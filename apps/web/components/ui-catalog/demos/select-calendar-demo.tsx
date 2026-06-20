@@ -72,7 +72,7 @@ export function CalendarDemo() {
 
   return (
     <div className="grid gap-4 p-4 sm:grid-cols-[auto_minmax(0,1fr)]">
-      <div className="overflow-hidden rounded-xl border">
+      <div className="overflow-hidden rounded-md border">
         <Calendar
           mode="single"
           selected={selectedDate}
@@ -80,7 +80,7 @@ export function CalendarDemo() {
           className="mx-auto"
         />
       </div>
-      <div className="space-y-2 rounded-xl border bg-muted/20 p-4">
+      <div className="space-y-2 rounded-md bg-muted/20 p-4">
         <p className="text-sm font-medium">Selected review date</p>
         <p className="text-sm leading-6 text-muted-foreground">
           {selectedDate ? calendarSummaryFormatter.format(selectedDate) : "No date selected"}

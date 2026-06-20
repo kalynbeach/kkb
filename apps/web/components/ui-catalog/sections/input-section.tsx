@@ -71,7 +71,7 @@ export function InputSection() {
         description="Binary, exclusive, and preference-style controls in one compact surface."
       >
         <div className="grid gap-5 p-6">
-          <div className="flex items-center justify-between gap-4 rounded-xl border px-4 py-3">
+          <div className="flex items-center justify-between gap-4 rounded-md bg-muted/20 px-4 py-3">
             <div className="space-y-1">
               <Label htmlFor="sticky-rail" className="font-medium">
                 Enable sticky rail
@@ -81,7 +81,7 @@ export function InputSection() {
             <Switch id="sticky-rail" defaultChecked aria-label="Enable sticky rail" />
           </div>
 
-          <div className="space-y-3 rounded-xl border px-4 py-3">
+          <div className="space-y-3 rounded-md bg-muted/20 px-4 py-3">
             <p className="text-sm font-medium">Release channel</p>
             <RadioGroup defaultValue="stable" className="gap-2">
               <div className="flex items-center gap-2 text-sm">
@@ -95,7 +95,7 @@ export function InputSection() {
             </RadioGroup>
           </div>
 
-          <div className="flex items-center gap-3 rounded-xl border px-4 py-3 text-sm">
+          <div className="flex items-center gap-3 rounded-md bg-muted/20 px-4 py-3 text-sm">
             <Checkbox id="follow-up-notes" defaultChecked />
             <Label htmlFor="follow-up-notes">Send follow-up notes after publish</Label>
           </div>

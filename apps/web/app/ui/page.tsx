@@ -35,40 +35,37 @@ const catalogSections = [
     id: "layout",
     label: "Layout",
     description:
-      "Shell primitives, spacing helpers, and structural building blocks land here next.",
+      "Shell primitives, spacing helpers, and structural building blocks for app surfaces.",
   },
   {
     id: "navigation",
     label: "Navigation",
-    description: "Tabs, breadcrumbs, accordions, and related navigation demos fill this section.",
+    description: "Tabs, breadcrumbs, accordions, and route-orientation primitives for dense flows.",
   },
   {
     id: "input",
     label: "Input",
-    description:
-      "Form controls and selection patterns arrive here once the core catalog cards ship.",
+    description: "Form controls and selection patterns with keyboard-first defaults.",
   },
   {
     id: "feedback",
     label: "Feedback",
-    description: "Status, loading, and progress patterns will populate this section.",
+    description: "Status, loading, and progress patterns for system visibility.",
   },
   {
     id: "overlay",
     label: "Overlay",
-    description:
-      "Dialogs, drawers, and contextual overlays stay isolated inside small demo islands.",
+    description: "Dialogs, drawers, and contextual overlays isolated inside focused demo islands.",
   },
   {
     id: "menu",
     label: "Menu",
-    description: "Dropdown, context, menubar, and command surfaces with isolated local state.",
+    description: "Dropdown, context, menubar, and command surfaces with local state only.",
   },
   {
     id: "data",
     label: "Data",
-    description:
-      "Tables, inline code, shortcut patterns, and carousel cards with narrow local state.",
+    description: "Tables, inline code, shortcut patterns, and compact collection affordances.",
   },
   {
     id: "audio",
@@ -88,6 +85,16 @@ const sectionItemCounts = {
   data: dataSectionItemCount,
   audio: audioSectionItemCount,
 } as const;
+
+const catalogSectionsWithCounts = catalogSections.map((section) => ({
+  ...section,
+  itemCount: sectionItemCounts[section.id],
+}));
+
+const totalItemCount = catalogSectionsWithCounts.reduce(
+  (total, section) => total + section.itemCount,
+  0,
+);
 
 function renderSectionContent(sectionId: (typeof catalogSections)[number]["id"]) {
   switch (sectionId) {
@@ -113,21 +120,23 @@ function renderSectionContent(sectionId: (typeof catalogSections)[number]["id"])
 export default function UiPage() {
   return (
     <main className="min-h-screen bg-background">
-      <div className="border-b">
+      <div className="border-b bg-background">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="space-y-3">
               <Link
                 href="/"
-                className="inline-flex items-center font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
+                className="inline-flex items-center font-mono text-xs text-muted-foreground transition-colors hover:text-foreground"
               >
-                ← Home
+                ← home
               </Link>
               <div className="space-y-2">
-                <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">UI catalog</h1>
-                <p className="max-w-2xl text-sm leading-6 text-muted-foreground sm:text-base">
-                  Curated `@kkb/ui` primitives, isolated demo islands, and the full audio player
-                  composition in one verification route.
+                <h1 className="font-mono text-3xl font-semibold tracking-[-0.02em] text-balance sm:text-4xl">
+                  UI catalog
+                </h1>
+                <p className="max-w-2xl text-sm leading-6 text-muted-foreground text-pretty sm:text-base">
+                  Browse the `@kkb/ui` system through focused primitives, interactive demo islands,
+                  and the full audio player composition.
                 </p>
               </div>
             </div>
@@ -137,16 +146,42 @@ export default function UiPage() {
       </div>
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="lg:grid lg:grid-cols-[220px_minmax(0,1fr)] lg:gap-10">
-          <CatalogNav sections={catalogSections} />
-          <div className="space-y-12">
-            {catalogSections.map((section) => (
+        <div className="mb-10 grid gap-px overflow-hidden rounded-lg border bg-border md:grid-cols-3">
+          <div className="bg-background p-4">
+            <p className="font-mono text-xs text-muted-foreground">coverage</p>
+            <p className="mt-2 font-mono text-lg font-semibold">{totalItemCount} primitives</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Curated examples, not an export dump.
+            </p>
+          </div>
+          <div className="bg-background p-4">
+            <p className="font-mono text-xs text-muted-foreground">structure</p>
+            <p className="mt-2 font-mono text-lg font-semibold">
+              {catalogSections.length} sections
+            </p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Anchored for fast browsing and review.
+            </p>
+          </div>
+          <div className="bg-background p-4">
+            <p className="font-mono text-xs text-muted-foreground">source</p>
+            <p className="mt-2 font-mono text-lg font-semibold">@kkb/ui</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Shared primitives before app-local UI.
+            </p>
+          </div>
+        </div>
+
+        <div className="lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10">
+          <CatalogNav sections={catalogSectionsWithCounts} totalItemCount={totalItemCount} />
+          <div className="space-y-16">
+            {catalogSectionsWithCounts.map((section) => (
               <Section
                 key={section.id}
                 id={section.id}
                 title={section.label}
                 description={section.description}
-                itemCount={sectionItemCounts[section.id]}
+                itemCount={section.itemCount}
               >
                 {renderSectionContent(section.id)}
               </Section>
