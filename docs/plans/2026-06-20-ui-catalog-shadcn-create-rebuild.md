@@ -175,7 +175,44 @@ During implementation, use:
 - `reference/audit.md` after implementation for accessibility, responsive, and interaction checks.
 - `reference/polish.md` once the catalog structure is correct.
 
-## 10. Open questions
+## 10. Shadcn/create reference study notes
+
+Study target:
+
+`https://ui.shadcn.com/create?preset=b1D0enCq&base=base&pointer=true&item=preview`
+
+These notes capture the direct browser study of the reference page and should guide the next `/ui` pass.
+
+### Key takeaways
+
+- The reference is a viewport-locked builder shell, not a documentation page or marketing page. The shell is compact: top nav, left controls, large bordered preview iframe, and restrained action surfaces.
+- The default `Preview` is a live component wall. It relies on dense, real UI examples carrying the meaning instead of explanatory cards, category prose, or metadata blocks.
+- The preview iframe is larger than the visible viewport. On desktop it behaves like a wide capture surface with many columns, while the parent shell exposes only a clean slice of the wall.
+- Navigation is command-first. `Menu` opens a compact command menu, and `Navigate...` opens a searchable list with `Preview` first, followed by every component.
+- Focused component views keep the same outer shell and swap only the preview item. The Button view is a specimen sheet, not a doc article: section label, plain stage, variants/examples. Observed sections include `Variants & Sizes`, `Icon Right`, `Icon Left`, `Icon Only`, `Invalid States`, and `Examples`.
+- Component pages show many states in one glance. The page prioritizes direct visual comparison over descriptions, import contracts, and guidance text.
+- The style/token controls are compact dropdown/radio popovers with the current value embedded in the trigger and a separate lock button per token. They are dense but legible because they stay out of the preview canvas.
+- `Get Code` is a modal workflow with framework/base radios, option switches, package-manager tabs, and a copyable command. This export workflow is specific to shadcn/create and should not be copied into the KKB catalog unless there is a real KKB export action.
+- On mobile, the top nav collapses to a small menu button, the preview remains the primary first block, and the token controls become a horizontal scroller below the preview. The mobile layout still preserves the builder-shell mental model.
+
+### Implications for `kkb`
+
+- Keep the shadcn/create topology, search behavior, preview/focused item model, and responsive shell. Do not copy preset generation, shuffle, lock controls, or code export unless those become real KKB product actions.
+- Rework `Preview` into a dense live mosaic of `@kkb/ui` components. It should feel like a component wall or inspection bench, not a metadata catalog or grouped documentation index.
+- Remove most explanatory chrome from the primary preview path. Source paths, counts, category descriptions, and usage guidance should be secondary or revealed on focused views, not dominant on the default scan.
+- Rework focused component views into specimen sheets: a small set of labeled stages with variants, invalid/disabled/loading states, and 1-2 realistic composed examples. Avoid a guide/sidebar layout as the main component-page structure.
+- Treat the left rail as navigation only. It should be tighter, with cleaner active state and fewer icons, counters, descriptions, and dashboard-like footer stats.
+- Treat search as the fastest route through the catalog. The command overlay should list `Preview`, `Design System`, categories, and every component, with the current item indicated.
+- Preserve KKB identity through tokens, TX-02/Geist usage, audio/scoped instrument surfaces, and complete `@kkb/ui` coverage. The reference provides structure and density, not brand or copy style.
+- Use mobile as a first-class constraint: preview first, controls/navigation collapsed or horizontally scrollable, no page-level horizontal overflow.
+
+### Current local delta
+
+The first implementation pass in `apps/web/components/ui-catalog/catalog-workbench.tsx` has the right structural foundation: URL-backed `?item=`, command search, left rail, preview/focused/category/design-system views, and full public export coverage.
+
+The current mismatch is visual hierarchy. `PreviewSurface` still reads as a workbench index with headers, signature bays, category priority panels, support export lists, and explanatory copy. `FocusedComponentSurface` still adds a guide/source/state/related sidebar before the examples. The next pass should invert that priority: examples first, labels second, metadata last.
+
+## 11. Open questions
 
 None blocking. The key direction is confirmed enough:
 
@@ -185,7 +222,7 @@ None blocking. The key direction is confirmed enough:
 - richer composed demos for important components
 - shadcn/create layout/search model, not preset-generation behavior
 
-## 11. Implementation status and follow-up notes
+## 12. Implementation status and follow-up notes
 
 A first implementation pass now exists in `apps/web/components/ui-catalog/catalog-workbench.tsx`, with `apps/web/app/ui/page.tsx` reduced to a Suspense wrapper around the client workbench. It establishes the core architecture: URL-backed `?item=` selection, command search, persistent catalog rail, preview/focused/category/design-system views, and full public export inventory coverage.
 
