@@ -7,6 +7,7 @@ import {
   itemsForCategory,
   utilityItems,
 } from "../catalog-data";
+import { searchCatalogItems } from "../catalog-search-index";
 
 const publicComponentIds = [
   "accordion",
@@ -102,5 +103,32 @@ describe("ui catalog data", () => {
   test("keeps audio as an instrument category with component exports", () => {
     expect(itemsForCategory("Audio").map((item) => item.id)).toContain("audio-waveform");
     expect(itemsForCategory("Audio").map((item) => item.id)).toContain("audio-presenter");
+  });
+
+  test("ranks exact button component matches before related results", () => {
+    expect(
+      searchCatalogItems("button")
+        .slice(0, 2)
+        .map((item) => item.id),
+    ).toEqual(["button", "button-group"]);
+  });
+
+  test("distinguishes the Input component from the Input category", () => {
+    const resultIds = searchCatalogItems("input").map((item) => item.id);
+
+    expect(resultIds[0]).toBe("input");
+    expect(resultIds.indexOf("category-input")).toBeGreaterThan(resultIds.indexOf("input"));
+  });
+
+  test("keeps the default search list flat and view-first", () => {
+    expect(
+      searchCatalogItems("")
+        .slice(0, 2)
+        .map((item) => item.id),
+    ).toEqual(["preview", "design-system"]);
+  });
+
+  test("returns no results for unknown queries", () => {
+    expect(searchCatalogItems("not-a-real-component")).toEqual([]);
   });
 });

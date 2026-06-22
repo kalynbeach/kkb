@@ -73,26 +73,26 @@ export function CatalogWorkbench() {
       />
 
       <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-        <div className="flex min-h-16 items-center gap-3 px-4 md:px-6">
+        <div className="flex min-h-14 items-center gap-3 px-3 md:px-4">
           <Button variant="ghost" size="icon" asChild className="shrink-0">
             <Link href="/" aria-label="Return home">
               <ArrowLeft className="size-4" />
             </Link>
           </Button>
           <div className="min-w-0 flex-1">
-            <p className="font-mono text-xs text-muted-foreground">@kkb/ui / catalog</p>
-            <h1 className="truncate font-mono text-lg font-semibold tracking-[-0.01em]">
+            <p className="font-mono text-[11px] text-muted-foreground">@kkb/ui</p>
+            <h1 className="truncate font-mono text-base font-semibold tracking-[-0.01em]">
               {selectedItem.label}
             </h1>
           </div>
           <Button
             type="button"
             variant="outline"
-            className="hidden min-w-72 justify-start gap-2 text-muted-foreground md:inline-flex"
+            className="hidden min-w-64 justify-start gap-2 text-muted-foreground md:inline-flex"
             onClick={() => setSearchOpen(true)}
           >
             <Search className="size-4" />
-            Search catalog...
+            Search...
             <KbdGroup className="ml-auto">
               <Kbd>⌘</Kbd>
               <Kbd>K</Kbd>
@@ -112,13 +112,13 @@ export function CatalogWorkbench() {
         </div>
       </header>
 
-      <div className="grid h-[calc(100vh-4rem)] overflow-hidden lg:grid-cols-[256px_minmax(0,1fr)]">
+      <div className="grid h-[calc(100vh-3.5rem)] overflow-hidden lg:grid-cols-[240px_minmax(0,1fr)]">
         <CatalogRail selectedItemId={selectedItem.id} onSelect={selectItem} />
         <section
           ref={contentRef}
-          className="min-w-0 overflow-y-auto border-l bg-muted/20 p-2 md:p-4"
+          className="min-w-0 overflow-y-auto bg-muted/20 p-2 md:p-3 lg:border-l"
         >
-          <div className="min-h-full overflow-hidden rounded-lg border bg-background shadow-none">
+          <div className="min-h-full overflow-hidden rounded-md border bg-background shadow-none">
             <CatalogSurface selectedItem={selectedItem} onSelect={selectItem} />
           </div>
         </section>

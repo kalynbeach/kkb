@@ -19,7 +19,14 @@ import {
   AlertDialogTrigger,
 } from "@kkb/ui/components/alert-dialog";
 import { AspectRatio } from "@kkb/ui/components/aspect-ratio";
-import { Avatar, AvatarFallback, AvatarImage } from "@kkb/ui/components/avatar";
+import {
+  Avatar,
+  AvatarBadge,
+  AvatarFallback,
+  AvatarGroup,
+  AvatarGroupCount,
+  AvatarImage,
+} from "@kkb/ui/components/avatar";
 import { Badge } from "@kkb/ui/components/badge";
 import {
   Breadcrumb,
@@ -93,6 +100,7 @@ import {
 } from "@kkb/ui/components/dropdown-menu";
 import {
   Empty,
+  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
@@ -100,6 +108,7 @@ import {
 } from "@kkb/ui/components/empty";
 import { Field, FieldContent, FieldDescription, FieldLabel } from "@kkb/ui/components/field";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@kkb/ui/components/hover-card";
+import { Input } from "@kkb/ui/components/input";
 import {
   InputGroup,
   InputGroupAddon,
@@ -165,6 +174,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@kkb/ui/components/select";
+import { Separator } from "@kkb/ui/components/separator";
 import {
   Sheet,
   SheetContent,
@@ -212,11 +222,19 @@ import { cn } from "@kkb/ui/lib/utils";
 import {
   Bell,
   Boxes,
+  Check,
   ChevronRight,
   CircleAlert,
   Component,
+  Download,
+  ExternalLink,
   Grid2X2,
+  Loader2,
+  Mail,
+  Plus,
   Search,
+  Settings,
+  SlidersHorizontal,
   X,
 } from "lucide-react";
 import * as React from "react";
@@ -224,9 +242,7 @@ import * as React from "react";
 import {
   type CatalogCategory,
   type CatalogItem,
-  categoryMeta,
   componentItems,
-  focusedIntent,
   itemFromId,
   relatedItems,
   sourceInstruction,
@@ -258,11 +274,6 @@ const chartData = [
   { month: "May", value: 72 },
 ] as const;
 
-const exportItems = [...componentItems, ...utilityItems];
-const categoryTokenRows = Object.entries(categoryMeta).map(
-  ([label, meta]) => [label, meta.description] as const,
-);
-
 export function CatalogSurface({
   selectedItem,
   onSelect,
@@ -287,72 +298,320 @@ export function CatalogSurface({
 
 function PreviewSurface({ onSelect }: { onSelect: (id: string) => void }) {
   return (
-    <div className="bg-background">
-      <div className="flex min-h-12 flex-wrap items-center justify-between gap-2 border-b px-3 py-2">
-        <div className="flex min-w-0 items-center gap-2">
-          <p className="font-mono text-sm font-semibold">Preview</p>
-          <Badge variant="outline">{exportItems.length} exports</Badge>
-        </div>
-        <Button type="button" variant="outline" size="sm" onClick={() => onSelect("design-system")}>
-          Inspect tokens
-        </Button>
+    <div className="bg-muted/25">
+      <div className="grid auto-rows-min gap-px bg-border md:grid-cols-12">
+        <PreviewCell className="md:col-span-12 xl:col-span-4">
+          <TokenTypeStrip onSelect={onSelect} />
+        </PreviewCell>
+        <PreviewCell className="md:col-span-7 xl:col-span-4">
+          <ActionPreview />
+        </PreviewCell>
+        <PreviewCell className="md:col-span-5 xl:col-span-4">
+          <NavigationPreview />
+        </PreviewCell>
+        <PreviewCell className="md:col-span-6 xl:col-span-4">
+          <FormPreview />
+        </PreviewCell>
+        <PreviewCell className="md:col-span-6 xl:col-span-4">
+          <MenuOverlayPreview />
+        </PreviewCell>
+        <PreviewCell className="md:col-span-7 xl:col-span-4">
+          <DataPreview />
+        </PreviewCell>
+        <PreviewCell className="md:col-span-5 xl:col-span-8">
+          <AudioPreview />
+        </PreviewCell>
       </div>
-
-      <div className="grid auto-rows-min gap-px bg-border md:grid-cols-6">
-        <PreviewPanel title="Actions" className="md:col-span-3">
-          <ActionBench />
-        </PreviewPanel>
-        <PreviewPanel title="Fields" className="md:col-span-3">
-          <FieldBench />
-        </PreviewPanel>
-        <PreviewPanel title="Navigation" className="md:col-span-3">
-          <NavigationBench />
-        </PreviewPanel>
-        <PreviewPanel title="Data" className="md:col-span-3">
-          <DataBench />
-        </PreviewPanel>
-        <PreviewPanel title="Feedback" className="md:col-span-2">
-          <FeedbackBench />
-        </PreviewPanel>
-        <PreviewPanel title="Overlays" className="md:col-span-2">
-          <OverlayBench />
-        </PreviewPanel>
-        <PreviewPanel title="Menus" className="md:col-span-2">
-          <MenuBench />
-        </PreviewPanel>
-        <PreviewPanel title="Layout" className="md:col-span-3">
-          <LayoutBench />
-        </PreviewPanel>
-        <PreviewPanel title="Audio" className="md:col-span-3">
-          <AudioBench />
-        </PreviewPanel>
-        <PreviewPanel title="Design tokens" className="md:col-span-2">
-          <TokenBench onSelect={onSelect} />
-        </PreviewPanel>
-        <PreviewPanel title="Export wall" className="md:col-span-4">
-          <ExportWall onSelect={onSelect} />
-        </PreviewPanel>
+      <div className="border-t bg-background p-3">
+        <div className="flex flex-wrap gap-2">
+          {componentItems
+            .filter((item) => item.important)
+            .slice(0, 16)
+            .map((item) => (
+              <Button
+                key={item.id}
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => onSelect(item.id)}
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+              >
+                {item.label}
+              </Button>
+            ))}
+        </div>
       </div>
     </div>
   );
 }
 
-function PreviewPanel({
-  title,
-  className,
-  children,
-}: {
-  title: string;
-  className?: string;
-  children: React.ReactNode;
-}) {
+function PreviewCell({ className, children }: { className?: string; children: React.ReactNode }) {
   return (
-    <section className={cn("min-w-0 bg-background", className)}>
-      <div className="flex min-h-9 items-center justify-between border-b px-3">
-        <h2 className="font-mono text-xs font-semibold text-muted-foreground">{title}</h2>
+    <section className={cn("min-w-0 bg-background p-3 md:p-4", className)}>{children}</section>
+  );
+}
+
+function PreviewLabel({ children }: { children: React.ReactNode }) {
+  return <p className="mb-3 font-mono text-[11px] text-muted-foreground">{children}</p>;
+}
+
+function TokenTypeStrip({ onSelect }: { onSelect: (id: string) => void }) {
+  return (
+    <div className="space-y-4">
+      <PreviewLabel>tokens / type</PreviewLabel>
+      <div className="grid grid-cols-3 gap-2">
+        {[
+          ["paper", "bg-background text-foreground"],
+          ["ink", "bg-foreground text-background"],
+          ["rail", "bg-muted text-muted-foreground"],
+          ["primary", "bg-primary text-primary-foreground"],
+          ["audio", "bg-audio-accent text-primary"],
+          ["border", "bg-border text-foreground"],
+        ].map(([label, className]) => (
+          <button
+            key={label}
+            type="button"
+            onClick={() => onSelect("design-system")}
+            className={cn("min-h-16 border p-2 text-left font-mono text-[11px]", className)}
+          >
+            {label}
+          </button>
+        ))}
       </div>
-      <div className="p-3">{children}</div>
-    </section>
+      <div className="border p-3">
+        <p className="font-mono text-xl font-semibold tracking-[-0.02em]">TX-02 specimen</p>
+        <p className="mt-1 text-sm leading-5 text-muted-foreground">
+          Geist body copy stays quiet beside technical labels.
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ActionPreview() {
+  return (
+    <div className="space-y-4">
+      <PreviewLabel>buttons / actions</PreviewLabel>
+      <div className="flex flex-wrap gap-2">
+        <Button>Run checks</Button>
+        <Button variant="secondary">Save note</Button>
+        <Button variant="outline">
+          <ExternalLink className="size-4" />
+          Open
+        </Button>
+        <Button variant="ghost">Dismiss</Button>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <Button size="sm">
+          <Plus className="size-4" />
+          Add
+        </Button>
+        <Button size="sm" variant="outline">
+          Export
+          <Download className="size-4" />
+        </Button>
+        <Button size="icon" variant="outline" aria-label="Settings">
+          <Settings className="size-4" />
+        </Button>
+        <Button disabled>
+          <Loader2 className="size-4 animate-spin" />
+          Syncing
+        </Button>
+      </div>
+      <ButtonGroup>
+        <Button variant="outline">Source</Button>
+        <Button variant="outline">States</Button>
+        <Button variant="outline">Tokens</Button>
+      </ButtonGroup>
+    </div>
+  );
+}
+
+function NavigationPreview() {
+  return (
+    <div className="space-y-4">
+      <PreviewLabel>navigation</PreviewLabel>
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">KKB</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>UI</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+      <Tabs defaultValue="preview">
+        <TabsList>
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+          <TabsTrigger value="tokens">Tokens</TabsTrigger>
+          <TabsTrigger value="audio">Audio</TabsTrigger>
+        </TabsList>
+        <TabsContent value="preview" className="border p-3 text-sm">
+          Component wall
+        </TabsContent>
+        <TabsContent value="tokens" className="border p-3 text-sm">
+          Token specimens
+        </TabsContent>
+        <TabsContent value="audio" className="border p-3 text-sm">
+          Audio primitives
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+function FormPreview() {
+  return (
+    <div className="space-y-4">
+      <PreviewLabel>forms / fields</PreviewLabel>
+      <div className="grid gap-3">
+        <Field>
+          <FieldLabel htmlFor="catalog-filter">Filter</FieldLabel>
+          <InputGroup>
+            <InputGroupAddon>
+              <Search className="size-4" />
+            </InputGroupAddon>
+            <InputGroupInput id="catalog-filter" defaultValue="audio waveform" />
+          </InputGroup>
+        </Field>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Select defaultValue="preview">
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="preview">Preview</SelectItem>
+              <SelectItem value="focused">Focused</SelectItem>
+            </SelectContent>
+          </Select>
+          <NativeSelect defaultValue="compact" aria-label="Density">
+            <NativeSelectOption value="compact">Compact</NativeSelectOption>
+            <NativeSelectOption value="roomy">Roomy</NativeSelectOption>
+          </NativeSelect>
+        </div>
+        <div className="flex flex-wrap items-center gap-4 border p-3">
+          <Field orientation="horizontal" className="w-auto">
+            <Checkbox id="preview-verified" defaultChecked />
+            <FieldLabel htmlFor="preview-verified">Verified</FieldLabel>
+          </Field>
+          <Switch id="preview-enabled" defaultChecked aria-label="Enabled" />
+          <Slider defaultValue={[72]} max={100} className="min-w-32 flex-1" aria-label="Density" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MenuOverlayPreview() {
+  return (
+    <TooltipProvider>
+      <div className="space-y-4">
+        <PreviewLabel>menus / overlays</PreviewLabel>
+        <div className="flex flex-wrap gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">Dropdown</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Inspect</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem>Copy import</DropdownMenuItem>
+              <DropdownMenuCheckboxItem checked>Show states</DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline">Popover</Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64">
+              <p className="text-sm">Density, token, and state controls stay contextual.</p>
+            </PopoverContent>
+          </Popover>
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button variant="outline">Dialog</Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Inspect component</DialogTitle>
+                <DialogDescription>Focused modal example.</DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <Button>Done</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="icon" aria-label="Status">
+                <Bell className="size-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Status</TooltipContent>
+          </Tooltip>
+        </div>
+        <Command className="rounded-md border">
+          <CommandInput placeholder="Navigate..." />
+          <CommandList>
+            <CommandItem>Button</CommandItem>
+            <CommandItem>Input</CommandItem>
+            <CommandItem>Audio Waveform</CommandItem>
+          </CommandList>
+        </Command>
+      </div>
+    </TooltipProvider>
+  );
+}
+
+function DataPreview() {
+  return (
+    <div className="space-y-4">
+      <PreviewLabel>data</PreviewLabel>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Primitive</TableHead>
+            <TableHead>Status</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {["Table", "Code", "Kbd"].map((name) => (
+            <TableRow key={name}>
+              <TableCell>{name}</TableCell>
+              <TableCell>covered</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
+        <div className="flex h-24 items-end gap-1 border bg-muted/20 p-3" aria-label="Chart">
+          {chartData.map((bar) => (
+            <div key={bar.month} className="flex flex-1 flex-col items-center gap-1">
+              <div className="w-full bg-foreground" style={{ height: `${bar.value}%` }} />
+              <span className="font-mono text-[10px] text-muted-foreground">{bar.month}</span>
+            </div>
+          ))}
+        </div>
+        <KbdGroup>
+          <Kbd>⌘</Kbd>
+          <Kbd>K</Kbd>
+        </KbdGroup>
+      </div>
+    </div>
+  );
+}
+
+function AudioPreview() {
+  return (
+    <div className="space-y-4">
+      <PreviewLabel>audio</PreviewLabel>
+      <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_280px]">
+        <WaveformDemo />
+        <PlayerControlsDemo />
+      </div>
+    </div>
   );
 }
 
@@ -566,34 +825,6 @@ function DataBench() {
   );
 }
 
-function FeedbackBench() {
-  return (
-    <div className="space-y-3">
-      <Alert>
-        <CircleAlert className="size-4" />
-        <AlertTitle>Coverage ready</AlertTitle>
-        <AlertDescription>Every public export has a catalog path.</AlertDescription>
-      </Alert>
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge>stable</Badge>
-        <Badge variant="secondary">preview</Badge>
-        <Badge variant="outline">token</Badge>
-        <Avatar>
-          <AvatarImage src="" alt="" />
-          <AvatarFallback>KB</AvatarFallback>
-        </Avatar>
-        <Spinner className="size-4" />
-      </div>
-      <Progress value={78} />
-      <div className="space-y-2">
-        <Skeleton className="h-4 w-44" />
-        <Skeleton className="h-16 w-full" />
-      </div>
-      <Toaster position="bottom-right" />
-    </div>
-  );
-}
-
 function OverlayBench() {
   return (
     <TooltipProvider>
@@ -681,198 +912,6 @@ function OverlayBench() {
   );
 }
 
-function MenuBench() {
-  return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">Dropdown</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel>Catalog</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>Copy import</DropdownMenuItem>
-            <DropdownMenuCheckboxItem checked>Show tokens</DropdownMenuCheckboxItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <Menubar>
-          <MenubarMenu>
-            <MenubarTrigger>File</MenubarTrigger>
-            <MenubarContent>
-              <MenubarItem>
-                Copy source <MenubarShortcut>⌘C</MenubarShortcut>
-              </MenubarItem>
-              <MenubarSeparator />
-              <MenubarItem>Open docs</MenubarItem>
-            </MenubarContent>
-          </MenubarMenu>
-        </Menubar>
-      </div>
-      <ContextMenu>
-        <ContextMenuTrigger className="grid h-20 place-items-center border border-dashed text-sm text-muted-foreground">
-          Right click surface
-        </ContextMenuTrigger>
-        <ContextMenuContent>
-          <ContextMenuItem>
-            Open focused view<ContextMenuShortcut>↵</ContextMenuShortcut>
-          </ContextMenuItem>
-          <ContextMenuSeparator />
-          <ContextMenuItem>Copy source</ContextMenuItem>
-        </ContextMenuContent>
-      </ContextMenu>
-      <Command className="rounded-md border">
-        <CommandInput placeholder="Search..." />
-        <CommandList>
-          <CommandItem>Button</CommandItem>
-          <CommandItem>Dialog</CommandItem>
-        </CommandList>
-      </Command>
-    </div>
-  );
-}
-
-function LayoutBench() {
-  return (
-    <div className="grid gap-4 lg:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle>Release surface</CardTitle>
-          <CardDescription>Hard-edged KKB panel.</CardDescription>
-          <CardAction>
-            <Badge>ready</Badge>
-          </CardAction>
-        </CardHeader>
-        <CardContent>
-          <AspectRatio ratio={16 / 7}>
-            <div className="grid size-full place-items-center border bg-muted/30 font-mono text-sm">
-              16:7 frame
-            </div>
-          </AspectRatio>
-        </CardContent>
-        <CardFooter>
-          <Button variant="outline" className="w-full">
-            Action
-          </Button>
-        </CardFooter>
-      </Card>
-      <div className="space-y-3">
-        <ScrollArea className="h-28 border">
-          <ItemGroup>
-            {["Preview", "Tokens", "Button"].map((label, index) => (
-              <React.Fragment key={label}>
-                <Item size="sm">
-                  <ItemMedia variant="icon">
-                    <Component className="size-4" />
-                  </ItemMedia>
-                  <ItemContent>
-                    <ItemTitle>{label}</ItemTitle>
-                    <ItemDescription>Catalog entry</ItemDescription>
-                  </ItemContent>
-                  <ItemActions>
-                    <Badge variant="outline">{index + 1}</Badge>
-                  </ItemActions>
-                </Item>
-                {index < 2 ? <ItemSeparator /> : null}
-              </React.Fragment>
-            ))}
-          </ItemGroup>
-        </ScrollArea>
-        <ResizablePanelGroup className="min-h-24 rounded-md border">
-          <ResizablePanel defaultSize={45} className="grid place-items-center text-sm">
-            rail
-          </ResizablePanel>
-          <ResizableHandle />
-          <ResizablePanel defaultSize={55} className="grid place-items-center text-sm">
-            canvas
-          </ResizablePanel>
-        </ResizablePanelGroup>
-        <Empty className="border border-dashed">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <Boxes className="size-4" />
-            </EmptyMedia>
-            <EmptyTitle>No variant selected</EmptyTitle>
-            <EmptyDescription>Select a component to inspect.</EmptyDescription>
-          </EmptyHeader>
-        </Empty>
-      </div>
-    </div>
-  );
-}
-
-function AudioBench() {
-  return (
-    <div className="grid gap-3 xl:grid-cols-2">
-      <WaveformDemo />
-      <PlayerControlsDemo />
-    </div>
-  );
-}
-
-function TokenBench({ onSelect }: { onSelect: (id: string) => void }) {
-  return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-2">
-        {[
-          ["background", "bg-background text-foreground"],
-          ["foreground", "bg-foreground text-background"],
-          ["primary", "bg-primary text-primary-foreground"],
-          ["muted", "bg-muted text-muted-foreground"],
-          ["border", "bg-border text-foreground"],
-          ["audio", "bg-audio-accent text-primary"],
-        ].map(([label, className]) => (
-          <button
-            key={label}
-            type="button"
-            onClick={() => onSelect("design-system")}
-            className={cn("min-h-16 border p-3 text-left font-mono text-xs", className)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-      <div className="space-y-2">
-        <p className="font-mono text-lg font-semibold tracking-[-0.02em]">TX-02 heading</p>
-        <p className="text-sm leading-6 text-muted-foreground">
-          Geist carries longer explanatory copy with stable rhythm.
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function ExportWall({ onSelect }: { onSelect: (id: string) => void }) {
-  return (
-    <div className="grid gap-1 sm:grid-cols-2 xl:grid-cols-3">
-      {exportItems.map((item) => (
-        <article
-          key={item.id}
-          className="grid min-h-24 grid-cols-[minmax(0,1fr)_auto] items-start gap-3 border bg-background p-3"
-        >
-          <span className="min-w-0">
-            <span className="block truncate font-mono text-xs font-semibold">{item.label}</span>
-            <span className="mt-1 block font-mono text-[10px] text-muted-foreground">
-              {item.category}
-            </span>
-            <button
-              type="button"
-              onClick={() => onSelect(item.id)}
-              aria-label={`Open ${item.label}`}
-              className="mt-3 font-mono text-[10px] text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            >
-              Open
-            </button>
-          </span>
-          <span className="grid min-h-9 min-w-12 place-items-center">
-            {renderTinyPreview(item.id)}
-          </span>
-        </article>
-      ))}
-    </div>
-  );
-}
-
 function SurfaceHeader({ item, action }: { item: CatalogItem; action?: React.ReactNode }) {
   return (
     <div className="grid gap-3 bg-background px-4 py-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
@@ -898,57 +937,42 @@ function FocusedComponentSurface({
   item: CatalogItem;
   onSelect: (id: string) => void;
 }) {
+  const related = relatedItems(item);
+
   return (
-    <div>
+    <div className="bg-muted/20">
       <SurfaceHeader
         item={item}
         action={
-          <Code className="max-w-full break-all whitespace-normal text-[11px]">
+          <Code className="max-w-full break-all whitespace-normal text-[11px] opacity-80">
             {sourceInstruction(item)}
           </Code>
         }
       />
-      <div className="border-t bg-muted/20 p-3 md:p-4">
-        <div className="grid gap-4 md:grid-cols-2">{renderFocusedExamples(item)}</div>
+      <div className="border-t p-3 md:p-4">
+        <div className="grid gap-px bg-border md:grid-cols-2">{renderFocusedExamples(item)}</div>
       </div>
-      <FocusedMetadata item={item} onSelect={onSelect} />
-    </div>
-  );
-}
-
-function FocusedMetadata({
-  item,
-  onSelect,
-}: {
-  item: CatalogItem;
-  onSelect: (id: string) => void;
-}) {
-  const related = relatedItems(item);
-
-  return (
-    <div className="grid gap-px border-t bg-border md:grid-cols-[minmax(0,1fr)_minmax(240px,0.45fr)]">
-      <div className="bg-background p-4">
-        <p className="font-mono text-xs text-muted-foreground">intent</p>
-        <p className="mt-2 max-w-3xl text-sm leading-6 text-muted-foreground">
-          {focusedIntent(item)}
-        </p>
-      </div>
-      <div className="bg-background p-4">
-        <p className="font-mono text-xs text-muted-foreground">related</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {related.map((relatedItem) => (
-            <Button
-              key={relatedItem.id}
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => onSelect(relatedItem.id)}
-            >
-              {relatedItem.label}
-            </Button>
-          ))}
-        </div>
-      </div>
+      {related.length ? (
+        <footer className="border-t bg-background px-4 py-3">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="font-mono text-[11px] text-muted-foreground">Related</span>
+            <div className="flex flex-wrap gap-1.5">
+              {related.map((relatedItem) => (
+                <Button
+                  key={relatedItem.id}
+                  type="button"
+                  variant="ghost"
+                  size="xs"
+                  className="h-6 px-2 text-[11px] text-muted-foreground hover:text-foreground"
+                  onClick={() => onSelect(relatedItem.id)}
+                >
+                  {relatedItem.label}
+                </Button>
+              ))}
+            </div>
+          </div>
+        </footer>
+      ) : null}
     </div>
   );
 }
@@ -1026,23 +1050,32 @@ function renderFocusedExamples(item: CatalogItem) {
 
 function focusedExamplesFor(item: CatalogItem) {
   switch (item.id) {
+    case "button":
+      return <ButtonSpecimen />;
+    case "button-group":
+      return <ButtonGroupSpecimen />;
+    case "card":
+      return <CardSpecimen />;
+    case "input":
+      return <InputSpecimen />;
+    case "dialog":
+      return <DialogSpecimen />;
+    case "table":
+      return <TableSpecimen />;
     case "accordion":
     case "collapsible":
-      return <DisclosureExamples />;
+      return <DisclosureExamples item={item} />;
     case "alert-dialog":
-    case "dialog":
+      return <AlertDialogSpecimen />;
     case "drawer":
     case "sheet":
     case "popover":
     case "hover-card":
     case "tooltip":
-      return <OverlayExamples />;
-    case "button":
-    case "button-group":
+      return <OverlayExamples item={item} />;
     case "toggle":
     case "toggle-group":
-      return <ActionExamples />;
-    case "input":
+      return <ActionExamples item={item} />;
     case "input-group":
     case "input-otp":
     case "select":
@@ -1056,8 +1089,7 @@ function focusedExamplesFor(item: CatalogItem) {
     case "field":
     case "form":
     case "label":
-      return <InputExamples />;
-    case "table":
+      return <InputExamples item={item} />;
     case "chart":
     case "code":
     case "kbd":
@@ -1065,21 +1097,20 @@ function focusedExamplesFor(item: CatalogItem) {
     case "json-render":
     case "json-render-catalog":
     case "json-render-registry":
-      return <DataExamples />;
+      return <DataExamples item={item} />;
     case "sidebar":
     case "navigation-menu":
     case "breadcrumb":
     case "tabs":
     case "pagination":
-      return <NavigationExamples />;
-    case "card":
+      return <NavigationExamples item={item} />;
     case "aspect-ratio":
     case "empty":
     case "item":
     case "resizable":
     case "scroll-area":
     case "separator":
-      return <LayoutExamples />;
+      return <LayoutExamples item={item} />;
     case "alert":
     case "avatar":
     case "badge":
@@ -1087,17 +1118,17 @@ function focusedExamplesFor(item: CatalogItem) {
     case "skeleton":
     case "sonner":
     case "spinner":
-      return <FeedbackExamples />;
+      return <FeedbackExamples item={item} />;
     case "command":
     case "context-menu":
     case "dropdown-menu":
     case "menubar":
-      return <MenuExamples />;
+      return <MenuExamples item={item} />;
     case "direction":
     case "mode-toggle":
     case "theme-provider":
     case "use-mobile":
-      return <UtilitiesExamples />;
+      return <UtilitiesExamples item={item} />;
     default:
       return (
         <SpecimenStage title={item.label}>
@@ -1206,34 +1237,404 @@ function SpecimenStage({
   );
 }
 
-function ActionExamples() {
+function ButtonSpecimen() {
   return (
     <>
-      <SpecimenStage title="Variants and sizes">
-        <div className="flex flex-wrap items-center gap-2">
-          <Button>Default</Button>
-          <Button size="sm">Small</Button>
-          <Button variant="secondary">Secondary</Button>
-          <Button variant="outline">Outline</Button>
-          <Button variant="ghost">Ghost</Button>
-          <Button disabled>Disabled</Button>
+      <SpecimenStage title="Variants and sizes" className="md:col-span-2">
+        <div className="grid gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button>Default</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="outline">Outline</Button>
+            <Button variant="ghost">Ghost</Button>
+            <Button variant="link">Link</Button>
+            <Button variant="destructive">Destructive</Button>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button size="xs">Extra small</Button>
+            <Button size="sm">Small</Button>
+            <Button>Default</Button>
+            <Button size="lg">Large</Button>
+            <Button size="icon" aria-label="Settings">
+              <Settings className="size-4" />
+            </Button>
+          </div>
         </div>
       </SpecimenStage>
-      <SpecimenStage title="Toolbar">
+      <SpecimenStage title="Icons and states">
+        <div className="flex flex-wrap items-center gap-2">
+          <Button>
+            <Plus className="size-4" />
+            Add source
+          </Button>
+          <Button variant="outline">
+            Download
+            <Download className="size-4" />
+          </Button>
+          <Button disabled>
+            <Loader2 className="size-4 animate-spin" />
+            Loading
+          </Button>
+          <Button aria-invalid variant="outline">
+            Invalid
+          </Button>
+        </div>
+      </SpecimenStage>
+      <SpecimenStage title="Action row">
+        <div className="flex flex-wrap items-center justify-between gap-3 border p-3">
+          <div>
+            <p className="font-mono text-sm font-semibold">Catalog route</p>
+            <p className="text-sm text-muted-foreground">Preview, verify, then keep editing.</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline">Cancel</Button>
+            <Button>Apply changes</Button>
+          </div>
+        </div>
+      </SpecimenStage>
+    </>
+  );
+}
+
+function ButtonGroupSpecimen() {
+  return (
+    <>
+      <SpecimenStage title="Segmented actions">
+        <ButtonGroup>
+          <Button variant="outline">Source</Button>
+          <Button variant="outline">States</Button>
+          <Button variant="outline">Tokens</Button>
+        </ButtonGroup>
+      </SpecimenStage>
+      <SpecimenStage title="Toolbar grouping">
+        <div className="flex flex-wrap gap-2">
+          <ButtonGroup>
+            <Button variant="outline" size="icon" aria-label="Grid">
+              <Grid2X2 className="size-4" />
+            </Button>
+            <Button variant="outline" size="icon" aria-label="Tune">
+              <SlidersHorizontal className="size-4" />
+            </Button>
+            <Button variant="outline" size="icon" aria-label="Confirm">
+              <Check className="size-4" />
+            </Button>
+          </ButtonGroup>
+          <Button variant="secondary">Run selected</Button>
+        </div>
+      </SpecimenStage>
+    </>
+  );
+}
+
+function CardSpecimen() {
+  return (
+    <>
+      <SpecimenStage title="Default and compact card" className="md:col-span-2">
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Playback surface</CardTitle>
+              <CardDescription>Bordered panel with action slot.</CardDescription>
+              <CardAction>
+                <Badge>ready</Badge>
+              </CardAction>
+            </CardHeader>
+            <CardContent>
+              <div className="grid min-h-28 place-items-center border bg-muted/30 font-mono text-sm">
+                content
+              </div>
+            </CardContent>
+            <CardFooter className="justify-between gap-2">
+              <span className="font-mono text-xs text-muted-foreground">24px padding</span>
+              <Button size="sm">Open</Button>
+            </CardFooter>
+          </Card>
+          <Card className="gap-4 py-4">
+            <CardHeader className="px-4">
+              <CardTitle className="text-base">Compact review</CardTitle>
+              <CardDescription>Smaller internal rhythm.</CardDescription>
+            </CardHeader>
+            <CardContent className="px-4">
+              <Progress value={68} />
+            </CardContent>
+            <CardFooter className="px-4">
+              <Button variant="outline" size="sm" className="w-full">
+                Continue
+              </Button>
+            </CardFooter>
+          </Card>
+        </div>
+      </SpecimenStage>
+      <SpecimenStage title="Edge-to-edge media">
+        <Card className="overflow-hidden py-0">
+          <div className="grid h-32 place-items-center bg-foreground text-background">
+            <p className="font-mono text-sm">media</p>
+          </div>
+          <CardHeader>
+            <CardTitle>Signal capture</CardTitle>
+            <CardDescription>Content can own the top edge.</CardDescription>
+          </CardHeader>
+        </Card>
+      </SpecimenStage>
+      <SpecimenStage title="Footer actions">
+        <Card>
+          <CardHeader>
+            <CardTitle>Specimen queue</CardTitle>
+            <CardDescription>Action rows stay compact.</CardDescription>
+          </CardHeader>
+          <CardFooter className="gap-2">
+            <Button variant="outline" className="flex-1">
+              Skip
+            </Button>
+            <Button className="flex-1">Approve</Button>
+          </CardFooter>
+        </Card>
+      </SpecimenStage>
+    </>
+  );
+}
+
+function InputSpecimen() {
+  return (
+    <>
+      <SpecimenStage title="Text field states" className="md:col-span-2">
+        <div className="grid gap-4 lg:grid-cols-2">
+          <Field>
+            <FieldLabel htmlFor="input-plain">Plain</FieldLabel>
+            <Input id="input-plain" placeholder="Component name" />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="input-filled">With value</FieldLabel>
+            <Input id="input-filled" defaultValue="audio-waveform" />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="input-disabled">Disabled</FieldLabel>
+            <Input id="input-disabled" disabled defaultValue="locked" />
+          </Field>
+          <Field data-invalid>
+            <FieldLabel htmlFor="input-invalid">Invalid</FieldLabel>
+            <Input id="input-invalid" aria-invalid defaultValue="missing import" />
+            <FieldDescription className="text-destructive">
+              Source path is required.
+            </FieldDescription>
+          </Field>
+        </div>
+      </SpecimenStage>
+      <SpecimenStage title="Label and help text">
+        <Field>
+          <FieldLabel htmlFor="input-email">Notify collaborator</FieldLabel>
+          <InputGroup>
+            <InputGroupAddon>
+              <Mail className="size-4" />
+            </InputGroupAddon>
+            <InputGroupInput id="input-email" placeholder="kalyn@example.com" />
+          </InputGroup>
+          <FieldDescription>Used for compact settings and route filters.</FieldDescription>
+        </Field>
+      </SpecimenStage>
+      <SpecimenStage title="Grouped search">
+        <InputGroup>
+          <InputGroupAddon>
+            <Search className="size-4" />
+            <InputGroupText>Filter</InputGroupText>
+          </InputGroupAddon>
+          <InputGroupInput defaultValue="button" />
+          <InputGroupAddon align="inline-end">
+            <InputGroupButton size="icon-xs" variant="ghost" aria-label="Clear filter">
+              <X className="size-3" />
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
+      </SpecimenStage>
+    </>
+  );
+}
+
+function DialogSpecimen() {
+  return (
+    <>
+      <SpecimenStage title="Trigger and modal">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button>Open dialog</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Inspect component</DialogTitle>
+              <DialogDescription>Focused modal example.</DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button variant="outline">Cancel</Button>
+              <Button>Done</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </SpecimenStage>
+      <SpecimenStage title="Open-state anatomy">
+        <div className="mx-auto max-w-sm border bg-background p-4 shadow-sm">
+          <p className="font-mono text-base font-semibold">Inspect component</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Dialog content is compact, explicit, and action-led.
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" size="sm">
+              Cancel
+            </Button>
+            <Button size="sm">Done</Button>
+          </div>
+        </div>
+      </SpecimenStage>
+    </>
+  );
+}
+
+function TableSpecimen() {
+  return (
+    <>
+      <SpecimenStage title="Compact data table" className="md:col-span-2">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Component</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {[
+              ["Button", "Input", "ready"],
+              ["Card", "Layout", "ready"],
+              ["Waveform", "Audio", "scoped"],
+            ].map(([component, category, status]) => (
+              <TableRow key={component}>
+                <TableCell>{component}</TableCell>
+                <TableCell>{category}</TableCell>
+                <TableCell>
+                  <Badge variant="outline">{status}</Badge>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </SpecimenStage>
+      <SpecimenStage title="Caption and keyboard">
+        <div className="space-y-4">
+          <Table>
+            <TableCaption>Focused table specimen.</TableCaption>
+            <TableBody>
+              <TableRow>
+                <TableCell>Open search</TableCell>
+                <TableCell>
+                  <KbdGroup>
+                    <Kbd>⌘</Kbd>
+                    <Kbd>K</Kbd>
+                  </KbdGroup>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+      </SpecimenStage>
+    </>
+  );
+}
+
+function ActionExamples({ item }: { item: CatalogItem }) {
+  return (
+    <>
+      <SpecimenStage title={`${item.label} states`}>
+        <div className="flex flex-wrap items-center gap-2">
+          <Toggle defaultPressed>
+            <Grid2X2 className="size-4" />
+            Grid
+          </Toggle>
+          <Toggle aria-invalid>Invalid</Toggle>
+          <Toggle disabled>Disabled</Toggle>
+          <ToggleGroup type="multiple" defaultValue={["labels"]}>
+            <ToggleGroupItem value="labels">Labels</ToggleGroupItem>
+            <ToggleGroupItem value="stats">Stats</ToggleGroupItem>
+          </ToggleGroup>
+        </div>
+      </SpecimenStage>
+      <SpecimenStage title={`${item.label} toolbar`}>
         <ActionBench />
       </SpecimenStage>
     </>
   );
 }
 
-function InputExamples() {
-  return (
-    <>
-      <SpecimenStage title="Settings form">
-        <FieldBench />
-      </SpecimenStage>
-      <SpecimenStage title="Structured entry">
-        <div className="space-y-4">
+function InputExamples({ item }: { item: CatalogItem }) {
+  if (item.id === "select" || item.id === "native-select" || item.id === "combobox") {
+    return (
+      <>
+        <SpecimenStage title={`${item.label} closed state`}>
+          <div className="grid gap-3">
+            <Select defaultValue="preview">
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="preview">Preview</SelectItem>
+                <SelectItem value="focused">Focused</SelectItem>
+              </SelectContent>
+            </Select>
+            <NativeSelect defaultValue="compact" aria-label="Density">
+              <NativeSelectOption value="compact">Compact</NativeSelectOption>
+              <NativeSelectOption value="roomy">Roomy</NativeSelectOption>
+            </NativeSelect>
+          </div>
+        </SpecimenStage>
+        <SpecimenStage title={`${item.label} search state`}>
+          <Combobox items={["button", "input", "audio waveform"]}>
+            <ComboboxInput placeholder="Primitive or bay" />
+            <ComboboxContent>
+              <ComboboxList>
+                {["button", "input", "audio waveform"].map((value) => (
+                  <ComboboxItem key={value} value={value}>
+                    {value}
+                  </ComboboxItem>
+                ))}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+        </SpecimenStage>
+      </>
+    );
+  }
+
+  if (item.id === "input-group") {
+    return (
+      <>
+        <SpecimenStage title="Input Group addons">
+          <InputGroup>
+            <InputGroupAddon>
+              <Search className="size-4" />
+              <InputGroupText>Filter</InputGroupText>
+            </InputGroupAddon>
+            <InputGroupInput defaultValue="card" />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton size="icon-xs" variant="ghost" aria-label="Clear">
+                <X className="size-3" />
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
+        </SpecimenStage>
+        <SpecimenStage title="Input Group action">
+          <InputGroup>
+            <InputGroupInput placeholder="kalyn@example.com" />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton size="sm">Invite</InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
+        </SpecimenStage>
+      </>
+    );
+  }
+
+  if (item.id === "input-otp") {
+    return (
+      <>
+        <SpecimenStage title="Input OTP segmented code">
           <InputOTP maxLength={6}>
             <InputOTPGroup>
               <InputOTPSlot index={0} />
@@ -1247,6 +1648,29 @@ function InputExamples() {
               <InputOTPSlot index={5} />
             </InputOTPGroup>
           </InputOTP>
+        </SpecimenStage>
+        <SpecimenStage title="Input OTP in context">
+          <Field>
+            <FieldLabel>Verification code</FieldLabel>
+            <FieldDescription>Six slots with separator rhythm.</FieldDescription>
+          </Field>
+        </SpecimenStage>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <SpecimenStage title={`${item.label} settings form`}>
+        <FieldBench />
+      </SpecimenStage>
+      <SpecimenStage title={`${item.label} structured entry`}>
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-4">
+            <Checkbox id={`${item.id}-checked`} defaultChecked />
+            <Switch id={`${item.id}-switch`} defaultChecked aria-label={`${item.label} enabled`} />
+            <Slider defaultValue={[64]} max={100} aria-label={`${item.label} range`} />
+          </div>
           <CalendarDemo />
         </div>
       </SpecimenStage>
@@ -1254,30 +1678,293 @@ function InputExamples() {
   );
 }
 
-function LayoutExamples() {
-  return (
-    <>
-      <SpecimenStage title="Panel primitives">
-        <LayoutBench />
-      </SpecimenStage>
-      <SpecimenStage title="Aspect ratio">
-        <AspectRatio ratio={16 / 7}>
-          <div className="grid size-full place-items-center border bg-muted/30 font-mono text-sm">
-            16:7 frame
+function LayoutExamples({ item }: { item: CatalogItem }) {
+  if (item.id === "aspect-ratio") {
+    return (
+      <>
+        <SpecimenStage title="Ratios" className="md:col-span-2">
+          <div className="grid gap-4 lg:grid-cols-3">
+            {[
+              ["16 / 9", 16 / 9],
+              ["4 / 3", 4 / 3],
+              ["1 / 1", 1],
+            ].map(([label, ratio]) => (
+              <AspectRatio key={label} ratio={ratio as number}>
+                <div className="grid size-full place-items-center border bg-muted/30 font-mono text-sm">
+                  {label}
+                </div>
+              </AspectRatio>
+            ))}
           </div>
-        </AspectRatio>
+        </SpecimenStage>
+        <SpecimenStage title="Media frame" className="md:col-span-2">
+          <AspectRatio ratio={21 / 9}>
+            <div className="grid size-full place-items-center border bg-foreground text-background">
+              <span className="font-mono text-sm">21 / 9</span>
+            </div>
+          </AspectRatio>
+        </SpecimenStage>
+      </>
+    );
+  }
+
+  if (item.id === "resizable") {
+    return (
+      <>
+        <SpecimenStage title="Horizontal panels" className="md:col-span-2">
+          <ResizablePanelGroup className="min-h-72 border">
+            <ResizablePanel defaultSize={28} minSize={20} className="grid place-items-center">
+              <span className="font-mono text-sm">rail</span>
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={72} minSize={40} className="grid place-items-center">
+              <span className="font-mono text-sm">canvas</span>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </SpecimenStage>
+        <SpecimenStage title="Three panels" className="md:col-span-2">
+          <ResizablePanelGroup className="min-h-64 border">
+            <ResizablePanel defaultSize={30} minSize={20} className="grid place-items-center">
+              <span className="font-mono text-sm">left</span>
+            </ResizablePanel>
+            <ResizableHandle />
+            <ResizablePanel defaultSize={40} minSize={25} className="grid place-items-center">
+              <span className="font-mono text-sm">preview</span>
+            </ResizablePanel>
+            <ResizableHandle />
+            <ResizablePanel
+              defaultSize={30}
+              minSize={20}
+              className="grid place-items-center bg-muted/25"
+            >
+              <span className="font-mono text-sm">right</span>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        </SpecimenStage>
+      </>
+    );
+  }
+
+  if (item.id === "scroll-area") {
+    return (
+      <>
+        <SpecimenStage title="Scrollable list">
+          <ScrollArea className="h-72 border">
+            <ItemGroup>
+              {componentItems.slice(0, 18).map((component) => (
+                <React.Fragment key={component.id}>
+                  <Item size="sm">
+                    <ItemContent>
+                      <ItemTitle>{component.label}</ItemTitle>
+                      <ItemDescription>{component.source}</ItemDescription>
+                    </ItemContent>
+                  </Item>
+                  <ItemSeparator />
+                </React.Fragment>
+              ))}
+            </ItemGroup>
+          </ScrollArea>
+        </SpecimenStage>
+        <SpecimenStage title="Contained copy">
+          <ScrollArea className="h-72 border p-4">
+            <div className="space-y-4 pr-4 text-sm leading-6 text-muted-foreground">
+              {Array.from({ length: 8 }, (_, index) => (
+                <p key={index}>
+                  ScrollArea keeps long content inside a bounded specimen without moving the page.
+                </p>
+              ))}
+            </div>
+          </ScrollArea>
+        </SpecimenStage>
+      </>
+    );
+  }
+
+  if (item.id === "separator") {
+    return (
+      <>
+        <SpecimenStage title="Horizontal separators">
+          <div className="space-y-4">
+            <div>
+              <p className="font-mono text-sm">Preview</p>
+              <p className="text-sm text-muted-foreground">Component specimen state.</p>
+            </div>
+            <Separator />
+            <div>
+              <p className="font-mono text-sm">Source</p>
+              <p className="text-sm text-muted-foreground">@kkb/ui/components/separator</p>
+            </div>
+            <Separator />
+            <div>
+              <p className="font-mono text-sm">Related</p>
+              <p className="text-sm text-muted-foreground">Low-noise footer grouping.</p>
+            </div>
+          </div>
+        </SpecimenStage>
+        <SpecimenStage title="Vertical separators">
+          <div className="flex h-36 items-stretch justify-center gap-6">
+            <span className="grid place-items-center font-mono text-sm">A</span>
+            <Separator orientation="vertical" />
+            <span className="grid place-items-center font-mono text-sm">B</span>
+            <Separator orientation="vertical" />
+            <span className="grid place-items-center font-mono text-sm">C</span>
+          </div>
+        </SpecimenStage>
+      </>
+    );
+  }
+
+  if (item.id === "empty") {
+    return (
+      <SpecimenStage title="Empty state" className="md:col-span-2">
+        <Empty className="min-h-72 border">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <Boxes className="size-5" />
+            </EmptyMedia>
+            <EmptyTitle>No captures selected</EmptyTitle>
+            <EmptyDescription>Choose an audio pass or create a new capture.</EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button size="sm">Create capture</Button>
+          </EmptyContent>
+        </Empty>
       </SpecimenStage>
-    </>
+    );
+  }
+
+  if (item.id === "item") {
+    return (
+      <SpecimenStage title="Item group" className="md:col-span-2">
+        <ItemGroup className="border">
+          {[
+            {
+              iconItem: itemFromId("audio-waveform"),
+              title: "Audio waveform",
+              description: "High-density preview item",
+              state: "ready",
+            },
+            {
+              iconItem: itemFromId("dialog"),
+              title: "Dialog",
+              description: "Overlay item with trigger state",
+              state: "open",
+            },
+            {
+              iconItem: itemFromId("table"),
+              title: "Table",
+              description: "Data item with keyboard affordance",
+              state: "focus",
+            },
+          ].map(({ iconItem, title, description, state }, index) => (
+            <React.Fragment key={title}>
+              <Item>
+                <ItemMedia>
+                  <CatalogItemIcon item={iconItem} className="size-4" />
+                </ItemMedia>
+                <ItemContent>
+                  <ItemTitle>{title}</ItemTitle>
+                  <ItemDescription>{description}</ItemDescription>
+                </ItemContent>
+                <ItemActions>
+                  <Badge variant="secondary">{state}</Badge>
+                </ItemActions>
+              </Item>
+              {index < 2 ? <ItemSeparator /> : null}
+            </React.Fragment>
+          ))}
+        </ItemGroup>
+      </SpecimenStage>
+    );
+  }
+
+  return (
+    <SpecimenStage title={item.label} className="md:col-span-2">
+      {renderTinyPreview(item.id)}
+    </SpecimenStage>
   );
 }
 
-function NavigationExamples() {
+function NavigationExamples({ item }: { item: CatalogItem }) {
+  if (item.id === "breadcrumb") {
+    return (
+      <SpecimenStage title="Breadcrumb states" className="md:col-span-2">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/ui">Catalog</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/ui?item=category-navigation">Navigation</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </SpecimenStage>
+    );
+  }
+
+  if (item.id === "tabs") {
+    return (
+      <SpecimenStage title="Tabs" className="md:col-span-2">
+        <Tabs defaultValue="preview" className="w-full">
+          <TabsList>
+            <TabsTrigger value="preview">Preview</TabsTrigger>
+            <TabsTrigger value="tokens">Tokens</TabsTrigger>
+            <TabsTrigger value="usage">Usage</TabsTrigger>
+          </TabsList>
+          <TabsContent value="preview" className="border p-4">
+            Component preview state
+          </TabsContent>
+          <TabsContent value="tokens" className="border p-4">
+            Token reference state
+          </TabsContent>
+          <TabsContent value="usage" className="border p-4">
+            Usage state
+          </TabsContent>
+        </Tabs>
+      </SpecimenStage>
+    );
+  }
+
+  if (item.id === "pagination") {
+    return (
+      <SpecimenStage title="Pagination" className="md:col-span-2">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious href="#" />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink href="#" isActive>
+                1
+              </PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink href="#">2</PaginationLink>
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationNext href="#" />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </SpecimenStage>
+    );
+  }
+
   return (
     <>
-      <SpecimenStage title="Route shell">
+      <SpecimenStage title={`${item.label} route shell`}>
         <NavigationBench />
       </SpecimenStage>
-      <SpecimenStage title="Sidebar">
+      <SpecimenStage title={`${item.label} navigation state`}>
         <div className="h-64 overflow-hidden border">
           <SidebarProvider defaultOpen className="min-h-0">
             <Sidebar collapsible="none">
@@ -1309,10 +1996,10 @@ function NavigationExamples() {
   );
 }
 
-function DisclosureExamples() {
+function DisclosureExamples({ item }: { item: CatalogItem }) {
   return (
     <>
-      <SpecimenStage title="Accordion">
+      <SpecimenStage title={`${item.label} expanded state`}>
         <Accordion type="single" collapsible defaultValue="one">
           <AccordionItem value="one">
             <AccordionTrigger>What does Preview show?</AccordionTrigger>
@@ -1326,7 +2013,7 @@ function DisclosureExamples() {
           </AccordionItem>
         </Accordion>
       </SpecimenStage>
-      <SpecimenStage title="Collapsible">
+      <SpecimenStage title={`${item.label} disclosure control`}>
         <Collapsible defaultOpen>
           <div className="flex items-center justify-between gap-4">
             <p className="font-mono text-sm">Implementation notes</p>
@@ -1345,13 +2032,13 @@ function DisclosureExamples() {
   );
 }
 
-function OverlayExamples() {
+function OverlayExamples({ item }: { item: CatalogItem }) {
   return (
     <>
-      <SpecimenStage title="Modal family">
+      <SpecimenStage title={`${item.label} trigger`}>
         <OverlayBench />
       </SpecimenStage>
-      <SpecimenStage title="Contextual overlay">
+      <SpecimenStage title={`${item.label} open-state shape`}>
         <TooltipProvider>
           <div className="flex flex-wrap gap-2">
             <Popover>
@@ -1377,51 +2064,330 @@ function OverlayExamples() {
   );
 }
 
-function FeedbackExamples() {
+function AlertDialogSpecimen() {
   return (
     <>
-      <SpecimenStage title="Status stack">
-        <FeedbackBench />
+      <SpecimenStage title="Trigger and modal">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive">Delete capture</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete capture?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action removes the selected waveform capture.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </SpecimenStage>
-      <SpecimenStage title="Error state">
-        <Alert variant="destructive">
-          <CircleAlert className="size-4" />
-          <AlertTitle>Browser verification failed</AlertTitle>
-          <AlertDescription>
-            Re-run the focused browser check after fixing overflow or clipped overlay findings.
-          </AlertDescription>
-        </Alert>
+      <SpecimenStage title="Open-state anatomy">
+        <div className="max-w-sm border bg-background p-4 shadow-sm">
+          <p className="font-mono text-sm font-semibold">Delete capture?</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Alert dialogs reserve the destructive decision for the footer.
+          </p>
+          <div className="mt-4 flex justify-end gap-2">
+            <Button variant="outline" size="sm">
+              Cancel
+            </Button>
+            <Button variant="destructive" size="sm">
+              Delete
+            </Button>
+          </div>
+        </div>
       </SpecimenStage>
     </>
   );
 }
 
-function MenuExamples() {
-  return (
-    <>
-      <SpecimenStage title="Menu surfaces">
-        <MenuBench />
+function FeedbackExamples({ item }: { item: CatalogItem }) {
+  if (item.id === "alert") {
+    return (
+      <SpecimenStage title="Alert variants" className="md:col-span-2">
+        <div className="grid gap-3">
+          <Alert>
+            <Check className="size-4" />
+            <AlertTitle>Capture ready</AlertTitle>
+            <AlertDescription>Waveform analysis completed.</AlertDescription>
+          </Alert>
+          <Alert variant="destructive">
+            <CircleAlert className="size-4" />
+            <AlertTitle>Capture failed</AlertTitle>
+            <AlertDescription>Reconnect the input source.</AlertDescription>
+          </Alert>
+        </div>
       </SpecimenStage>
-      <SpecimenStage title="Command pattern">
+    );
+  }
+
+  if (item.id === "avatar") {
+    return (
+      <SpecimenStage title="Avatar sizes" className="md:col-span-2">
+        <div className="flex flex-wrap items-center gap-5">
+          <Avatar size="sm">
+            <AvatarFallback>KB</AvatarFallback>
+          </Avatar>
+          <Avatar>
+            <AvatarImage src="https://github.com/shadcn.png" alt="shadcn" />
+            <AvatarFallback>SC</AvatarFallback>
+            <AvatarBadge />
+          </Avatar>
+          <Avatar size="lg">
+            <AvatarFallback>UI</AvatarFallback>
+          </Avatar>
+          <AvatarGroup>
+            <Avatar>
+              <AvatarFallback>AA</AvatarFallback>
+            </Avatar>
+            <Avatar>
+              <AvatarFallback>BB</AvatarFallback>
+            </Avatar>
+            <AvatarGroupCount>+3</AvatarGroupCount>
+          </AvatarGroup>
+        </div>
+      </SpecimenStage>
+    );
+  }
+
+  if (item.id === "badge") {
+    return (
+      <SpecimenStage title="Badge variants" className="md:col-span-2">
+        <div className="flex flex-wrap gap-2">
+          <Badge>Default</Badge>
+          <Badge variant="secondary">Secondary</Badge>
+          <Badge variant="outline">Outline</Badge>
+          <Badge variant="destructive">Destructive</Badge>
+        </div>
+      </SpecimenStage>
+    );
+  }
+
+  if (item.id === "progress") {
+    return (
+      <SpecimenStage title="Progress values" className="md:col-span-2">
+        <div className="grid gap-4">
+          <Progress value={28} />
+          <Progress value={64} />
+          <Progress value={92} />
+        </div>
+      </SpecimenStage>
+    );
+  }
+
+  if (item.id === "skeleton") {
+    return (
+      <SpecimenStage title="Skeleton loading shape" className="md:col-span-2">
+        <div className="space-y-3">
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-28 w-full" />
+          <div className="grid gap-2 sm:grid-cols-3">
+            <Skeleton className="h-16" />
+            <Skeleton className="h-16" />
+            <Skeleton className="h-16" />
+          </div>
+        </div>
+      </SpecimenStage>
+    );
+  }
+
+  if (item.id === "spinner" || item.id === "sonner") {
+    return (
+      <SpecimenStage
+        title={item.id === "spinner" ? "Spinner state" : "Sonner state"}
+        className="md:col-span-2"
+      >
+        <div className="flex items-center gap-3">
+          <Spinner />
+          <span className="text-sm text-muted-foreground">
+            {item.id === "spinner" ? "Loading capture" : "Toast host mounted"}
+          </span>
+          {item.id === "sonner" ? <Toaster /> : null}
+        </div>
+      </SpecimenStage>
+    );
+  }
+
+  return (
+    <SpecimenStage title={item.label} className="md:col-span-2">
+      {renderTinyPreview(item.id)}
+    </SpecimenStage>
+  );
+}
+
+function MenuExamples({ item }: { item: CatalogItem }) {
+  if (item.id === "command") {
+    return (
+      <SpecimenStage title="Command list" className="md:col-span-2">
         <Command className="rounded-md border">
-          <CommandInput placeholder="Search..." />
+          <CommandInput placeholder="Search components..." />
           <CommandList>
             <CommandItem>Button</CommandItem>
+            <CommandItem>Input</CommandItem>
             <CommandItem>Dialog</CommandItem>
           </CommandList>
         </Command>
       </SpecimenStage>
-    </>
+    );
+  }
+
+  if (item.id === "dropdown-menu") {
+    return (
+      <SpecimenStage title="Dropdown menu" className="md:col-span-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline">Open menu</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuLabel>Catalog</DropdownMenuLabel>
+            <DropdownMenuItem>Preview</DropdownMenuItem>
+            <DropdownMenuItem>Open source</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuCheckboxItem checked>Verified</DropdownMenuCheckboxItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </SpecimenStage>
+    );
+  }
+
+  if (item.id === "context-menu") {
+    return (
+      <SpecimenStage title="Context menu" className="md:col-span-2">
+        <ContextMenu>
+          <ContextMenuTrigger className="grid h-40 place-items-center border bg-muted/20 text-sm text-muted-foreground">
+            Right click surface
+          </ContextMenuTrigger>
+          <ContextMenuContent>
+            <ContextMenuItem>Open</ContextMenuItem>
+            <ContextMenuItem>Duplicate</ContextMenuItem>
+            <ContextMenuSeparator />
+            <ContextMenuItem>
+              Inspect
+              <ContextMenuShortcut>⌘I</ContextMenuShortcut>
+            </ContextMenuItem>
+          </ContextMenuContent>
+        </ContextMenu>
+      </SpecimenStage>
+    );
+  }
+
+  if (item.id === "menubar") {
+    return (
+      <SpecimenStage title="Menubar" className="md:col-span-2">
+        <Menubar>
+          <MenubarMenu>
+            <MenubarTrigger>File</MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem>New capture</MenubarItem>
+              <MenubarItem>
+                Save
+                <MenubarShortcut>⌘S</MenubarShortcut>
+              </MenubarItem>
+              <MenubarSeparator />
+              <MenubarItem>Export</MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+          <MenubarMenu>
+            <MenubarTrigger>View</MenubarTrigger>
+            <MenubarContent>
+              <MenubarItem>Preview</MenubarItem>
+              <MenubarItem>Components</MenubarItem>
+            </MenubarContent>
+          </MenubarMenu>
+        </Menubar>
+      </SpecimenStage>
+    );
+  }
+
+  return (
+    <SpecimenStage title={item.label} className="md:col-span-2">
+      {renderTinyPreview(item.id)}
+    </SpecimenStage>
   );
 }
 
-function DataExamples() {
+function DataExamples({ item }: { item: CatalogItem }) {
+  if (item.id === "code") {
+    return (
+      <SpecimenStage title="Code" className="md:col-span-2">
+        <div className="space-y-3 text-sm">
+          <p>
+            Import <Code>@kkb/ui/components/code</Code>
+          </p>
+          <p>
+            Use <Code>item=button</Code> for direct catalog routes.
+          </p>
+        </div>
+      </SpecimenStage>
+    );
+  }
+
+  if (item.id === "kbd") {
+    return (
+      <SpecimenStage title="Keyboard groups" className="md:col-span-2">
+        <div className="flex flex-wrap gap-3">
+          <KbdGroup>
+            <Kbd>⌘</Kbd>
+            <Kbd>K</Kbd>
+          </KbdGroup>
+          <KbdGroup>
+            <Kbd>Shift</Kbd>
+            <Kbd>Tab</Kbd>
+          </KbdGroup>
+          <Kbd>Esc</Kbd>
+        </div>
+      </SpecimenStage>
+    );
+  }
+
+  if (item.id === "chart") {
+    return (
+      <SpecimenStage title="Chart bars" className="md:col-span-2">
+        <div
+          className="flex h-64 items-end gap-2 border bg-muted/20 p-4"
+          aria-label="Chart specimen"
+        >
+          {chartData.map((bar) => (
+            <div key={bar.month} className="flex flex-1 flex-col items-center gap-2">
+              <div className="w-full bg-foreground" style={{ height: `${bar.value}%` }} />
+              <span className="font-mono text-xs text-muted-foreground">{bar.month}</span>
+            </div>
+          ))}
+        </div>
+      </SpecimenStage>
+    );
+  }
+
+  if (item.id === "carousel") {
+    return (
+      <SpecimenStage title="Carousel" className="md:col-span-2">
+        <CarouselDemo />
+      </SpecimenStage>
+    );
+  }
+
+  if (item.id.startsWith("json-render")) {
+    return (
+      <SpecimenStage title={item.label} className="md:col-span-2">
+        <div className="grid gap-3 border bg-muted/20 p-4 font-mono text-xs">
+          <span>{item.source}</span>
+          <Code>{`{ "component": "${item.label}", "status": "registered" }`}</Code>
+        </div>
+      </SpecimenStage>
+    );
+  }
+
   return (
     <>
-      <SpecimenStage title="Table, code, keyboard">
+      <SpecimenStage title={`${item.label} dense values`}>
         <DataBench />
       </SpecimenStage>
-      <SpecimenStage title="Chart and carousel">
+      <SpecimenStage title={`${item.label} visual state`}>
         <div className="space-y-6">
           <div
             className="flex h-44 items-end gap-2 border bg-muted/20 p-4"
@@ -1441,10 +2407,10 @@ function DataExamples() {
   );
 }
 
-function UtilitiesExamples() {
+function UtilitiesExamples({ item }: { item?: CatalogItem }) {
   return (
     <>
-      <SpecimenStage title="Theme and direction">
+      <SpecimenStage title={`${item?.label ?? "Utility"} runtime surface`}>
         <div className="space-y-4">
           <ModeToggle />
           <DirectionProvider dir="rtl">
@@ -1455,7 +2421,7 @@ function UtilitiesExamples() {
           </p>
         </div>
       </SpecimenStage>
-      <SpecimenStage title="Public utilities">
+      <SpecimenStage title={`${item?.label ?? "Utility"} source reference`}>
         <div className="space-y-2">
           {utilityItems.map((item) => (
             <div key={item.id} className="border p-3">
@@ -1475,9 +2441,9 @@ function DesignSystemSurface() {
   return (
     <div>
       <SurfaceHeader item={itemFromId("design-system")} />
-      <div className="grid gap-px border-t bg-border lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div className="grid gap-px border-t bg-border xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="grid gap-px bg-border md:grid-cols-2">{<DesignSystemCards />}</div>
-        <div className="grid gap-px bg-border">
+        <div className="grid content-start gap-px bg-border">
           <TokenPanel
             title="Implementation"
             rows={[
@@ -1495,7 +2461,6 @@ function DesignSystemSurface() {
               ["accent", "neutral product accent"],
             ]}
           />
-          <TokenPanel title="Category map" rows={categoryTokenRows} />
         </div>
       </div>
     </div>
@@ -1518,7 +2483,7 @@ function DesignSystemCards() {
             ["border", "bg-border text-foreground"],
             ["audio", "bg-audio-accent text-primary"],
           ].map(([label, className]) => (
-            <div key={label} className={cn("min-h-20 border p-3 font-mono text-xs", className)}>
+            <div key={label} className={cn("min-h-28 border p-3 font-mono text-xs", className)}>
               {label}
             </div>
           ))}
@@ -1561,6 +2526,28 @@ function DesignSystemCards() {
               <div className="h-3 bg-foreground" style={{ width: step * 16 }} />
             </div>
           ))}
+        </div>
+      </SpecimenStage>
+      <SpecimenStage title="Scoped instrument color" className="md:col-span-2">
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="border border-audio-panel-border bg-audio-accent-softer p-4">
+            <p className="font-mono text-sm text-audio-accent">audio blue</p>
+            <div className="mt-4 flex h-20 items-end gap-1">
+              {[28, 64, 42, 80, 54, 72, 36, 60].map((value) => (
+                <div
+                  key={value}
+                  className="flex-1 bg-audio-accent"
+                  style={{ height: `${value}%` }}
+                />
+              ))}
+            </div>
+          </div>
+          <div className="border bg-[color:var(--oscilloscope-shoulder)] p-4 text-[color:var(--oscilloscope-glow)]">
+            <p className="font-mono text-sm">P31 oscilloscope</p>
+            <div className="mt-4 h-20 border border-[color:var(--oscilloscope-floor)] bg-[color:var(--oscilloscope-shoulder)] p-3">
+              <div className="h-full w-full border-t-2 border-[color:var(--oscilloscope-trace)]" />
+            </div>
+          </div>
         </div>
       </SpecimenStage>
     </>
