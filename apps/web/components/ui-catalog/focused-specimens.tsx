@@ -889,10 +889,10 @@ function InputExamples({ item }: { item: CatalogItem }) {
       <>
         <SpecimenStage title="Checkbox states">
           <div className="flex flex-wrap items-center gap-4">
-            <Checkbox id="checkbox-on" defaultChecked />
-            <Checkbox id="checkbox-off" />
-            <Checkbox id="checkbox-disabled" disabled />
-            <Checkbox id="checkbox-invalid" aria-invalid />
+            <Checkbox id="checkbox-on" defaultChecked aria-label="Checked state" />
+            <Checkbox id="checkbox-off" aria-label="Unchecked state" />
+            <Checkbox id="checkbox-disabled" disabled aria-label="Disabled state" />
+            <Checkbox id="checkbox-invalid" aria-invalid aria-label="Invalid state" />
           </div>
         </SpecimenStage>
         <SpecimenStage title="Checkbox field row">
@@ -1353,24 +1353,40 @@ function NavigationExamples({ item }: { item: CatalogItem }) {
 
   if (item.id === "tabs") {
     return (
-      <SpecimenStage title="Tabs" className="md:col-span-2">
-        <Tabs defaultValue="preview" className="w-full">
-          <TabsList>
-            <TabsTrigger value="preview">Preview</TabsTrigger>
-            <TabsTrigger value="tokens">Tokens</TabsTrigger>
-            <TabsTrigger value="usage">Usage</TabsTrigger>
-          </TabsList>
-          <TabsContent value="preview" className="border p-4">
-            Component preview state
-          </TabsContent>
-          <TabsContent value="tokens" className="border p-4">
-            Token reference state
-          </TabsContent>
-          <TabsContent value="usage" className="border p-4">
-            Usage state
-          </TabsContent>
-        </Tabs>
-      </SpecimenStage>
+      <>
+        <SpecimenStage title="Tabs states" className="md:col-span-2">
+          <Tabs defaultValue="preview" className="w-full">
+            <TabsList>
+              <TabsTrigger value="preview">Preview</TabsTrigger>
+              <TabsTrigger value="tokens">Tokens</TabsTrigger>
+              <TabsTrigger value="usage">Usage</TabsTrigger>
+            </TabsList>
+            <TabsContent value="preview" className="border p-4">
+              Component preview state
+            </TabsContent>
+            <TabsContent value="tokens" className="border p-4">
+              Token reference state
+            </TabsContent>
+            <TabsContent value="usage" className="border p-4">
+              Usage state
+            </TabsContent>
+          </Tabs>
+        </SpecimenStage>
+        <SpecimenStage title="Tabs density">
+          <Tabs defaultValue="source">
+            <TabsList className="w-full justify-start">
+              <TabsTrigger value="source">Source</TabsTrigger>
+              <TabsTrigger value="states">States</TabsTrigger>
+            </TabsList>
+            <TabsContent value="source" className="border p-3 font-mono text-xs">
+              @kkb/ui/components/tabs
+            </TabsContent>
+            <TabsContent value="states" className="border p-3 text-sm text-muted-foreground">
+              Compact tab lists keep focused specimens in one panel.
+            </TabsContent>
+          </Tabs>
+        </SpecimenStage>
+      </>
     );
   }
 
@@ -1565,7 +1581,7 @@ function OverlayExamples({ item }: { item: CatalogItem }) {
             </Popover>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="outline" size="icon">
+                <Button variant="outline" size="icon" aria-label="Show notification tooltip">
                   <Bell className="size-4" />
                 </Button>
               </TooltipTrigger>
@@ -1654,7 +1670,7 @@ function OverlayBench() {
         </HoverCard>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" aria-label="Show notification tooltip">
               <Bell className="size-4" />
             </Button>
           </TooltipTrigger>
@@ -1839,69 +1855,109 @@ function MenuExamples({ item }: { item: CatalogItem }) {
 
   if (item.id === "dropdown-menu") {
     return (
-      <SpecimenStage title="Dropdown menu" className="md:col-span-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline">Open menu</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuLabel>Catalog</DropdownMenuLabel>
-            <DropdownMenuItem>Preview</DropdownMenuItem>
-            <DropdownMenuItem>Open source</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuCheckboxItem checked>Verified</DropdownMenuCheckboxItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </SpecimenStage>
+      <>
+        <SpecimenStage title="Dropdown menu trigger">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">Open menu</Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuLabel>Catalog</DropdownMenuLabel>
+              <DropdownMenuItem>Preview</DropdownMenuItem>
+              <DropdownMenuItem>Open source</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuCheckboxItem checked>Verified</DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SpecimenStage>
+        <SpecimenStage title="Dropdown menu anatomy">
+          <div className="w-56 border bg-popover p-1 text-popover-foreground shadow-sm">
+            <p className="px-2 py-1.5 font-mono text-xs">Catalog</p>
+            <div className="px-2 py-1.5 text-sm">Preview</div>
+            <div className="px-2 py-1.5 text-sm">Open source</div>
+            <Separator className="my-1" />
+            <div className="flex items-center justify-between px-2 py-1.5 text-sm">
+              Verified
+              <Check className="size-4" />
+            </div>
+          </div>
+        </SpecimenStage>
+      </>
     );
   }
 
   if (item.id === "context-menu") {
     return (
-      <SpecimenStage title="Context menu" className="md:col-span-2">
-        <ContextMenu>
-          <ContextMenuTrigger className="grid h-40 place-items-center border bg-muted/20 text-sm text-muted-foreground">
-            Right click surface
-          </ContextMenuTrigger>
-          <ContextMenuContent>
-            <ContextMenuItem>Open</ContextMenuItem>
-            <ContextMenuItem>Duplicate</ContextMenuItem>
-            <ContextMenuSeparator />
-            <ContextMenuItem>
+      <>
+        <SpecimenStage title="Context menu trigger">
+          <ContextMenu>
+            <ContextMenuTrigger className="grid h-40 place-items-center border bg-muted/20 text-sm text-muted-foreground">
+              Right click surface
+            </ContextMenuTrigger>
+            <ContextMenuContent>
+              <ContextMenuItem>Open</ContextMenuItem>
+              <ContextMenuItem>Duplicate</ContextMenuItem>
+              <ContextMenuSeparator />
+              <ContextMenuItem>
+                Inspect
+                <ContextMenuShortcut>⌘I</ContextMenuShortcut>
+              </ContextMenuItem>
+            </ContextMenuContent>
+          </ContextMenu>
+        </SpecimenStage>
+        <SpecimenStage title="Context menu anatomy">
+          <div className="w-56 border bg-popover p-1 text-popover-foreground shadow-sm">
+            <div className="px-2 py-1.5 text-sm">Open</div>
+            <div className="px-2 py-1.5 text-sm">Duplicate</div>
+            <Separator className="my-1" />
+            <div className="flex items-center justify-between px-2 py-1.5 text-sm">
               Inspect
-              <ContextMenuShortcut>⌘I</ContextMenuShortcut>
-            </ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
-      </SpecimenStage>
+              <span className="font-mono text-xs text-muted-foreground">⌘I</span>
+            </div>
+          </div>
+        </SpecimenStage>
+      </>
     );
   }
 
   if (item.id === "menubar") {
     return (
-      <SpecimenStage title="Menubar" className="md:col-span-2">
-        <Menubar>
-          <MenubarMenu>
-            <MenubarTrigger>File</MenubarTrigger>
-            <MenubarContent>
-              <MenubarItem>New capture</MenubarItem>
-              <MenubarItem>
-                Save
-                <MenubarShortcut>⌘S</MenubarShortcut>
-              </MenubarItem>
-              <MenubarSeparator />
-              <MenubarItem>Export</MenubarItem>
-            </MenubarContent>
-          </MenubarMenu>
-          <MenubarMenu>
-            <MenubarTrigger>View</MenubarTrigger>
-            <MenubarContent>
-              <MenubarItem>Preview</MenubarItem>
-              <MenubarItem>Components</MenubarItem>
-            </MenubarContent>
-          </MenubarMenu>
-        </Menubar>
-      </SpecimenStage>
+      <>
+        <SpecimenStage title="Menubar trigger">
+          <Menubar>
+            <MenubarMenu>
+              <MenubarTrigger>File</MenubarTrigger>
+              <MenubarContent>
+                <MenubarItem>New capture</MenubarItem>
+                <MenubarItem>
+                  Save
+                  <MenubarShortcut>⌘S</MenubarShortcut>
+                </MenubarItem>
+                <MenubarSeparator />
+                <MenubarItem>Export</MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
+            <MenubarMenu>
+              <MenubarTrigger>View</MenubarTrigger>
+              <MenubarContent>
+                <MenubarItem>Preview</MenubarItem>
+                <MenubarItem>Components</MenubarItem>
+              </MenubarContent>
+            </MenubarMenu>
+          </Menubar>
+        </SpecimenStage>
+        <SpecimenStage title="Menubar menu anatomy">
+          <div className="w-56 border bg-popover p-1 text-popover-foreground shadow-sm">
+            <div className="px-2 py-1.5 text-sm">New capture</div>
+            <div className="flex items-center justify-between px-2 py-1.5 text-sm">
+              Save
+              <span className="font-mono text-xs text-muted-foreground">⌘S</span>
+            </div>
+            <Separator className="my-1" />
+            <div className="px-2 py-1.5 text-sm">Export</div>
+          </div>
+        </SpecimenStage>
+      </>
     );
   }
 
@@ -1915,16 +1971,28 @@ function MenuExamples({ item }: { item: CatalogItem }) {
 function DataExamples({ item }: { item: CatalogItem }) {
   if (item.id === "code") {
     return (
-      <SpecimenStage title="Code" className="md:col-span-2">
-        <div className="space-y-3 text-sm">
-          <p>
-            Import <Code>@kkb/ui/components/code</Code>
-          </p>
-          <p>
-            Use <Code>item=button</Code> for direct catalog routes.
-          </p>
-        </div>
-      </SpecimenStage>
+      <>
+        <SpecimenStage title="Inline code">
+          <div className="space-y-3 text-sm">
+            <p>
+              Import <Code>@kkb/ui/components/code</Code>
+            </p>
+            <p>
+              Use <Code>item=button</Code> for direct catalog routes.
+            </p>
+          </div>
+        </SpecimenStage>
+        <SpecimenStage title="Code in dense copy">
+          <div className="grid gap-3 border bg-muted/20 p-3 text-sm">
+            <p>
+              Keep package paths legible beside prose: <Code>@kkb/ui/json-render</Code>.
+            </p>
+            <p className="font-mono text-xs text-muted-foreground">
+              Code stays compact without taking over the whole surface.
+            </p>
+          </div>
+        </SpecimenStage>
+      </>
     );
   }
 
@@ -1966,20 +2034,47 @@ function DataExamples({ item }: { item: CatalogItem }) {
 
   if (item.id === "carousel") {
     return (
-      <SpecimenStage title="Carousel" className="md:col-span-2">
-        <CarouselDemo />
-      </SpecimenStage>
+      <>
+        <SpecimenStage title="Carousel viewport" className="md:col-span-2">
+          <CarouselDemo />
+        </SpecimenStage>
+        <SpecimenStage title="Carousel controls">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button variant="outline" size="sm">
+              Previous
+            </Button>
+            <Button variant="outline" size="sm">
+              Next
+            </Button>
+            <span className="font-mono text-xs text-muted-foreground">slide 1 / 5</span>
+          </div>
+        </SpecimenStage>
+      </>
     );
   }
 
   if (item.id.startsWith("json-render")) {
     return (
-      <SpecimenStage title={item.label} className="md:col-span-2">
-        <div className="grid gap-3 border bg-muted/20 p-4 font-mono text-xs">
-          <span>{item.source}</span>
-          <Code>{`{ "component": "${item.label}", "status": "registered" }`}</Code>
-        </div>
-      </SpecimenStage>
+      <>
+        <SpecimenStage title={`${item.label} source`}>
+          <div className="grid gap-3 border bg-muted/20 p-4 font-mono text-xs">
+            <span>{item.source}</span>
+            <Code>{`{ "component": "${item.label}", "status": "registered" }`}</Code>
+          </div>
+        </SpecimenStage>
+        <SpecimenStage title={`${item.label} contract`}>
+          <div className="grid gap-2 border p-3 text-sm">
+            <div className="flex items-center justify-between gap-3">
+              <span>registry entry</span>
+              <Badge variant="outline">stable</Badge>
+            </div>
+            <Separator />
+            <p className="text-muted-foreground">
+              JSON render routes stay compact, but expose source and registration state.
+            </p>
+          </div>
+        </SpecimenStage>
+      </>
     );
   }
 

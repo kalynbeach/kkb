@@ -63,4 +63,29 @@ describe("ui catalog focused surfaces", () => {
       "Caption and keyboard",
     ]);
   });
+
+  test("renders named specimens for compact menu, navigation, and data routes", () => {
+    expect(specimenTitlesFor(itemFromId("dropdown-menu"))).toEqual([
+      "Dropdown menu trigger",
+      "Dropdown menu anatomy",
+    ]);
+    expect(specimenTitlesFor(itemFromId("context-menu"))).toEqual([
+      "Context menu trigger",
+      "Context menu anatomy",
+    ]);
+    expect(specimenTitlesFor(itemFromId("menubar"))).toEqual([
+      "Menubar trigger",
+      "Menubar menu anatomy",
+    ]);
+    expect(specimenTitlesFor(itemFromId("tabs"))).toEqual(["Tabs states", "Tabs density"]);
+    expect(specimenTitlesFor(itemFromId("code"))).toEqual(["Inline code", "Code in dense copy"]);
+    expect(specimenTitlesFor(itemFromId("carousel"))).toEqual([
+      "Carousel viewport",
+      "Carousel controls",
+    ]);
+    expect(specimenTitlesFor(itemFromId("json-render-registry"))).toEqual([
+      "JSON Render Registry source",
+      "JSON Render Registry contract",
+    ]);
+  });
 });
