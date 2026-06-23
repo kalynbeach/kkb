@@ -264,6 +264,11 @@ export const componentItems = catalogItems.filter((item) => item.kind === "compo
 export const utilityItems = catalogItems.filter((item) => item.kind === "utility");
 export const allSelectableItems = catalogItems;
 
+export type CatalogItemResolution = {
+  item: CatalogItem;
+  missingItemId: string | null;
+};
+
 export function componentDescription(id: string, label: string, category: string) {
   if (id.startsWith("audio-")) {
     return `${label} belongs to the scoped audio presentation layer and uses KKB instrument tokens.`;
@@ -274,14 +279,24 @@ export function componentDescription(id: string, label: string, category: string
   return `${label} is part of the ${category.toLowerCase()} surface in @kkb/ui.`;
 }
 
-export function itemFromId(id: string | null): CatalogItem {
+export function resolveCatalogItem(id: string | null): CatalogItemResolution {
   const fallback = catalogItems[0];
 
   if (!fallback) {
     throw new Error("Catalog requires at least one item.");
   }
 
-  return allSelectableItems.find((item) => item.id === id) ?? fallback;
+  if (!id) {
+    return { item: fallback, missingItemId: null };
+  }
+
+  const item = allSelectableItems.find((candidate) => candidate.id === id);
+
+  return item ? { item, missingItemId: null } : { item: fallback, missingItemId: id };
+}
+
+export function itemFromId(id: string | null): CatalogItem {
+  return resolveCatalogItem(id).item;
 }
 
 export function groupedItems() {

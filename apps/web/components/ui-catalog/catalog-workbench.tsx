@@ -8,8 +8,8 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
 
-import { itemFromId } from "./catalog-data";
-import { CatalogRail } from "./catalog-rail";
+import { resolveCatalogItem } from "./catalog-data";
+import { CatalogCompactNav, CatalogRail } from "./catalog-rail";
 import { CatalogSearchDialog } from "./catalog-search";
 import { CatalogSurface } from "./catalog-surfaces";
 
@@ -19,7 +19,8 @@ export function CatalogWorkbench() {
   const searchParams = useSearchParams();
   const [searchOpen, setSearchOpen] = React.useState(false);
   const contentRef = React.useRef<HTMLElement>(null);
-  const selectedItem = itemFromId(searchParams.get("item"));
+  const selectedItemResolution = resolveCatalogItem(searchParams.get("item"));
+  const selectedItem = selectedItemResolution.item;
 
   const selectItem = React.useCallback(
     (id: string) => {
@@ -63,8 +64,20 @@ export function CatalogWorkbench() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
+  React.useEffect(() => {
+    if (!selectedItemResolution.missingItemId) {
+      return;
+    }
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("item");
+
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }, [pathname, router, searchParams, selectedItemResolution.missingItemId]);
+
   return (
-    <main className="h-screen overflow-hidden bg-background text-foreground">
+    <main className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
       <CatalogSearchDialog
         open={searchOpen}
         selectedItemId={selectedItem.id}
@@ -112,7 +125,9 @@ export function CatalogWorkbench() {
         </div>
       </header>
 
-      <div className="grid h-[calc(100vh-3.5rem)] overflow-hidden lg:grid-cols-[240px_minmax(0,1fr)]">
+      <CatalogCompactNav selectedItem={selectedItem} onSelect={selectItem} />
+
+      <div className="grid min-h-0 flex-1 overflow-hidden lg:grid-cols-[240px_minmax(0,1fr)]">
         <CatalogRail selectedItemId={selectedItem.id} onSelect={selectItem} />
         <section
           ref={contentRef}

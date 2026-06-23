@@ -1,8 +1,61 @@
+"use client";
+
 import { ScrollArea } from "@kkb/ui/components/scroll-area";
 import { cn } from "@kkb/ui/lib/utils";
 import type { ReactNode } from "react";
+import * as React from "react";
 
-import { categoryId, categoryOrder, itemsForCategory } from "./catalog-data";
+import { type CatalogItem, categoryId, categoryOrder, itemsForCategory } from "./catalog-data";
+
+export function CatalogCompactNav({
+  selectedItem,
+  onSelect,
+}: {
+  selectedItem: CatalogItem;
+  onSelect: (id: string) => void;
+}) {
+  const activeButtonRef = React.useRef<HTMLButtonElement>(null);
+
+  React.useEffect(() => {
+    activeButtonRef.current?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [selectedItem.category, selectedItem.id]);
+
+  return (
+    <nav
+      aria-label="UI catalog sections"
+      className="border-b bg-sidebar text-sidebar-foreground lg:hidden"
+    >
+      <div className="flex gap-1 overflow-x-auto px-2 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <CompactNavButton
+          active={selectedItem.id === "preview"}
+          activeButtonRef={selectedItem.id === "preview" ? activeButtonRef : undefined}
+          onClick={() => onSelect("preview")}
+        >
+          Preview
+        </CompactNavButton>
+        <CompactNavButton
+          active={selectedItem.id === "design-system"}
+          activeButtonRef={selectedItem.id === "design-system" ? activeButtonRef : undefined}
+          onClick={() => onSelect("design-system")}
+        >
+          Design System
+        </CompactNavButton>
+        {categoryOrder
+          .filter((category) => category !== "Design System")
+          .map((category) => (
+            <CompactNavButton
+              key={category}
+              active={selectedItem.category === category}
+              activeButtonRef={selectedItem.category === category ? activeButtonRef : undefined}
+              onClick={() => onSelect(categoryId(category))}
+            >
+              {category}
+            </CompactNavButton>
+          ))}
+      </div>
+    </nav>
+  );
+}
 
 export function CatalogRail({
   selectedItemId,
@@ -12,7 +65,7 @@ export function CatalogRail({
   onSelect: (id: string) => void;
 }) {
   return (
-    <aside className="hidden h-[calc(100vh-3.5rem)] overflow-hidden bg-sidebar text-sidebar-foreground lg:block">
+    <aside className="hidden h-full overflow-hidden bg-sidebar text-sidebar-foreground lg:block">
       <div className="flex h-full flex-col border-r">
         <div className="border-b p-3">
           <RailButton active={selectedItemId === "preview"} onClick={() => onSelect("preview")}>
@@ -71,6 +124,34 @@ export function CatalogRail({
         </ScrollArea>
       </div>
     </aside>
+  );
+}
+
+function CompactNavButton({
+  active,
+  activeButtonRef,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  activeButtonRef?: React.Ref<HTMLButtonElement>;
+  onClick: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      ref={activeButtonRef}
+      onClick={onClick}
+      className={cn(
+        "min-h-11 shrink-0 rounded-md px-3 font-mono text-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+        active
+          ? "bg-foreground text-background"
+          : "text-muted-foreground hover:bg-accent/70 hover:text-foreground",
+      )}
+    >
+      {children}
+    </button>
   );
 }
 

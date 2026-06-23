@@ -5,8 +5,10 @@ import {
   componentItems,
   itemFromId,
   itemsForCategory,
+  resolveCatalogItem,
   utilityItems,
 } from "../catalog-data";
+import { getCatalogSearchGroups } from "../catalog-search";
 import { searchCatalogItems } from "../catalog-search-index";
 
 const publicComponentIds = [
@@ -98,6 +100,10 @@ describe("ui catalog data", () => {
     expect(categoryId("Design System")).toBe("category-design-system");
     expect(categoryId("Audio")).toBe("category-audio");
     expect(itemFromId("missing").id).toBe("preview");
+    expect(resolveCatalogItem("missing")).toEqual({
+      item: itemFromId("preview"),
+      missingItemId: "missing",
+    });
   });
 
   test("keeps audio as an instrument category with component exports", () => {
@@ -130,5 +136,14 @@ describe("ui catalog data", () => {
 
   test("returns no results for unknown queries", () => {
     expect(searchCatalogItems("not-a-real-component")).toEqual([]);
+  });
+
+  test("groups empty search around pinned views, current category, and category browse", () => {
+    const groups = getCatalogSearchGroups("", itemFromId("button"));
+
+    expect(groups.map((group) => group.heading)).toEqual(["Pinned", "Input", "Browse categories"]);
+    expect(groups[0]?.items.map((item) => item.id)).toEqual(["preview", "design-system"]);
+    expect(groups[1]?.items.map((item) => item.id)).toContain("button");
+    expect(groups[2]?.items.map((item) => item.id)).toContain("category-audio");
   });
 });
