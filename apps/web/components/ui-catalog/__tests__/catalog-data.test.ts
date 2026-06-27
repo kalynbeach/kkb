@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 
 import {
+  catalogItems,
   categoryId,
   componentItems,
   itemFromId,
@@ -104,6 +107,17 @@ describe("ui catalog data", () => {
       item: itemFromId("preview"),
       missingItemId: "missing",
     });
+  });
+
+  test("keeps category source paths backed by local files", () => {
+    const workspaceRoot = process.cwd().endsWith("/apps/web")
+      ? resolve(process.cwd(), "../..")
+      : process.cwd();
+    const categoryItems = catalogItems.filter((item) => item.kind === "category");
+
+    for (const item of categoryItems) {
+      expect(existsSync(resolve(workspaceRoot, item.source))).toBe(true);
+    }
   });
 
   test("keeps audio as an instrument category with component exports", () => {

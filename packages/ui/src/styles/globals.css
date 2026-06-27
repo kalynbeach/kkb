@@ -173,6 +173,10 @@
   --audio-status-error: oklch(0.637 0.208 25.331);
   --audio-status-error-glow: oklch(0.637 0.208 25.331 / 0.6);
   --audio-error-text: oklch(0.704 0.191 22.216 / 0.8);
+  --oscilloscope-trace: color(srgb 0.03 0.78 0.2);
+  --oscilloscope-glow: color(srgb 0.74 1 0.71);
+  --oscilloscope-shoulder: color(srgb 0.004 0.08 0.018);
+  --oscilloscope-floor: color(srgb 0.42 0.64 0.38);
 }
 
 .dark {
@@ -259,6 +263,10 @@
   --audio-status-error: oklch(0.71 0.188 25.3);
   --audio-status-error-glow: oklch(0.71 0.188 25.3 / 0.65);
   --audio-error-text: oklch(0.78 0.168 25.1 / 0.85);
+  --oscilloscope-trace: color(srgb 0.03 0.78 0.2);
+  --oscilloscope-glow: color(srgb 0.74 1 0.71);
+  --oscilloscope-shoulder: color(srgb 0.004 0.08 0.018);
+  --oscilloscope-floor: color(srgb 0.42 0.64 0.38);
 }
 
 @layer components {

@@ -11,7 +11,7 @@ export function DesignSystemSurface() {
       <SurfaceHeader item={itemFromId("design-system")} />
       <div className="grid gap-px border-t bg-border xl:grid-cols-[minmax(0,1fr)_320px]">
         <div className="grid gap-px bg-border md:grid-cols-2">
-          <DesignSystemCards />
+          <DesignSystemCards stageClassName="border-0" />
         </div>
         <div className="grid content-start gap-px bg-border">
           <TokenPanel
@@ -37,10 +37,10 @@ export function DesignSystemSurface() {
   );
 }
 
-export function DesignSystemCards() {
+export function DesignSystemCards({ stageClassName }: { stageClassName?: string } = {}) {
   return (
     <>
-      <SpecimenStage title="Color tokens">
+      <SpecimenStage title="Color tokens" className={stageClassName}>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {[
             ["background", "bg-background text-foreground"],
@@ -59,7 +59,7 @@ export function DesignSystemCards() {
           ))}
         </div>
       </SpecimenStage>
-      <SpecimenStage title="Typography">
+      <SpecimenStage title="Typography" className={stageClassName}>
         <div className="space-y-4">
           <div>
             <p className="font-mono text-2xl font-semibold tracking-[-0.02em]">
@@ -73,7 +73,7 @@ export function DesignSystemCards() {
           <p className="font-mono-secondary text-xs">Departure Mono stays selective.</p>
         </div>
       </SpecimenStage>
-      <SpecimenStage title="Radius">
+      <SpecimenStage title="Radius" className={stageClassName}>
         <div className="grid grid-cols-4 gap-3">
           {["rounded-none", "rounded-sm", "rounded-md", "rounded-lg"].map((radius) => (
             <div
@@ -88,7 +88,7 @@ export function DesignSystemCards() {
           ))}
         </div>
       </SpecimenStage>
-      <SpecimenStage title="Spacing">
+      <SpecimenStage title="Spacing" className={stageClassName}>
         <div className="space-y-3">
           {[1, 2, 3, 4, 6, 8].map((step) => (
             <div key={step} className="flex items-center gap-3">
@@ -98,7 +98,10 @@ export function DesignSystemCards() {
           ))}
         </div>
       </SpecimenStage>
-      <SpecimenStage title="Scoped instrument color" className="md:col-span-2">
+      <SpecimenStage
+        title="Scoped instrument color"
+        className={cn("md:col-span-2", stageClassName)}
+      >
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="border border-audio-panel-border bg-audio-accent-softer p-4">
             <p className="font-mono text-sm text-audio-accent">audio blue</p>

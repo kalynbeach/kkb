@@ -141,18 +141,22 @@ export const catalogItems: readonly CatalogItem[] = [
       ["audio", "Audio", "Audio", "Audio player and waveform primitives."],
       ["utilities", "Utilities", "Utilities", "Non-visual public utilities and providers."],
     ] as const
-  ).map(
-    ([id, label, category, description]) =>
-      ({
-        id: `category-${id}`,
-        label: `${label} category`,
-        kind: "category",
-        category: category as CatalogCategory,
-        source: `apps/web/components/ui-catalog/sections/${id}-section.tsx`,
-        description,
-        keywords: [id, label, "category"],
-      }) satisfies CatalogItem,
-  ),
+  ).map(([id, label, category, description]) => {
+    const source =
+      id === "utilities"
+        ? "apps/web/components/ui-catalog/focused-specimens.tsx"
+        : `apps/web/components/ui-catalog/sections/${id}-section.tsx`;
+
+    return {
+      id: `category-${id}`,
+      label: `${label} category`,
+      kind: "category",
+      category: category as CatalogCategory,
+      source,
+      description,
+      keywords: [id, label, "category"],
+    } satisfies CatalogItem;
+  }),
   ...(
     [
       ["accordion", "Accordion", "Navigation", "@kkb/ui/components/accordion", true],
