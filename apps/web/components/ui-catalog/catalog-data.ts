@@ -144,7 +144,7 @@ export const catalogItems: readonly CatalogItem[] = [
   ).map(([id, label, category, description]) => {
     const source =
       id === "utilities"
-        ? "apps/web/components/ui-catalog/focused-specimens.tsx"
+        ? "apps/web/components/ui-catalog/utility-examples.tsx"
         : `apps/web/components/ui-catalog/sections/${id}-section.tsx`;
 
     return {

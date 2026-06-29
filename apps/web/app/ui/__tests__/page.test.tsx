@@ -3,7 +3,7 @@ import { renderToString } from "react-dom/server";
 
 import { itemFromId } from "../../../components/ui-catalog/catalog-data";
 import { CatalogCompactNav } from "../../../components/ui-catalog/catalog-rail";
-import { Section } from "../../../components/ui-catalog/section";
+import { CategorySurface } from "../../../components/ui-catalog/category-surface";
 import { LayoutSection } from "../../../components/ui-catalog/sections/layout-section";
 import UiPage from "../page";
 
@@ -20,14 +20,12 @@ describe("/ui page", () => {
     expect(html).toContain("Loading catalog workbench");
   });
 
-  test("keeps section cards two-up on desktop before widening to three columns", () => {
+  test("keeps category surfaces two-up on desktop before widening to three columns", () => {
     const html = renderToString(
-      <Section id="layout" title="Layout" itemCount={4}>
-        <div>one</div>
-      </Section>,
+      <CategorySurface item={itemFromId("category-layout")} />,
     ).replaceAll("<!-- -->", "");
 
-    expect(html).toContain("md:grid-cols-2 2xl:grid-cols-3");
+    expect(html).toContain("md:grid-cols-2 xl:grid-cols-3");
   });
 
   test("treats the layout showcase as a featured card on desktop", () => {

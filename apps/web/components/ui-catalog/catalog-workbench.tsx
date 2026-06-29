@@ -28,9 +28,6 @@ export function CatalogWorkbench() {
       params.set("item", id);
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
       setSearchOpen(false);
-      window.requestAnimationFrame(() =>
-        contentRef.current?.scrollTo({ top: 0, behavior: "smooth" }),
-      );
     },
     [pathname, router, searchParams],
   );
@@ -42,13 +39,10 @@ export function CatalogWorkbench() {
       return;
     }
 
-    content.scrollTo({ top: 0 });
     const frame = window.requestAnimationFrame(() => content.scrollTo({ top: 0 }));
-    const timeout = window.setTimeout(() => content.scrollTo({ top: 0 }), 50);
 
     return () => {
       window.cancelAnimationFrame(frame);
-      window.clearTimeout(timeout);
     };
   }, [selectedItem.id]);
 

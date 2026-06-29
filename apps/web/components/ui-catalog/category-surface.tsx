@@ -5,7 +5,6 @@ import { Badge } from "@kkb/ui/components/badge";
 import type { CatalogCategory, CatalogItem } from "./catalog-data";
 import { SurfaceHeader } from "./catalog-surface-shared";
 import { DesignSystemCards } from "./design-system-surface";
-import { UtilitiesExamples } from "./focused-specimens";
 import { AudioSection } from "./sections/audio-section";
 import { DataSection } from "./sections/data-section";
 import { FeedbackSection } from "./sections/feedback-section";
@@ -14,6 +13,7 @@ import { LayoutSection } from "./sections/layout-section";
 import { MenuSection } from "./sections/menu-section";
 import { NavigationSection } from "./sections/navigation-section";
 import { OverlaySection } from "./sections/overlay-section";
+import { UtilitiesExamples } from "./utility-examples";
 
 export function CategorySurface({ item }: { item: CatalogItem }) {
   if (item.category === "Audio") {
