@@ -63,14 +63,13 @@ import { cn } from "@kkb/ui/lib/utils";
 import { Bell, Download, ExternalLink, Loader2, Plus, Search, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { componentItems } from "./catalog-data";
 import { chartData } from "./catalog-surface-shared";
 import { PlayerControlsDemo, WaveformDemo } from "./demos/audio-demo";
 
 export function PreviewWall({ onSelect }: { onSelect: (id: string) => void }) {
   return (
-    <div className="bg-muted/25">
-      <div className="grid auto-rows-min gap-px bg-border md:grid-cols-12">
+    <div className="min-h-full bg-background p-4 md:p-6">
+      <div className="grid auto-rows-min gap-x-8 gap-y-6 md:grid-cols-12">
         <PreviewCell className="md:col-span-12 xl:col-span-4">
           <TokenTypeStrip onSelect={onSelect} />
         </PreviewCell>
@@ -89,47 +88,21 @@ export function PreviewWall({ onSelect }: { onSelect: (id: string) => void }) {
         <PreviewCell className="md:col-span-7 xl:col-span-4">
           <DataPreview />
         </PreviewCell>
-        <PreviewCell className="md:col-span-5 xl:col-span-8">
+        <PreviewCell className="md:col-span-12">
           <AudioPreview />
         </PreviewCell>
-      </div>
-      <div className="border-t bg-background p-3">
-        <div className="flex flex-wrap gap-2">
-          {componentItems
-            .filter((item) => item.important)
-            .slice(0, 16)
-            .map((item) => (
-              <Button
-                key={item.id}
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => onSelect(item.id)}
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
-              >
-                {item.label}
-              </Button>
-            ))}
-        </div>
       </div>
     </div>
   );
 }
 
 function PreviewCell({ className, children }: { className?: string; children: ReactNode }) {
-  return (
-    <section className={cn("min-w-0 bg-background p-3 md:p-4", className)}>{children}</section>
-  );
-}
-
-function PreviewLabel({ children }: { children: ReactNode }) {
-  return <p className="mb-3 font-mono text-[11px] text-muted-foreground">{children}</p>;
+  return <section className={cn("min-w-0", className)}>{children}</section>;
 }
 
 function TokenTypeStrip({ onSelect }: { onSelect: (id: string) => void }) {
   return (
     <div className="space-y-4">
-      <PreviewLabel>tokens / type</PreviewLabel>
       <div className="grid grid-cols-3 gap-2">
         {[
           ["paper", "bg-background text-foreground"],
@@ -162,7 +135,6 @@ function TokenTypeStrip({ onSelect }: { onSelect: (id: string) => void }) {
 function ActionPreview() {
   return (
     <div className="space-y-4">
-      <PreviewLabel>buttons / actions</PreviewLabel>
       <div className="flex flex-wrap gap-2">
         <Button>Run checks</Button>
         <Button variant="secondary">Save note</Button>
@@ -201,7 +173,6 @@ function ActionPreview() {
 function NavigationPreview() {
   return (
     <div className="space-y-4">
-      <PreviewLabel>navigation</PreviewLabel>
       <Breadcrumb>
         <BreadcrumbList>
           <BreadcrumbItem>
@@ -236,7 +207,6 @@ function NavigationPreview() {
 function FormPreview() {
   return (
     <div className="space-y-4">
-      <PreviewLabel>forms / fields</PreviewLabel>
       <div className="grid gap-3">
         <Field>
           <FieldLabel htmlFor="catalog-filter">Filter</FieldLabel>
@@ -279,7 +249,6 @@ function MenuOverlayPreview() {
   return (
     <TooltipProvider>
       <div className="space-y-4">
-        <PreviewLabel>menus / overlays</PreviewLabel>
         <div className="flex flex-wrap gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -339,7 +308,6 @@ function MenuOverlayPreview() {
 function DataPreview() {
   return (
     <div className="space-y-4">
-      <PreviewLabel>data</PreviewLabel>
       <Table>
         <TableHeader>
           <TableRow>
@@ -377,7 +345,6 @@ function DataPreview() {
 function AudioPreview() {
   return (
     <div className="space-y-4">
-      <PreviewLabel>audio</PreviewLabel>
       <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_280px]">
         <WaveformDemo />
         <PlayerControlsDemo />

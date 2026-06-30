@@ -229,6 +229,7 @@ import {
   CircleAlert,
   Component,
   Download,
+  ExternalLink,
   Grid2X2,
   Loader2,
   Mail,
@@ -240,20 +241,13 @@ import {
 } from "lucide-react";
 import * as React from "react";
 
-import {
-  type CatalogItem,
-  componentItems,
-  itemFromId,
-  relatedItems,
-  sourceInstruction,
-} from "./catalog-data";
+import { type CatalogItem, componentItems, itemFromId } from "./catalog-data";
 import { CatalogItemIcon } from "./catalog-icons";
 import {
   chartData,
   DemoBoundary,
   renderTinyPreview,
   SpecimenStage,
-  SurfaceHeader,
 } from "./catalog-surface-shared";
 import {
   AudioCompositionDemo,
@@ -267,47 +261,13 @@ import { UtilitiesExamples } from "./utility-examples";
 
 export function FocusedComponentSurface({
   item,
-  onSelect,
 }: {
   item: CatalogItem;
   onSelect: (id: string) => void;
 }) {
-  const related = relatedItems(item);
-
   return (
-    <div className="bg-muted/20">
-      <SurfaceHeader
-        item={item}
-        action={
-          <Code className="max-w-full break-all whitespace-normal text-[11px] opacity-80">
-            {sourceInstruction(item)}
-          </Code>
-        }
-      />
-      <div className="border-t p-3 md:p-4">
-        <div className="grid gap-px bg-border md:grid-cols-2">{renderFocusedExamples(item)}</div>
-      </div>
-      {related.length ? (
-        <footer className="border-t bg-background px-4 py-3">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="font-mono text-[11px] text-muted-foreground">Related</span>
-            <div className="flex flex-wrap gap-1.5">
-              {related.map((relatedItem) => (
-                <Button
-                  key={relatedItem.id}
-                  type="button"
-                  variant="ghost"
-                  size="xs"
-                  className="h-6 px-2 text-[11px] text-muted-foreground hover:text-foreground"
-                  onClick={() => onSelect(relatedItem.id)}
-                >
-                  {relatedItem.label}
-                </Button>
-              ))}
-            </div>
-          </div>
-        </footer>
-      ) : null}
+    <div className="min-h-full bg-background p-4 md:p-6">
+      <div className="grid gap-x-8 gap-y-6 md:grid-cols-2">{renderFocusedExamples(item)}</div>
     </div>
   );
 }
@@ -564,44 +524,47 @@ function ButtonGroupSpecimen() {
 function CardSpecimen() {
   return (
     <>
-      <SpecimenStage title="Default and compact card" className="md:col-span-2">
-        <div className="grid gap-4 lg:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Playback surface</CardTitle>
-              <CardDescription>Bordered panel with action slot.</CardDescription>
-              <CardAction>
-                <Badge>ready</Badge>
-              </CardAction>
-            </CardHeader>
-            <CardContent>
-              <div className="grid min-h-28 place-items-center border bg-muted/30 font-mono text-sm">
-                content
-              </div>
-            </CardContent>
-            <CardFooter className="justify-between gap-2">
-              <span className="font-mono text-xs text-muted-foreground">24px padding</span>
-              <Button size="sm">Open</Button>
-            </CardFooter>
-          </Card>
-          <Card className="gap-4 py-4">
-            <CardHeader className="px-4">
-              <CardTitle className="text-base">Compact review</CardTitle>
-              <CardDescription>Smaller internal rhythm.</CardDescription>
-            </CardHeader>
-            <CardContent className="px-4">
-              <Progress value={68} />
-            </CardContent>
-            <CardFooter className="px-4">
-              <Button variant="outline" size="sm" className="w-full">
-                Continue
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
+      <SpecimenStage title="Default Size" bodyClassName="grid min-h-72 place-items-center p-6">
+        <Card className="w-full max-w-md">
+          <CardHeader>
+            <CardTitle>Playback surface</CardTitle>
+            <CardDescription>Bordered panel with action slot.</CardDescription>
+            <CardAction>
+              <Badge>ready</Badge>
+            </CardAction>
+          </CardHeader>
+          <CardContent>
+            <div className="grid min-h-28 place-items-center border bg-background font-mono text-sm">
+              content
+            </div>
+          </CardContent>
+          <CardFooter className="justify-between gap-2">
+            <span className="font-mono text-xs text-muted-foreground">24px padding</span>
+            <Button size="sm">Open</Button>
+          </CardFooter>
+        </Card>
       </SpecimenStage>
-      <SpecimenStage title="Edge-to-edge media">
-        <Card className="overflow-hidden py-0">
+      <SpecimenStage title="Small Size" bodyClassName="grid min-h-72 place-items-center p-6">
+        <Card className="w-full max-w-md gap-4 py-4">
+          <CardHeader className="px-4">
+            <CardTitle className="text-base">Compact review</CardTitle>
+            <CardDescription>Smaller internal rhythm.</CardDescription>
+          </CardHeader>
+          <CardContent className="px-4">
+            <Progress value={68} />
+          </CardContent>
+          <CardFooter className="px-4">
+            <Button variant="outline" size="sm" className="w-full">
+              Continue
+            </Button>
+          </CardFooter>
+        </Card>
+      </SpecimenStage>
+      <SpecimenStage
+        title="Content Edge to Edge"
+        bodyClassName="grid min-h-72 place-items-center p-6"
+      >
+        <Card className="w-full max-w-md overflow-hidden py-0">
           <div className="grid h-32 place-items-center bg-foreground text-background">
             <p className="font-mono text-sm">media</p>
           </div>
@@ -611,8 +574,29 @@ function CardSpecimen() {
           </CardHeader>
         </Card>
       </SpecimenStage>
-      <SpecimenStage title="Footer actions">
-        <Card>
+      <SpecimenStage title="Custom Spacing" bodyClassName="grid min-h-72 place-items-center p-6">
+        <Card className="w-full max-w-md gap-4 p-4">
+          <div className="flex flex-wrap gap-2">
+            {["16px", "20px", "24px", "32px"].map((space) => (
+              <Badge key={space} variant="outline">
+                {space}
+              </Badge>
+            ))}
+          </div>
+          <CardHeader className="px-0">
+            <CardTitle>Release Health</CardTitle>
+            <CardDescription>Track readiness across launch signals.</CardDescription>
+          </CardHeader>
+          <CardContent className="px-0">
+            <div className="grid grid-cols-[1fr_auto] gap-3 bg-muted/50 p-3">
+              <span className="text-sm text-muted-foreground">Checks passed</span>
+              <span className="font-mono text-sm">24 / 26</span>
+            </div>
+          </CardContent>
+        </Card>
+      </SpecimenStage>
+      <SpecimenStage title="Footer Actions" bodyClassName="grid min-h-72 place-items-center p-6">
+        <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle>Specimen queue</CardTitle>
             <CardDescription>Action rows stay compact.</CardDescription>
@@ -1772,14 +1756,111 @@ function FeedbackExamples({ item }: { item: CatalogItem }) {
 
   if (item.id === "badge") {
     return (
-      <SpecimenStage title="Badge variants" className="md:col-span-2">
-        <div className="flex flex-wrap gap-2">
-          <Badge>Default</Badge>
-          <Badge variant="secondary">Secondary</Badge>
-          <Badge variant="outline">Outline</Badge>
-          <Badge variant="destructive">Destructive</Badge>
-        </div>
-      </SpecimenStage>
+      <>
+        <SpecimenStage title="Variants" bodyClassName="grid min-h-36 place-items-center">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge>Default</Badge>
+            <Badge variant="secondary">Secondary</Badge>
+            <Badge variant="destructive">Destructive</Badge>
+            <Badge variant="outline">Outline</Badge>
+            <Badge variant="ghost">Ghost</Badge>
+            <Badge variant="link">Link</Badge>
+          </div>
+        </SpecimenStage>
+        <SpecimenStage title="Icon Left" bodyClassName="grid min-h-36 place-items-center">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge>
+              <Check className="size-3" />
+              Default
+            </Badge>
+            <Badge variant="secondary">
+              <Check className="size-3" />
+              Secondary
+            </Badge>
+            <Badge variant="destructive">
+              <CircleAlert className="size-3" />
+              Destructive
+            </Badge>
+            <Badge variant="outline">
+              <Check className="size-3" />
+              Outline
+            </Badge>
+          </div>
+        </SpecimenStage>
+        <SpecimenStage title="Icon Right" bodyClassName="grid min-h-36 place-items-center">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge>
+              Default
+              <Check className="size-3" />
+            </Badge>
+            <Badge variant="secondary">
+              Secondary
+              <Check className="size-3" />
+            </Badge>
+            <Badge variant="destructive">
+              Destructive
+              <X className="size-3" />
+            </Badge>
+            <Badge variant="outline">
+              Outline
+              <Check className="size-3" />
+            </Badge>
+          </div>
+        </SpecimenStage>
+        <SpecimenStage title="With Spinner" bodyClassName="grid min-h-36 place-items-center">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge>
+              <Loader2 className="size-3 animate-spin" />
+              Default
+            </Badge>
+            <Badge variant="secondary">
+              <Loader2 className="size-3 animate-spin" />
+              Secondary
+            </Badge>
+            <Badge variant="destructive">
+              <Loader2 className="size-3 animate-spin" />
+              Destructive
+            </Badge>
+            <Badge variant="outline">
+              <Loader2 className="size-3 animate-spin" />
+              Outline
+            </Badge>
+          </div>
+        </SpecimenStage>
+        <SpecimenStage title="asChild" bodyClassName="grid min-h-36 place-items-center">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge asChild>
+              <a href="#badge-link">
+                Default
+                <ExternalLink className="size-3" />
+              </a>
+            </Badge>
+            <Badge asChild variant="secondary">
+              <a href="#badge-link-secondary">
+                Secondary
+                <ExternalLink className="size-3" />
+              </a>
+            </Badge>
+            <Badge asChild variant="destructive">
+              <a href="#badge-link-destructive">
+                Destructive
+                <ExternalLink className="size-3" />
+              </a>
+            </Badge>
+            <Badge asChild variant="outline">
+              <a href="#badge-link-outline">
+                Outline
+                <ExternalLink className="size-3" />
+              </a>
+            </Badge>
+          </div>
+        </SpecimenStage>
+        <SpecimenStage title="Long Text" bodyClassName="grid min-h-36 place-items-center">
+          <Badge variant="secondary" className="max-w-full whitespace-normal text-left">
+            A badge with a lot of text to see how it wraps
+          </Badge>
+        </SpecimenStage>
+      </>
     );
   }
 

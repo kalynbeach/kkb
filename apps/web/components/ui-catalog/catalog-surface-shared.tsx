@@ -37,22 +37,24 @@ export function SpecimenStage({
   title,
   description,
   className,
+  bodyClassName,
   children,
 }: {
   title: string;
   description?: string;
   className?: string;
+  bodyClassName?: string;
   children: React.ReactNode;
 }) {
   return (
-    <section className={cn("min-w-0 border bg-background", className)}>
-      <header className="border-b px-3 py-2">
-        <h3 className="font-mono text-sm font-semibold">{title}</h3>
+    <section className={cn("min-w-0 bg-background", className)}>
+      <header className="mb-2 px-1">
+        <h3 className="font-mono text-xs text-muted-foreground">{title}</h3>
         {description ? (
-          <p className="mt-1 text-sm leading-5 text-muted-foreground">{description}</p>
+          <p className="mt-1 max-w-prose text-sm leading-5 text-muted-foreground">{description}</p>
         ) : null}
       </header>
-      <div className="p-4">{children}</div>
+      <div className={cn("min-h-36 bg-muted/25 p-4", bodyClassName)}>{children}</div>
     </section>
   );
 }

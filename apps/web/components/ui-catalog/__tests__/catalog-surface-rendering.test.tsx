@@ -45,9 +45,19 @@ describe("ui catalog focused surfaces", () => {
       "Action row",
     ]);
     expect(specimenTitlesFor(itemFromId("card"))).toEqual([
-      "Default and compact card",
-      "Edge-to-edge media",
-      "Footer actions",
+      "Default Size",
+      "Small Size",
+      "Content Edge to Edge",
+      "Custom Spacing",
+      "Footer Actions",
+    ]);
+    expect(specimenTitlesFor(itemFromId("badge"))).toEqual([
+      "Variants",
+      "Icon Left",
+      "Icon Right",
+      "With Spinner",
+      "asChild",
+      "Long Text",
     ]);
     expect(specimenTitlesFor(itemFromId("input"))).toEqual([
       "Text field states",

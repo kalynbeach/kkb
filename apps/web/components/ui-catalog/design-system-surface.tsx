@@ -2,18 +2,16 @@
 
 import { cn } from "@kkb/ui/lib/utils";
 
-import { itemFromId } from "./catalog-data";
-import { SpecimenStage, SurfaceHeader } from "./catalog-surface-shared";
+import { SpecimenStage } from "./catalog-surface-shared";
 
 export function DesignSystemSurface() {
   return (
-    <div>
-      <SurfaceHeader item={itemFromId("design-system")} />
-      <div className="grid gap-px border-t bg-border xl:grid-cols-[minmax(0,1fr)_320px]">
-        <div className="grid gap-px bg-border md:grid-cols-2">
-          <DesignSystemCards stageClassName="border-0" />
+    <div className="min-h-full bg-background p-4 md:p-6">
+      <div className="grid gap-x-8 gap-y-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="grid gap-x-8 gap-y-6 md:grid-cols-2">
+          <DesignSystemCards />
         </div>
-        <div className="grid content-start gap-px bg-border">
+        <div className="grid content-start gap-6">
           <TokenPanel
             title="Implementation"
             rows={[
@@ -135,9 +133,11 @@ function TokenPanel({
   rows: readonly (readonly [string, string])[];
 }) {
   return (
-    <div className="bg-background p-4">
-      <p className="font-mono text-sm font-semibold">{title}</p>
-      <div className="mt-3 divide-y">
+    <section className="min-w-0 bg-background">
+      <header className="mb-2 px-1">
+        <h3 className="font-mono text-xs text-muted-foreground">{title}</h3>
+      </header>
+      <div className="divide-y bg-muted/25 p-4">
         {rows.map(([label, value]) => (
           <div key={label} className="grid gap-2 py-2 text-sm sm:grid-cols-[112px_minmax(0,1fr)]">
             <span className="font-mono text-xs text-muted-foreground">{label}</span>
@@ -145,6 +145,6 @@ function TokenPanel({
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

@@ -123,13 +123,8 @@ export function CatalogWorkbench() {
 
       <div className="grid min-h-0 flex-1 overflow-hidden lg:grid-cols-[240px_minmax(0,1fr)]">
         <CatalogRail selectedItemId={selectedItem.id} onSelect={selectItem} />
-        <section
-          ref={contentRef}
-          className="min-w-0 overflow-y-auto bg-muted/20 p-2 md:p-3 lg:border-l"
-        >
-          <div className="min-h-full overflow-hidden rounded-md border bg-background shadow-none">
-            <CatalogSurface selectedItem={selectedItem} onSelect={selectItem} />
-          </div>
+        <section ref={contentRef} className="min-w-0 overflow-y-auto bg-background lg:border-l">
+          <CatalogSurface selectedItem={selectedItem} onSelect={selectItem} />
         </section>
       </div>
     </main>
