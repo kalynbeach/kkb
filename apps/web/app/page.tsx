@@ -13,7 +13,7 @@ export default function Home() {
     <main className="flex min-h-svh items-center justify-center px-4 py-8 sm:px-8">
       <div className="grid w-full max-w-3xl gap-5">
         <header className="border-b border-foreground pb-3">
-          <h1 className="font-mono text-2xl font-bold tracking-tight">KKB</h1>
+          <h1 className="font-serif text-2xl font-bold">KKB</h1>
         </header>
 
         <nav aria-label="KKB routes">

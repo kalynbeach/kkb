@@ -7,7 +7,8 @@
 
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-eb-garamond), Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-serif: var(--font-mekzantine, var(--font-eb-garamond)), ui-serif, serif;
+  --font-serif-secondary: var(--font-eb-garamond), ui-serif, serif;
   --font-mono: var(--font-tx-02), ui-monospace, monospace;
   --font-mono-secondary: var(--font-departure-mono), ui-monospace, monospace;
   --radius-sm: calc(var(--radius) * 0.6);

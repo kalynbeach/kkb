@@ -76,7 +76,12 @@ typography:
     fontWeight: 500
     lineHeight: 16px
   body-serif:
-    fontFamily: EB Garamond
+    fontFamily: Mekzantine
+    fontSize: 18px
+    fontWeight: 400
+    lineHeight: 28px
+  body-serif-secondary:
+    fontFamily: EB Garamond, ui-serif, serif
     fontSize: 18px
     fontWeight: 400
     lineHeight: 28px
@@ -174,11 +179,13 @@ Dark mode mirrors the same semantic roles: backgrounds become near-black, cards 
 
 ## Typography
 
-The system uses four type roles: **Geist** for readable continuous sans-serif text, **EB Garamond** for serif text, **TX-02** for standard monospace UI, and **Departure Mono** for selective lo-fi technical accents.
+The system uses five type roles: **Geist** for readable continuous sans-serif text, **Mekzantine** for primary serif and display-serif moments, **EB Garamond** for secondary editorial serif text, **TX-02** for standard monospace UI, and **Departure Mono** for selective lo-fi technical accents.
 
 Use **Geist** through `--font-sans` for body copy, docs prose, descriptions, paragraphs, and other text that benefits from a neutral sans-serif reading rhythm.
 
-Use **EB Garamond** through `--font-serif` for serif text. It is the default KKB serif face, but it should be applied deliberately rather than replacing the sans-serif product baseline.
+Use **Mekzantine** through `--font-serif` for primary serif text. It is the default KKB serif face for brand marks, display-serif accents, and compact editorial moments. Apply it deliberately; it should add studio character without replacing the sans-serif product baseline.
+
+Use **EB Garamond** through `--font-serif-secondary` for longer secondary editorial serif text where a more traditional reading rhythm is useful. It remains available, but it is no longer the primary serif token.
 
 Use **TX-02** through `--font-mono` for headings, labels, code, technical metadata, timestamps, audio telemetry, and compact hardware-style UI. The checked-in font file is `TX-02-VF.woff2`, but components should reference the `font-mono` token rather than hard-coding the file name.
 
@@ -190,7 +197,7 @@ Keep type compact but readable:
 
 - Headlines use TX-02, semibold weight, and slight negative tracking for a precise technical voice.
 - Body text uses Geist at normal weight with comfortable line height.
-- Serif text uses EB Garamond when a more editorial or literary tone is explicitly desired.
+- Serif text uses Mekzantine for primary marks and compact editorial accents; EB Garamond remains available through `--font-serif-secondary` for longer secondary editorial text.
 - Labels use TX-02 at medium weight; keep them concise and sentence case unless the component is explicitly instrument-like.
 - Departure Mono may use compact sizing and tighter layouts for pixel-forward accents, but avoid using it for long-form reading or dense code.
 - Audio labels may use uppercase, small type, and wider tracking for a control-panel feel.
@@ -258,7 +265,7 @@ Keep audio-specific color and depth decisions inside `packages/ui` audio present
 - Do keep DESIGN.md frontmatter tokens in hex so Google DESIGN.md consumers can parse them.
 - Do pair filled colors with their matching foreground tokens, especially `primary` with `primary-foreground`.
 - Do use the 4px spacing rhythm for component dimensions and layout gaps.
-- Do use Geist for prose and body copy; use EB Garamond for deliberate serif text; use TX-02 for headings, labels, code, telemetry, and audio metadata; use Departure Mono only as a selective secondary monospace accent.
+- Do use Geist for prose and body copy; use Mekzantine for primary serif marks and display-serif accents; use EB Garamond through `--font-serif-secondary` for secondary editorial serif text; use TX-02 for headings, labels, code, telemetry, and audio metadata; use Departure Mono only as a selective secondary monospace accent.
 - Don't reintroduce Geist Mono; it is not part of the KKB font system.
 - Don't use the audio blue accent as a general-purpose brand color.
 - Don't add shadows where borders, spacing, or tonal contrast are enough.

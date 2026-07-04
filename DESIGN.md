@@ -103,7 +103,12 @@ typography:
     fontWeight: 500
     lineHeight: "16px"
   body-serif:
-    fontFamily: "var(--font-eb-garamond), Georgia, Cambria, 'Times New Roman', Times, serif"
+    fontFamily: "var(--font-mekzantine), ui-serif, serif"
+    fontSize: "18px"
+    fontWeight: 400
+    lineHeight: "28px"
+  body-serif-secondary:
+    fontFamily: "var(--font-eb-garamond), ui-serif, serif"
     fontSize: "18px"
     fontWeight: 400
     lineHeight: "28px"
@@ -200,6 +205,7 @@ KKB's product foundation is hard-edged and technical. Most app surfaces should b
 - shadcn/ui-compatible semantic tokens remain present for compatibility, while personal studio names (`bench-ink`, `paper-white`, `scope-blue`) carry the design language.
 - TX-02 carries headings, labels, code, telemetry, and compact hardware-style UI.
 - Geist carries readable prose and body copy.
+- Mekzantine carries the primary serif voice for brand marks and compact editorial accents; EB Garamond remains secondary.
 - Cool audio blues are scoped to audio and waveform surfaces.
 - P31 phosphor greens are scoped to oscilloscope traces, glow, and shader-derived visualizations.
 - Edges are sharp by default; roundness must be earned.
@@ -240,11 +246,13 @@ The shared UI palette in `packages/ui/src/styles/globals.css` is neutral-first a
 
 ## 3. Typography
 
-The system uses four type roles: **Geist** for readable continuous sans-serif text, **EB Garamond** for deliberate serif text, **TX-02** for standard monospace UI, and **Departure Mono** for selective lo-fi technical accents.
+The system uses five type roles: **Geist** for readable continuous sans-serif text, **Mekzantine** for deliberate primary serif and display-serif moments, **EB Garamond** for secondary editorial serif text, **TX-02** for standard monospace UI, and **Departure Mono** for selective lo-fi technical accents.
 
 Use **Geist** through `--font-sans` for body copy, docs prose, descriptions, paragraphs, and other text that benefits from a neutral sans-serif reading rhythm.
 
-Use **EB Garamond** through `--font-serif` for serif text. It is the default KKB serif face, but it should be applied deliberately rather than replacing the sans-serif product baseline.
+Use **Mekzantine** through `--font-serif` for primary serif text. It is the default KKB serif face for brand marks, display-serif accents, and compact editorial moments. Apply it deliberately; it should add studio character without replacing the sans-serif product baseline.
+
+Use **EB Garamond** through `--font-serif-secondary` for longer secondary editorial serif text where a more traditional reading rhythm is useful. It remains available, but it is no longer the primary serif token.
 
 Use **TX-02** through `--font-mono` for headings, labels, code, technical metadata, timestamps, audio telemetry, oscilloscope readouts, and compact hardware-style UI. The checked-in font file is `TX-02-VF.woff2`, but components should reference the `font-mono` token rather than hard-coding the file name.
 
@@ -260,7 +268,8 @@ Geist Mono is intentionally not part of the KKB type system.
 - **Body LG / MD / SM** (Geist, 400, 18/16/14px): Prose, descriptions, docs previews, field help, and explanatory UI copy.
 - **Label MD / SM** (TX-02, 500, 14/12px): Buttons, tabs, navigation labels, controls, and terse metadata.
 - **Code SM** (TX-02, 500, 12px / 16px): Inline technical references and compact code-adjacent labels.
-- **Body Serif** (EB Garamond, 18px / 28px): Intentional editorial notes, essays, or long-form design writing.
+- **Body Serif** (Mekzantine, 18px / 28px): Primary serif marks, compact editorial notes, and display-serif accents.
+- **Body Serif Secondary** (EB Garamond, 18px / 28px): Longer editorial notes, essays, or secondary long-form design writing.
 - **Accent Mono** (Departure Mono, 12px / 16px): Pixel-forward technical accents only.
 - **Audio Label** (TX-02, 10px / 12px, 0.08em): Uppercase audio and instrument labels.
 
@@ -340,7 +349,7 @@ Oscilloscope surfaces use P31 phosphor greens from the WebGPU shaders: trace gre
 - **Do** treat `packages/ui/src/styles/globals.css` as the live token source of truth.
 - **Do** pair filled colors with matching foreground tokens, especially `primary` with `primary-foreground`.
 - **Do** use the 4px spacing rhythm for component dimensions and layout gaps.
-- **Do** use Geist for prose and body copy; use EB Garamond for deliberate serif text; use TX-02 for headings, labels, code, telemetry, audio metadata, and oscilloscope readouts; use Departure Mono only as a selective secondary monospace accent.
+- **Do** use Geist for prose and body copy; use Mekzantine for primary serif marks and display-serif accents; use EB Garamond through `--font-serif-secondary` for secondary editorial serif text; use TX-02 for headings, labels, code, telemetry, audio metadata, and oscilloscope readouts; use Departure Mono only as a selective secondary monospace accent.
 - **Do** keep roundness low: 1-4px for most controls and panels, 6px only for larger containers, full radius only for badges/avatars/sliders/switches.
 - **Do** use audio blue for audio and waveform state, and P31 green for oscilloscope trace/glow state.
 

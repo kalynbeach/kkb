@@ -64,6 +64,8 @@
       --shadow-low: none;
       --shadow-audio: 0 8px 32px oklch(0 0 0 / 0.5), inset 0 1px 0 oklch(1 0 0 / 0.3);
       --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+      --font-serif: "Mekzantine", ui-serif, serif;
+      --font-serif-secondary: "EB Garamond", ui-serif, serif;
       --font-mono: "TX-02", ui-monospace, monospace;
       --font-mono-secondary: "Departure Mono", ui-monospace, monospace;
     }
@@ -793,7 +795,7 @@
           </article>
           <article class="compact-card">
             <h3>Typography restored</h3>
-            <p>TX-02 carries headings, labels, code, telemetry, and hardware-style UI. Geist handles prose; Departure Mono and EB Garamond stay selective.</p>
+            <p>TX-02 carries headings, labels, code, telemetry, and hardware-style UI. Geist handles prose; Mekzantine carries the primary serif voice, with EB Garamond and Departure Mono kept selective.</p>
           </article>
         </div>
         <div class="source-note" style="margin-top: 12px;">
@@ -843,12 +845,14 @@
       <section class="section" id="type">
         <div class="section-head">
           <h2>Typography roles</h2>
-          <p>TX-02 is the technical voice for headings, labels, code, telemetry, and instrument UI. Geist handles readable body copy.</p>
+          <p>TX-02 is the technical voice for headings, labels, code, telemetry, and instrument UI. Geist handles readable body copy. Mekzantine is the primary serif voice; EB Garamond remains secondary.</p>
         </div>
         <div class="type-stack">
           <div class="type-row"><div class="type-role">headline-lg</div><div class="type-sample display" style="font-family: var(--font-mono); font-size: 32px; line-height: 40px; letter-spacing: -0.02em;">Catalog heading</div><div class="type-meta">TX-02 / 600 / 32px</div></div>
           <div class="type-row"><div class="type-role">headline-md</div><div class="type-sample title" style="font-family: var(--font-mono); font-size: 24px; line-height: 32px;">Panel title</div><div class="type-meta">TX-02 / 600 / 24px</div></div>
-          <div class="type-row"><div class="type-role">body</div><div class="type-sample body">Readable explanatory copy for demos, docs previews, and control help.</div><div class="type-meta">400 / 0.875rem / 1.5</div></div>
+          <div class="type-row"><div class="type-role">body</div><div class="type-sample body">Readable explanatory copy for demos, docs previews, and control help.</div><div class="type-meta">Geist / 400 / 0.875rem</div></div>
+          <div class="type-row"><div class="type-role">serif</div><div class="type-sample" style="font-family: var(--font-serif); font-size: 24px; line-height: 32px;">KKB studio mark</div><div class="type-meta">Mekzantine / primary serif</div></div>
+          <div class="type-row"><div class="type-role">serif-secondary</div><div class="type-sample" style="font-family: var(--font-serif-secondary); font-size: 18px; line-height: 28px;">Secondary editorial note with a quieter reading texture.</div><div class="type-meta">EB Garamond / secondary serif</div></div>
           <div class="type-row"><div class="type-role">label-md</div><div class="type-sample label" style="font-family: var(--font-mono);">Button and field label</div><div class="type-meta">TX-02 / 500 / 14px</div></div>
           <div class="type-row"><div class="type-role">mono</div><div class="type-sample mono">oscilloscope.buffer.ms</div><div class="type-meta">TX-02 / 0.75rem</div></div>
         </div>

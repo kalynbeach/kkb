@@ -19,6 +19,11 @@ const departureMono = localFont({
   variable: "--font-departure-mono",
 });
 
+const mekzantine = localFont({
+  src: "./fonts/MEKZANTINE-Regular.woff2",
+  variable: "--font-mekzantine",
+});
+
 const ebGaramond = EB_Garamond({
   subsets: ["latin"],
   variable: "--font-eb-garamond",
@@ -37,7 +42,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${tx02.variable} ${departureMono.variable} ${ebGaramond.variable}`}
+        className={`${geistSans.variable} ${tx02.variable} ${departureMono.variable} ${mekzantine.variable} ${ebGaramond.variable}`}
       >
         <ThemeProvider
           attribute="class"
