@@ -263,7 +263,6 @@ export function FocusedComponentSurface({
   item,
 }: {
   item: CatalogItem;
-  onSelect: (id: string) => void;
 }) {
   return (
     <div className="min-h-full bg-background p-4 md:p-6">

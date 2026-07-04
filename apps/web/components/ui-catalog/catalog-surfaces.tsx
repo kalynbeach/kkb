@@ -25,5 +25,5 @@ export function CatalogSurface({
     return <CategorySurface item={selectedItem} />;
   }
 
-  return <FocusedComponentSurface item={selectedItem} onSelect={onSelect} />;
+  return <FocusedComponentSurface item={selectedItem} />;
 }
