@@ -94,6 +94,7 @@ export function CatalogRail({
                       </p>
                       <button
                         type="button"
+                        aria-label={`Show all ${category} items`}
                         onClick={() => onSelect(categoryId(category))}
                         className={cn(
                           "font-mono text-[10px] text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",

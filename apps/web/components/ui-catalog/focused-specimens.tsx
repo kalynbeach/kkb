@@ -259,11 +259,7 @@ import { CarouselDemo } from "./demos/carousel-demo";
 import { CalendarDemo } from "./demos/select-calendar-demo";
 import { UtilitiesExamples } from "./utility-examples";
 
-export function FocusedComponentSurface({
-  item,
-}: {
-  item: CatalogItem;
-}) {
+export function FocusedComponentSurface({ item }: { item: CatalogItem }) {
   return (
     <div className="min-h-full bg-background p-4 md:p-6">
       <div className="grid gap-x-8 gap-y-6 md:grid-cols-2">{renderFocusedExamples(item)}</div>
@@ -2100,8 +2096,10 @@ function DataExamples({ item }: { item: CatalogItem }) {
           aria-label="Chart specimen"
         >
           {chartData.map((bar) => (
-            <div key={bar.month} className="flex flex-1 flex-col items-center gap-2">
-              <div className="w-full bg-foreground" style={{ height: `${bar.value}%` }} />
+            <div key={bar.month} className="flex h-full flex-1 flex-col justify-end gap-2">
+              <div className="flex min-h-0 flex-1 items-end self-stretch">
+                <div className="w-full bg-foreground" style={{ height: `${bar.value}%` }} />
+              </div>
               <span className="font-mono text-xs text-muted-foreground">{bar.month}</span>
             </div>
           ))}
@@ -2168,8 +2166,10 @@ function DataExamples({ item }: { item: CatalogItem }) {
             aria-label="Chart specimen"
           >
             {chartData.map((bar) => (
-              <div key={bar.month} className="flex flex-1 flex-col items-center gap-2">
-                <div className="w-full bg-foreground" style={{ height: `${bar.value}%` }} />
+              <div key={bar.month} className="flex h-full flex-1 flex-col justify-end gap-2">
+                <div className="flex min-h-0 flex-1 items-end self-stretch">
+                  <div className="w-full bg-foreground" style={{ height: `${bar.value}%` }} />
+                </div>
                 <span className="font-mono text-xs text-muted-foreground">{bar.month}</span>
               </div>
             ))}
@@ -2211,8 +2211,10 @@ function DataBench() {
         </KbdGroup>
         <div className="flex h-24 items-end gap-1 border bg-muted/20 p-3" aria-label="Chart">
           {chartData.map((bar) => (
-            <div key={bar.month} className="flex flex-1 flex-col items-center gap-1">
-              <div className="w-full bg-foreground" style={{ height: `${bar.value}%` }} />
+            <div key={bar.month} className="flex h-full flex-1 flex-col justify-end gap-1">
+              <div className="flex min-h-0 flex-1 items-end self-stretch">
+                <div className="w-full bg-foreground" style={{ height: `${bar.value}%` }} />
+              </div>
               <span className="font-mono text-[10px] text-muted-foreground">{bar.month}</span>
             </div>
           ))}

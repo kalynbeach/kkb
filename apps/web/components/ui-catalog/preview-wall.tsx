@@ -327,8 +327,10 @@ function DataPreview() {
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
         <div className="flex h-24 items-end gap-1 border bg-muted/20 p-3" aria-label="Chart">
           {chartData.map((bar) => (
-            <div key={bar.month} className="flex flex-1 flex-col items-center gap-1">
-              <div className="w-full bg-foreground" style={{ height: `${bar.value}%` }} />
+            <div key={bar.month} className="flex h-full flex-1 flex-col justify-end gap-1">
+              <div className="flex min-h-0 flex-1 items-end self-stretch">
+                <div className="w-full bg-foreground" style={{ height: `${bar.value}%` }} />
+              </div>
               <span className="font-mono text-[10px] text-muted-foreground">{bar.month}</span>
             </div>
           ))}
