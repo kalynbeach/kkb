@@ -1,6 +1,5 @@
 import { AspectRatio } from "@kkb/ui/components/aspect-ratio";
 import { Badge } from "@kkb/ui/components/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@kkb/ui/components/card";
 import {
   Empty,
   EmptyDescription,
@@ -40,7 +39,7 @@ const recentLayoutTokens = [
   },
   {
     name: "Rail width",
-    value: "220px",
+    value: "240px",
     detail: "Matches the desktop navigation column in the catalog shell.",
   },
 ] as const;
@@ -53,38 +52,42 @@ export function LayoutSection() {
         description="Foundational surface styling plus a fixed-ratio media frame."
         className="md:col-span-2"
       >
-        <div className="grid gap-4 p-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-          <Card className="gap-4 border-dashed bg-muted/20 py-0">
-            <CardHeader className="border-b py-5">
-              <CardTitle>Release surface</CardTitle>
-              <CardDescription>
+        <div className="grid gap-4 p-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+          <div className="flex min-w-0 flex-col gap-4 rounded-md bg-muted/20 p-5">
+            <div className="space-y-1">
+              <p className="font-mono text-base font-semibold tracking-[-0.01em]">
+                Release surface
+              </p>
+              <p className="text-sm leading-6 text-muted-foreground">
                 Compact status panel using the base Card primitives directly.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid gap-3 py-0 pb-6">
-              <div className="flex items-center justify-between rounded-lg border bg-background px-3 py-2">
-                <span className="text-sm font-medium">ui-catalog</span>
+              </p>
+            </div>
+            <div className="divide-y rounded-md border bg-background">
+              <div className="flex items-center justify-between gap-3 px-3 py-2">
+                <span className="min-w-0 truncate text-sm font-medium">ui-catalog</span>
                 <Badge variant="outline">staged</Badge>
               </div>
-              <div className="flex items-center justify-between rounded-lg border bg-background px-3 py-2">
-                <span className="text-sm font-medium">section files</span>
-                <span className="font-mono text-xs text-muted-foreground">4 added</span>
+              <div className="flex items-center justify-between gap-3 px-3 py-2">
+                <span className="min-w-0 truncate text-sm font-medium">section files</span>
+                <span className="shrink-0 font-mono text-xs text-muted-foreground">4 added</span>
               </div>
-              <div className="flex items-center justify-between rounded-lg border bg-background px-3 py-2">
-                <span className="text-sm font-medium">status</span>
+              <div className="flex items-center justify-between gap-3 px-3 py-2">
+                <span className="min-w-0 truncate text-sm font-medium">status</span>
                 <Badge>ready</Badge>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
           <AspectRatio ratio={16 / 10}>
-            <div className="flex size-full flex-col justify-between rounded-xl border bg-[linear-gradient(140deg,oklch(0.97_0_0)_0%,oklch(0.93_0.01_260)_100%)] p-5 dark:bg-[linear-gradient(140deg,oklch(0.23_0.01_260)_0%,oklch(0.18_0.02_250)_100%)]">
-              <div className="flex items-center justify-between text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            <div className="flex size-full flex-col justify-between rounded-md border bg-muted/40 p-5">
+              <div className="flex items-center justify-between gap-3 font-mono text-xs text-muted-foreground">
                 <span>media frame</span>
                 <span>16:10</span>
               </div>
               <div className="space-y-2">
-                <p className="text-lg font-semibold tracking-tight">Aspect-ratio shell</p>
+                <p className="font-mono text-lg font-semibold tracking-[-0.01em]">
+                  Aspect-ratio shell
+                </p>
                 <p className="max-w-xs text-sm leading-6 text-muted-foreground">
                   A fixed canvas for screenshots, artwork, or embedded visual demos.
                 </p>
@@ -99,7 +102,7 @@ export function LayoutSection() {
         description="List rows, separators, and compact metadata actions for stacked content."
       >
         <div className="p-4">
-          <ItemGroup className="rounded-xl border">
+          <ItemGroup className="rounded-md border-border/80">
             <Item variant="muted" size="sm">
               <ItemMedia variant="icon">
                 <Layers3 className="size-4" />
@@ -153,16 +156,18 @@ export function LayoutSection() {
         description="Dense, readable metadata lists inside constrained surfaces."
       >
         <div className="p-4">
-          <ScrollArea className="h-52 rounded-xl border">
+          <ScrollArea className="h-52 rounded-md border-border/80 bg-muted/20">
             <div className="space-y-4 p-4">
               {recentLayoutTokens.map((token, index) => (
                 <div key={token.name} className="space-y-4">
                   <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1">
+                    <div className="min-w-0 space-y-1">
                       <p className="text-sm font-medium">{token.name}</p>
                       <p className="text-sm leading-6 text-muted-foreground">{token.detail}</p>
                     </div>
-                    <span className="font-mono text-xs text-muted-foreground">{token.value}</span>
+                    <span className="shrink-0 font-mono text-xs text-muted-foreground">
+                      {token.value}
+                    </span>
                   </div>
                   {index < recentLayoutTokens.length - 1 ? <Separator /> : null}
                 </div>
@@ -183,8 +188,8 @@ export function LayoutSection() {
         title="Empty States"
         description="Roomy fallback presentation with icon media and balanced copy."
       >
-        <div className="flex h-full items-center p-6">
-          <Empty className="min-h-52 rounded-xl border">
+        <div className="flex h-full items-center p-5">
+          <Empty className="min-h-52 rounded-md border-dashed bg-muted/20">
             <EmptyHeader>
               <EmptyMedia variant="icon">
                 <ScrollText className="size-5" />

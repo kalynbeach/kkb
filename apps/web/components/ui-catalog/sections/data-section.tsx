@@ -31,7 +31,7 @@ export function DataSection() {
         description="Structured comparison rows for compact release and primitive summaries."
       >
         <div className="p-6">
-          <div className="rounded-xl border">
+          <div className="overflow-hidden rounded-md bg-muted/20">
             <Table>
               <TableCaption>Representative data-display coverage for issue #19.</TableCaption>
               <TableHeader>
@@ -64,7 +64,7 @@ export function DataSection() {
             Use <Code>server-owned sections</Code> and <Code>explicit client demos</Code> to keep
             hydration narrow.
           </p>
-          <pre className="overflow-x-auto rounded-xl border bg-muted/20 p-4 text-sm leading-6">
+          <pre className="overflow-x-auto rounded-md bg-muted/20 p-4 text-sm leading-6">
             <code>{codeSample}</code>
           </pre>
         </div>
@@ -75,15 +75,15 @@ export function DataSection() {
         description="Representative key patterns for command-style UIs without implying live route wiring."
       >
         <div className="space-y-4 p-6">
-          <div className="flex items-center justify-between rounded-xl border bg-muted/20 px-4 py-3">
-            <span className="text-sm font-medium">Command palette pattern</span>
+          <div className="flex items-center justify-between gap-4 rounded-md bg-muted/20 px-4 py-3">
+            <span className="min-w-0 text-sm font-medium">Command palette pattern</span>
             <KbdGroup>
               <Kbd>⌘</Kbd>
               <Kbd>K</Kbd>
             </KbdGroup>
           </div>
-          <div className="flex items-center justify-between rounded-xl border bg-muted/20 px-4 py-3">
-            <span className="text-sm font-medium">Section jump pattern</span>
+          <div className="flex items-center justify-between gap-4 rounded-md bg-muted/20 px-4 py-3">
+            <span className="min-w-0 text-sm font-medium">Section jump pattern</span>
             <KbdGroup>
               <Kbd>G</Kbd>
               <Kbd>M</Kbd>

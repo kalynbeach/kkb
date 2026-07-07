@@ -1,0 +1,328 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-18T00:00:00.000Z",
+  "title": "Design System: KKB",
+  "extensions": {
+    "colorMeta": {
+      "background": {
+        "role": "neutral",
+        "displayName": "Background",
+        "canonical": "oklch(1 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.25 0 0)",
+          "oklch(0.37 0 0)",
+          "oklch(0.50 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.76 0 0)",
+          "oklch(0.89 0 0)",
+          "oklch(1 0 0)"
+        ]
+      },
+      "foreground": {
+        "role": "neutral",
+        "displayName": "Foreground",
+        "canonical": "oklch(0.145 0 0)",
+        "tonalRamp": [
+          "oklch(0.145 0 0)",
+          "oklch(0.24 0 0)",
+          "oklch(0.35 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.61 0 0)",
+          "oklch(0.74 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.97 0 0)"
+        ]
+      },
+      "primary": {
+        "role": "primary",
+        "displayName": "Primary",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.205 0 0)",
+          "oklch(0.32 0 0)",
+          "oklch(0.45 0 0)",
+          "oklch(0.58 0 0)",
+          "oklch(0.72 0 0)",
+          "oklch(0.86 0 0)",
+          "oklch(0.985 0 0)"
+        ]
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Border",
+        "canonical": "oklch(0.922 0 0)",
+        "tonalRamp": [
+          "oklch(0.18 0 0)",
+          "oklch(0.30 0 0)",
+          "oklch(0.43 0 0)",
+          "oklch(0.56 0 0)",
+          "oklch(0.69 0 0)",
+          "oklch(0.82 0 0)",
+          "oklch(0.922 0 0)",
+          "oklch(0.98 0 0)"
+        ]
+      },
+      "audio-accent": {
+        "role": "secondary",
+        "displayName": "Audio Accent",
+        "canonical": "oklch(0.768 0.122 252.001)",
+        "tonalRamp": [
+          "oklch(0.18 0.122 252.001)",
+          "oklch(0.28 0.122 252.001)",
+          "oklch(0.40 0.122 252.001)",
+          "oklch(0.52 0.122 252.001)",
+          "oklch(0.64 0.122 252.001)",
+          "oklch(0.768 0.122 252.001)",
+          "oklch(0.86 0.08 252.001)",
+          "oklch(0.95 0.04 252.001)"
+        ]
+      },
+      "oscilloscope-trace": {
+        "role": "tertiary",
+        "displayName": "Oscilloscope Trace",
+        "canonical": "color(srgb 0.03 0.78 0.2)",
+        "tonalRamp": [
+          "color(srgb 0.004 0.08 0.018)",
+          "color(srgb 0.02 0.20 0.06)",
+          "color(srgb 0.03 0.36 0.1)",
+          "color(srgb 0.03 0.52 0.15)",
+          "color(srgb 0.03 0.78 0.2)",
+          "color(srgb 0.34 0.9 0.42)",
+          "color(srgb 0.74 1 0.71)",
+          "color(srgb 0.93 1 0.9)"
+        ]
+      },
+      "paper-white": {
+        "role": "neutral",
+        "displayName": "Paper White",
+        "canonical": "oklch(1 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.25 0 0)",
+          "oklch(0.37 0 0)",
+          "oklch(0.50 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.76 0 0)",
+          "oklch(0.89 0 0)",
+          "oklch(1 0 0)"
+        ]
+      },
+      "bench-ink": {
+        "role": "neutral",
+        "displayName": "Bench Ink",
+        "canonical": "oklch(0.145 0 0)",
+        "tonalRamp": [
+          "oklch(0.145 0 0)",
+          "oklch(0.24 0 0)",
+          "oklch(0.35 0 0)",
+          "oklch(0.48 0 0)",
+          "oklch(0.61 0 0)",
+          "oklch(0.74 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.97 0 0)"
+        ]
+      },
+      "instrument-black": {
+        "role": "primary",
+        "displayName": "Instrument Black",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.205 0 0)",
+          "oklch(0.32 0 0)",
+          "oklch(0.45 0 0)",
+          "oklch(0.58 0 0)",
+          "oklch(0.72 0 0)",
+          "oklch(0.86 0 0)",
+          "oklch(0.985 0 0)"
+        ]
+      },
+      "rail-gray": {
+        "role": "neutral",
+        "displayName": "Rail Gray",
+        "canonical": "oklch(0.922 0 0)",
+        "tonalRamp": [
+          "oklch(0.18 0 0)",
+          "oklch(0.30 0 0)",
+          "oklch(0.43 0 0)",
+          "oklch(0.56 0 0)",
+          "oklch(0.69 0 0)",
+          "oklch(0.82 0 0)",
+          "oklch(0.922 0 0)",
+          "oklch(0.98 0 0)"
+        ]
+      },
+      "mute-gray": {
+        "role": "neutral",
+        "displayName": "Mute Gray",
+        "canonical": "oklch(0.556 0 0)",
+        "tonalRamp": ["oklch(0.556 0 0)"]
+      },
+      "scope-blue": {
+        "role": "secondary",
+        "displayName": "Scope Blue",
+        "canonical": "oklch(0.768 0.122 252.001)",
+        "tonalRamp": [
+          "oklch(0.18 0.122 252.001)",
+          "oklch(0.28 0.122 252.001)",
+          "oklch(0.40 0.122 252.001)",
+          "oklch(0.52 0.122 252.001)",
+          "oklch(0.64 0.122 252.001)",
+          "oklch(0.768 0.122 252.001)",
+          "oklch(0.86 0.08 252.001)",
+          "oklch(0.95 0.04 252.001)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "headline-lg": {
+        "displayName": "Headline LG",
+        "purpose": "Main technical page headings and catalog titles."
+      },
+      "headline-md": {
+        "displayName": "Headline MD",
+        "purpose": "Section headings and prominent panel headers."
+      },
+      "headline-sm": {
+        "displayName": "Headline SM",
+        "purpose": "Card titles, demos, and compact page headings."
+      },
+      "body-md": {
+        "displayName": "Body MD",
+        "purpose": "Readable prose and explanatory UI copy."
+      },
+      "label-md": {
+        "displayName": "Label MD",
+        "purpose": "Buttons, tabs, navigation labels, controls, and terse metadata."
+      },
+      "audio-label": {
+        "displayName": "Audio Label",
+        "purpose": "Uppercase audio and instrument labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "surface-low",
+        "value": "shadow-sm",
+        "purpose": "Floating sidebars, active tab surfaces, popovers, dropdowns, dialogs, and tooltips."
+      },
+      {
+        "name": "input-low",
+        "value": "shadow-xs",
+        "purpose": "Outline buttons and fields where a barely-raised edge improves affordance."
+      },
+      {
+        "name": "audio-shell",
+        "value": "0 8px 32px oklch(0 0 0 / 0.5), inset 0 1px 0 oklch(1 0 0 / 0.3)",
+        "purpose": "Only for audio instrument chrome."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-fast",
+        "value": "75ms",
+        "purpose": "Pressed transport button feedback and immediate mechanical states."
+      },
+      {
+        "name": "state-standard",
+        "value": "150-250ms",
+        "purpose": "Default hover, focus, selected, open, and closed state changes."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px"
+      },
+      {
+        "name": "md",
+        "value": "768px"
+      },
+      {
+        "name": "lg",
+        "value": "1024px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Sharp technical product action aligned with shadcn/ui primary tokens.",
+      "html": "<button class=\"ds-btn-primary\">Run check</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; height: 36px; padding: 0 16px; border: 0; border-radius: 3px; background: var(--primary); color: var(--primary-foreground); font: 500 14px/20px var(--font-tx-02), ui-monospace, monospace; transition: background-color 180ms ease-out, box-shadow 180ms ease-out; } .ds-btn-primary:hover { background: oklch(0.205 0 0 / 0.9); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.708 0 0 / 0.5); } .ds-btn-primary:disabled { pointer-events: none; opacity: 0.5; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Sharp 36px field with transparent fill, structural border, and strong focus ring.",
+      "html": "<input class=\"ds-input\" placeholder=\"Signal name\" />",
+      "css": ".ds-input { width: 100%; min-width: 0; height: 36px; padding: 0 12px; border: 1px solid var(--input); border-radius: 3px; background: transparent; color: var(--foreground); font: 400 14px/20px var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; transition: color 180ms ease-out, box-shadow 180ms ease-out, border-color 180ms ease-out; } .ds-input::placeholder { color: var(--muted-foreground); } .ds-input:focus-visible { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px oklch(0.708 0 0 / 0.5); } .ds-input:disabled { cursor: not-allowed; opacity: 0.5; }"
+    },
+    {
+      "name": "Panel Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Nearly square bordered panel; sharp, technical, and flat by default.",
+      "html": "<section class=\"ds-card\"><h3>Runtime report</h3><p>Inspect audio state, route output, and render health.</p></section>",
+      "css": ".ds-card { display: flex; flex-direction: column; gap: 24px; padding: 24px; border: 1px solid var(--border); border-radius: 4px; background: var(--card); color: var(--card-foreground); } .ds-card h3 { margin: 0; font: 600 20px/28px var(--font-tx-02), ui-monospace, monospace; letter-spacing: -0.01em; } .ds-card p { margin: 0; color: var(--muted-foreground); font: 400 14px/20px var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }"
+    },
+    {
+      "name": "Oscilloscope Trace",
+      "kind": "custom",
+      "refersTo": "oscilloscope-trace",
+      "description": "P31 green shader-derived trace treatment reserved for oscilloscope surfaces.",
+      "html": "<div class=\"ds-scope\"><svg viewBox=\"0 0 320 90\" aria-label=\"Oscilloscope trace\"><path d=\"M0 48 C 34 12, 52 10, 76 48 S 122 84, 154 48 S 214 10, 240 48 S 292 84, 320 42\"/></svg></div>",
+      "css": ".ds-scope { border: 1px solid color(srgb 0.03 0.78 0.2 / 0.22); border-radius: 0; background: #020604; box-shadow: inset 0 0 0 1px color(srgb 0.004 0.08 0.018 / 0.8); padding: 16px; } .ds-scope svg { display: block; width: 100%; height: auto; overflow: visible; } .ds-scope path { fill: none; stroke: color(srgb 0.03 0.78 0.2); stroke-width: 3; stroke-linecap: square; filter: drop-shadow(0 0 10px color(srgb 0.74 1 0.71 / 0.45)); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Dynamic Digital Studio",
+    "overview": "KKB is a sharp technical creative monorepo. Its design system preserves shadcn/ui semantic tokens, TX-02-forward technical typography, low-radius machined surfaces, scoped audio blues, and shader-derived oscilloscope greens.",
+    "keyCharacteristics": [
+      "shadcn/ui-compatible semantic tokens remain the canonical frontmatter vocabulary.",
+      "TX-02 carries headings, labels, code, telemetry, and compact hardware-style UI.",
+      "Geist carries readable prose and body copy.",
+      "Cool audio blues are scoped to audio and waveform surfaces.",
+      "P31 phosphor greens are scoped to oscilloscope traces, glow, and shader-derived visualizations.",
+      "Edges are sharp by default; roundness must be earned."
+    ],
+    "rules": [
+      {
+        "name": "The Semantic Token Rule",
+        "body": "Use shadcn/ui token names in docs and components. Descriptive names are prose, not replacements for semantic token names.",
+        "section": "colors"
+      },
+      {
+        "name": "The Blue-and-Green Scope Rule",
+        "body": "Audio blue belongs to audio and waveform UI. P31 green belongs to oscilloscope traces and shader-derived visualizations.",
+        "section": "colors"
+      },
+      {
+        "name": "The TX-02 Heading Rule",
+        "body": "KKB's technical voice uses TX-02 for headings and labels.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Product Rule",
+        "body": "A resting product surface should not look lifted.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve shadcn/ui token names in frontmatter and generated docs.",
+      "Do keep roundness low: 1-4px for most controls and panels, 6px only for larger containers, full radius only for badges/avatars/sliders/switches.",
+      "Do use audio blue for audio and waveform state, and P31 green for oscilloscope trace/glow state."
+    ],
+    "donts": [
+      "Don't replace semantic shadcn/ui tokens with descriptive aliases in frontmatter.",
+      "Don't use the audio blue accent as a general-purpose brand color.",
+      "Don't use oscilloscope green as a generic success color.",
+      "Don't use rounded soft cards, pillowy inputs, glassmorphism, heavy gradients, or generic glossy SaaS styling."
+    ]
+  }
+}

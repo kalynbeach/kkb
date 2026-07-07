@@ -58,7 +58,7 @@ export function DialogSheetDemo() {
 
   return (
     <div className="grid gap-4 p-6 lg:grid-cols-2">
-      <div className="space-y-4 rounded-xl border bg-muted/20 p-4">
+      <div className="space-y-4 rounded-md bg-muted/20 p-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium">Modal dialog</p>
@@ -84,7 +84,7 @@ export function DialogSheetDemo() {
         </Dialog>
       </div>
 
-      <div className="space-y-4 rounded-xl border bg-muted/20 p-4">
+      <div className="space-y-4 rounded-md bg-muted/20 p-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium">Side sheet</p>
@@ -128,7 +128,7 @@ export function AlertDialogDrawerDemo() {
 
   return (
     <div className="grid gap-4 p-6 lg:grid-cols-2">
-      <div className="space-y-4 rounded-xl border bg-muted/20 p-4">
+      <div className="space-y-4 rounded-md bg-muted/20 p-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium">Alert dialog</p>
@@ -157,7 +157,7 @@ export function AlertDialogDrawerDemo() {
         </AlertDialog>
       </div>
 
-      <div className="space-y-4 rounded-xl border bg-muted/20 p-4">
+      <div className="space-y-4 rounded-md bg-muted/20 p-4">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium">Mobile drawer</p>
@@ -201,7 +201,7 @@ export function PopoverHoverCardTooltipDemo() {
   return (
     <TooltipProvider>
       <div className="grid gap-4 p-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-        <div className="space-y-4 rounded-xl border bg-muted/20 p-4">
+        <div className="space-y-4 rounded-md bg-muted/20 p-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium">Popover</p>
@@ -226,7 +226,7 @@ export function PopoverHoverCardTooltipDemo() {
           </Popover>
         </div>
 
-        <div className="grid gap-3 rounded-xl border bg-muted/20 p-4">
+        <div className="grid gap-3 rounded-md bg-muted/20 p-4">
           <HoverCard openDelay={120} closeDelay={120}>
             <HoverCardTrigger asChild>
               <Button variant="secondary">Preview hover card</Button>

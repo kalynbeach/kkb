@@ -21,7 +21,7 @@ import { Switch } from "@kkb/ui/components/switch";
 import { Textarea } from "@kkb/ui/components/textarea";
 import { Toggle } from "@kkb/ui/components/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@kkb/ui/components/toggle-group";
-import { Bell, Search, SlidersHorizontal, Sparkles } from "lucide-react";
+import { Activity, Bell, Search, SlidersHorizontal } from "lucide-react";
 
 import { ComponentCard } from "../component-card";
 import { CalendarDemo, SelectDemo } from "../demos/select-calendar-demo";
@@ -37,14 +37,14 @@ export function InputSection() {
       >
         <div className="space-y-4 p-6">
           <div className="flex flex-wrap gap-3">
-            <Button>Publish</Button>
-            <Button variant="outline">Preview</Button>
-            <Button variant="secondary">Save draft</Button>
+            <Button>Run checks</Button>
+            <Button variant="outline">Open route</Button>
+            <Button variant="secondary">Save note</Button>
           </div>
           <ButtonGroup>
-            <Button variant="outline">Day</Button>
-            <Button variant="outline">Week</Button>
-            <Button variant="outline">Month</Button>
+            <Button variant="outline">Source</Button>
+            <Button variant="outline">States</Button>
+            <Button variant="outline">Tokens</Button>
           </ButtonGroup>
         </div>
       </ComponentCard>
@@ -54,15 +54,15 @@ export function InputSection() {
         description="Straight fields plus richer grouped input affordances."
       >
         <div className="space-y-4 p-6">
-          <Input placeholder="Search sections" defaultValue="ui catalog" />
+          <Input placeholder="Search primitives" defaultValue="audio waveform" />
           <InputGroup>
             <InputGroupAddon>
               <Search className="size-4" />
               <InputGroupText>Filter</InputGroupText>
             </InputGroupAddon>
-            <InputGroupInput defaultValue="navigation" />
+            <InputGroupInput defaultValue="focused state coverage" />
           </InputGroup>
-          <Textarea defaultValue="Shared shell is in place. Populate the cards with representative demos next." />
+          <Textarea defaultValue="Document the import path, visible states, and recovery behavior before marking a primitive ship-ready." />
         </div>
       </ComponentCard>
 
@@ -71,33 +71,35 @@ export function InputSection() {
         description="Binary, exclusive, and preference-style controls in one compact surface."
       >
         <div className="grid gap-5 p-6">
-          <div className="flex items-center justify-between gap-4 rounded-xl border px-4 py-3">
+          <div className="flex items-center justify-between gap-4 rounded-md bg-muted/20 px-4 py-3">
             <div className="space-y-1">
               <Label htmlFor="sticky-rail" className="font-medium">
                 Enable sticky rail
               </Label>
-              <p className="text-sm text-muted-foreground">Keeps section nav visible on desktop.</p>
+              <p className="text-sm text-muted-foreground">
+                Keeps spatial browsing visible on desktop.
+              </p>
             </div>
             <Switch id="sticky-rail" defaultChecked aria-label="Enable sticky rail" />
           </div>
 
-          <div className="space-y-3 rounded-xl border px-4 py-3">
+          <div className="space-y-3 rounded-md bg-muted/20 px-4 py-3">
             <p className="text-sm font-medium">Release channel</p>
             <RadioGroup defaultValue="stable" className="gap-2">
               <div className="flex items-center gap-2 text-sm">
                 <RadioGroupItem id="release-stable" value="stable" />
-                <Label htmlFor="release-stable">Stable</Label>
+                <Label htmlFor="release-stable">Ship-ready</Label>
               </div>
               <div className="flex items-center gap-2 text-sm">
                 <RadioGroupItem id="release-preview" value="preview" />
-                <Label htmlFor="release-preview">Preview</Label>
+                <Label htmlFor="release-preview">Needs browser pass</Label>
               </div>
             </RadioGroup>
           </div>
 
-          <div className="flex items-center gap-3 rounded-xl border px-4 py-3 text-sm">
+          <div className="flex items-center gap-3 rounded-md bg-muted/20 px-4 py-3 text-sm">
             <Checkbox id="follow-up-notes" defaultChecked />
-            <Label htmlFor="follow-up-notes">Send follow-up notes after publish</Label>
+            <Label htmlFor="follow-up-notes">Add verification notes to the handoff</Label>
           </div>
         </div>
       </ComponentCard>
@@ -142,13 +144,13 @@ export function InputSection() {
       >
         <div className="space-y-5 p-6">
           <div className="flex flex-wrap gap-3">
-            <Toggle defaultPressed aria-label="Auto layout">
-              <Sparkles className="size-4" />
-              Auto layout
+            <Toggle defaultPressed aria-label="Show scope traces">
+              <Activity className="size-4" />
+              Scope traces
             </Toggle>
-            <Toggle aria-label="Notifications">
+            <Toggle aria-label="Watch browser checks">
               <Bell className="size-4" />
-              Notifications
+              Watch checks
             </Toggle>
           </div>
 

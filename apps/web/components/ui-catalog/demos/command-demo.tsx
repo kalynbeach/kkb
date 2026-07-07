@@ -43,7 +43,7 @@ export function CommandDemo() {
 
   return (
     <div className="space-y-4 p-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border bg-muted/20 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-md bg-muted/20 p-4">
         <div className="space-y-1">
           <p className="text-sm font-medium">Palette launcher</p>
           <p className="text-sm text-muted-foreground">

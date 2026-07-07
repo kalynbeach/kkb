@@ -38,7 +38,7 @@ export function NavigationMenuDemo() {
   return (
     <div className="flex justify-center p-6">
       <NavigationMenu viewport={false} className="w-full max-w-xl justify-start">
-        <NavigationMenuList className="w-full justify-start rounded-xl border bg-muted/20 p-2">
+        <NavigationMenuList className="w-full justify-start rounded-md bg-muted/20 p-2">
           <NavigationMenuItem>
             <NavigationMenuTrigger>Catalog</NavigationMenuTrigger>
             <NavigationMenuContent className="w-[min(26rem,calc(100vw-5rem))]">

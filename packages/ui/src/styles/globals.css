@@ -7,7 +7,8 @@
 
 @theme inline {
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-serif: var(--font-eb-garamond), Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-serif: var(--font-mekzantine, var(--font-eb-garamond)), ui-serif, serif;
+  --font-serif-secondary: var(--font-eb-garamond), ui-serif, serif;
   --font-mono: var(--font-tx-02), ui-monospace, monospace;
   --font-mono-secondary: var(--font-departure-mono), ui-monospace, monospace;
   --radius-sm: calc(var(--radius) * 0.6);
@@ -89,7 +90,7 @@
 }
 
 :root {
-  --radius: 0.45rem;
+  --radius: 0.1875rem;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -173,6 +174,10 @@
   --audio-status-error: oklch(0.637 0.208 25.331);
   --audio-status-error-glow: oklch(0.637 0.208 25.331 / 0.6);
   --audio-error-text: oklch(0.704 0.191 22.216 / 0.8);
+  --oscilloscope-trace: color(srgb 0.03 0.78 0.2);
+  --oscilloscope-glow: color(srgb 0.74 1 0.71);
+  --oscilloscope-shoulder: color(srgb 0.004 0.08 0.018);
+  --oscilloscope-floor: color(srgb 0.42 0.64 0.38);
 }
 
 .dark {
@@ -259,6 +264,10 @@
   --audio-status-error: oklch(0.71 0.188 25.3);
   --audio-status-error-glow: oklch(0.71 0.188 25.3 / 0.65);
   --audio-error-text: oklch(0.78 0.168 25.1 / 0.85);
+  --oscilloscope-trace: color(srgb 0.03 0.78 0.2);
+  --oscilloscope-glow: color(srgb 0.74 1 0.71);
+  --oscilloscope-shoulder: color(srgb 0.004 0.08 0.018);
+  --oscilloscope-floor: color(srgb 0.42 0.64 0.38);
 }
 
 @layer components {

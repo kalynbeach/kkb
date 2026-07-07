@@ -49,19 +49,19 @@ export function NavigationSection() {
               <TabsTrigger value="activity">Activity</TabsTrigger>
               <TabsTrigger value="tokens">Tokens</TabsTrigger>
             </TabsList>
-            <TabsContent value="overview" className="rounded-xl border p-4">
+            <TabsContent value="overview" className="rounded-md bg-muted/20 p-4">
               <p className="text-sm font-medium">Release overview</p>
               <p className="mt-1 text-sm leading-6 text-muted-foreground">
                 Core sections are server-rendered first, with heavier demo islands landing later.
               </p>
             </TabsContent>
-            <TabsContent value="activity" className="rounded-xl border p-4">
+            <TabsContent value="activity" className="rounded-md bg-muted/20 p-4">
               <p className="text-sm font-medium">Recent activity</p>
               <p className="mt-1 text-sm leading-6 text-muted-foreground">
                 Section scaffolding, page shell, and nav behavior all shipped ahead of demos.
               </p>
             </TabsContent>
-            <TabsContent value="tokens" className="rounded-xl border p-4">
+            <TabsContent value="tokens" className="rounded-md bg-muted/20 p-4">
               <p className="text-sm font-medium">Navigation tokens</p>
               <p className="mt-1 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
                 active / muted / accent
@@ -80,7 +80,7 @@ export function NavigationSection() {
             type="single"
             collapsible
             defaultValue="scope"
-            className="rounded-xl border px-4"
+            className="rounded-md bg-muted/20 px-4"
           >
             <AccordionItem value="scope">
               <AccordionTrigger>What ships in the current catalog pass?</AccordionTrigger>
@@ -97,7 +97,7 @@ export function NavigationSection() {
             </AccordionItem>
           </Accordion>
 
-          <Collapsible defaultOpen className="rounded-xl border p-4">
+          <Collapsible defaultOpen className="rounded-md bg-muted/20 p-4">
             <div className="flex items-center justify-between gap-4">
               <div className="space-y-1">
                 <p className="text-sm font-medium">Navigation state note</p>
@@ -142,7 +142,7 @@ export function NavigationSection() {
             </BreadcrumbList>
           </Breadcrumb>
 
-          <div className="grid gap-3 rounded-xl border p-4 text-sm text-muted-foreground">
+          <div className="grid gap-3 rounded-md bg-muted/20 p-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
               <Compass className="size-4" />
               Route context stays lightweight and readable.

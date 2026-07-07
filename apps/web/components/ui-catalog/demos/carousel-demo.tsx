@@ -41,7 +41,7 @@ export function CarouselDemo() {
         <CarouselContent>
           {carouselSlides.map((slide) => (
             <CarouselItem key={slide.title} className="md:basis-1/2">
-              <div className="flex h-full flex-col justify-between rounded-xl border bg-muted/20 p-5">
+              <div className="flex h-full flex-col justify-between rounded-md bg-muted/20 p-5">
                 <div className="space-y-3">
                   <Badge variant="outline">{slide.tag}</Badge>
                   <div className="space-y-2">

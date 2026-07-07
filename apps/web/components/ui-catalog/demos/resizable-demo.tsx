@@ -12,7 +12,7 @@ const panelNotes = [
 export function ResizableDemo() {
   return (
     <div className="h-64 p-4">
-      <div className="h-full overflow-hidden rounded-xl border">
+      <div className="h-full overflow-hidden rounded-md border">
         <ResizablePanelGroup>
           <ResizablePanel defaultSize={28} minSize={20}>
             <div className="flex h-full flex-col gap-4 bg-muted/20 p-4">

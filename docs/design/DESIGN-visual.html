@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KKB Design System Visual</title>
+  <style>
+    @font-face {
+      font-family: "Geist";
+      src: url("../../apps/web/app/fonts/GeistVF.woff") format("woff");
+      font-weight: 100 900;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "TX-02";
+      src: url("../../apps/web/app/fonts/TX-02-VF.woff2") format("woff2");
+      font-weight: 100 900;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "Departure Mono";
+      src: url("../../apps/web/app/fonts/DepartureMono-Regular.woff2") format("woff2");
+      font-weight: 400;
+      font-display: swap;
+    }
+
+    :root {
+      color-scheme: light dark;
+      --radius-sm: 2px;
+      --radius-md: 3px;
+      --radius-lg: 4px;
+      --radius-xl: 6px;
+
+      --paper-white: oklch(1 0 0);
+      --bench-ink: oklch(0.145 0 0);
+      --instrument-black: oklch(0.205 0 0);
+      --rail-gray: oklch(0.922 0 0);
+      --mute-gray: oklch(0.556 0 0);
+      --panel-white: oklch(0.985 0 0);
+      --panel-graphite: oklch(0.205 0 0);
+      --scope-blue: oklch(0.768 0.122 252.001);
+      --scope-blue-dark: oklch(0.183 0.05 270.309);
+      --oscilloscope-trace: color(srgb 0.03 0.78 0.2);
+      --oscilloscope-glow: color(srgb 0.74 1 0.71);
+      --oscilloscope-shoulder: color(srgb 0.004 0.08 0.018);
+      --signal-warning: oklch(0.837 0.164 84.429);
+      --signal-error: oklch(0.637 0.208 25.331);
+
+      --bg: var(--paper-white);
+      --bg-well: oklch(0.985 0 0);
+      --surface: var(--paper-white);
+      --surface-2: oklch(0.97 0 0);
+      --surface-3: oklch(0.945 0 0);
+      --text: var(--bench-ink);
+      --text-dim: var(--mute-gray);
+      --border: var(--rail-gray);
+      --border-strong: oklch(0.82 0 0);
+      --accent: var(--scope-blue);
+      --accent-deep: oklch(0.49 0.13 252.001);
+      --warning: var(--signal-warning);
+      --error: var(--signal-error);
+      --shadow-low: none;
+      --shadow-audio: 0 8px 32px oklch(0 0 0 / 0.5), inset 0 1px 0 oklch(1 0 0 / 0.3);
+      --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+      --font-serif: "Mekzantine", ui-serif, serif;
+      --font-serif-secondary: "EB Garamond", ui-serif, serif;
+      --font-mono: "TX-02", ui-monospace, monospace;
+      --font-mono-secondary: "Departure Mono", ui-monospace, monospace;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: oklch(0.145 0 0);
+        --bg-well: oklch(0.12 0 0);
+        --surface: oklch(0.205 0 0);
+        --surface-2: oklch(0.269 0 0);
+        --surface-3: oklch(0.32 0 0);
+        --text: oklch(0.985 0 0);
+        --text-dim: oklch(0.708 0 0);
+        --border: oklch(1 0 0 / 0.1);
+        --border-strong: oklch(1 0 0 / 0.18);
+        --accent: oklch(0.8 0.122 252.001);
+        --accent-deep: oklch(0.72 0.13 252.001);
+        --warning: oklch(0.86 0.144 84.4);
+        --error: oklch(0.71 0.188 25.3);
+        --shadow-low: none;
+      }
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 78% 4%, oklch(0.768 0.122 252.001 / 0.14), transparent 30rem),
+        radial-gradient(circle at 4% 16%, oklch(0.205 0 0 / 0.035), transparent 28rem),
+        var(--bg);
+      font-family: var(--font-sans);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      text-rendering: optimizeLegibility;
+    }
+
+    a { color: inherit; }
+
+    .wrap {
+      width: min(1440px, calc(100% - 48px));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 188px minmax(0, 1fr);
+      gap: 40px;
+      padding: 32px 0 72px;
+    }
+
+    .toc {
+      position: sticky;
+      top: 24px;
+      align-self: start;
+      max-height: calc(100dvh - 48px);
+      overflow-y: auto;
+      padding: 12px 0;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .toc-title {
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      font-weight: 650;
+    }
+
+    .toc a {
+      display: block;
+      padding: 6px 8px;
+      border: 1px solid transparent;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      transition: color 160ms ease-out, background-color 160ms ease-out, border-color 160ms ease-out;
+    }
+
+    .toc a:hover,
+    .toc a.active {
+      color: var(--text);
+      background: var(--surface-2);
+      border-color: var(--border);
+    }
+
+    .main { min-width: 0; }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 28px;
+    }
+
+    .hero-panel,
+    .system-map,
+    .panel,
+    .component-preview,
+    .rule-panel,
+    .compact-card,
+    .swatch,
+    .type-row,
+    .source-note {
+      background: color-mix(in oklch, var(--surface) 96%, var(--accent) 4%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-low);
+    }
+
+    .hero-panel {
+      padding: clamp(24px, 4vw, 48px);
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hero-panel::after {
+      content: "";
+      position: absolute;
+      inset: auto -12% -26% auto;
+      width: 42%;
+      aspect-ratio: 1;
+      border: 1px solid color-mix(in oklch, var(--accent) 50%, transparent);
+      border-radius: 0;
+      opacity: 0.32;
+      pointer-events: none;
+    }
+
+    .kicker {
+      display: inline-flex;
+      width: fit-content;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 550;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in oklch, var(--accent) 16%, transparent);
+    }
+
+    h1,
+    h2,
+    h3,
+    p { margin: 0; }
+
+    h1 {
+      max-width: 15ch;
+      margin-top: 36px;
+      font-family: var(--font-mono);
+      font-size: clamp(2.35rem, 6.2vw, 4.8rem);
+      font-weight: 650;
+      line-height: 0.98;
+      letter-spacing: -0.025em;
+      text-wrap: balance;
+    }
+
+    .lead {
+      max-width: 70ch;
+      margin-top: 24px;
+      color: var(--text-dim);
+      font-size: 1rem;
+      line-height: 1.65;
+      text-wrap: pretty;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 32px;
+    }
+
+    .button {
+      display: inline-flex;
+      height: 2.25rem;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border-radius: var(--radius-md);
+      padding: 0.5rem 1rem;
+      border: 1px solid transparent;
+      font-family: var(--font-mono);
+      font-size: 0.875rem;
+      font-weight: 550;
+      text-decoration: none;
+      transition: background-color 160ms ease-out, border-color 160ms ease-out, transform 160ms ease-out;
+    }
+
+    .button.primary {
+      background: var(--instrument-black);
+      color: var(--panel-white);
+    }
+
+    .button.secondary {
+      background: var(--surface-2);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .button:hover { transform: translateY(-1px); }
+    .button:focus-visible,
+    input:focus-visible { outline: 3px solid color-mix(in oklch, var(--accent) 42%, transparent); outline-offset: 2px; }
+
+    .system-map {
+      padding: 18px;
+      display: grid;
+      gap: 12px;
+      align-content: start;
+      background: var(--bg-well);
+    }
+
+    .map-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+    }
+
+    .map-node {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      background: var(--surface);
+    }
+
+    .map-node strong {
+      display: block;
+      color: var(--text);
+      font-size: 0.95rem;
+      letter-spacing: -0.015em;
+    }
+
+    .map-node span {
+      display: block;
+      margin-top: 4px;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+    }
+
+    .map-node.signal {
+      background: color-mix(in oklch, var(--scope-blue-dark) 92%, black 8%);
+      color: oklch(0.93 0.02 264.4);
+      border-color: oklch(0.768 0.122 252.001 / 0.34);
+      box-shadow: inset 0 2px 8px oklch(0 0 0 / 0.42);
+    }
+
+    .map-node.signal strong { color: oklch(0.96 0.015 264.4); }
+    .map-node.signal span { color: oklch(0.8 0.07 252.001); }
+
+    .section {
+      scroll-margin-top: 32px;
+      margin-top: 28px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 24px;
+      margin: 48px 0 16px;
+    }
+
+    .section-head h2 {
+      font-family: var(--font-mono);
+      font-size: 2rem;
+      font-weight: 650;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      text-wrap: balance;
+    }
+
+    .section-head p {
+      max-width: 52ch;
+      color: var(--text-dim);
+      text-align: right;
+      text-wrap: pretty;
+    }
+
+    .grid {
+      display: grid;
+      gap: 16px;
+    }
+
+    .grid.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.auto { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
+
+    .panel { padding: 20px; }
+
+    .panel h3,
+    .compact-card h3,
+    .rule-panel h3,
+    .component-preview h3 {
+      margin-bottom: 8px;
+      font-family: var(--font-mono);
+      font-size: 1.05rem;
+      font-weight: 600;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
+    }
+
+    .panel p,
+    .compact-card p,
+    .rule-panel p,
+    .component-preview p {
+      color: var(--text-dim);
+      text-wrap: pretty;
+    }
+
+    .source-note {
+      padding: 18px 20px;
+      background: var(--surface);
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.78em;
+      color: var(--text);
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.1rem 0.28rem;
+    }
+
+    .swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+    }
+
+    .swatch {
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .swatch-chip {
+      height: 86px;
+      border-bottom: 1px solid var(--border);
+      background: var(--swatch);
+    }
+
+    .swatch-body {
+      padding: 12px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .swatch-body strong {
+      font-size: 0.9rem;
+      letter-spacing: -0.01em;
+    }
+
+    .swatch-body span {
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+    }
+
+    .type-stack {
+      display: grid;
+      gap: 10px;
+    }
+
+    .type-row {
+      display: grid;
+      grid-template-columns: 140px minmax(0, 1fr) 170px;
+      gap: 18px;
+      align-items: baseline;
+      padding: 16px;
+      background: var(--surface);
+    }
+
+    .type-role {
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .type-sample.display { font-size: 2.25rem; line-height: 1.12; font-weight: 600; letter-spacing: -0.025em; }
+    .type-sample.title { font-size: 1.25rem; line-height: 1.2; font-weight: 600; letter-spacing: -0.025em; }
+    .type-sample.body { font-size: 0.875rem; line-height: 1.5; }
+    .type-sample.label { font-size: 0.875rem; line-height: 1.25; font-weight: 500; }
+    .type-sample.mono { font-family: var(--font-mono); font-size: 0.75rem; line-height: 1.25; font-weight: 500; }
+
+    .type-meta {
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      text-align: right;
+    }
+
+    .component-lab {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .component-preview {
+      padding: 20px;
+      background: var(--surface);
+    }
+
+    .control-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+      align-items: center;
+    }
+
+    .input {
+      height: 2.25rem;
+      min-width: min(100%, 220px);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--text);
+      padding: 0.25rem 0.75rem;
+      font: 400 0.875rem/1.5 var(--font-sans);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: var(--instrument-black);
+      color: var(--panel-white);
+      padding: 0.125rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 550;
+    }
+
+    .audio-shell {
+      border: 1px solid oklch(0.652 0.026 264.382);
+      border-radius: var(--radius-lg);
+      padding: 4px;
+      background-image: linear-gradient(180deg, oklch(0.809 0.035 270.957), oklch(0.678 0.025 264.392) 8%, oklch(0.73 0.025 264.41) 40%, oklch(0.652 0.026 264.382) 92%, oklch(0.575 0.038 270.671));
+      box-shadow: var(--shadow-audio);
+    }
+
+    .audio-titlebar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid oklch(0.471 0.066 274.924);
+      padding: 6px 10px;
+      background-image: linear-gradient(90deg, oklch(0.558 0.075 276.408), oklch(0.638 0.073 276.818), oklch(0.558 0.075 276.408));
+      color: oklch(0.881 0.024 264.446);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+    }
+
+    .audio-panel {
+      position: relative;
+      min-height: 144px;
+      overflow: hidden;
+      border: 2px solid oklch(0.344 0.044 269.831);
+      background-image: linear-gradient(180deg, oklch(0.183 0.05 270.309), oklch(0.209 0.053 268.661) 50%, oklch(0.183 0.05 270.309));
+      box-shadow: inset 0 2px 8px oklch(0 0 0 / 0.6), inset 0 -1px 0 oklch(1 0 0 / 0.02);
+    }
+
+    .trace {
+      position: absolute;
+      inset: 24px 18px;
+    }
+
+    .trace svg { width: 100%; height: 100%; display: block; }
+
+    .transport {
+      display: flex;
+      gap: 6px;
+      padding: 8px;
+      background: oklch(0.652 0.026 264.382 / 0.5);
+    }
+
+    .transport button {
+      display: inline-flex;
+      width: 32px;
+      height: 28px;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid oklch(0.784 0.035 270.937);
+      border-radius: var(--radius-sm);
+      color: oklch(0.443 0.07 274.957);
+      background-image: linear-gradient(180deg, oklch(0.883 0.032 269.793), oklch(0.784 0.035 270.937) 40%, oklch(0.733 0.036 270.889));
+      box-shadow: 0 1px 0 oklch(1 0 0 / 0.5), inset 0 1px 0 oklch(1 0 0 / 0.4), 0 1px 2px oklch(0 0 0 / 0.12);
+    }
+
+    .rule-stack {
+      display: grid;
+      gap: 12px;
+    }
+
+    .rule-panel {
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 16px minmax(0, 1fr);
+      gap: 12px;
+      background: var(--surface);
+    }
+
+    .rule-mark {
+      width: 10px;
+      height: 10px;
+      margin-top: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .compact-card {
+      padding: 18px;
+      background: var(--surface);
+    }
+
+    .intent-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+    }
+
+    .intent-list .compact-card:nth-child(2) {
+      background: color-mix(in oklch, var(--surface) 90%, var(--scope-blue) 10%);
+    }
+
+    .intent-list .compact-card:nth-child(3) {
+      background: var(--bg-well);
+    }
+
+    .do-dont {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    ul.clean {
+      margin: 12px 0 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 9px;
+    }
+
+    ul.clean li {
+      position: relative;
+      padding-left: 18px;
+      color: var(--text-dim);
+    }
+
+    ul.clean li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0.68em;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--dot, var(--accent));
+    }
+
+    .footer {
+      margin-top: 40px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 1050px) {
+      .wrap {
+        width: min(100% - 32px, 900px);
+        grid-template-columns: 1fr;
+        padding-top: 0;
+      }
+
+      .toc {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        gap: 4px;
+        max-height: none;
+        margin: 0 -16px;
+        padding: 10px 16px;
+        overflow-x: auto;
+        background: color-mix(in oklch, var(--bg) 92%, transparent);
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(10px);
+      }
+
+      .toc-title { display: none; }
+      .toc a { flex: 0 0 auto; }
+      .hero,
+      .component-lab,
+      .grid.two,
+      .grid.three,
+      .do-dont { grid-template-columns: 1fr; }
+      .section-head { display: block; }
+      .section-head p { margin-top: 8px; text-align: left; }
+      .type-row { grid-template-columns: 1fr; gap: 8px; }
+      .type-meta { text-align: left; }
+    }
+
+    @media (max-width: 620px) {
+      .wrap { width: min(100% - 24px, 900px); }
+      .hero-panel { min-height: auto; }
+      h1 { font-size: clamp(2.35rem, 15vw, 4rem); }
+      .section-head h2 { font-size: 1.65rem; }
+      .swatch-chip { height: 70px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto;
+        transition-duration: 0.01ms;
+        animation-duration: 0.01ms;
+        animation-iteration-count: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="toc" id="toc" aria-label="Design system sections">
+      <div class="toc-title">KKB / DESIGN.md</div>
+      <a href="#overview" class="active">Overview</a>
+      <a href="#intent">Initial intent</a>
+      <a href="#colors">Colors</a>
+      <a href="#type">Typography</a>
+      <a href="#components">Components</a>
+      <a href="#rules">Rules</a>
+      <a href="#files">Files</a>
+    </nav>
+
+    <main class="main">
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-panel">
+          <div>
+            <div class="kicker"><span class="status-dot"></span> Dynamic Digital Studio</div>
+            <h1 id="page-title">KKB design system visual</h1>
+            <p class="lead">A visual companion for <code>DESIGN.md</code>, styled with the same tokens it documents: shadcn/ui-compatible semantics, TX-02 technical typography, hard-edged controls, scoped audio blue, and P31 oscilloscope green.</p>
+            <div class="hero-actions">
+              <a class="button primary" href="../../DESIGN.md">Open DESIGN.md</a>
+              <a class="button secondary" href="DESIGN-backup-2026-06-18.md">Review original backup</a>
+            </div>
+          </div>
+        </div>
+
+        <aside class="system-map" aria-label="System map">
+          <div class="map-header"><span>source</span><span>token-driven</span></div>
+          <div class="map-node">
+            <strong>PRODUCT.md intent</strong>
+            <span>technical, rhythmic, detailed, beautiful, bold</span>
+          </div>
+          <div class="map-node">
+            <strong>DESIGN.md spec</strong>
+            <span>six-section system with frontmatter tokens</span>
+          </div>
+          <div class="map-node signal">
+            <strong>Blue / green instrument scopes</strong>
+            <span>audio blue for waveform UI; P31 green for oscilloscope traces</span>
+          </div>
+          <div class="map-node">
+            <strong>@kkb/ui components</strong>
+            <span>buttons, fields, cards, tabs, badges, audio shell</span>
+          </div>
+        </aside>
+      </section>
+
+      <section class="section" id="overview">
+        <div class="section-head">
+          <h2>What this system should feel like</h2>
+          <p>Sharp enough to feel technical, precise enough to trust, direct enough that the work stays in the foreground.</p>
+        </div>
+        <div class="grid three">
+          <article class="panel">
+            <h3>shadcn-compatible clarity</h3>
+            <p>Controls, demos, docs, and visualizations keep semantic token names aligned with <code>globals.css</code> and @kkb/ui.</p>
+          </article>
+          <article class="panel">
+            <h3>One coherent workshop</h3>
+            <p>Experiments can have local character, but the shared token and component vocabulary prevents routes from becoming separate products.</p>
+          </article>
+          <article class="panel">
+            <h3>Hard-edged by default</h3>
+            <p>Most controls and panels use 1-4px radii. Full rounding is reserved for badges, avatars, sliders, and switches.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="intent">
+        <div class="section-head">
+          <h2>Initial intent retained from the backup</h2>
+          <p>The backup remains a reference for original direction. This visual keeps its useful decisions while tightening language around the new spec.</p>
+        </div>
+        <div class="intent-list">
+          <article class="compact-card">
+            <h3>Neutral-first foundation</h3>
+            <p>The original spec established white, near-black, quiet gray borders, semantic foreground pairs, and compact shadcn-derived controls.</p>
+          </article>
+          <article class="compact-card">
+            <h3>Audio as scoped exception</h3>
+            <p>The original design already separated the tactile audio layer: cool blue accents, recessed panels, scanlines, and hardware-like controls.</p>
+          </article>
+          <article class="compact-card">
+            <h3>Typography restored</h3>
+            <p>TX-02 carries headings, labels, code, telemetry, and hardware-style UI. Geist handles prose; Mekzantine carries the primary serif voice, with EB Garamond and Departure Mono kept selective.</p>
+          </article>
+        </div>
+        <div class="source-note" style="margin-top: 12px;">
+          <strong>Reference note:</strong> <code>docs/design/DESIGN-backup-2026-06-18.md</code> is kept as the work-in-progress original. Treat it as initial intent, not obsolete noise.
+        </div>
+      </section>
+
+      <section class="section" id="colors">
+        <div class="section-head">
+          <h2>Color roles</h2>
+          <p>shadcn/ui neutrals do the daily work. Audio blue and P31 green earn attention only when they describe instrument state.</p>
+        </div>
+        <div class="swatch-grid">
+          <article class="swatch" style="--swatch: var(--paper-white);">
+            <div class="swatch-chip"></div><div class="swatch-body"><strong>paper-white / background</strong><span>oklch(1 0 0)</span></div>
+          </article>
+          <article class="swatch" style="--swatch: var(--bench-ink);">
+            <div class="swatch-chip"></div><div class="swatch-body"><strong>bench-ink / foreground</strong><span>oklch(0.145 0 0)</span></div>
+          </article>
+          <article class="swatch" style="--swatch: var(--instrument-black);">
+            <div class="swatch-chip"></div><div class="swatch-body"><strong>instrument-black / primary</strong><span>oklch(0.205 0 0)</span></div>
+          </article>
+          <article class="swatch" style="--swatch: var(--rail-gray);">
+            <div class="swatch-chip"></div><div class="swatch-body"><strong>rail-gray / border-input</strong><span>oklch(0.922 0 0)</span></div>
+          </article>
+          <article class="swatch" style="--swatch: var(--mute-gray);">
+            <div class="swatch-chip"></div><div class="swatch-body"><strong>mute-gray / muted-foreground</strong><span>oklch(0.556 0 0)</span></div>
+          </article>
+          <article class="swatch" style="--swatch: var(--scope-blue);">
+            <div class="swatch-chip"></div><div class="swatch-body"><strong>scope-blue / audio-accent</strong><span>oklch(0.768 0.122 252.001)</span></div>
+          </article>
+          <article class="swatch" style="--swatch: var(--oscilloscope-trace);">
+            <div class="swatch-chip"></div><div class="swatch-body"><strong>oscilloscope-trace</strong><span>color(srgb 0.03 0.78 0.2)</span></div>
+          </article>
+          <article class="swatch" style="--swatch: var(--oscilloscope-glow);">
+            <div class="swatch-chip"></div><div class="swatch-body"><strong>oscilloscope-glow</strong><span>color(srgb 0.74 1 0.71)</span></div>
+          </article>
+          <article class="swatch" style="--swatch: var(--signal-warning);">
+            <div class="swatch-chip"></div><div class="swatch-body"><strong>audio-status-warning</strong><span>oklch(0.837 0.164 84.429)</span></div>
+          </article>
+          <article class="swatch" style="--swatch: var(--signal-error);">
+            <div class="swatch-chip"></div><div class="swatch-body"><strong>audio-status-error</strong><span>oklch(0.637 0.208 25.331)</span></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="type">
+        <div class="section-head">
+          <h2>Typography roles</h2>
+          <p>TX-02 is the technical voice for headings, labels, code, telemetry, and instrument UI. Geist handles readable body copy. Mekzantine is the primary serif voice; EB Garamond remains secondary.</p>
+        </div>
+        <div class="type-stack">
+          <div class="type-row"><div class="type-role">headline-lg</div><div class="type-sample display" style="font-family: var(--font-mono); font-size: 32px; line-height: 40px; letter-spacing: -0.02em;">Catalog heading</div><div class="type-meta">TX-02 / 600 / 32px</div></div>
+          <div class="type-row"><div class="type-role">headline-md</div><div class="type-sample title" style="font-family: var(--font-mono); font-size: 24px; line-height: 32px;">Panel title</div><div class="type-meta">TX-02 / 600 / 24px</div></div>
+          <div class="type-row"><div class="type-role">body</div><div class="type-sample body">Readable explanatory copy for demos, docs previews, and control help.</div><div class="type-meta">Geist / 400 / 0.875rem</div></div>
+          <div class="type-row"><div class="type-role">serif</div><div class="type-sample" style="font-family: var(--font-serif); font-size: 24px; line-height: 32px;">KKB studio mark</div><div class="type-meta">Mekzantine / primary serif</div></div>
+          <div class="type-row"><div class="type-role">serif-secondary</div><div class="type-sample" style="font-family: var(--font-serif-secondary); font-size: 18px; line-height: 28px;">Secondary editorial note with a quieter reading texture.</div><div class="type-meta">EB Garamond / secondary serif</div></div>
+          <div class="type-row"><div class="type-role">label-md</div><div class="type-sample label" style="font-family: var(--font-mono);">Button and field label</div><div class="type-meta">TX-02 / 500 / 14px</div></div>
+          <div class="type-row"><div class="type-role">mono</div><div class="type-sample mono">oscilloscope.buffer.ms</div><div class="type-meta">TX-02 / 0.75rem</div></div>
+        </div>
+      </section>
+
+      <section class="section" id="components">
+        <div class="section-head">
+          <h2>Component vocabulary</h2>
+          <p>Compact, predictable, keyboard-first controls with hard edges. Audio and oscilloscope surfaces are the deliberate instrument exceptions.</p>
+        </div>
+        <div class="component-lab">
+          <article class="component-preview">
+            <h3>Sharp product controls</h3>
+            <p>Default components stay neutral, shadcn-compatible, structurally clear, and low-radius.</p>
+            <div class="control-row">
+              <button class="button primary" type="button">Primary</button>
+              <button class="button secondary" type="button">Secondary</button>
+              <input class="input" value="Signal name" aria-label="Signal name" />
+              <span class="badge">ready</span>
+            </div>
+          </article>
+          <article class="component-preview">
+            <h3>Audio instrument shell</h3>
+            <p>Depth, gradients, and Scope Blue stay inside audio and signal-visualization surfaces.</p>
+            <div class="audio-shell" style="margin-top: 16px;">
+              <div class="audio-titlebar"><span>scope / preview</span><span>42 ms</span></div>
+              <div class="audio-panel">
+                <div class="trace">
+                  <svg viewBox="0 0 360 120" role="img" aria-label="Scope trace preview">
+                    <path d="M0 62 C 32 26, 52 24, 78 62 S 126 99, 156 62 S 210 24, 238 62 S 294 99, 360 58" fill="none" stroke="oklch(0.768 0.122 252.001)" stroke-width="4" stroke-linecap="round" />
+                    <path d="M0 62 C 32 26, 52 24, 78 62 S 126 99, 156 62 S 210 24, 238 62 S 294 99, 360 58" fill="none" stroke="oklch(0.768 0.122 252.001 / 0.28)" stroke-width="12" stroke-linecap="round" />
+                  </svg>
+                </div>
+              </div>
+              <div class="transport"><button type="button" aria-label="Play">▶</button><button type="button" aria-label="Pause">Ⅱ</button><button type="button" aria-label="Stop">■</button></div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="rules">
+        <div class="section-head">
+          <h2>Operating rules</h2>
+          <p>These are the durable constraints that should guide future agents and feature work.</p>
+        </div>
+        <div class="rule-stack">
+          <article class="rule-panel"><span class="rule-mark"></span><div><h3>The Scope Rarity Rule</h3><p>Scope Blue belongs to signal, selection, and audio instrument state. If it appears as general decoration, it is wrong.</p></div></article>
+          <article class="rule-panel"><span class="rule-mark"></span><div><h3>The Semantic Token Rule</h3><p>Use shadcn/ui token names in docs and components. Descriptive names are prose, not replacements for semantic token names.</p></div></article>
+          <article class="rule-panel"><span class="rule-mark"></span><div><h3>The Flat-Until-Earned Rule</h3><p>A resting product surface should not look lifted. Shadows must communicate overlay, active state, or instrument depth.</p></div></article>
+        </div>
+        <div class="do-dont" style="margin-top: 16px;">
+          <article class="panel">
+            <h3>Do</h3>
+            <ul class="clean">
+              <li>Build from <code>@kkb/ui</code> tokens and components first.</li>
+              <li>Keep body text at WCAG AA contrast.</li>
+              <li>Use 1-4px radii for most controls and panels.</li>
+              <li>Use borders and tonal layering before shadows.</li>
+            </ul>
+          </article>
+          <article class="panel">
+            <h3>Don't</h3>
+            <ul class="clean" style="--dot: var(--error);">
+              <li>Make KKB feel vibe-coded, corporate, or like generic glossy SaaS.</li>
+              <li>Use heavy gradients, rounded soft cards, pillowy inputs, or decorative color drift.</li>
+              <li>Use display fonts in labels, buttons, data, or controls.</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="files">
+        <div class="section-head">
+          <h2>Source files</h2>
+          <p>The visual is a companion, not a replacement for the canonical design docs.</p>
+        </div>
+        <div class="grid auto">
+          <article class="source-note"><strong>Current spec</strong><p><code>DESIGN.md</code></p></article>
+          <article class="source-note"><strong>Original backup</strong><p><code>docs/design/DESIGN-backup-2026-06-18.md</code></p></article>
+          <article class="source-note"><strong>Generated visual</strong><p><code>docs/design/DESIGN-visual.html</code></p></article>
+          <article class="source-note"><strong>Panel sidecar</strong><p><code>.impeccable/design.json</code></p></article>
+        </div>
+      </section>
+
+      <footer class="footer">Generated as a static HTML visual for the KKB design system. It uses local project fonts when opened from this repository.</footer>
+    </main>
+  </div>
+
+  <script>
+    (() => {
+      const toc = document.getElementById('toc');
+      const links = Array.from(toc.querySelectorAll('a'));
+      const sections = links.map(link => {
+        const el = document.getElementById(link.getAttribute('href').slice(1));
+        return el ? { link, el } : null;
+      }).filter(Boolean);
+
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          links.forEach(link => {
+            link.classList.remove('active');
+          });
+          const match = sections.find(section => section.el === entry.target);
+          if (match) {
+            match.link.classList.add('active');
+            if (window.innerWidth <= 1050) {
+              match.link.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+          }
+        });
+      }, { rootMargin: '-12% 0px -78% 0px' });
+
+      sections.forEach(section => {
+        observer.observe(section.el);
+      });
+    })();
+  </script>
+</body>
+</html>
