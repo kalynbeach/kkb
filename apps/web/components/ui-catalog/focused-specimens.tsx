@@ -243,12 +243,8 @@ import * as React from "react";
 
 import { type CatalogItem, componentItems, itemFromId } from "./catalog-data";
 import { CatalogItemIcon } from "./catalog-icons";
-import {
-  chartData,
-  DemoBoundary,
-  renderTinyPreview,
-  SpecimenStage,
-} from "./catalog-surface-shared";
+import { chartData } from "./catalog-preview-data";
+import { DemoBoundary, SpecimenStage, TinyPreview } from "./catalog-surface-shared";
 import {
   AudioCompositionDemo,
   PlayerControlsDemo,
@@ -360,7 +356,9 @@ function focusedExamplesFor(item: CatalogItem) {
     default:
       return (
         <SpecimenStage title={item.label}>
-          <div className="grid min-h-40 place-items-center">{renderTinyPreview(item.id)}</div>
+          <div className="grid min-h-40 place-items-center">
+            <TinyPreview id={item.id} />
+          </div>
         </SpecimenStage>
       );
   }
@@ -1093,7 +1091,7 @@ function InputExamples({ item }: { item: CatalogItem }) {
 
   return (
     <SpecimenStage title={item.label} className="md:col-span-2">
-      {renderTinyPreview(item.id)}
+      <TinyPreview id={item.id} />
     </SpecimenStage>
   );
 }
@@ -1300,7 +1298,7 @@ function LayoutExamples({ item }: { item: CatalogItem }) {
 
   return (
     <SpecimenStage title={item.label} className="md:col-span-2">
-      {renderTinyPreview(item.id)}
+      <TinyPreview id={item.id} />
     </SpecimenStage>
   );
 }
@@ -1906,7 +1904,7 @@ function FeedbackExamples({ item }: { item: CatalogItem }) {
 
   return (
     <SpecimenStage title={item.label} className="md:col-span-2">
-      {renderTinyPreview(item.id)}
+      <TinyPreview id={item.id} />
     </SpecimenStage>
   );
 }
@@ -2037,7 +2035,7 @@ function MenuExamples({ item }: { item: CatalogItem }) {
 
   return (
     <SpecimenStage title={item.label} className="md:col-span-2">
-      {renderTinyPreview(item.id)}
+      <TinyPreview id={item.id} />
     </SpecimenStage>
   );
 }

@@ -63,7 +63,7 @@ import { cn } from "@kkb/ui/lib/utils";
 import { Bell, Download, ExternalLink, Loader2, Plus, Search, Settings } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { chartData } from "./catalog-surface-shared";
+import { chartData } from "./catalog-preview-data";
 import { PlayerControlsDemo, WaveformDemo } from "./demos/audio-demo";
 
 export function PreviewWall({ onSelect }: { onSelect: (id: string) => void }) {
