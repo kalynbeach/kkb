@@ -1,8 +1,13 @@
-import { allSelectableItems, type CatalogItem } from "./catalog-data";
+import { allSelectableItems, type CatalogItem, itemFromId, itemsForCategory } from "./catalog-data";
 
 export type CatalogSearchMatch = {
   item: CatalogItem;
   score: number;
+};
+
+export type CatalogSearchGroup = {
+  heading: string;
+  items: readonly CatalogItem[];
 };
 
 const kindPriority: Record<CatalogItem["kind"], number> = {
@@ -64,8 +69,7 @@ function scoreItem(item: CatalogItem, rawQuery: string) {
   const source = normalize(item.source);
   const keywordText = normalize(item.keywords.join(" "));
   const description = normalize(item.description);
-  const labelWords = words(item.label);
-  const idWords = words(item.id);
+  const itemWords = new Set([...words(item.label), ...words(item.id)]);
 
   if (label === query || id === query) {
     return 10_000;
@@ -75,11 +79,11 @@ function scoreItem(item: CatalogItem, rawQuery: string) {
     return 9_000;
   }
 
-  if (labelWords.includes(query) || idWords.includes(query)) {
+  if (itemWords.has(query)) {
     return 8_000;
   }
 
-  if (queryWords.every((word) => labelWords.includes(word) || idWords.includes(word))) {
+  if (queryWords.every((word) => itemWords.has(word))) {
     return 7_500;
   }
 
@@ -106,32 +110,93 @@ export function rankCatalogSearch(
     return defaultOrder(items).map((item) => ({ item, score: 1 }));
   }
 
-  return items
-    .map((item) => ({ item, score: scoreItem(item, query) }))
-    .filter((match) => match.score > 0)
-    .sort((left, right) => {
-      const scoreDifference = right.score - left.score;
+  const matches: CatalogSearchMatch[] = [];
 
-      if (scoreDifference !== 0) {
-        return scoreDifference;
-      }
+  for (const item of items) {
+    const score = scoreItem(item, query);
 
-      const kindDifference = kindPriority[left.item.kind] - kindPriority[right.item.kind];
+    if (score > 0) {
+      matches.push({ item, score });
+    }
+  }
 
-      if (kindDifference !== 0) {
-        return kindDifference;
-      }
+  return matches.sort((left, right) => {
+    const scoreDifference = right.score - left.score;
 
-      const importantDifference = Number(right.item.important) - Number(left.item.important);
+    if (scoreDifference !== 0) {
+      return scoreDifference;
+    }
 
-      if (importantDifference !== 0) {
-        return importantDifference;
-      }
+    const kindDifference = kindPriority[left.item.kind] - kindPriority[right.item.kind];
 
-      return left.item.label.localeCompare(right.item.label);
-    });
+    if (kindDifference !== 0) {
+      return kindDifference;
+    }
+
+    const importantDifference = Number(right.item.important) - Number(left.item.important);
+
+    if (importantDifference !== 0) {
+      return importantDifference;
+    }
+
+    return left.item.label.localeCompare(right.item.label);
+  });
 }
 
 export function searchCatalogItems(query: string, items?: readonly CatalogItem[]) {
   return rankCatalogSearch(query, items).map((match) => match.item);
+}
+
+export function getCatalogSearchGroups(
+  query: string,
+  selectedItem: CatalogItem,
+): CatalogSearchGroup[] {
+  if (!query) {
+    return emptySearchGroups(selectedItem);
+  }
+
+  const grouped = new Map<string, CatalogItem[]>();
+
+  for (const { item } of rankCatalogSearch(query).slice(0, 24)) {
+    const heading = searchResultHeading(item);
+    grouped.set(heading, [...(grouped.get(heading) ?? []), item]);
+  }
+
+  return [...grouped].map(([heading, items]) => ({ heading, items }));
+}
+
+function emptySearchGroups(selectedItem: CatalogItem): CatalogSearchGroup[] {
+  const pinned = [itemFromId("preview"), itemFromId("design-system")];
+
+  const currentCategory =
+    selectedItem.category === "Design System" ? [] : itemsForCategory(selectedItem.category);
+
+  const categoryItems = allSelectableItems.filter((item) => item.kind === "category");
+
+  return [
+    { heading: "Pinned", items: pinned },
+    {
+      heading:
+        selectedItem.category === "Design System" ? "Core components" : selectedItem.category,
+      items:
+        currentCategory.length > 0
+          ? currentCategory
+          : allSelectableItems
+              .filter((item) => item.important && item.kind === "component")
+              .slice(0, 10),
+    },
+    { heading: "Browse categories", items: categoryItems },
+  ].filter((group) => group.items.length > 0);
+}
+
+function searchResultHeading(item: CatalogItem) {
+  switch (item.kind) {
+    case "view":
+      return "Views";
+    case "category":
+      return "Categories";
+    case "component":
+    case "utility":
+      return item.category;
+  }
 }

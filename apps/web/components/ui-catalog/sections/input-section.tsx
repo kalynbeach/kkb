@@ -26,8 +26,6 @@ import { Activity, Bell, Search, SlidersHorizontal } from "lucide-react";
 import { ComponentCard } from "../component-card";
 import { CalendarDemo, SelectDemo } from "../demos/select-calendar-demo";
 
-export const inputSectionItemCount = 6;
-
 export function InputSection() {
   return (
     <>

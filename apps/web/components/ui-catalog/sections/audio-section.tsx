@@ -6,8 +6,6 @@ import {
   WaveformDemo,
 } from "../demos/audio-demo";
 
-export const audioSectionItemCount = 5;
-
 export function AudioSection() {
   return (
     <>

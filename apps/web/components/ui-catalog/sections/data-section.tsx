@@ -13,8 +13,6 @@ import {
 import { ComponentCard } from "../component-card";
 import { CarouselDemo } from "../demos/carousel-demo";
 
-export const dataSectionItemCount = 4;
-
 const dataRows = [
   { primitive: "Table", role: "structured rows", state: "server-owned" },
   { primitive: "Code", role: "inline tokens", state: "static" },

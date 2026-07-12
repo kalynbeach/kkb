@@ -11,8 +11,7 @@ import {
   resolveCatalogItem,
   utilityItems,
 } from "../catalog-data";
-import { getCatalogSearchGroups } from "../catalog-search";
-import { searchCatalogItems } from "../catalog-search-index";
+import { getCatalogSearchGroups, searchCatalogItems } from "../catalog-search-index";
 
 const publicComponentIds = [
   "accordion",

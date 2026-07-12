@@ -1,8 +1,10 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { Window } from "happy-dom";
-import { act } from "react";
+import { act, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
+import { itemFromId } from "../../../components/ui-catalog/catalog-data";
+import { CatalogSearchSession } from "../../../components/ui-catalog/catalog-search";
 import { CarouselDemo } from "../../../components/ui-catalog/demos/carousel-demo";
 import { CommandDemo } from "../../../components/ui-catalog/demos/command-demo";
 import { DropdownMenuDemo } from "../../../components/ui-catalog/demos/menu-demo";
@@ -180,6 +182,26 @@ function expectBodyText(environment: DomEnvironment, text: string) {
   expect(environment.document.body.textContent).toContain(text);
 }
 
+function CatalogSearchHarness() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <button type="button" onClick={() => setOpen(true)}>
+        Open catalog search
+      </button>
+      <button type="button" onClick={() => setOpen(false)}>
+        Close catalog search
+      </button>
+      <CatalogSearchSession
+        open={open}
+        selectedItem={itemFromId("button")}
+        onSelect={() => setOpen(false)}
+      />
+    </>
+  );
+}
+
 let domEnvironment: DomEnvironment | null = null;
 
 beforeEach(() => {
@@ -229,6 +251,32 @@ describe("interactive /ui demos", () => {
 
     expectBodyText(environment, "Catalog command");
     expectBodyText(environment, "Search local section actions.");
+  });
+
+  test("catalog search replaces stale input with a fresh session when reopened", () => {
+    const environment = domEnvironment as DomEnvironment;
+    renderIntoDom(environment, <CatalogSearchHarness />);
+    dispatchPrimaryClick(getButtonByText(environment, "Open catalog search"), environment.window);
+
+    const input = environment.document.querySelector<HTMLInputElement>(
+      'input[placeholder="Search component, category, source..."]',
+    );
+    expect(input).not.toBeNull();
+
+    if (input) {
+      input.value = "audio";
+    }
+    expect(input?.value).toBe("audio");
+
+    dispatchPrimaryClick(getButtonByText(environment, "Close catalog search"), environment.window);
+    dispatchPrimaryClick(getButtonByText(environment, "Open catalog search"), environment.window);
+
+    const reopenedInput = environment.document.querySelector<HTMLInputElement>(
+      'input[placeholder="Search component, category, source..."]',
+    );
+    expect(reopenedInput).not.toBe(input);
+    expect(reopenedInput?.value).toBe("");
+    expectBodyText(environment, "Pinned views and category browse");
   });
 
   test("carousel demo renders manual controls", () => {
