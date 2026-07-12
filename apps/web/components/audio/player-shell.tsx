@@ -12,6 +12,8 @@ import { useEffect, useEffectEvent, useRef } from "react";
 
 import type { WebPlayer } from "@/lib/audio/create-web-player";
 
+import { shouldPollPlayerTimeline } from "./player-timeline";
+
 type PlayerShellProps = {
   player: WebPlayer | null;
   title: string;
@@ -34,8 +36,6 @@ type PlayerShellProps = {
   onSetVolume: (volume: number) => void;
   className?: string;
 };
-
-const shouldPollPlayerTimeline = (status: PlayerShellProps["status"]) => status === "playing";
 
 const formatBufferedLabel = (
   bufferedSegments: ReturnType<typeof createPlayerPresenter>["bufferedSegments"],
@@ -346,4 +346,4 @@ function StatusLed({ status }: { status: PlayerShellProps["status"] }) {
   );
 }
 
-export { PlayerShell, shouldPollPlayerTimeline };
+export { PlayerShell };

@@ -1,7 +1,8 @@
 import { describe, expect, test } from "bun:test";
 import { renderToString } from "react-dom/server";
 
-import { PlayerShell, shouldPollPlayerTimeline } from "../player-shell";
+import { PlayerShell } from "../player-shell";
+import { shouldPollPlayerTimeline } from "../player-timeline";
 
 const createPlayerStub = () => ({
   defaultTrack: {
