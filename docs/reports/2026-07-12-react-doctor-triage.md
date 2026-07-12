@@ -14,8 +14,10 @@ scored 100 with no findings.
 
 ## Disposition summary
 
-- Fix in this stack: 49 findings.
-- Defer with evidence: 11 findings.
+- Resolved from the original scan: 49 findings.
+- Deferred from the original scan with evidence: 11 findings.
+- Final scan: 13 warnings and no errors. Two additional oscilloscope heuristics surfaced around the
+  same local external-runtime synchronization already covered by the original deferral.
 - The fix stack prioritizes correctness, stale closures, hydration consistency, dead code,
   Fast Refresh boundaries, stable context values, and verified dependency ownership.
 - Deferred findings are external-system synchronization effects, an intentional browser support
@@ -87,16 +89,56 @@ scored 100 with no findings.
 | RD-059 | warning | `jsx-no-constructed-context-values` | `packages/ui/src/components/toggle-group.tsx:43` | Fix: memoize the toggle-group provider value. |
 | RD-060 | warning | `only-export-components` | `packages/ui/src/components/toggle.tsx:45` | Fix: move the shared variant helper to a pure module. |
 
-## Planned commit stack
+## Completed commit stack
 
-1. Fix oscilloscope render purity and stale effect callbacks.
-2. Fix carousel listener cleanup and stabilize context providers.
-3. Canonicalize catalog routes and reset search sessions synchronously.
-4. Remove dead catalog code and streamline its collection passes.
-5. Isolate non-component helpers from Fast Refresh component modules.
-6. Use a hydration-stable calendar day identifier.
-7. Remove dependencies with no owning imports.
+1. `a434e49` — stabilize oscilloscope effect callbacks.
+2. `e26dfc1` — isolate the player timeline helper.
+3. `9f9dd2e` — remove unused workspace dependencies.
+4. `c5b563c` — clean up carousel subscriptions and stabilize its context.
+5. `3824680` — stabilize chart and form render contexts.
+6. `471e468` — isolate UI helpers, stabilize toggle context, and add calendar SSR coverage.
+7. `5dcf2f6` — canonicalize invalid catalog routes on the server.
+8. `7198c46` — reset catalog search sessions and remove dead catalog data.
+9. `2ee5e45` — isolate catalog preview data and rendering helpers.
 
-Each source commit must pass its most relevant targeted tests and type checks before it is added to
-the draft pull request. The completed stack will rerun the full test, type-check, lint, build, and
-React Doctor checks; this report will then record the final score and residual findings.
+## Final React Doctor result
+
+The final React Doctor `0.7.6` scan covered 163 files and completed successfully:
+
+- Score: 67/100, up from 56/100.
+- Errors: 0, down from 2.
+- Warnings: 13, down from 58.
+- `@kkb/docs`: 100, no findings.
+- `@kkb/web`: 67, 7 warnings.
+- `@kkb/ui`: 76, 6 warnings.
+
+### Residual warning triage
+
+| Rule | Count | Disposition |
+| --- | ---: | --- |
+| `exhaustive-deps` | 2 | False positives: sidebar callbacks and context values depend on the derived `open` value, which already changes with `openProp` or `_open`. |
+| `no-effect-chain` | 3 | Deliberate external synchronization: Web Audio updates, oscilloscope runtime config updates, and URL hash persistence belong in effects. |
+| `no-pass-live-state-to-parent` | 2 | False positives: the Effect Event controls the local imperative signal runtime and is not a parent callback. |
+| `no-pass-data-to-parent` | 1 | False positive on the same local signal-runtime Effect Event; no data is passed to a parent component. |
+| `rendering-hydration-no-flicker` | 1 | Deliberate SSR-safe checking state before browser-only WebGPU capability detection. |
+| `prefer-dynamic-import` | 1 | Deferred to a consuming route boundary; chart is already an opt-in package subpath. |
+| `js-combine-iterations` | 2 | Deferred for tiny chart tooltip and legend payloads where the current form preserves clearer formatter-index behavior. |
+| `no-many-boolean-props` | 1 | Deliberate API: the flags model independent queue and playback capabilities with existing coverage. |
+
+The three parent-data/state diagnostics include two warnings that were not distinct entries in the
+baseline scan. They appeared after the oscilloscope callbacks moved to React Effect Events, but they
+target the same locally owned imperative runtime synchronization as RD-008.
+
+## Verification
+
+- `bun run test`: 191 tests passed across `@kkb/audio`, `@kkb/ui`, and `@kkb/web`.
+- `bun run check-types`: all five workspace typecheck tasks passed.
+- `bun run format-and-lint`: passed with 31 existing warnings and 3 infos in generated/static docs
+  and the existing sidebar cookie assignment.
+- `bun run build --filter=@kkb/web`: passed.
+- `bun run build --filter=@kkb/docs`: passed.
+- `bun install --frozen-lockfile --lockfile-only`: passed.
+- `git diff --check`: passed.
+
+The combined sandboxed Turbo build stalled while both Next compilers ran concurrently. The two Next
+workspaces completed successfully when built sequentially outside the restricted sandbox.
