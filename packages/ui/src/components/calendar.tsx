@@ -1,10 +1,12 @@
 "use client";
 
-import { Button, buttonVariants } from "@kkb/ui/components/button";
+import { Button } from "@kkb/ui/components/button";
 import { cn } from "@kkb/ui/lib/utils";
 import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 import * as React from "react";
 import { type DayButton, DayPicker, getDefaultClassNames } from "react-day-picker";
+
+import { buttonVariants } from "./button-variants";
 
 function Calendar({
   className,
@@ -156,7 +158,7 @@ function CalendarDayButton({
       ref={ref}
       variant="ghost"
       size="icon"
-      data-day={day.date.toLocaleDateString()}
+      data-day={day.isoDate}
       data-selected-single={
         modifiers.selected &&
         !modifiers.range_start &&
