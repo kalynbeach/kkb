@@ -8,7 +8,14 @@ import type {
   OscilloscopeConfigUpdate,
   OscilloscopeSupport,
 } from "@kkb/audio/oscilloscope/types";
-import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { createMicProvider, type MicInputMode } from "@/lib/oscilloscope/create-mic-provider";
 
@@ -41,6 +48,16 @@ const loadCreateScopeDefault: LoadCreateScope = () => import("@kkb/audio/oscillo
 const initialSupport: OscilloscopeSupport = {
   status: "checking",
 };
+const supportedSupport: OscilloscopeSupport = {
+  status: "supported",
+};
+const unsupportedSupport: OscilloscopeSupport = {
+  reason: "WebGPU is not available in this browser.",
+  status: "unsupported",
+};
+const subscribeToOscilloscopeSupport = () => () => {};
+const getOscilloscopeSupportSnapshot = () => getOscilloscopeSupport().status === "supported";
+const getServerOscilloscopeSupportSnapshot = () => null;
 const MIN_TRAIL_LENGTH = 16;
 const MAX_TRAIL_LENGTH = 128;
 const MIN_BLOOM = 0;
@@ -153,8 +170,21 @@ export function OscilloscopeClient({
   const micRuntimeRef = useRef<MicRuntime | null>(null);
   const micRequestIdRef = useRef(0);
   const scopeRef = useRef<ScopeController | null>(null);
-  const [support, setSupport] = useState<OscilloscopeSupport>(initialSupport);
+  const supportSnapshot = useSyncExternalStore<boolean | null>(
+    subscribeToOscilloscopeSupport,
+    getOscilloscopeSupportSnapshot,
+    getServerOscilloscopeSupportSnapshot,
+  );
+  const detectedSupport =
+    supportSnapshot === null
+      ? initialSupport
+      : supportSnapshot
+        ? supportedSupport
+        : unsupportedSupport;
+  const [runtimeSupport, setRuntimeSupport] = useState<OscilloscopeSupport | null>(null);
+  const support = runtimeSupport ?? detectedSupport;
   const [config, setConfig] = useState<OscilloscopeConfig>(defaultPreset.config);
+  const [hashReady, setHashReady] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
   const [micStatus, setMicStatus] = useState<"idle" | "requesting" | "ready" | "error">("idle");
   const [selectedPresetId, setSelectedPresetId] = useState(defaultPreset.id);
@@ -231,10 +261,6 @@ export function OscilloscopeClient({
   );
 
   useEffect(() => {
-    setSupport(getOscilloscopeSupport());
-  }, []);
-
-  useEffect(() => {
     const canvas = canvasRef.current;
     if (support.status !== "supported" || !canvas) {
       return;
@@ -265,7 +291,7 @@ export function OscilloscopeClient({
       }
 
       console.error("[oscilloscope] start failed", error);
-      setSupport({
+      setRuntimeSupport({
         reason:
           error instanceof Error
             ? `Unable to start WebGPU renderer: ${error.message}`
@@ -318,11 +344,16 @@ export function OscilloscopeClient({
       setConfig(initial.config);
       setSelectedPresetId(initial.presetId);
     }
+    setHashReady(true);
   }, []);
 
   useEffect(() => {
+    if (!hashReady) {
+      return;
+    }
+
     writeHashConfig(config, selectedPresetId);
-  }, [config, selectedPresetId]);
+  }, [config, hashReady, selectedPresetId]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

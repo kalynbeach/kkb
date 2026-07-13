@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
 import { Window } from "happy-dom";
-import { act } from "react";
+import { act, StrictMode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 
@@ -224,13 +224,32 @@ describe("OscilloscopeClient", () => {
     });
     const loadCreateScope = mock(async () => ({ createOscilloscope: createScope }));
 
-    expect(() =>
-      renderToString(
-        <OscilloscopeClient createScope={createScope} loadCreateScope={loadCreateScope} />,
-      ),
-    ).not.toThrow();
+    const html = renderToString(
+      <OscilloscopeClient createScope={createScope} loadCreateScope={loadCreateScope} />,
+    );
+
+    expect(html).toContain("Checking WebGPU support...");
     expect(createScope).not.toHaveBeenCalled();
     expect(loadCreateScope).not.toHaveBeenCalled();
+  });
+
+  test("shows the unsupported state without starting the browser runtime", async () => {
+    const environment = domEnvironment as DomEnvironment;
+    Object.defineProperty(environment.window.navigator, "gpu", {
+      configurable: true,
+      value: undefined,
+      writable: true,
+    });
+    const createScope = mock(() => {
+      throw new Error("unsupported browser runtime should not start");
+    });
+
+    await renderIntoDomAsync(environment, <OscilloscopeClient createScope={createScope} />);
+
+    expect(environment.document.body.textContent).toContain(
+      "WebGPU is not available in this browser.",
+    );
+    expect(createScope).not.toHaveBeenCalled();
   });
 
   test("keeps one scope instance alive while controls push config updates", async () => {
@@ -443,7 +462,12 @@ describe("OscilloscopeClient", () => {
     };
     const createScope = mock(() => scope);
 
-    await renderIntoDomAsync(environment, <OscilloscopeClient createScope={createScope} />);
+    await renderIntoDomAsync(
+      environment,
+      <StrictMode>
+        <OscilloscopeClient createScope={createScope} />
+      </StrictMode>,
+    );
     await act(async () => {
       await Promise.resolve();
       await Promise.resolve();
