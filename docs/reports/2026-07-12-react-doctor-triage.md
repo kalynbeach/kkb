@@ -8,21 +8,22 @@ Command:
 bunx react-doctor@latest --verbose
 ```
 
-React Doctor `0.7.6` scanned 157 files across `@kkb/docs`, `@kkb/web`, and `@kkb/ui`.
-The baseline score was 56/100 with 60 findings: 2 errors and 58 warnings. `@kkb/docs`
-scored 100 with no findings.
+React Doctor `0.7.6` initially scanned 157 files across `@kkb/docs`, `@kkb/web`, and
+`@kkb/ui`. The baseline score was 56/100 with 60 findings: 2 errors and 58 warnings.
+`@kkb/docs` scored 100 with no findings. A follow-up scan after the first remediation stack
+covered 163 files and reported 13 warnings; the second remediation stack reduced that result to
+7 warnings across 165 files.
 
 ## Disposition summary
 
-- Resolved from the original scan: 49 findings.
-- Deferred from the original scan with evidence: 11 findings.
-- Final scan: 13 warnings and no errors. Two additional oscilloscope heuristics surfaced around the
+- Resolved from the original scan: 55 findings.
+- Deferred from the original scan with evidence: 5 findings.
+- Final scan: 7 warnings and no errors. Two additional oscilloscope heuristics surfaced around the
   same local external-runtime synchronization already covered by the original deferral.
 - The fix stack prioritizes correctness, stale closures, hydration consistency, dead code,
   Fast Refresh boundaries, stable context values, and verified dependency ownership.
-- Deferred findings are external-system synchronization effects, an intentional browser support
-  transition, small chart payload iterations, a route-level dynamic-loading decision, transport
-  capability booleans, and two dependency-analysis false positives.
+- Deferred findings are external-system synchronization effects, local Effect Event false
+  positives, and a route-level dynamic-loading decision.
 
 ## Finding ledger
 
@@ -32,12 +33,12 @@ scored 100 with no findings.
 | RD-002 | warning | `no-effect-chain` | `apps/web/components/binaural-beats/binaural-beats-client.tsx:155` | Defer: the effect synchronizes committed state to the external Web Audio engine and is guarded while stopped. |
 | RD-003 | error | `no-ref-current-in-render` | `apps/web/components/oscilloscope/oscilloscope-client.tsx:157` | Fix: read current config through a React Effect Event instead of mutating a ref during render. |
 | RD-004 | warning | `prefer-module-scope-pure-function` | `apps/web/components/oscilloscope/oscilloscope-client.tsx:176` | Fix: move the capture-free teardown helper to module scope. |
-| RD-005 | warning | `rendering-hydration-no-flicker` | `apps/web/components/oscilloscope/oscilloscope-client.tsx:236` | Defer: the explicit checking state preserves SSR hydration before browser-only WebGPU detection. |
+| RD-005 | warning | `rendering-hydration-no-flicker` | `apps/web/components/oscilloscope/oscilloscope-client.tsx:236` | Fix: expose a primitive WebGPU capability snapshot through `useSyncExternalStore` while retaining the SSR checking state. |
 | RD-006 | warning | `exhaustive-deps` | `apps/web/components/oscilloscope/oscilloscope-client.tsx:303` | Fix: make runtime source synchronization an Effect Event so async startup reads the current provider factory. |
 | RD-007 | warning | `no-effect-chain` | `apps/web/components/oscilloscope/oscilloscope-client.tsx:305` | Defer: the effect synchronizes React config to an imperative oscilloscope runtime, not derived React state. |
 | RD-008 | warning | `no-pass-live-state-to-parent` | `apps/web/components/oscilloscope/oscilloscope-client.tsx:315` | Defer: the local function controls an imperative signal provider and is not a parent callback. |
 | RD-009 | warning | `exhaustive-deps` | `apps/web/components/oscilloscope/oscilloscope-client.tsx:316` | Fix: use the same Effect Event while retaining the provider override as a resynchronization dependency. |
-| RD-010 | warning | `no-effect-chain` | `apps/web/components/oscilloscope/oscilloscope-client.tsx:326` | Defer: committed state is intentionally synchronized to the browser hash as an external system. |
+| RD-010 | warning | `no-effect-chain` | `apps/web/components/oscilloscope/oscilloscope-client.tsx:326` | Keep diagnostic: committed state is synchronized to the browser hash as an external system. Fix: gate persistence until restoration commits so Strict Mode cannot overwrite the incoming hash. |
 | RD-011 | warning | `unused-export` | `apps/web/components/ui-catalog/catalog-data.ts:72` | Fix: delete dead `railGroups` data. |
 | RD-012 | warning | `unused-export` | `apps/web/components/ui-catalog/catalog-data.ts:306` | Fix: delete dead `groupedItems`. |
 | RD-013 | warning | `unused-export` | `apps/web/components/ui-catalog/catalog-data.ts:313` | Fix: delete dead `itemLane` and its orphaned lane data. |
@@ -67,7 +68,7 @@ scored 100 with no findings.
 | RD-037 | warning | `unused-dependency` | `apps/web/package.json` (`radix-ui`) | Fix: remove the dependency; only `@kkb/ui` imports it. |
 | RD-038 | warning | `unused-dev-dependency` | `apps/web/package.json` (`@json-render/shadcn`) | Fix: remove the duplicate dev dependency; `@kkb/ui` owns the actual import. |
 | RD-039 | warning | `unused-dependency` | `packages/ui/package.json` (`@hookform/resolvers`) | Fix: remove the dependency; the workspace has no imports. |
-| RD-040 | warning | `no-many-boolean-props` | `packages/ui/src/components/audio/player-controls.tsx:49` | Defer: the booleans represent independent queue and playback capabilities already covered by tests. |
+| RD-040 | warning | `no-many-boolean-props` | `packages/ui/src/components/audio/player-controls.tsx:49` | Fix: replace transport booleans with a presenter-owned control-mode discriminant and callback-derived navigation availability. |
 | RD-041 | warning | `only-export-components` | `packages/ui/src/components/audio/waveform.tsx:238` | Fix: move keyboard seek helpers to a pure module. |
 | RD-042 | warning | `only-export-components` | `packages/ui/src/components/badge.tsx:45` | Fix: stop exporting the file-local variant helper. |
 | RD-043 | warning | `only-export-components` | `packages/ui/src/components/button-group.tsx:76` | Fix: stop exporting the file-local variant helper. |
@@ -78,13 +79,13 @@ scored 100 with no findings.
 | RD-048 | warning | `prefer-dynamic-import` | `packages/ui/src/components/chart.tsx:5` | Defer: chart is an opt-in package subpath; loading policy belongs at a consuming route boundary. |
 | RD-049 | warning | `jsx-no-constructed-context-values` | `packages/ui/src/components/chart.tsx:50` | Fix: memoize the chart provider value. |
 | RD-050 | warning | `rerender-memo-before-early-return` | `packages/ui/src/components/chart.tsx:118` | Fix: return inactive tooltips before deriving their small label fragment. |
-| RD-051 | warning | `js-combine-iterations` | `packages/ui/src/components/chart.tsx:159` | Defer: tooltip payloads are small and the filtered formatter index is behaviorally significant. |
-| RD-052 | warning | `js-combine-iterations` | `packages/ui/src/components/chart.tsx:258` | Defer: legend payloads are small and the current filter/map form is clearer. |
+| RD-051 | warning | `js-combine-iterations` | `packages/ui/src/components/chart.tsx:159` | Fix: map visible tooltip payloads in one pass while preserving the filtered formatter index. |
+| RD-052 | warning | `js-combine-iterations` | `packages/ui/src/components/chart.tsx:258` | Fix: reuse the same one-pass visible-payload mapper for legends. |
 | RD-053 | warning | `jsx-no-constructed-context-values` | `packages/ui/src/components/form.tsx:36` | Fix: memoize the field provider value. |
 | RD-054 | warning | `jsx-no-constructed-context-values` | `packages/ui/src/components/form.tsx:75` | Fix: memoize the item provider value. |
 | RD-055 | warning | `only-export-components` | `packages/ui/src/components/navigation-menu.tsx:159` | Fix: stop exporting the file-local style helper. |
-| RD-056 | warning | `exhaustive-deps` | `packages/ui/src/components/sidebar.tsx:87` | Defer: the callback depends on derived `open`, which already covers `openProp` and `_open`. |
-| RD-057 | warning | `exhaustive-deps` | `packages/ui/src/components/sidebar.tsx:122` | Defer: the memo depends on derived `open`, so the reported source states are not stale. |
+| RD-056 | warning | `exhaustive-deps` | `packages/ui/src/components/sidebar.tsx:87` | Fix: derive the effective open state inside the callback and list the controlled and internal sources explicitly. |
+| RD-057 | warning | `exhaustive-deps` | `packages/ui/src/components/sidebar.tsx:122` | Fix: derive the effective open state inside the context memo with explicit source dependencies. |
 | RD-058 | warning | `only-export-components` | `packages/ui/src/components/tabs.tsx:80` | Fix: stop exporting the file-local variant helper. |
 | RD-059 | warning | `jsx-no-constructed-context-values` | `packages/ui/src/components/toggle-group.tsx:43` | Fix: memoize the toggle-group provider value. |
 | RD-060 | warning | `only-export-components` | `packages/ui/src/components/toggle.tsx:45` | Fix: move the shared variant helper to a pure module. |
@@ -100,30 +101,31 @@ scored 100 with no findings.
 7. `5dcf2f6` — canonicalize invalid catalog routes on the server.
 8. `7198c46` — reset catalog search sessions and remove dead catalog data.
 9. `2ee5e45` — isolate catalog preview data and rendering helpers.
+10. `145a938` — make sidebar dependencies explicit.
+11. `3410d45` — model player control modes.
+12. `b0d6ba9` — map chart payloads in one pass and cover visible indexes.
+13. `ff5f925` — stabilize oscilloscope hydration and Strict Mode hash restoration.
 
 ## Final React Doctor result
 
-The final React Doctor `0.7.6` scan covered 163 files and completed successfully:
+The final React Doctor `0.7.6` scan covered 165 files and completed successfully:
 
-- Score: 67/100, up from 56/100.
+- Score shown by the tool: 59/100. The score changed from 67 on the 13-warning scan even though
+  the warning count fell; warning count and disposition are the comparable follow-up measures.
 - Errors: 0, down from 2.
-- Warnings: 13, down from 58.
+- Warnings: 7, down from 58 initially and 13 at the start of this follow-up.
 - `@kkb/docs`: 100, no findings.
-- `@kkb/web`: 67, 7 warnings.
-- `@kkb/ui`: 76, 6 warnings.
+- `@kkb/web`: 59, 6 warnings.
+- `@kkb/ui`: 85, 1 warning.
 
 ### Residual warning triage
 
 | Rule | Count | Disposition |
 | --- | ---: | --- |
-| `exhaustive-deps` | 2 | False positives: sidebar callbacks and context values depend on the derived `open` value, which already changes with `openProp` or `_open`. |
-| `no-effect-chain` | 3 | Deliberate external synchronization: Web Audio updates, oscilloscope runtime config updates, and URL hash persistence belong in effects. |
+| `no-effect-chain` | 3 | Deliberate external synchronization: Web Audio updates, oscilloscope runtime config updates, and URL hash persistence belong in effects. Strict Mode hash restoration is now gated and covered. |
 | `no-pass-live-state-to-parent` | 2 | False positives: the Effect Event controls the local imperative signal runtime and is not a parent callback. |
 | `no-pass-data-to-parent` | 1 | False positive on the same local signal-runtime Effect Event; no data is passed to a parent component. |
-| `rendering-hydration-no-flicker` | 1 | Deliberate SSR-safe checking state before browser-only WebGPU capability detection. |
 | `prefer-dynamic-import` | 1 | Deferred to a consuming route boundary; chart is already an opt-in package subpath. |
-| `js-combine-iterations` | 2 | Deferred for tiny chart tooltip and legend payloads where the current form preserves clearer formatter-index behavior. |
-| `no-many-boolean-props` | 1 | Deliberate API: the flags model independent queue and playback capabilities with existing coverage. |
 
 The three parent-data/state diagnostics include two warnings that were not distinct entries in the
 baseline scan. They appeared after the oscilloscope callbacks moved to React Effect Events, but they
@@ -131,13 +133,14 @@ target the same locally owned imperative runtime synchronization as RD-008.
 
 ## Verification
 
-- `bun run test`: 191 tests passed across `@kkb/audio`, `@kkb/ui`, and `@kkb/web`.
+- `bun run test`: 193 tests passed across `@kkb/audio`, `@kkb/ui`, and `@kkb/web`.
 - `bun run check-types`: all five workspace typecheck tasks passed.
 - `bun run format-and-lint`: passed with 31 existing warnings and 3 infos in generated/static docs
   and the existing sidebar cookie assignment.
 - `bun run build --filter=@kkb/web`: passed.
 - `bun run build --filter=@kkb/docs`: passed.
 - `bun install --frozen-lockfile --lockfile-only`: passed.
+- `bunx react-doctor@latest --verbose`: 7 warnings and no errors.
 - `git diff --check`: passed.
 
 The combined sandboxed Turbo build stalled while both Next compilers ran concurrently. The two Next
