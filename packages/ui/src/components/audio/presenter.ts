@@ -19,6 +19,8 @@ export type PlayerPresenterInput = {
   bufferedRanges: BufferedRange[];
 };
 
+export type PlayerControlMode = "unavailable" | "play" | "pause";
+
 const formatTime = (value: number) => {
   const totalSeconds = Math.max(0, Math.floor(Number.isFinite(value) ? value : 0));
   const minutes = Math.floor(totalSeconds / 60);
@@ -51,11 +53,11 @@ export const createPlayerPresenter = ({
   const isPlaying = status === "playing";
   const canControl =
     status !== "idle" && status !== "loading" && status !== "recovering" && status !== "error";
+  const controlMode: PlayerControlMode = !canControl ? "unavailable" : isPlaying ? "pause" : "play";
 
   return {
     isPlaying,
-    isPlayDisabled: !canControl || isPlaying,
-    isPauseDisabled: !canControl || !isPlaying,
+    controlMode,
     currentTimeLabel: formatTime(safeCurrentTime),
     durationLabel: formatTime(safeDurationValue),
     progressPercent: clampPercent((safeCurrentTime / safeDuration) * 100),

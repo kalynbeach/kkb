@@ -3,11 +3,10 @@
 import { cn } from "@kkb/ui/lib/utils";
 import { Pause, Play, SkipBack, SkipForward, Square } from "lucide-react";
 
+import type { PlayerControlMode } from "./presenter";
+
 type PlayerControlsProps = {
-  canSelectPrevious?: boolean;
-  canSelectNext?: boolean;
-  isPlayDisabled?: boolean;
-  isPauseDisabled?: boolean;
+  controlMode: PlayerControlMode;
   rate: number;
   volume: number;
   className?: string;
@@ -47,10 +46,7 @@ function TransportButton({
 }
 
 function PlayerControls({
-  canSelectPrevious = false,
-  canSelectNext = false,
-  isPlayDisabled = false,
-  isPauseDisabled = false,
+  controlMode,
   rate,
   volume,
   className,
@@ -62,10 +58,12 @@ function PlayerControls({
   onSetRate,
   onSetVolume,
 }: PlayerControlsProps) {
-  const controlsDisabled = isPlayDisabled && isPauseDisabled;
-  const isPreviousDisabled = controlsDisabled || !canSelectPrevious;
+  const controlsDisabled = controlMode === "unavailable";
+  const isPreviousDisabled = controlsDisabled || !onPrevious;
+  const isPlayDisabled = controlMode !== "play";
+  const isPauseDisabled = controlMode !== "pause";
   const isStopDisabled = controlsDisabled;
-  const isNextDisabled = controlsDisabled || !canSelectNext;
+  const isNextDisabled = controlsDisabled || !onNext;
 
   return (
     <div className={cn("flex flex-col gap-2 py-1.5", className)}>

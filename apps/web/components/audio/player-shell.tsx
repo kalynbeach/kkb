@@ -278,17 +278,14 @@ function PlayerShell({
 
         <div className="mx-1 mt-1 mb-1">
           <PlayerControls
-            canSelectPrevious={canSelectPrevious}
-            canSelectNext={canSelectNext}
-            isPlayDisabled={presenter.isPlayDisabled}
-            isPauseDisabled={presenter.isPauseDisabled}
+            controlMode={presenter.controlMode}
             rate={rate}
             volume={volume}
-            onPrevious={onPrevious}
+            onPrevious={canSelectPrevious ? onPrevious : undefined}
             onPlay={onPlay}
             onPause={onPause}
             onStop={onStop}
-            onNext={onNext}
+            onNext={canSelectNext ? onNext : undefined}
             onSetRate={onSetRate}
             onSetVolume={onSetVolume}
           />

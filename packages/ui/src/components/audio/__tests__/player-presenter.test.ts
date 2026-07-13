@@ -3,11 +3,17 @@ import { describe, expect, test } from "bun:test";
 import { createPlayerPresenter } from "../presenter";
 
 describe("createPlayerPresenter", () => {
-  test("maps status to play and pause disabled states", () => {
+  test("maps status to the available transport action", () => {
     const idle = createPlayerPresenter({
       status: "idle",
       currentTime: 0,
       duration: 0,
+      bufferedRanges: [],
+    });
+    const ready = createPlayerPresenter({
+      status: "ready",
+      currentTime: 0,
+      duration: 120,
       bufferedRanges: [],
     });
     const playing = createPlayerPresenter({
@@ -17,10 +23,9 @@ describe("createPlayerPresenter", () => {
       bufferedRanges: [],
     });
 
-    expect(idle.isPlayDisabled).toBe(true);
-    expect(idle.isPauseDisabled).toBe(true);
-    expect(playing.isPlayDisabled).toBe(true);
-    expect(playing.isPauseDisabled).toBe(false);
+    expect(idle.controlMode).toBe("unavailable");
+    expect(ready.controlMode).toBe("play");
+    expect(playing.controlMode).toBe("pause");
   });
 
   test("formats current time and duration labels", () => {

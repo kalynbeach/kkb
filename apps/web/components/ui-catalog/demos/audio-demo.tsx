@@ -152,8 +152,7 @@ export function PlayerControlsDemo() {
         </Badge>
       </div>
       <PlayerControls
-        isPlayDisabled={presenter.isPlayDisabled}
-        isPauseDisabled={presenter.isPauseDisabled}
+        controlMode={presenter.controlMode}
         rate={rate}
         volume={volume}
         onPlay={() => setIsPlaying(true)}
