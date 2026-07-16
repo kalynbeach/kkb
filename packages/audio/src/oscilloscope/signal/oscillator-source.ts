@@ -49,6 +49,8 @@ export const createOscillatorSignalProvider = (
   const fftSize = options.fftSize ?? 1024;
   const clock = options.clock ?? (() => performance.now() / 1000);
   const emptyFrequencyData = new Float32Array(fftSize / 2);
+  const leftBuffer = new Float32Array(fftSize);
+  const rightBuffer = new Float32Array(fftSize);
   let frameSamples: {
     left: Float32Array;
     right: Float32Array;
@@ -58,18 +60,21 @@ export const createOscillatorSignalProvider = (
     right: false,
   };
 
-  const buildSamples = (oscillator: OscillatorSourceConfig["a"], now: number) => {
-    const samples = new Float32Array(fftSize);
+  const buildSamples = (
+    oscillator: OscillatorSourceConfig["a"],
+    now: number,
+    target: Float32Array,
+  ) => {
     const detuneMultiplier = 2 ** (oscillator.detuneCents / 1200);
     const frequency = oscillator.frequency * detuneMultiplier;
 
     for (let index = 0; index < fftSize; index += 1) {
       const time = now - (fftSize - 1 - index) / sampleRate;
       const phase = time * frequency + toPhaseOffset(oscillator.phase);
-      samples[index] = sampleWave(oscillator.waveform, phase) * oscillator.amplitude;
+      target[index] = sampleWave(oscillator.waveform, phase) * oscillator.amplitude;
     }
 
-    return samples;
+    return target;
   };
 
   const readFrameSamples = () => {
@@ -79,8 +84,8 @@ export const createOscillatorSignalProvider = (
 
     const now = clock();
     frameSamples = {
-      left: buildSamples(config.a, now),
-      right: buildSamples(config.b, now),
+      left: buildSamples(config.a, now, leftBuffer),
+      right: buildSamples(config.b, now, rightBuffer),
     };
     servedChannels = {
       left: false,
