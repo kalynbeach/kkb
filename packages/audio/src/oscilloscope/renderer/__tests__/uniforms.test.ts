@@ -124,8 +124,10 @@ describe("createRendererUniformValues", () => {
 describe("packRendererUniforms", () => {
   test("packs the renderer uniform values into one GPU-friendly buffer payload", () => {
     const values = createRendererUniformValues(config, 800, 600, 1 / 60);
-    const payload = packRendererUniforms(values);
+    const target = new Float32Array(8);
+    const payload = packRendererUniforms(values, target);
 
+    expect(payload).toBe(target);
     expect(payload).toBeInstanceOf(Float32Array);
     expect(payload).toHaveLength(8);
     expect(payload[0]).toBeCloseTo(values.fadeAlpha, 6);
@@ -136,5 +138,13 @@ describe("packRendererUniforms", () => {
     expect(payload[5]).toBeCloseTo(values.texelSizeY, 6);
     expect(payload[6]).toBeCloseTo(values.bloomStrength, 6);
     expect(payload[7]).toBeCloseTo(values.traceGain, 6);
+  });
+
+  test("rejects targets that cannot hold all renderer uniforms", () => {
+    const values = createRendererUniformValues(config, 800, 600, 1 / 60);
+
+    expect(() => packRendererUniforms(values, new Float32Array(7))).toThrow(
+      "Renderer uniform target must contain at least 8 floats.",
+    );
   });
 });

@@ -46,6 +46,7 @@ export const createWebGpuRenderer = async (
     magFilter: "linear",
     minFilter: "linear",
   });
+  const uniformScratch = new Float32Array(8);
   const uniformBuffer = device.createBuffer({
     size: 8 * Float32Array.BYTES_PER_ELEMENT,
     usage: GPU_BUFFER_USAGE_COPY_DST | GPU_BUFFER_USAGE_UNIFORM,
@@ -207,6 +208,7 @@ export const createWebGpuRenderer = async (
   const drawFrame = (geometry: FrameGeometry, config: OscilloscopeConfig, deltaSeconds: number) => {
     const uniforms = packRendererUniforms(
       createRendererUniformValues(config, canvas.width, canvas.height, deltaSeconds),
+      uniformScratch,
     );
     const history = historyTarget;
 

@@ -49,14 +49,18 @@ export const createRendererUniformValues = (
   };
 };
 
-export const packRendererUniforms = (values: RendererUniformValues) =>
-  new Float32Array([
-    values.fadeAlpha,
-    values.traceAlpha,
-    values.backgroundLift,
-    values.glowSpread,
-    values.texelSizeX,
-    values.texelSizeY,
-    values.bloomStrength,
-    values.traceGain,
-  ]);
+export const packRendererUniforms = (values: RendererUniformValues, target: Float32Array) => {
+  if (target.length < 8) {
+    throw new Error("Renderer uniform target must contain at least 8 floats.");
+  }
+
+  target[0] = values.fadeAlpha;
+  target[1] = values.traceAlpha;
+  target[2] = values.backgroundLift;
+  target[3] = values.glowSpread;
+  target[4] = values.texelSizeX;
+  target[5] = values.texelSizeY;
+  target[6] = values.bloomStrength;
+  target[7] = values.traceGain;
+  return target;
+};
