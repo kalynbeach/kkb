@@ -7,14 +7,6 @@ import * as React from "react";
 import { type CatalogItem, itemFromId } from "./catalog-data";
 import { CatalogItemIcon } from "./catalog-icons";
 
-export const chartData = [
-  { month: "Jan", value: 52 },
-  { month: "Feb", value: 86 },
-  { month: "Mar", value: 68 },
-  { month: "Apr", value: 44 },
-  { month: "May", value: 72 },
-] as const;
-
 export function SurfaceHeader({ item, action }: { item: CatalogItem; action?: React.ReactNode }) {
   return (
     <div className="grid gap-3 bg-background px-4 py-3 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
@@ -97,7 +89,7 @@ export class DemoBoundary extends React.Component<DemoBoundaryProps, DemoBoundar
   }
 }
 
-export function renderTinyPreview(id: string) {
+export function TinyPreview({ id }: { id: string }) {
   return <StaticTinyPreview item={itemFromId(id)} />;
 }
 

@@ -24,8 +24,6 @@ import { Layers3, ListFilter, Package2, ScrollText } from "lucide-react";
 import { ComponentCard } from "../component-card";
 import { ResizableDemo } from "../demos/resizable-demo";
 
-export const layoutSectionItemCount = 5;
-
 const recentLayoutTokens = [
   {
     name: "Surface padding",

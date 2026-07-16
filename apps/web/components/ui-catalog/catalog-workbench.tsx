@@ -58,18 +58,6 @@ export function CatalogWorkbench() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  React.useEffect(() => {
-    if (!selectedItemResolution.missingItemId) {
-      return;
-    }
-
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("item");
-
-    const query = params.toString();
-    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
-  }, [pathname, router, searchParams, selectedItemResolution.missingItemId]);
-
   return (
     <main className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
       <CatalogSearchDialog

@@ -33,8 +33,6 @@ import { ChevronRight, Compass, LayoutTemplate, PanelsTopLeft } from "lucide-rea
 import { ComponentCard } from "../component-card";
 import { NavigationMenuDemo } from "../demos/navigation-menu-demo";
 
-export const navigationSectionItemCount = 5;
-
 export function NavigationSection() {
   return (
     <>

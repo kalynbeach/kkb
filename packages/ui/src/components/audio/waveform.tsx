@@ -6,6 +6,7 @@ import type { Ref } from "react";
 import { Playhead } from "./playhead";
 import type { BufferedRange } from "./presenter";
 import { AUDIO_BUFFERED_SEGMENT_CLASS_NAME } from "./theme";
+import { clampTime, getNextSeekTimeForKey } from "./waveform-seek";
 
 const DEFAULT_BARS = [
   { id: "bar-01", height: 0.34 },
@@ -55,10 +56,6 @@ type WaveformProps = {
   bufferedRangesRef?: Ref<HTMLDivElement>;
 };
 
-const SEEK_STEP_SECONDS = 5;
-
-const clampTime = (value: number, duration: number) => Math.min(duration, Math.max(0, value));
-
 const getLiveTimeline = ({
   currentTime,
   duration,
@@ -73,40 +70,6 @@ const getLiveTimeline = ({
     currentTime: timeline?.currentTime ?? currentTime,
     duration: timeline?.duration ?? duration,
   };
-};
-
-const getNextSeekTimeForKey = ({
-  key,
-  currentTime,
-  duration,
-}: {
-  key: string;
-  currentTime: number;
-  duration: number;
-}) => {
-  if (!Number.isFinite(duration) || duration <= 0) {
-    return null;
-  }
-
-  const safeCurrentTime = Number.isFinite(currentTime) ? currentTime : 0;
-
-  if (key === "ArrowLeft") {
-    return clampTime(safeCurrentTime - SEEK_STEP_SECONDS, duration);
-  }
-
-  if (key === "ArrowRight") {
-    return clampTime(safeCurrentTime + SEEK_STEP_SECONDS, duration);
-  }
-
-  if (key === "Home") {
-    return 0;
-  }
-
-  if (key === "End") {
-    return duration;
-  }
-
-  return null;
 };
 
 function Waveform({
@@ -235,4 +198,4 @@ function Waveform({
   );
 }
 
-export { getNextSeekTimeForKey, Waveform };
+export { Waveform };

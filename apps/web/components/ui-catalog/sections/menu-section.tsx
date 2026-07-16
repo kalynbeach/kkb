@@ -2,8 +2,6 @@ import { ComponentCard } from "../component-card";
 import { CommandDemo } from "../demos/command-demo";
 import { ContextMenuDemo, DropdownMenuDemo, MenubarDemo } from "../demos/menu-demo";
 
-export const menuSectionItemCount = 4;
-
 export function MenuSection() {
   return (
     <>

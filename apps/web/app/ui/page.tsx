@@ -1,13 +1,48 @@
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
-
+import { resolveCatalogItem } from "@/components/ui-catalog/catalog-data";
 import { CatalogWorkbench } from "@/components/ui-catalog/catalog-workbench";
 
-export default function UiPage() {
+type UiSearchParams = Record<string, string | string[] | undefined>;
+
+export default async function UiPage({ searchParams }: { searchParams: Promise<UiSearchParams> }) {
+  const resolvedSearchParams = await searchParams;
+  const requestedItem = firstValue(resolvedSearchParams.item);
+
+  if (resolveCatalogItem(requestedItem ?? null).missingItemId) {
+    redirect(catalogPathWithoutItem(resolvedSearchParams));
+  }
+
   return (
     <Suspense fallback={<UiPageFallback />}>
       <CatalogWorkbench />
     </Suspense>
   );
+}
+
+function firstValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function catalogPathWithoutItem(searchParams: UiSearchParams) {
+  const canonicalSearchParams = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(searchParams)) {
+    if (key === "item" || value === undefined) {
+      continue;
+    }
+
+    if (Array.isArray(value)) {
+      for (const entry of value) {
+        canonicalSearchParams.append(key, entry);
+      }
+    } else {
+      canonicalSearchParams.set(key, value);
+    }
+  }
+
+  const query = canonicalSearchParams.toString();
+  return query ? `/ui?${query}` : "/ui";
 }
 
 function UiPageFallback() {

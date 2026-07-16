@@ -5,8 +5,6 @@ import {
   PopoverHoverCardTooltipDemo,
 } from "../demos/overlay-demo";
 
-export const overlaySectionItemCount = 3;
-
 export function OverlaySection() {
   return (
     <>

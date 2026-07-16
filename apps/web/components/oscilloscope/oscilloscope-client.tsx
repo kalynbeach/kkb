@@ -8,7 +8,14 @@ import type {
   OscilloscopeConfigUpdate,
   OscilloscopeSupport,
 } from "@kkb/audio/oscilloscope/types";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { createMicProvider, type MicInputMode } from "@/lib/oscilloscope/create-mic-provider";
 
@@ -41,6 +48,16 @@ const loadCreateScopeDefault: LoadCreateScope = () => import("@kkb/audio/oscillo
 const initialSupport: OscilloscopeSupport = {
   status: "checking",
 };
+const supportedSupport: OscilloscopeSupport = {
+  status: "supported",
+};
+const unsupportedSupport: OscilloscopeSupport = {
+  reason: "WebGPU is not available in this browser.",
+  status: "unsupported",
+};
+const subscribeToOscilloscopeSupport = () => () => {};
+const getOscilloscopeSupportSnapshot = () => getOscilloscopeSupport().status === "supported";
+const getServerOscilloscopeSupportSnapshot = () => null;
 const MIN_TRAIL_LENGTH = 16;
 const MAX_TRAIL_LENGTH = 128;
 const MIN_BLOOM = 0;
@@ -138,6 +155,12 @@ const writeHashConfig = (cfg: OscilloscopeConfig, presetId: string) => {
   window.history.replaceState(null, "", `#${p.toString()}`);
 };
 
+const destroyMicRuntime = (runtime: MicRuntime | null) => {
+  runtime?.destroy().catch((error) => {
+    console.error("[oscilloscope] mic destroy failed", error);
+  });
+};
+
 export function OscilloscopeClient({
   createMicProvider: createMicProviderOverride = createMicProvider,
   createScope,
@@ -147,14 +170,25 @@ export function OscilloscopeClient({
   const micRuntimeRef = useRef<MicRuntime | null>(null);
   const micRequestIdRef = useRef(0);
   const scopeRef = useRef<ScopeController | null>(null);
-  const [support, setSupport] = useState<OscilloscopeSupport>(initialSupport);
+  const supportSnapshot = useSyncExternalStore<boolean | null>(
+    subscribeToOscilloscopeSupport,
+    getOscilloscopeSupportSnapshot,
+    getServerOscilloscopeSupportSnapshot,
+  );
+  const detectedSupport =
+    supportSnapshot === null
+      ? initialSupport
+      : supportSnapshot
+        ? supportedSupport
+        : unsupportedSupport;
+  const [runtimeSupport, setRuntimeSupport] = useState<OscilloscopeSupport | null>(null);
+  const support = runtimeSupport ?? detectedSupport;
   const [config, setConfig] = useState<OscilloscopeConfig>(defaultPreset.config);
+  const [hashReady, setHashReady] = useState(false);
   const [micError, setMicError] = useState<string | null>(null);
   const [micStatus, setMicStatus] = useState<"idle" | "requesting" | "ready" | "error">("idle");
   const [selectedPresetId, setSelectedPresetId] = useState(defaultPreset.id);
-  const latestConfigRef = useRef(config);
-
-  latestConfigRef.current = config;
+  const getLatestConfig = useEffectEvent(() => config);
 
   const applyPreset = useCallback((preset: (typeof OSCILLOSCOPE_PRESETS)[number]) => {
     setConfig((current) => ({
@@ -173,69 +207,58 @@ export function OscilloscopeClient({
     }));
   }, [selectedPresetId]);
 
-  const destroyMicRuntime = (runtime: MicRuntime | null) => {
-    runtime?.destroy().catch((error) => {
-      console.error("[oscilloscope] mic destroy failed", error);
-    });
-  };
+  const syncSignalSource = useEffectEvent(
+    (scope: ScopeController, sourceType: OscilloscopeConfig["source"]["type"]) => {
+      const requestId = ++micRequestIdRef.current;
 
-  const syncSignalSource = (
-    scope: ScopeController,
-    sourceType: OscilloscopeConfig["source"]["type"],
-  ) => {
-    const requestId = ++micRequestIdRef.current;
+      if (sourceType !== "mic") {
+        const runtime = micRuntimeRef.current;
+        micRuntimeRef.current = null;
+        scope.setSignalProvider(null);
+        setMicError(null);
+        setMicStatus("idle");
+        destroyMicRuntime(runtime);
 
-    if (sourceType !== "mic") {
-      const runtime = micRuntimeRef.current;
-      micRuntimeRef.current = null;
-      scope.setSignalProvider(null);
+        return () => {
+          if (micRequestIdRef.current === requestId) {
+            micRequestIdRef.current += 1;
+          }
+        };
+      }
+
       setMicError(null);
-      setMicStatus("idle");
-      destroyMicRuntime(runtime);
+      setMicStatus("requesting");
+
+      createMicProviderOverride({ mode: getMicInputMode() })
+        .then((runtime) => {
+          if (micRequestIdRef.current !== requestId || scopeRef.current !== scope) {
+            runtime.destroy().catch(() => {});
+            return;
+          }
+
+          const previousRuntime = micRuntimeRef.current;
+          micRuntimeRef.current = runtime;
+          destroyMicRuntime(previousRuntime);
+          scope.setSignalProvider(runtime.provider);
+          setMicStatus("ready");
+        })
+        .catch((error: unknown) => {
+          if (micRequestIdRef.current !== requestId || scopeRef.current !== scope) {
+            return;
+          }
+
+          scope.setSignalProvider(null);
+          setMicError(error instanceof Error ? error.message : "Unable to access microphone.");
+          setMicStatus("error");
+        });
 
       return () => {
         if (micRequestIdRef.current === requestId) {
           micRequestIdRef.current += 1;
         }
       };
-    }
-
-    setMicError(null);
-    setMicStatus("requesting");
-
-    createMicProviderOverride({ mode: getMicInputMode() })
-      .then((runtime) => {
-        if (micRequestIdRef.current !== requestId || scopeRef.current !== scope) {
-          runtime.destroy().catch(() => {});
-          return;
-        }
-
-        const previousRuntime = micRuntimeRef.current;
-        micRuntimeRef.current = runtime;
-        destroyMicRuntime(previousRuntime);
-        scope.setSignalProvider(runtime.provider);
-        setMicStatus("ready");
-      })
-      .catch((error: unknown) => {
-        if (micRequestIdRef.current !== requestId || scopeRef.current !== scope) {
-          return;
-        }
-
-        scope.setSignalProvider(null);
-        setMicError(error instanceof Error ? error.message : "Unable to access microphone.");
-        setMicStatus("error");
-      });
-
-    return () => {
-      if (micRequestIdRef.current === requestId) {
-        micRequestIdRef.current += 1;
-      }
-    };
-  };
-
-  useEffect(() => {
-    setSupport(getOscilloscopeSupport());
-  }, []);
+    },
+  );
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -268,7 +291,7 @@ export function OscilloscopeClient({
       }
 
       console.error("[oscilloscope] start failed", error);
-      setSupport({
+      setRuntimeSupport({
         reason:
           error instanceof Error
             ? `Unable to start WebGPU renderer: ${error.message}`
@@ -285,7 +308,7 @@ export function OscilloscopeClient({
           return;
         }
 
-        const latestConfig = latestConfigRef.current;
+        const latestConfig = getLatestConfig();
         scope = resolvedCreateScope(canvas, latestConfig);
         scopeRef.current = scope;
         syncSignalSource(scope, latestConfig.source.type);
@@ -321,11 +344,16 @@ export function OscilloscopeClient({
       setConfig(initial.config);
       setSelectedPresetId(initial.presetId);
     }
+    setHashReady(true);
   }, []);
 
   useEffect(() => {
+    if (!hashReady) {
+      return;
+    }
+
     writeHashConfig(config, selectedPresetId);
-  }, [config, selectedPresetId]);
+  }, [config, hashReady, selectedPresetId]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {

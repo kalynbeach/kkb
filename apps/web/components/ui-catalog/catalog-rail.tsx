@@ -7,6 +7,8 @@ import * as React from "react";
 
 import { type CatalogItem, categoryId, categoryOrder, itemsForCategory } from "./catalog-data";
 
+const browseCategories = categoryOrder.filter((category) => category !== "Design System");
+
 export function CatalogCompactNav({
   selectedItem,
   onSelect,
@@ -40,18 +42,16 @@ export function CatalogCompactNav({
         >
           Design System
         </CompactNavButton>
-        {categoryOrder
-          .filter((category) => category !== "Design System")
-          .map((category) => (
-            <CompactNavButton
-              key={category}
-              active={selectedItem.category === category}
-              activeButtonRef={selectedItem.category === category ? activeButtonRef : undefined}
-              onClick={() => onSelect(categoryId(category))}
-            >
-              {category}
-            </CompactNavButton>
-          ))}
+        {browseCategories.map((category) => (
+          <CompactNavButton
+            key={category}
+            active={selectedItem.category === category}
+            activeButtonRef={selectedItem.category === category ? activeButtonRef : undefined}
+            onClick={() => onSelect(categoryId(category))}
+          >
+            {category}
+          </CompactNavButton>
+        ))}
       </div>
     </nav>
   );
@@ -80,47 +80,43 @@ export function CatalogRail({
         </div>
         <ScrollArea className="min-h-0 flex-1">
           <nav aria-label="UI catalog" className="space-y-4 p-3">
-            {categoryOrder
-              .filter((category) => category !== "Design System")
-              .map((category) => {
-                const categoryItems = itemsForCategory(category);
-                const currentCategoryActive = selectedItemId === categoryId(category);
+            {browseCategories.map((category) => {
+              const categoryItems = itemsForCategory(category);
+              const currentCategoryActive = selectedItemId === categoryId(category);
 
-                return (
-                  <div key={category} className="space-y-1">
-                    <div className="flex items-center justify-between gap-2 px-2">
-                      <p className="font-mono text-[11px] leading-4 text-muted-foreground">
-                        {category}
-                      </p>
-                      <button
-                        type="button"
-                        aria-label={`Show all ${category} items`}
-                        onClick={() => onSelect(categoryId(category))}
-                        className={cn(
-                          "font-mono text-[10px] text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
-                          currentCategoryActive && "text-foreground underline",
-                        )}
-                      >
-                        All
-                      </button>
-                    </div>
-                    <div className="space-y-0.5">
-                      {categoryItems
-                        .filter((item) => item.kind !== "category" && item.kind !== "view")
-                        .map((item) => (
-                          <RailButton
-                            key={item.id}
-                            active={selectedItemId === item.id}
-                            onClick={() => onSelect(item.id)}
-                            className="min-h-7 text-xs"
-                          >
-                            <span className="min-w-0 flex-1 truncate">{item.label}</span>
-                          </RailButton>
-                        ))}
-                    </div>
+              return (
+                <div key={category} className="space-y-1">
+                  <div className="flex items-center justify-between gap-2 px-2">
+                    <p className="font-mono text-[11px] leading-4 text-muted-foreground">
+                      {category}
+                    </p>
+                    <button
+                      type="button"
+                      aria-label={`Show all ${category} items`}
+                      onClick={() => onSelect(categoryId(category))}
+                      className={cn(
+                        "font-mono text-[10px] text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
+                        currentCategoryActive && "text-foreground underline",
+                      )}
+                    >
+                      All
+                    </button>
                   </div>
-                );
-              })}
+                  <div className="space-y-0.5">
+                    {categoryItems.map((item) => (
+                      <RailButton
+                        key={item.id}
+                        active={selectedItemId === item.id}
+                        onClick={() => onSelect(item.id)}
+                        className="min-h-7 text-xs"
+                      >
+                        <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                      </RailButton>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </nav>
         </ScrollArea>
       </div>

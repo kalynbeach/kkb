@@ -7,17 +7,38 @@ import { CategorySurface } from "../../../components/ui-catalog/category-surface
 import { LayoutSection } from "../../../components/ui-catalog/sections/layout-section";
 import UiPage from "../page";
 
-function renderUiPageHtml() {
-  return renderToString(<UiPage />).replaceAll("<!-- -->", "");
+async function renderUiPageHtml() {
+  const page = await UiPage({ searchParams: Promise.resolve({}) });
+  return renderToString(page).replaceAll("<!-- -->", "");
 }
 
 describe("/ui page", () => {
-  test("renders the catalog workbench suspense fallback during server string rendering", () => {
-    const html = renderUiPageHtml();
+  test("renders the catalog workbench suspense fallback during server string rendering", async () => {
+    const html = await renderUiPageHtml();
 
     expect(html).toContain("@kkb/ui / catalog");
     expect(html).toContain("UI catalog");
     expect(html).toContain("Loading catalog workbench");
+  });
+
+  test("redirects invalid item queries without dropping other search parameters", async () => {
+    let redirectError: unknown;
+
+    try {
+      await UiPage({
+        searchParams: Promise.resolve({
+          item: "not-a-catalog-item",
+          mode: "compact",
+          tag: ["one", "two"],
+        }),
+      });
+    } catch (error) {
+      redirectError = error;
+    }
+
+    expect(redirectError).toMatchObject({
+      digest: "NEXT_REDIRECT;replace;/ui?mode=compact&tag=one&tag=two;307;",
+    });
   });
 
   test("keeps category surfaces two-up on desktop before widening to three columns", () => {

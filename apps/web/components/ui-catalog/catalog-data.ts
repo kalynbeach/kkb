@@ -1,5 +1,4 @@
 export type CatalogKind = "view" | "category" | "component" | "utility";
-export type CatalogLane = "core" | "instrument" | "support";
 export type CatalogCategory =
   | "Design System"
   | "Layout"
@@ -68,45 +67,6 @@ export const categoryMeta: Record<CatalogCategory, { description: string }> = {
     description: "Public hooks, providers, direction utilities, and supporting exports.",
   },
 };
-
-export const railGroups: readonly {
-  label: string;
-  categories: readonly CatalogCategory[];
-}[] = [
-  {
-    label: "Core bench",
-    categories: ["Design System", "Input", "Layout", "Feedback"],
-  },
-  {
-    label: "Instrument bays",
-    categories: ["Audio", "Data"],
-  },
-  {
-    label: "Interaction support",
-    categories: ["Navigation", "Overlay", "Menu", "Utilities"],
-  },
-];
-
-const corePrimitiveIds = new Set([
-  "design-system",
-  "button",
-  "field",
-  "input",
-  "select",
-  "dialog",
-  "table",
-  "tabs",
-  "sidebar",
-]);
-
-const instrumentBayIds = new Set([
-  "category-audio",
-  "audio-player-controls",
-  "audio-playhead",
-  "audio-waveform",
-  "audio-presenter",
-  "audio-theme",
-]);
 
 export const catalogItems: readonly CatalogItem[] = [
   {
@@ -303,91 +263,12 @@ export function itemFromId(id: string | null): CatalogItem {
   return resolveCatalogItem(id).item;
 }
 
-export function groupedItems() {
-  return categoryOrder.map((category) => ({
-    category,
-    items: catalogItems.filter((item) => item.category === category && item.kind !== "view"),
-  }));
-}
-
-export function itemLane(item: CatalogItem): CatalogLane {
-  if (instrumentBayIds.has(item.id) || item.category === "Audio") {
-    return "instrument";
-  }
-
-  if (corePrimitiveIds.has(item.id) || item.important) {
-    return "core";
-  }
-
-  return "support";
-}
-
-export function laneLabel(lane: CatalogLane) {
-  switch (lane) {
-    case "core":
-      return "core";
-    case "instrument":
-      return "bay";
-    case "support":
-      return "support";
-  }
-}
-
 export function itemsForCategory(category: CatalogCategory) {
-  return catalogItems.filter((item) => item.category === category && item.id !== "preview");
+  return catalogItems.filter(
+    (item) => item.category === category && item.kind !== "category" && item.kind !== "view",
+  );
 }
 
 export function categoryId(category: CatalogCategory) {
   return `category-${category.toLowerCase().replaceAll(" ", "-")}`;
-}
-
-export function focusedIntent(item: CatalogItem) {
-  if (item.category === "Audio") {
-    return "Use inside audio runtime surfaces where waveform, transport, or presenter behavior needs the scoped instrument palette.";
-  }
-
-  if (item.id.startsWith("json-render")) {
-    return "Use for JSON-driven rendering paths where registry behavior and inspectable payload output matter.";
-  }
-
-  switch (item.category) {
-    case "Input":
-      return "Use when a user changes catalog state, filters source, confirms a choice, or enters structured data.";
-    case "Feedback":
-      return "Use when the interface needs to report status, verification progress, loading shape, or a recoverable problem.";
-    case "Overlay":
-      return "Use only when inline disclosure cannot carry the task without losing context.";
-    case "Menu":
-      return "Use for dense command surfaces where keyboard and pointer access need the same vocabulary.";
-    case "Navigation":
-      return "Use when users need route position, local orientation, or fast movement across catalog surfaces.";
-    case "Data":
-      return "Use when the surface needs dense, inspectable values without turning into prose.";
-    case "Layout":
-      return "Use to frame, group, or progressively reveal product UI without inventing app-local containers.";
-    case "Utilities":
-      return "Use as app infrastructure; keep these visible but lower priority than user-facing primitives.";
-    case "Design System":
-      return "Use as the source of truth for KKB tokens, typography, radius, and scoped instrument color.";
-  }
-}
-
-export function sourceInstruction(item: CatalogItem) {
-  if (item.source.startsWith("@kkb/ui/")) {
-    return `import from "${item.source}"`;
-  }
-
-  return item.source;
-}
-
-export function relatedItems(item: CatalogItem) {
-  return catalogItems
-    .filter(
-      (candidate) =>
-        candidate.id !== item.id &&
-        candidate.kind !== "view" &&
-        candidate.category === item.category &&
-        (candidate.important || candidate.kind === item.kind),
-    )
-    .slice(0, 4);
 }

@@ -8,8 +8,6 @@ import { AlertTriangle, CheckCircle2, Zap } from "lucide-react";
 
 import { ComponentCard } from "../component-card";
 
-export const feedbackSectionItemCount = 4;
-
 export function FeedbackSection() {
   return (
     <>

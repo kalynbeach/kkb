@@ -12,6 +12,8 @@ import { useEffect, useEffectEvent, useRef } from "react";
 
 import type { WebPlayer } from "@/lib/audio/create-web-player";
 
+import { shouldPollPlayerTimeline } from "./player-timeline";
+
 type PlayerShellProps = {
   player: WebPlayer | null;
   title: string;
@@ -34,8 +36,6 @@ type PlayerShellProps = {
   onSetVolume: (volume: number) => void;
   className?: string;
 };
-
-const shouldPollPlayerTimeline = (status: PlayerShellProps["status"]) => status === "playing";
 
 const formatBufferedLabel = (
   bufferedSegments: ReturnType<typeof createPlayerPresenter>["bufferedSegments"],
@@ -278,17 +278,14 @@ function PlayerShell({
 
         <div className="mx-1 mt-1 mb-1">
           <PlayerControls
-            canSelectPrevious={canSelectPrevious}
-            canSelectNext={canSelectNext}
-            isPlayDisabled={presenter.isPlayDisabled}
-            isPauseDisabled={presenter.isPauseDisabled}
+            controlMode={presenter.controlMode}
             rate={rate}
             volume={volume}
-            onPrevious={onPrevious}
+            onPrevious={canSelectPrevious ? onPrevious : undefined}
             onPlay={onPlay}
             onPause={onPause}
             onStop={onStop}
-            onNext={onNext}
+            onNext={canSelectNext ? onNext : undefined}
             onSetRate={onSetRate}
             onSetVolume={onSetVolume}
           />
@@ -346,4 +343,4 @@ function StatusLed({ status }: { status: PlayerShellProps["status"] }) {
   );
 }
 
-export { PlayerShell, shouldPollPlayerTimeline };
+export { PlayerShell };
