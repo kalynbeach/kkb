@@ -1,4 +1,5 @@
 import { mergeOscilloscopeConfig } from "./config";
+import { MAX_TRACE_POINTS } from "./limits";
 import { createXyMode } from "./modes/xy";
 import { createWebGpuRenderer } from "./renderer/pipeline";
 import type { OscilloscopeRenderer } from "./renderer/types";
@@ -21,8 +22,6 @@ const EMPTY_GEOMETRY = {
   kind: "line-strip" as const,
   points: new Float32Array(0),
 };
-const MAX_VERTEX_FLOATS = 8192;
-const MAX_TRACE_POINTS = MAX_VERTEX_FLOATS / 2;
 
 export const createOscilloscope = (
   canvas: HTMLCanvasElement,
