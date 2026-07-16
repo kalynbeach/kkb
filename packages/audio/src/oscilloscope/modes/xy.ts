@@ -13,12 +13,7 @@ export const createXyMode = (): DisplayMode<XyModeParams> => {
     generateFrame: ({ params, signals }): FrameGeometry => {
       const left = signals.getSamples(0);
       const right = signals.channelCount === 2 ? signals.getSamples(1) : left;
-      const sampleCount = Math.min(
-        MAX_TRACE_POINTS,
-        params.sampleCount,
-        left.length,
-        right.length,
-      );
+      const sampleCount = Math.min(MAX_TRACE_POINTS, params.sampleCount, left.length, right.length);
       const activeLength = sampleCount * 2;
 
       if (activePoints.length !== activeLength) {
