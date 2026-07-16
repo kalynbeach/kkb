@@ -30,6 +30,10 @@ import {
 
 type NumericConfigKey = keyof BinauralBeatConfig;
 
+type BinauralBeatsClientProps = {
+  createEngine?: typeof createBinauralBeatEngine;
+};
+
 type NumberControlProps = {
   configKey: NumericConfigKey;
   description: string;
@@ -115,7 +119,9 @@ function NumberControl({
   );
 }
 
-export function BinauralBeatsClient() {
+export function BinauralBeatsClient({
+  createEngine = createBinauralBeatEngine,
+}: BinauralBeatsClientProps = {}) {
   const [config, setConfig] = useState<BinauralBeatConfig>(DEFAULT_BINAURAL_BEAT_CONFIG);
   const [engine, setEngine] = useState<BinauralBeatEngine | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -133,13 +139,13 @@ export function BinauralBeatsClient() {
         : "Audio is stopped.";
 
   useEffect(() => {
-    const nextEngine = createBinauralBeatEngine();
+    const nextEngine = createEngine();
     setEngine(nextEngine);
 
     return () => {
       nextEngine.destroy();
     };
-  }, []);
+  }, [createEngine]);
 
   useEffect(() => {
     const preset = getBinauralBeatPresetFromHash(window.location.hash);
