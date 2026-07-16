@@ -23,7 +23,7 @@ during the sequence; their dependency links and task goals refer to them here.
 
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
-| 001 | Add verification CI workflow (check-types, test, format-and-lint) | P1 | S | — | TODO |
+| 001 | Add verification CI workflow (check-types, test, format-and-lint) | P1 | S | — | DONE |
 | 002 | Move `shadcn` CLI to `@kkb/ui` development dependencies | P1 | S | 001 | TODO |
 | 003 | Make `bun test` fail loudly in workspaces that have tests | P2 | S | 002 | TODO |
 | 004 | Characterization tests for `BinauralBeatsClient` | P2 | M | 003 | TODO |
