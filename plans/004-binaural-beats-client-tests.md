@@ -7,7 +7,7 @@
 > in `plans/README.md` — unless a reviewer dispatched you and told you they
 > maintain the index.
 >
-> **Drift check (run first)**: `git diff --stat bff3b6b..HEAD -- apps/web/components/binaural-beats apps/web/lib/binaural-beats`
+> **Drift check (run first)**: `git diff --stat 704eeb9..HEAD -- apps/web/components/binaural-beats apps/web/lib/binaural-beats`
 > If any in-scope file changed since this plan was written, compare the
 > "Current state" excerpts against the live code before proceeding; on a
 > mismatch, treat it as a STOP condition.
@@ -17,9 +17,9 @@
 - **Priority**: P2
 - **Effort**: M
 - **Risk**: LOW
-- **Depends on**: none (003 recommended first so the new suite can't silently vanish)
+- **Depends on**: plans/003-strict-test-scripts.md
 - **Category**: tests
-- **Planned at**: commit `bff3b6b`, 2026-07-11
+- **Planned at**: commit `704eeb9`, 2026-07-15 (reconciled)
 
 ## Why this matters
 
@@ -43,6 +43,7 @@
 Conventions to match:
 - **Test harness exemplar**: `apps/web/components/oscilloscope/__tests__/oscilloscope-client.test.tsx`. It builds a happy-dom `Window`, installs a list of globals (`document`, `window`, `navigator`, `HTMLElement`, event constructors, …) onto `globalThis`, renders with `react-dom/client` `createRoot` inside `act`, and restores globals in cleanup. Read that file first and reuse its DOM-environment helper structure (copy the helper into the new test file; do not import across test files).
 - **Injection-prop convention**: `OscilloscopeClient` takes optional factory props (`oscilloscope-client.tsx:24-28`: `createMicProvider?`, `createScope?`, `loadCreateScope?`) defaulting to the real implementations. Mirror this.
+- **Live baseline**: the component and binaural library are unchanged from `bff3b6b`; `@kkb/web` now has 96 passing tests across 18 files at `704eeb9` because unrelated suites grew.
 - React 19 JSX transform — no default React import. TypeScript strict — no `any`.
 
 ## Commands you will need
@@ -50,9 +51,19 @@ Conventions to match:
 | Purpose | Command | Expected on success |
 |---------|---------|---------------------|
 | New suite only | `cd apps/web && bun test binaural-beats-client` | all new tests pass |
-| Workspace tests | `turbo run test --filter=@kkb/web --force` | exit 0, count grows from 93 |
+| Workspace tests | `turbo run test --filter=@kkb/web --force` | exit 0, count grows from 96 |
 | Typecheck | `bun run check-types` | exit 0 |
 | Lint | `bun run format-and-lint` | exit 0 |
+| Live route | `turbo run dev --filter=@kkb/web` | web app available at `http://localhost:3000` |
+
+## Suggested executor toolkit
+
+- Use Codex's Browser plugin for the Step 5 interaction and visible-state
+  checks on `/binaural-beats`.
+- Use Codex's Computer Use plugin only when a native browser/audio surface is
+  not exposed through Browser. Follow its action-time confirmation rules; do
+  not use either plugin as a substitute for the automated characterization
+  suite.
 
 ## Scope
 
@@ -65,10 +76,12 @@ Conventions to match:
 - `apps/web/lib/binaural-beats/*` — already tested; any change there invalidates this plan's excerpts.
 - `apps/web/components/oscilloscope/__tests__/oscilloscope-client.test.tsx` — read-only exemplar.
 - Refactoring `BinauralBeatsClient` (splitting, renaming state, "improving" the race guards) — characterization means pinning current behavior, not changing it.
+- Any styling, shadcn composition, icon, or accessibility cleanup beyond what the tests observe — this PR is a behavior-safety net, not a UI remediation.
 
 ## Git workflow
 
-- Branch: `advisor/004-binaural-client-tests`
+- Branch: `codex/plan-004-binaural-client-tests`
+- Worktree (explicitly operator-authorized for this queue): create a dedicated worktree for this branch from updated `main` after Plan 003 is merged; do not switch the primary `main` checkout.
 - Commits: one for the injection prop, one for the suite; messages like `test: add binaural beats client characterization suite`
 - Do NOT push or open a PR unless the operator instructed it.
 
@@ -100,20 +113,94 @@ Create `apps/web/components/binaural-beats/__tests__/binaural-beats-client.test.
 - Stub engine factory:
 
 ```tsx
-const createEngineStub = () => {
-  const calls: { destroyed: number; played: BinauralBeatConfig[]; stopped: number; updated: BinauralBeatConfig[] } = {
-    destroyed: 0, played: [], stopped: 0, updated: [],
+const createEngineHarness = () => {
+  const calls: {
+    destroyed: number;
+    played: BinauralBeatConfig[];
+    stopped: number;
+    updated: BinauralBeatConfig[];
+  } = {
+    destroyed: 0,
+    played: [],
+    stopped: 0,
+    updated: [],
   };
   let failNextPlay: Error | null = null;
+  let failNextStop: Error | null = null;
+  let nextPlayPromise: Promise<void> | null = null;
+  let nextStopPromise: Promise<void> | null = null;
   const engine: BinauralBeatEngine = {
-    destroy: () => { calls.destroyed += 1; },
-    play: async (config) => { if (failNextPlay) { const e = failNextPlay; failNextPlay = null; throw e; } calls.played.push(config); },
-    stop: async () => { calls.stopped += 1; },
-    update: (config) => { calls.updated.push(config); },
+    destroy: () => {
+      calls.destroyed += 1;
+    },
+    play: async (config) => {
+      if (failNextPlay) {
+        const error = failNextPlay;
+        failNextPlay = null;
+        throw error;
+      }
+
+      calls.played.push(config);
+      const pending = nextPlayPromise;
+      nextPlayPromise = null;
+
+      if (pending) {
+        await pending;
+      }
+    },
+    stop: async () => {
+      calls.stopped += 1;
+
+      if (failNextStop) {
+        const error = failNextStop;
+        failNextStop = null;
+        throw error;
+      }
+
+      const pending = nextStopPromise;
+      nextStopPromise = null;
+
+      if (pending) {
+        await pending;
+      }
+    },
+    update: (config) => {
+      calls.updated.push(config);
+    },
   };
-  return { calls, engine, setFailNextPlay: (e: Error) => { failNextPlay = e; } };
+
+  return {
+    calls,
+    engine,
+    setFailNextPlay: (error: Error) => {
+      failNextPlay = error;
+    },
+    setFailNextStop: (error: Error) => {
+      failNextStop = error;
+    },
+    setNextPlayPromise: (promise: Promise<void>) => {
+      nextPlayPromise = promise;
+    },
+    setNextStopPromise: (promise: Promise<void>) => {
+      nextStopPromise = promise;
+    },
+  };
 };
 ```
+
+The harness is not itself the component prop: it returns the engine plus observation controls. In each test, create it once and inject an explicit factory adapter:
+
+```tsx
+const harness = createEngineHarness();
+const createEngine = mock(() => harness.engine);
+
+await renderIntoDomAsync(
+  environment,
+  <BinauralBeatsClient createEngine={createEngine} />,
+);
+```
+
+Use `harness.calls` and the four `setFailNext*`/`setNext*Promise` controls for assertions and deferred or rejected operations. The engine-lifecycle case must render without `StrictMode`, assert `createEngine` was called once, then unmount and assert `harness.calls.destroyed === 1`. Tests that intentionally exercise React's development-only double-effect probe are out of scope.
 
 **Verify**: `cd apps/web && bun test binaural-beats-client` → scaffold's first trivial test (component renders a Play button) passes.
 
@@ -125,16 +212,31 @@ Cover, at minimum (use `data-testid` sliders / button text / `role="alert"` to o
 2. **Hash hydration** — with `location.hash = "#preset=alpha"` before render, the alpha preset button has `aria-pressed="true"` and the displayed beat frequency matches the alpha preset's `beatFrequencyHz`.
 3. **No hash** — no preset selected (`aria-pressed="true"` on zero preset buttons); config equals defaults.
 4. **Preset selection** — clicking a preset button updates the beat display and calls `history.replaceState` with a hash containing `preset=<id>` (spy on `window.history.replaceState`).
-5. **Play happy path** — click Play → `engine.play` called once with current (sanitized) config → button reads Stop; while the `play` promise is pending, button is disabled and reads Starting (drive with a deferred promise, resolve inside `act`).
-6. **Stop** — with playback active, click Stop → `engine.stop` called; button returns to Play.
-7. **Play failure** — `setFailNextPlay(new Error("blocked"))`; click Play → `role="alert"` shows "blocked", button re-enabled reading Play, `calls.played` empty.
-8. **Live update** — while playing, change a slider/input value → `engine.update` called with the sanitized config; while stopped, changing config calls `update` zero times.
+5. **Play happy path** — use `setNextPlayPromise(deferred.promise)`, click Play, and confirm `engine.play` records one current sanitized config while the promise is pending; the button is disabled and reads Starting. Resolve the promise inside `act`, then confirm the button reads Stop.
+6. **Deferred stop** — first reach the playing state, then use `setNextStopPromise(deferred.promise)` and click Stop. While the promise is pending, assert `engine.stop` was called once, the button is disabled, and its label is Stopping. Resolve inside `act`, then assert the button is enabled and reads Play.
+7. **Stop failure recovery** — first reach the playing state, call `setFailNextStop(new Error("stop blocked"))`, and click Stop. Assert `calls.stopped === 1`, `role="alert"` shows "stop blocked", and the button recovers to an enabled Play state with neither Starting nor Stopping left behind.
+8. **Play failure** — `setFailNextPlay(new Error("blocked"))`; click Play → `role="alert"` shows "blocked", button re-enabled reading Play, `calls.played` empty.
+9. **Live update** — while playing, change a slider/input value → `engine.update` called with the sanitized config; while stopped, changing config calls `update` zero times.
 
-**Verify**: `cd apps/web && bun test binaural-beats-client` → 8+ tests pass.
+**Verify**: `cd apps/web && bun test binaural-beats-client` → 9+ tests pass.
 
 ### Step 4: Full verification loop
 
-**Verify**: `bun run check-types && turbo run test --filter=@kkb/web --force && bun run format-and-lint` → all exit 0; `@kkb/web` test count ≥ 101.
+**Verify**: `bun run check-types && turbo run test --filter=@kkb/web --force && bun run format-and-lint` → all exit 0; `@kkb/web` test count ≥ 105 (96 reconciled baseline + at least 9 new tests).
+
+### Step 5: Run a live Browser smoke check
+
+Start `turbo run dev --filter=@kkb/web`, then use Codex's Browser plugin to open
+`http://localhost:3000/binaural-beats`. Verify that selecting Alpha updates the
+pressed preset and URL hash, Play transitions to Stop after starting, and Stop
+returns to Play without a visible alert. Capture the route state or screenshot
+for the PR verification summary. Use Computer Use only if a native audio/browser
+surface needed for this check is not available through Browser.
+
+**Verify**: the route remains interactive with no new console or visible error.
+If the environment blocks audio startup, record the exact alert and environment
+limitation in the PR instead of changing component behavior; the automated
+deferred/rejection tests remain mandatory and must still pass.
 
 ## Test plan
 
@@ -143,8 +245,9 @@ The steps above ARE the test plan. Structural pattern: `oscilloscope-client.test
 ## Done criteria
 
 - [ ] `binaural-beats-client.tsx` diff is limited to the `createEngine` prop seam
-- [ ] New suite exists with ≥8 behavior tests, all passing via `turbo run test --filter=@kkb/web --force`
+- [ ] New suite exists with ≥9 behavior tests, including deferred-stop and stop-rejection recovery, all passing via `turbo run test --filter=@kkb/web --force`
 - [ ] `bun run check-types` and `bun run format-and-lint` exit 0
+- [ ] Step 5 Browser smoke evidence and any environment limitation are recorded in the PR verification summary
 - [ ] No files outside the in-scope list modified (`git status`)
 - [ ] `plans/README.md` status row updated
 
@@ -153,7 +256,7 @@ The steps above ARE the test plan. Structural pattern: `oscilloscope-client.test
 Stop and report back (do not improvise) if:
 
 - The excerpted behavior (state flags, hash format `#preset=<id>`, `data-testid` patterns) doesn't match the live component — drift; re-plan rather than adapt silently.
-- Radix `Slider` doesn't emit `onValueChange` under happy-dom event dispatch after a reasonable attempt — fall back to the numeric `Input` (`#binaural-<key>`) for case 8 and note it; if neither works, STOP.
+- Radix `Slider` doesn't emit `onValueChange` under happy-dom event dispatch after a reasonable attempt — fall back to the numeric `Input` (`#binaural-<key>`) for case 9 and note it; if neither works, STOP.
 - You find yourself wanting to change component behavior to make a test pass — that inverts characterization; report the friction instead.
 
 ## Maintenance notes

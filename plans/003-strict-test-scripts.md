@@ -7,7 +7,7 @@
 > in `plans/README.md` — unless a reviewer dispatched you and told you they
 > maintain the index.
 >
-> **Drift check (run first)**: `git diff --stat bff3b6b..HEAD -- apps/web/package.json packages/audio/package.json packages/ui/package.json packages/ableton/package.json`
+> **Drift check (run first)**: `git diff --stat 704eeb9..HEAD -- apps/web/package.json packages/audio/package.json packages/ui/package.json packages/ableton/package.json`
 > If any in-scope file changed since this plan was written, compare the
 > "Current state" excerpts against the live code before proceeding; on a
 > mismatch, treat it as a STOP condition.
@@ -17,22 +17,23 @@
 - **Priority**: P2
 - **Effort**: S
 - **Risk**: LOW
-- **Depends on**: none (001 recommended first)
+- **Depends on**: plans/002-move-shadcn-to-dev-deps.md
 - **Category**: tests
-- **Planned at**: commit `bff3b6b`, 2026-07-11
+- **Planned at**: commit `704eeb9`, 2026-07-15 (reconciled)
 
 ## Why this matters
 
-Every workspace test script is `bun test --pass-with-no-tests`. With that flag, a workspace whose tests are accidentally excluded — a glob/config regression, a bad rename of a `__tests__` directory, a tsconfig change that makes bun collect zero files — reports **green** instead of failing. `packages/ableton` demonstrates the failure mode today: it has zero test files, yet `turbo run test` reports it successful. The flag is appropriate only where there is genuinely nothing to test. This plan drops the flag in the three workspaces that have real suites (`apps/web`, `packages/audio`, `packages/ui`) so "found 0 tests" becomes a failure, and leaves it (documented) in `packages/ableton`, whose only code is a 72-line build script, a 1-line placeholder lib, and a 9-line hello-world extension — below the threshold where a smoke test earns its keep.
+Every workspace test script is `bun test --pass-with-no-tests`. With that flag, a workspace whose test files are accidentally excluded — for example, their `.test.*`/`.spec.*` suffixes are removed during a bulk rename or the files are moved outside the workspace — reports **green** instead of failing. `packages/ableton` demonstrates the failure mode today: it has zero test files, yet `turbo run test` reports it successful. The flag is appropriate only where there is genuinely nothing to test. This plan drops the flag in the three workspaces that have real suites (`apps/web`, `packages/audio`, `packages/ui`) so "found 0 tests" becomes a failure, and leaves it (documented) in `packages/ableton`, whose only code is a 72-line build script, a 1-line placeholder lib, and a 9-line hello-world extension — below the threshold where a smoke test earns its keep.
 
 ## Current state
 
-- `apps/web/package.json` — `"test": "bun test --pass-with-no-tests"`; has 18 test files / 93 tests (verified passing at `bff3b6b`).
-- `packages/audio/package.json` — `"test": "bun test --pass-with-no-tests"`; has substantive suites under `src/**/__tests__/`.
-- `packages/ui/package.json` — `"test": "bun test --pass-with-no-tests"`; has at least `src/components/audio/__tests__/audio-theme.test.ts`.
-- `packages/ableton/package.json` — `"test": "bun test --pass-with-no-tests"`; `find packages/ableton -name '*.test.*'` (excluding node_modules) returns nothing. Keep as-is.
+- `apps/web/package.json` — `"test": "bun test --pass-with-no-tests"`; has 18 test files / 96 tests (verified passing at `704eeb9`).
+- `packages/audio/package.json` — `"test": "bun test --pass-with-no-tests"`; has 20 test files / 81 tests.
+- `packages/ui/package.json` — `"test": "bun test --pass-with-no-tests"`; has 5 test files / 16 tests.
+- `packages/ableton/package.json` — `"test": "bun test --pass-with-no-tests"`; `rg --files packages/ableton -g '*.test.*' -g '*.spec.*'` returns nothing. Keep as-is.
 - `apps/docs/package.json` — no `test` script at all. Keep as-is.
 - `turbo.json` — `"test": { "dependsOn": ["^test"] }`; no change needed.
+- The three target scripts are unchanged from `bff3b6b`, but `apps/web/package.json` and `packages/ui/package.json` have unrelated dependency drift. Start from `704eeb9` after Plan 002 merges and preserve that live manifest state.
 
 Repo conventions: Bun only; conventional commits.
 
@@ -61,7 +62,8 @@ Repo conventions: Bun only; conventional commits.
 
 ## Git workflow
 
-- Branch: `advisor/003-strict-test-scripts`
+- Branch: `codex/plan-003-strict-test-scripts`
+- Worktree (explicitly operator-authorized for this queue): create a dedicated worktree for this branch from updated `main` after Plan 002 is merged; do not switch the primary `main` checkout.
 - Single commit, message: `config: fail bun test when suites are missing`
 - Do NOT push or open a PR unless the operator instructed it.
 
@@ -81,30 +83,32 @@ to:
 "test": "bun test"
 ```
 
-**Verify**: `grep -l 'pass-with-no-tests' apps/*/package.json packages/*/package.json` → prints only `packages/ableton/package.json`
+**Verify**: `rg -l 'pass-with-no-tests' apps/*/package.json packages/*/package.json` → prints only `packages/ableton/package.json`
 
 ### Step 2: Confirm each workspace still collects and passes its tests
 
-**Verify** (two commands — do not pipe the turbo run, or the pipe reports grep/tail's exit status instead of the tests'):
+**Verify** (do not pipe the command, because a pipe can hide the test exit status):
 
 ```bash
 turbo run test --filter=@kkb/web --filter=@kkb/audio --filter=@kkb/ui --force
-echo "turbo-exit: $?"
 ```
 
-→ `turbo-exit: 0`, and the output shows non-zero passing counts for all three workspaces with zero failures. (`--force` bypasses the turbo cache so the new scripts actually run.)
+→ exits 0, and the output shows non-zero passing counts for all three workspaces with zero failures. (`--force` bypasses the turbo cache so the new scripts actually run.)
 
-### Step 3: Confirm the guard works (negative test, then revert)
+### Step 3: Confirm Bun's no-tests guard in a disposable directory
 
-Temporarily rename a test dir to prove the failure mode is now caught:
+Do not rename or move repository test files: Bun discovers `.test.*` files regardless of whether their parent directory is named `__tests__`, and `@kkb/ui` has five suites. Instead, prove the installed Bun version's default behavior in an empty temporary directory:
 
 ```bash
-mv packages/ui/src/components/audio/__tests__ packages/ui/src/components/audio/__tests_x
-turbo run test --filter=@kkb/ui --force; echo "exit: $?"
-mv packages/ui/src/components/audio/__tests_x packages/ui/src/components/audio/__tests__
+SCRATCH="$(mktemp -d)"
+if (cd "$SCRATCH" && bun test); then
+  rmdir "$SCRATCH"
+  exit 1
+fi
+rmdir "$SCRATCH"
 ```
 
-**Verify**: the middle command exits non-zero (bun reports no tests found). After the second `mv`, `git status --porcelain` shows no changes under `packages/ui/src`.
+**Verify**: `bun test` prints `No tests found!` and exits non-zero, while the complete block exits 0. `git status --porcelain` remains unchanged because the repository was never mutated.
 
 ### Step 4: Full verification loop
 
@@ -116,9 +120,9 @@ No new test files. Step 3 is the behavioral proof: a workspace losing its suite 
 
 ## Done criteria
 
-- [ ] `pass-with-no-tests` appears only in `packages/ableton/package.json` (`grep -rl 'pass-with-no-tests' apps packages --include=package.json`)
+- [ ] `pass-with-no-tests` appears only in `packages/ableton/package.json` (`rg -l 'pass-with-no-tests' apps packages -g package.json`)
 - [ ] `turbo run test --force` passes for `@kkb/web`, `@kkb/audio`, `@kkb/ui` with non-zero test counts
-- [ ] Step 3 negative test demonstrated a non-zero exit and was fully reverted
+- [ ] Step 3 demonstrated a non-zero no-tests exit in a disposable empty directory without mutating repository tests
 - [ ] `bun run check-types`, `bun run test`, `bun run format-and-lint` all exit 0
 - [ ] No files outside the in-scope list modified (`git status`)
 - [ ] `plans/README.md` status row updated

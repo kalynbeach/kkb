@@ -7,7 +7,7 @@
 > in `plans/README.md` — unless a reviewer dispatched you and told you they
 > maintain the index.
 >
-> **Drift check (run first)**: `git diff --stat bff3b6b..HEAD -- .github/workflows package.json turbo.json`
+> **Drift check (run first)**: `git diff --stat 704eeb9..HEAD -- .github/workflows package.json turbo.json`
 > If any in-scope file changed since this plan was written, compare the
 > "Current state" excerpts against the live code before proceeding; on a
 > mismatch, treat it as a STOP condition.
@@ -19,11 +19,13 @@
 - **Risk**: LOW
 - **Depends on**: none
 - **Category**: dx
-- **Planned at**: commit `bff3b6b`, 2026-07-11
+- **Planned at**: commit `704eeb9`, 2026-07-15 (reconciled)
 
 ## Why this matters
 
-The repo documents a three-command verification loop (`bun run check-types`, `bun run test`, `bun run format-and-lint` — see `README.md` "Validation status") and AGENTS.md instructs "treat newly introduced warnings as regressions", but nothing enforces any of it: `.github/workflows/` contains only `claude.yml` (an `@claude`-mention agent) and `claude-code-review.yml` (AI PR review). Neither is a deterministic gate. A type error, failing test, or lint regression can land on `main` unnoticed. This plan adds a plain GitHub Actions workflow that runs the documented loop on every push to `main` and every pull request. Every other plan in `plans/` uses these three commands as done-criteria, so this is the foundation plan.
+The repo documents a three-command verification loop (`bun run check-types`, `bun run test`, `bun run format-and-lint` — see `README.md` "Validation status"), but no deterministic workflow runs it: `.github/workflows/` contains only `claude.yml` (an `@claude`-mention agent) and `claude-code-review.yml` (AI PR review). A type error, failing test, formatting/assist failure, or error-level Biome diagnostic can therefore land on `main` unnoticed. This plan adds a plain GitHub Actions workflow that runs the documented loop on every push to `main` and every pull request. Every other plan in `plans/` uses these three commands as done criteria, so this is the foundation plan.
+
+This workflow does **not** mechanically reject newly introduced warning-level diagnostics. `biome.json:39-40` deliberately configures unused imports and variables as warnings, and the reconciled baseline already contains 31 warnings, so `biome check .` exits 0 when warnings exist. AGENTS.md still requires contributors and reviewers to treat new warnings as regressions; adding a warning snapshot or changed-file ratchet is a separate policy change and is out of scope here.
 
 ## Current state
 
@@ -32,7 +34,7 @@ The repo documents a three-command verification loop (`bun run check-types`, `bu
 - There is no `ci.yml`, no husky/lefthook/pre-commit config anywhere in the repo.
 - Root `package.json` (repo root): scripts are `"check-types": "turbo run check-types"`, `"test": "turbo run test"`, `"format-and-lint": "biome check ."`; `"packageManager": "bun@1.3.14"`.
 - `turbo.json` defines `check-types` and `test` tasks with `dependsOn: ["^..."]`; no remote-cache signature/token is configured in the repo.
-- All three commands pass today at `bff3b6b` (verified during planning: 5 workspaces typecheck clean; 93 tests pass in `@kkb/web` plus suites in `@kkb/audio`, `@kkb/ui`, `@kkb/ableton`).
+- All three commands pass at `704eeb9` (verified during reconciliation: 5 typecheck tasks; 96 `@kkb/web`, 81 `@kkb/audio`, and 16 `@kkb/ui` tests; `@kkb/ableton` intentionally reports no tests; lint exits 0 with pre-existing warnings).
 
 Repo conventions to match:
 - Bun only — never npm/pnpm/yarn/npx (`CLAUDE.md`, `AGENTS.md`).
@@ -59,10 +61,15 @@ Repo conventions to match:
 - `turbo.json`, root `package.json` — no script or task changes are needed.
 - Turbo remote caching / `TURBO_TOKEN` — do not add secrets or cache config; local turbo cache inside the job is enough at this repo's scale.
 - Pre-commit hooks — deliberately excluded; CI is the single mechanical gate.
+- A Biome warning-count or changed-file ratchet — warning policy needs a
+  separate baseline/design decision; this workflow gates only non-zero Biome
+  results.
+- GitHub branch-protection settings — this plan creates the check but does not configure repository settings that require it.
 
 ## Git workflow
 
-- Branch: `advisor/001-verification-ci`
+- Branch: `codex/plan-001-verification-ci`
+- Worktree (explicitly operator-authorized for this queue): create a dedicated worktree for this branch from updated `main`; do not switch the primary `main` checkout.
 - Single commit, message: `config: add verification ci workflow`
 - Do NOT push or open a PR unless the operator instructed it.
 
@@ -79,6 +86,9 @@ on:
   push:
     branches: [main]
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   verify:
@@ -106,16 +116,16 @@ jobs:
 ```
 
 Notes:
-- `bun-version: 1.3.14` mirrors `packageManager` in root `package.json`. If that field has changed since `bff3b6b`, use the current value.
+- `bun-version: 1.3.14` mirrors `packageManager` in root `package.json`. If that field has changed since `704eeb9`, use the current value.
 - `--frozen-lockfile` makes lockfile/manifest drift a CI failure — that is intentional.
 
-**Verify**: `bun -e "const fs=require('fs');const t=fs.readFileSync('.github/workflows/ci.yml','utf8');if(!/oven-sh\/setup-bun@v2/.test(t)||!/--frozen-lockfile/.test(t))throw new Error('missing content');console.log('ok')"` → prints `ok`
+**Verify**: `bun -e "const fs=require('fs');const t=fs.readFileSync('.github/workflows/ci.yml','utf8');if(!/oven-sh\/setup-bun@v2/.test(t)||!/--frozen-lockfile/.test(t)||!/permissions:\\s*\\n\\s*contents: read/.test(t))throw new Error('missing content');console.log('ok')"` → prints `ok`
 
 ### Step 2: Prove the workflow's commands pass locally
 
 Run the three commands in workflow order:
 
-**Verify**: `bun install --frozen-lockfile && bun run check-types && bun run test && bun run format-and-lint` → all exit 0. If `format-and-lint` reports only pre-existing warnings but exits 0, that is a pass; if it exits non-zero, STOP (see below).
+**Verify**: `bun install --frozen-lockfile && bun run check-types && bun run test && bun run format-and-lint` → all exit 0. If `format-and-lint` reports warnings but exits 0, the mechanical gate passes; review the diff and diagnostic output separately for newly introduced warnings under AGENTS.md. If it exits non-zero, STOP (see below).
 
 ### Step 3: Update the plan index and commit
 
@@ -141,7 +151,7 @@ No unit tests — this is CI config. The verification is Step 2 (the exact comma
 
 Stop and report back (do not improvise) if:
 
-- `bun install --frozen-lockfile` fails at `bff3b6b`-descended HEAD — the lockfile is out of sync with a manifest; fixing that is out of scope.
+- `bun install --frozen-lockfile` fails at `704eeb9`-descended HEAD — the lockfile is out of sync with a manifest; fixing that is out of scope.
 - `bun run format-and-lint` exits non-zero on an untouched tree — the README says warnings may exist but the command is expected to pass; a hard failure means the baseline drifted.
 - A file named `.github/workflows/ci.yml` already exists.
 
@@ -149,4 +159,8 @@ Stop and report back (do not improvise) if:
 
 - If a `build` gate is wanted later, add `bun run build` as a step after Test — it was left out to keep CI fast (Next.js builds are the slow path and nothing deploys from CI today).
 - If bun's version in `packageManager` is bumped, the `bun-version` pin here must be bumped in the same PR.
+- The workflow creates a CI check; making it a required merge check is a separate repository-setting decision.
+- Warning-level Biome regressions remain a reviewer responsibility until the
+  repository adopts a warning-ratchet design; do not describe this workflow as
+  enforcing zero new warnings.
 - Plans 002–005 in this directory assume this workflow exists as their regression net.

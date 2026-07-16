@@ -1,4 +1,4 @@
-# Plan 002: Move the `shadcn` CLI out of `@kkb/ui` runtime dependencies
+# Plan 002: Move the `shadcn` CLI to `@kkb/ui` development dependencies
 
 > **Executor instructions**: Follow this plan step by step. Run every
 > verification command and confirm the expected result before moving to the
@@ -7,7 +7,7 @@
 > in `plans/README.md` — unless a reviewer dispatched you and told you they
 > maintain the index.
 >
-> **Drift check (run first)**: `git diff --stat bff3b6b..HEAD -- packages/ui/package.json bun.lock`
+> **Drift check (run first)**: `git diff --stat 704eeb9..HEAD -- packages/ui/package.json bun.lock`
 > If any in-scope file changed since this plan was written, compare the
 > "Current state" excerpts against the live code before proceeding; on a
 > mismatch, treat it as a STOP condition.
@@ -17,15 +17,15 @@
 - **Priority**: P1
 - **Effort**: S
 - **Risk**: LOW
-- **Depends on**: none (001 recommended first so CI guards the change)
-- **Category**: security
-- **Planned at**: commit `bff3b6b`, 2026-07-11
+- **Depends on**: plans/001-verification-ci.md
+- **Category**: tech-debt
+- **Planned at**: commit `704eeb9`, 2026-07-15 (reconciled)
 
 ## Why this matters
 
-`shadcn` is a code-generator CLI (it scaffolds component files, driven by `components.json`), not a runtime library — and nothing in the repo imports it (verified: `grep -rn "from ['\"]shadcn" apps packages --include='*.ts' --include='*.tsx'` returns nothing). Yet it sits in the `dependencies` of `packages/ui`, so its large transitive tree is part of the runtime dependency graph of every workspace that consumes `@kkb/ui`. `bun audit` at `bff3b6b` attributes ~6 advisories to that tree — picomatch (HIGH, ReDoS), `@hono/node-server`, `qs`, `ip-address`, `brace-expansion` (MED) — all via `workspace:@kkb/ui › shadcn`. Moving it to `devDependencies` keeps the pinned CLI available for `bunx shadcn add ...` while removing the vulnerable tree from the **runtime dependency graph**: production-mode installs (`bun install --production`) and any future publish of `@kkb/ui` stop carrying it.
+`shadcn` is a code-generator CLI driven by `components.json`, not an imported runtime library. No repository TypeScript or TSX file imports it. Keeping it in `packages/ui` runtime `dependencies` misstates its role and causes production-only workspace installs to carry a development tool that the running application does not use. Moving it to `devDependencies` keeps the pinned CLI reproducible while making the manifest and production install surface accurate.
 
-**Scope of the win, stated honestly:** `bun audit` has no production-only filter (its only flags are `--json`, `--audit-level`, `--ignore` — verified on bun 1.3.14), and the package stays installed and in `bun.lock` either way, so the audit *output* will likely still list these advisories after the move. What changes is what the advisories mean: dev-tool exposure instead of runtime exposure. If silencing the audit output matters, the follow-up is removing the dependency entirely and running the CLI via `bunx shadcn@<version>` — deferred here (see Maintenance notes) to keep this change minimal and reproducible.
+This is dependency hygiene, not evidence that the CLI is bundled into the Next.js application or reachable in production. A historical `bun audit` at `bff3b6b` attributed advisories to the `shadcn` tree, but that result was not refreshed during reconciliation because a live audit would transmit private workspace dependency metadata to an external service without explicit approval. The package remains in `bun.lock`, so moving it will not remove its advisories from lockfile-wide audit output.
 
 ## Current state
 
@@ -49,7 +49,9 @@
   }
 ```
 
-- `bun audit` (run from repo root) lists the advisories above under paths starting `workspace:@kkb/ui › shadcn`.
+- `packages/ui/package.json` and `bun.lock` changed between `bff3b6b` and `704eeb9` when unused dependencies were removed in the React Doctor remediation. The live `shadcn` entry is still `^4.13.0` under `dependencies`; start from `704eeb9` and do not reintroduce any removed dependency.
+- `bun pm why shadcn` at `704eeb9` shows only the direct `@kkb/ui` requirement (and its workspace consumers); `@json-render/shadcn` does not depend on the CLI.
+- The current audit state is intentionally unverified; do not claim that this plan fixes or clears a current advisory count.
 
 Repo conventions: Bun only (`bun install`, `bunx`); Biome formats JSON (`bun run format-and-lint`); conventional commits.
 
@@ -58,7 +60,7 @@ Repo conventions: Bun only (`bun install`, `bunx`); Biome formats JSON (`bun run
 | Purpose        | Command                   | Expected on success |
 |----------------|---------------------------|---------------------|
 | Sync lockfile  | `bun install`             | exit 0, lockfile updated |
-| Prod install   | `bun install --production --frozen-lockfile` (in a scratch clone, Step 3) | exit 0, no `shadcn` in `node_modules` |
+| Prod install   | `bun install --production --frozen-lockfile` (in a detached scratch worktree, Step 6) | exit 0, no unscoped `node_modules/shadcn` CLI package |
 | Typecheck      | `bun run check-types`     | exit 0 |
 | Tests          | `bun run test`            | exit 0 |
 | Lint           | `bun run format-and-lint` | exit 0 |
@@ -71,13 +73,14 @@ Repo conventions: Bun only (`bun install`, `bunx`); Biome formats JSON (`bun run
 - `plans/README.md` (status row update)
 
 **Out of scope** (do NOT touch):
-- Removing `shadcn` entirely — keep it pinned in `devDependencies` so `bunx shadcn` resolves the local version reproducibly.
+- Removing `shadcn` entirely — keep it pinned in `devDependencies` so `bunx --bun shadcn` resolves the local version reproducibly.
 - Any other dependency in `packages/ui` (e.g. `@base-ui/react`, `react-day-picker` majors) — separately tracked; do not bundle bumps into this change.
 - `components.json` and all component source under `packages/ui/src/`.
 
 ## Git workflow
 
-- Branch: `advisor/002-shadcn-dev-dep`
+- Branch: `codex/plan-002-shadcn-dev-dep`
+- Worktree (explicitly operator-authorized for this queue): create a dedicated worktree for this branch from updated `main` after Plan 001 is merged; do not switch the primary `main` checkout.
 - Single commit, message: `fix: move shadcn cli to ui dev dependencies`
 - Do NOT push or open a PR unless the operator instructed it.
 
@@ -95,39 +98,88 @@ Run `bun install` from the repo root.
 
 **Verify**: `git diff --name-only` → exactly `packages/ui/package.json` and `bun.lock` (plus `plans/README.md` if already edited).
 
-### Step 3: Confirm the runtime graph no longer carries shadcn
-
-`bun audit` cannot verify this (no production-only filter; dev deps stay in its output). Verify at the install level instead, in a scratch clone so the working tree is untouched:
-
-```bash
-SCRATCH="$(mktemp -d)/kkb-prod-check"
-git clone --depth 1 "file://$PWD" "$SCRATCH"
-cd "$SCRATCH" && bun install --production --frozen-lockfile
-ls node_modules/shadcn 2>/dev/null; echo "shadcn-present: $?"
-cd - && rm -rf "$SCRATCH"
-```
-
-Note: the clone only sees committed state — run this after committing Steps 1–2 (the Git workflow's single commit), or re-apply the Step 1 manifest change inside the scratch clone by hand before its install.
-
-**Verify**: the `ls` reports no such directory (`shadcn-present: 1`) under the production install, while `ls node_modules/shadcn` in the real repo (dev install) still resolves. If `bun install --production` errors on workspaces, fall back to the manifest-level check from Step 1 and record in your summary that install-level verification was skipped and why.
-
-### Step 4: Full verification loop
+### Step 3: Full verification loop
 
 **Verify**: `bun run check-types && bun run test && bun run format-and-lint` → all exit 0.
 
-### Step 5: Confirm the CLI still runs
+### Step 4: Confirm the pinned CLI still runs
 
-**Verify**: `cd packages/ui && bunx shadcn --version` → prints a `4.x` version, exit 0.
+**Verify**: `cd packages/ui && bunx --bun shadcn --version` → prints a `4.x` version, exit 0. Do not add `@latest`; this check must exercise the locally pinned dependency.
+
+### Step 5: Mark the plan in progress and create the local verification commit
+
+Set this plan's status row to IN PROGRESS in `plans/README.md`, review the complete diff, and create the single conventional commit. Keep it local and unpushed until Step 6 passes. The temporary IN PROGRESS status is intentional: the detached worktree can only test committed content, and the plan is not DONE until that test succeeds.
+
+**Verify**: `git show --stat --oneline HEAD` → only `packages/ui/package.json`, `bun.lock`, and `plans/README.md`; `git status --porcelain` → empty.
+
+### Step 6: Confirm a production-only install excludes shadcn
+
+Create a detached scratch worktree at the verified local commit. Run each block below as a separate gate so cleanup cannot mask a failed install or assertion.
+
+```bash
+PLAN_WORKTREE="$PWD"
+TEMP_ROOT="$(mktemp -d)"
+SCRATCH="$TEMP_ROOT/kkb-prod-check"
+git worktree add --detach "$SCRATCH" HEAD
+```
+
+**Verify**: `git worktree add` exits 0.
+
+```bash
+cd "$SCRATCH"
+bun install --production --frozen-lockfile
+```
+
+**Verify**: `bun install --production --frozen-lockfile` exits 0.
+
+```bash
+test ! -e node_modules/shadcn
+```
+
+**Verify**: exits 0; the root install has no unscoped CLI package.
+
+```bash
+test ! -e packages/ui/node_modules/shadcn
+```
+
+**Verify**: exits 0; the UI workspace has no local unscoped CLI package.
+
+```bash
+test -z "$(find node_modules packages/ui/node_modules -mindepth 2 -path '*/node_modules/shadcn' -print 2>/dev/null)"
+```
+
+**Verify**: exits 0; no deeper package-local `node_modules/shadcn` copy exists. These three independent assertions avoid assuming how Bun hoists workspace dependencies and do not confuse the separate scoped runtime package `@json-render/shadcn` with the CLI.
+
+Return to the plan worktree and clean up only after recording the verification result:
+
+```bash
+cd "$PLAN_WORKTREE"
+git worktree remove --force "$SCRATCH"
+rmdir "$TEMP_ROOT"
+```
+
+**Verify**: both cleanup commands exit 0. If the install or absence assertion failed, clean up, leave the committed index status at IN PROGRESS, and STOP with the exact failure; do not continue or replace the failed proof with an audit claim.
+
+### Step 7: Mark the verified plan done
+
+After every Step 6 gate passes, change this plan's index row from IN PROGRESS to DONE and amend the local commit. This changes documentation only; the implementation content is the exact commit already tested in the detached worktree.
+
+```bash
+git add plans/README.md
+git commit --amend --no-edit
+```
+
+**Verify**: `git show --stat --oneline HEAD` → only `packages/ui/package.json`, `bun.lock`, and `plans/README.md`; `git status --porcelain` → empty; the Plan 002 row reads DONE.
 
 ## Test plan
 
-No new tests — this is a manifest-only change with no runtime code path. The regression net is Step 4 (full repo verification) and Step 5 (CLI still invocable for future component scaffolding).
+No new tests — this is a manifest-only change with no runtime code path. The regression net is Step 3 (full repo verification), Step 4 (the pinned CLI remains invocable), and the independently checked Step 6 gates (a production-only install excludes the CLI from every fresh-install location).
 
 ## Done criteria
 
 - [ ] `packages/ui/package.json`: `shadcn` absent from `dependencies`, present in `devDependencies` at `^4.13.0`
-- [ ] `bun.lock` regenerated by `bun install` (no hand edits)
-- [ ] Production-mode install excludes `shadcn` (Step 3), or the documented fallback was recorded
+- [ ] `bun.lock` regenerated by `bun install` (no hand edits); the workspace classification changes while the resolved `shadcn` package tree remains locked
+- [ ] Production-mode install excludes `shadcn` from root, workspace-local, and nested fresh-install locations (Step 6)
 - [ ] `bun run check-types`, `bun run test`, `bun run format-and-lint` all exit 0
 - [ ] No files outside the in-scope list modified (`git status`)
 - [ ] `plans/README.md` status row updated
@@ -136,12 +188,13 @@ No new tests — this is a manifest-only change with no runtime code path. The r
 
 Stop and report back (do not improvise) if:
 
-- Any `grep -rn "from ['\"]shadcn\|require(['\"]shadcn" apps packages --include='*.ts' --include='*.tsx'` match appears (excluding node_modules) — the no-runtime-import assumption this plan rests on is false.
+- Any `rg -n "from ['\"]shadcn|require\\(['\"]shadcn" apps packages -g '*.ts' -g '*.tsx'` match appears — the no-runtime-import assumption this plan rests on is false.
 - `bun install` makes changes to lockfile entries unrelated to `shadcn`'s tree beyond ordinary pruning — inspect and report before committing.
 - `bun run test` or `check-types` fails after the move — a hidden runtime coupling exists; report it rather than reverting silently.
+- Any Step 6 install or absence assertion fails — clean up the detached worktree, leave the plan IN PROGRESS, and report the exact result.
 
 ## Maintenance notes
 
-- Future `bunx shadcn add <component>` invocations from `packages/ui` are unaffected — dev dependency resolution covers CLI use.
-- Reviewer should confirm the `bun.lock` diff only removes/relocates the shadcn subtree.
-- Deferred: evaluating whether `shadcn` can be dropped entirely (running via `bunx shadcn@<version>` against the registry) — kept as a dev dep here for version reproducibility. Note that full removal is the only change that will also clean the `bun audit` output, since bun audits the whole lockfile including dev deps.
+- Future `bunx --bun shadcn add <component>` invocations from `packages/ui` are unaffected — dev dependency resolution covers CLI use.
+- Reviewer should confirm the `bun.lock` diff changes the workspace dependency classification without removing the still-required development package tree or changing unrelated resolutions.
+- Deferred: evaluating whether `shadcn` can be dropped entirely (running via `bunx --bun shadcn@<version>` against the registry) — kept as a dev dep here for version reproducibility. Note that full removal is the only change that will also clean the `bun audit` output, since bun audits the whole lockfile including dev deps.
