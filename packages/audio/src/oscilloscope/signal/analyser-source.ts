@@ -20,21 +20,23 @@ export type SampleConditioning = {
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
-const readAnalyserSamples = (analyser: AnalyserLike) => {
-  const buffer = new Float32Array(analyser.fftSize);
-  analyser.getFloatTimeDomainData(buffer);
-  return buffer;
+const readAnalyserSamples = (analyser: AnalyserLike, target: Float32Array) => {
+  analyser.getFloatTimeDomainData(target);
+  return target;
 };
 
 const conditionSampleBuffer = (
   input: Float32Array,
+  output: Float32Array,
   conditioning?: SampleConditioning,
 ): Float32Array => {
-  if (!conditioning) {
-    return input;
+  if (input !== output) {
+    output.set(input);
   }
 
-  const output = input.slice();
+  if (!conditioning) {
+    return output;
+  }
 
   if (conditioning.center) {
     let mean = 0;
@@ -57,7 +59,8 @@ const conditionSampleBuffer = (
 
   const silenceFloor = conditioning.silenceFloor ?? 0;
   if (peak <= silenceFloor) {
-    return new Float32Array(output.length);
+    output.fill(0);
+    return output;
   }
 
   const targetPeak = conditioning.targetPeak ?? peak;
@@ -76,11 +79,7 @@ const conditionSampleBuffer = (
   return output;
 };
 
-const deriveStereoBuffer = (
-  input: Float32Array,
-  conditioning?: SampleConditioning,
-): Float32Array => {
-  const derived = new Float32Array(input.length);
+const deriveStereoBuffer = (input: Float32Array, output: Float32Array): Float32Array => {
   const delay = Math.max(1, Math.floor(input.length / 32));
 
   for (let index = 0; index < input.length; index += 1) {
@@ -88,10 +87,10 @@ const deriveStereoBuffer = (
     const previous = input[Math.max(0, index - 1)] ?? 0;
     const delayed = input[Math.max(0, index - delay)] ?? 0;
     const slope = current - previous;
-    derived[index] = clamp(delayed * 0.82 + slope * 1.6, -1, 1);
+    output[index] = clamp(delayed * 0.82 + slope * 1.6, -1, 1);
   }
 
-  return conditionSampleBuffer(derived, conditioning);
+  return output;
 };
 
 export const createAnalyserSignalProvider = ({
@@ -106,30 +105,48 @@ export const createAnalyserSignalProvider = ({
   right?: AnalyserLike;
   sampleConditioning?: SampleConditioning;
   sampleRate: number;
-}): SignalProvider => ({
-  channelCount: right || monoChannelMode === "derived-stereo" ? 2 : 1,
-  fftSize: left.fftSize,
-  frequencyBinCount: left.frequencyBinCount,
-  sampleRate,
-  smoothing: left.smoothingTimeConstant,
-  getFrequencyData: (channel) => {
-    const analyser = channel === 0 || !right ? left : right;
-    const buffer = new Float32Array(analyser.frequencyBinCount);
-    analyser.getFloatFrequencyData(buffer);
-    return buffer;
-  },
-  getSamples: (channel) => {
-    if (!right) {
-      const samples = conditionSampleBuffer(readAnalyserSamples(left), sampleConditioning);
+}): SignalProvider => {
+  const rawScratch = new Float32Array(left.fftSize);
+  const channel0Out = new Float32Array(left.fftSize);
+  const channel1Out = new Float32Array(left.fftSize);
+  const derivedScratch = new Float32Array(left.fftSize);
 
-      if (channel === 1 && monoChannelMode === "derived-stereo") {
-        return deriveStereoBuffer(samples, sampleConditioning);
+  return {
+    channelCount: right || monoChannelMode === "derived-stereo" ? 2 : 1,
+    fftSize: left.fftSize,
+    frequencyBinCount: left.frequencyBinCount,
+    sampleRate,
+    smoothing: left.smoothingTimeConstant,
+    getFrequencyData: (channel) => {
+      const analyser = channel === 0 || !right ? left : right;
+      const buffer = new Float32Array(analyser.frequencyBinCount);
+      analyser.getFloatFrequencyData(buffer);
+      return buffer;
+    },
+    getSamples: (channel) => {
+      if (channel === 0 || (!right && monoChannelMode === "duplicate")) {
+        return conditionSampleBuffer(
+          readAnalyserSamples(left, rawScratch),
+          channel0Out,
+          sampleConditioning,
+        );
       }
 
-      return samples;
-    }
+      if (right) {
+        return conditionSampleBuffer(
+          readAnalyserSamples(right, rawScratch),
+          channel1Out,
+          sampleConditioning,
+        );
+      }
 
-    const analyser = channel === 0 ? left : right;
-    return conditionSampleBuffer(readAnalyserSamples(analyser), sampleConditioning);
-  },
-});
+      conditionSampleBuffer(
+        readAnalyserSamples(left, rawScratch),
+        derivedScratch,
+        sampleConditioning,
+      );
+      deriveStereoBuffer(derivedScratch, channel1Out);
+      return conditionSampleBuffer(channel1Out, channel1Out, sampleConditioning);
+    },
+  };
+};
