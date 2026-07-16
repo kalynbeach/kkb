@@ -80,4 +80,29 @@ describe("createOscillatorSignalProvider", () => {
       expect(left[index] ** 2 + right[index] ** 2).toBeCloseTo(1, 5);
     }
   });
+
+  test("reuses distinct channel buffers across frames", () => {
+    const provider = createOscillatorSignalProvider(
+      {
+        ratioLock: "1:1",
+        type: "oscillators",
+        a: { amplitude: 1, detuneCents: 0, frequency: 220, phase: 0, waveform: "sine" },
+        b: { amplitude: 1, detuneCents: 0, frequency: 220, phase: 0, waveform: "sine" },
+      },
+      {
+        clock: () => 1,
+        fftSize: 8,
+        sampleRate: 48_000,
+      },
+    );
+
+    const firstLeft = provider.getSamples(0);
+    const firstRight = provider.getSamples(1);
+    const secondLeft = provider.getSamples(0);
+    const secondRight = provider.getSamples(1);
+
+    expect(secondLeft).toBe(firstLeft);
+    expect(secondRight).toBe(firstRight);
+    expect(firstLeft).not.toBe(firstRight);
+  });
 });

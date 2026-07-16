@@ -1,0 +1,2 @@
+export const MAX_VERTEX_FLOATS = 8192;
+export const MAX_TRACE_POINTS = MAX_VERTEX_FLOATS / 2;

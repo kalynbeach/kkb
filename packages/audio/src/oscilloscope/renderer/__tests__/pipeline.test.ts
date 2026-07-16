@@ -57,6 +57,7 @@ type FakeStats = {
   deviceDestroyCount: number;
   textureDestroyCount: number;
   textureViewCount: number;
+  writeBufferData: BufferSource[];
 };
 
 const createFakeGpuEnvironment = () => {
@@ -65,6 +66,7 @@ const createFakeGpuEnvironment = () => {
     deviceDestroyCount: 0,
     textureDestroyCount: 0,
     textureViewCount: 0,
+    writeBufferData: [],
   };
 
   const createView = () => {
@@ -111,7 +113,9 @@ const createFakeGpuEnvironment = () => {
     },
     queue: {
       submit: () => {},
-      writeBuffer: () => {},
+      writeBuffer: (_buffer: GPUBuffer, _bufferOffset: GPUSize64, data: BufferSource) => {
+        stats.writeBufferData.push(data);
+      },
     } as unknown as GPUQueue,
   } as unknown as GPUDevice;
 
@@ -152,6 +156,9 @@ describe("createWebGpuRenderer", () => {
     renderer.drawFrame(geometry, config, 1 / 60);
     renderer.drawFrame(geometry, config, 1 / 60);
 
+    expect(stats.writeBufferData).toHaveLength(4);
+    expect(stats.writeBufferData[0]).toBeInstanceOf(Float32Array);
+    expect(stats.writeBufferData[0]).toBe(stats.writeBufferData[2]);
     expect(stats.bindGroupCount).toBe(3);
     expect(stats.textureViewCount).toBe(3);
 

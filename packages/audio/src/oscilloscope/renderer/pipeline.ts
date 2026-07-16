@@ -1,3 +1,4 @@
+import { MAX_VERTEX_FLOATS } from "../limits";
 import type { FrameGeometry } from "../modes/mode";
 import type { OscilloscopeConfig } from "../types";
 import { COMPOSITE_SHADER } from "./shaders/composite";
@@ -21,7 +22,6 @@ const GPU_BUFFER_USAGE_UNIFORM = 0x0040;
 const GPU_TEXTURE_USAGE_TEXTURE_BINDING = 0x0004;
 const GPU_TEXTURE_USAGE_RENDER_ATTACHMENT = 0x0010;
 const HISTORY_FORMAT: GPUTextureFormat = "rgba16float";
-const MAX_VERTEX_FLOATS = 8192;
 
 export const createWebGpuRenderer = async (
   canvas: HTMLCanvasElement,
@@ -46,6 +46,7 @@ export const createWebGpuRenderer = async (
     magFilter: "linear",
     minFilter: "linear",
   });
+  const uniformScratch = new Float32Array(8);
   const uniformBuffer = device.createBuffer({
     size: 8 * Float32Array.BYTES_PER_ELEMENT,
     usage: GPU_BUFFER_USAGE_COPY_DST | GPU_BUFFER_USAGE_UNIFORM,
@@ -207,6 +208,7 @@ export const createWebGpuRenderer = async (
   const drawFrame = (geometry: FrameGeometry, config: OscilloscopeConfig, deltaSeconds: number) => {
     const uniforms = packRendererUniforms(
       createRendererUniformValues(config, canvas.width, canvas.height, deltaSeconds),
+      uniformScratch,
     );
     const history = historyTarget;
 

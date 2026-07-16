@@ -43,4 +43,52 @@ describe("createXyMode", () => {
 
     expect(Array.from(geometry.points)).toEqual([-1, -1, -0.25, -0.25, 0.25, 0.25, 1, 1]);
   });
+
+  test("reuses the active points view when the sample count is unchanged", () => {
+    const samples = [
+      new Float32Array([-1, 0]),
+      new Float32Array([1, 0.5]),
+      new Float32Array([-0.25, 0.75]),
+      new Float32Array([0.25, -0.75]),
+    ];
+    let readIndex = 0;
+    const changingProvider: SignalProvider = {
+      ...provider,
+      fftSize: 2,
+      frequencyBinCount: 1,
+      getSamples: () => samples[readIndex++] ?? new Float32Array(0),
+    };
+    const mode = createXyMode();
+    const frame = {
+      time: 0,
+      signals: changingProvider,
+      params: { gain: 1, sampleCount: 2 },
+      viewport: { height: 512, width: 512 },
+    };
+
+    const first = mode.generateFrame(frame);
+    const second = mode.generateFrame(frame);
+
+    expect(second.points).toBe(first.points);
+    expect(Array.from(second.points)).toEqual([-0.25, 0.25, 0.75, -0.75]);
+  });
+
+  test("clamps direct callers to the renderer point budget", () => {
+    const samples = new Float32Array(5_000);
+    const oversizedProvider: SignalProvider = {
+      ...provider,
+      fftSize: samples.length,
+      frequencyBinCount: samples.length / 2,
+      getSamples: () => samples,
+    };
+
+    const geometry = createXyMode().generateFrame({
+      time: 0,
+      signals: oversizedProvider,
+      params: { gain: 1, sampleCount: samples.length },
+      viewport: { height: 512, width: 512 },
+    });
+
+    expect(geometry.points).toHaveLength(8_192);
+  });
 });
