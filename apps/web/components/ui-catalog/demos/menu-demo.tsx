@@ -96,7 +96,7 @@ export function DropdownMenuDemo() {
           <DropdownMenuLabel>Alignment</DropdownMenuLabel>
           <DropdownMenuRadioGroup
             value={alignment}
-            onValueChange={(value) => setAlignment(value as AlignmentMode)}
+            onValueChange={(value: string) => setAlignment(value as AlignmentMode)}
           >
             <DropdownMenuRadioItem value="grid">Grid</DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="stack">Stack</DropdownMenuRadioItem>
@@ -176,7 +176,7 @@ export function MenubarDemo() {
             <MenubarSeparator />
             <MenubarRadioGroup
               value={density}
-              onValueChange={(value) => setDensity(value as DensityMode)}
+              onValueChange={(value: string) => setDensity(value as DensityMode)}
             >
               <MenubarRadioItem value="comfortable">Comfortable density</MenubarRadioItem>
               <MenubarRadioItem value="compact">Compact density</MenubarRadioItem>

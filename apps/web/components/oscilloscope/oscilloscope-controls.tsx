@@ -86,7 +86,7 @@ export function OscilloscopeControls({
                 aria-label="Oscilloscope source"
                 className="w-full text-sm"
                 data-testid="oscilloscope-source-toggle"
-                onValueChange={(value) => {
+                onValueChange={(value: string) => {
                   if (value === "oscillators" || value === "mic") {
                     onSourceChange(value);
                   }
@@ -267,7 +267,7 @@ export function OscilloscopeControls({
                 id="oscilloscope-trail"
                 max={128}
                 min={16}
-                onValueChange={([value]) => {
+                onValueChange={([value]: number[]) => {
                   if (typeof value === "number") {
                     onConfigChange({
                       phosphor: { ...config.phosphor, trailLength: value },
@@ -295,7 +295,7 @@ export function OscilloscopeControls({
                 id="oscilloscope-bloom"
                 max={1.5}
                 min={0}
-                onValueChange={([value]) => {
+                onValueChange={([value]: number[]) => {
                   if (typeof value === "number") {
                     onConfigChange({
                       phosphor: { ...config.phosphor, bloom: value },

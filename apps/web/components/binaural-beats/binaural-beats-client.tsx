@@ -87,7 +87,7 @@ function NumberControl({
             data-testid={`binaural-${configKey}-slider`}
             max={max}
             min={min}
-            onValueChange={([nextValue]) => {
+            onValueChange={([nextValue]: number[]) => {
               if (typeof nextValue === "number") {
                 onChange(configKey, nextValue);
               }
