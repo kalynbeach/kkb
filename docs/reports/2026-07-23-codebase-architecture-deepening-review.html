@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Architecture review — kkb</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
+
+      mermaid.initialize({
+        startOnLoad: false,
+        theme: "base",
+        securityLevel: "loose",
+        flowchart: { curve: "basis", htmlLabels: true },
+        themeVariables: {
+          background: "transparent",
+          primaryColor: "#f4efe7",
+          primaryTextColor: "#29251f",
+          primaryBorderColor: "#b9aa98",
+          lineColor: "#8a7b6a",
+          secondaryColor: "#e7efe6",
+          tertiaryColor: "#f6e4dd",
+          fontFamily: "JetBrains Mono, monospace",
+          fontSize: "18px",
+        },
+      });
+
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+      let activeDrag = null;
+      addEventListener("mousemove", (event) => activeDrag?.move(event));
+      addEventListener("mouseup", () => {
+        activeDrag?.end();
+        activeDrag = null;
+      });
+
+      async function initDiagram(shell, index) {
+        const source = shell.querySelector(".diagram-source");
+        const viewport = shell.querySelector(".mermaid-viewport");
+        const canvas = shell.querySelector(".mermaid-canvas");
+        const label = shell.querySelector(".zoom-label");
+        const wrap = shell.querySelector(".mermaid-wrap");
+        if (!source || !viewport || !canvas || !label || !wrap) return;
+
+        try {
+          const { svg } = await mermaid.render(`architecture-${index}`, source.textContent.trim());
+          canvas.innerHTML = svg;
+          const svgNode = canvas.querySelector("svg");
+          const viewBox = svgNode?.viewBox.baseVal;
+          const naturalWidth = viewBox?.width || 800;
+          const naturalHeight = viewBox?.height || 320;
+          let zoom = 1;
+          let panX = 0;
+          let panY = 0;
+          let dragged = false;
+
+          const apply = () => {
+            if (!svgNode) return;
+            svgNode.style.width = `${naturalWidth * zoom}px`;
+            svgNode.style.height = `${naturalHeight * zoom}px`;
+            svgNode.style.maxWidth = "none";
+            canvas.style.transform = `translate(${panX}px, ${panY}px)`;
+            label.textContent = `${Math.round(zoom * 100)}%`;
+          };
+
+          const fit = () => {
+            const width = viewport.clientWidth - 32;
+            const height = viewport.clientHeight - 32;
+            zoom = clamp(Math.min(width / naturalWidth, height / naturalHeight), 0.58, 2.5);
+            panX = Math.max(16, (viewport.clientWidth - naturalWidth * zoom) / 2);
+            panY = Math.max(16, (viewport.clientHeight - naturalHeight * zoom) / 2);
+            apply();
+          };
+
+          const zoomAtCenter = (factor) => {
+            const oldZoom = zoom;
+            zoom = clamp(zoom * factor, 0.4, 3);
+            panX -= ((naturalWidth * zoom) - (naturalWidth * oldZoom)) / 2;
+            panY -= ((naturalHeight * zoom) - (naturalHeight * oldZoom)) / 2;
+            apply();
+          };
+
+          const openFull = () => {
+            const page = `<!doctype html><meta charset="utf-8"><title>Architecture diagram</title><style>body{margin:0;padding:32px;background:#faf7f2;display:grid;place-items:center;min-height:100vh}svg{max-width:100%;height:auto}</style>${svgNode?.outerHTML || ""}`;
+            const next = window.open();
+            if (next) {
+              next.document.open();
+              next.document.write(page);
+              next.document.close();
+            }
+          };
+
+          shell.querySelector('[data-action="zoom-in"]')?.addEventListener("click", () => zoomAtCenter(1.2));
+          shell.querySelector('[data-action="zoom-out"]')?.addEventListener("click", () => zoomAtCenter(0.82));
+          shell.querySelector('[data-action="zoom-fit"]')?.addEventListener("click", fit);
+          shell.querySelector('[data-action="zoom-one"]')?.addEventListener("click", () => {
+            zoom = 1;
+            panX = 16;
+            panY = 16;
+            apply();
+          });
+          shell.querySelector('[data-action="zoom-expand"]')?.addEventListener("click", openFull);
+          wrap.addEventListener("wheel", (event) => {
+            event.preventDefault();
+            if (event.ctrlKey || event.metaKey) zoomAtCenter(event.deltaY < 0 ? 1.12 : 0.89);
+            else {
+              panX -= event.deltaX;
+              panY -= event.deltaY;
+              apply();
+            }
+          }, { passive: false });
+          wrap.addEventListener("mousedown", (event) => {
+            if (event.target.closest("button")) return;
+            dragged = false;
+            const startX = event.clientX;
+            const startY = event.clientY;
+            const initialX = panX;
+            const initialY = panY;
+            wrap.classList.add("is-panning");
+            activeDrag = {
+              move(moveEvent) {
+                const dx = moveEvent.clientX - startX;
+                const dy = moveEvent.clientY - startY;
+                dragged ||= Math.abs(dx) + Math.abs(dy) > 4;
+                panX = initialX + dx;
+                panY = initialY + dy;
+                apply();
+              },
+              end() { wrap.classList.remove("is-panning"); },
+            };
+          });
+          wrap.addEventListener("click", (event) => {
+            if (!dragged && !event.target.closest("button")) openFull();
+            dragged = false;
+          });
+          wrap.addEventListener("dblclick", fit);
+          new ResizeObserver(fit).observe(viewport);
+          fit();
+        } catch (error) {
+          console.error("Mermaid render failed", error);
+          label.textContent = "render error";
+        }
+      }
+
+      document.querySelectorAll(".diagram-shell").forEach((shell, index) => initDiagram(shell, index));
+    </script>
+    <style>
+      :root {
+        --bg: #f5f0e8;
+        --paper: #fffdfa;
+        --paper-warm: #fbf6ee;
+        --ink: #29251f;
+        --muted: #776e63;
+        --line: rgba(55, 45, 35, 0.14);
+        --line-strong: rgba(55, 45, 35, 0.28);
+        --emerald: #197356;
+        --emerald-soft: #e2f1e9;
+        --amber: #a45d09;
+        --amber-soft: #f7ead3;
+        --red: #b23b2b;
+        --red-soft: #f8e2dd;
+        --slate: #55616b;
+        --slate-soft: #e7eaec;
+        --deep: #283731;
+        --deep-ink: #f4f0e8;
+        --font-display: "Instrument Serif", Georgia, serif;
+        --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #171713;
+          --paper: #22221d;
+          --paper-warm: #2a2821;
+          --ink: #eee9de;
+          --muted: #aaa092;
+          --line: rgba(255, 250, 240, 0.10);
+          --line-strong: rgba(255, 250, 240, 0.22);
+          --emerald: #72c9a7;
+          --emerald-soft: #203a31;
+          --amber: #efba70;
+          --amber-soft: #3d3020;
+          --red: #ed8b7d;
+          --red-soft: #432a25;
+          --slate: #bac4ca;
+          --slate-soft: #30373b;
+          --deep: #dbece3;
+          --deep-ink: #172019;
+        }
+      }
+
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        color: var(--ink);
+        background-color: var(--bg);
+        background-image:
+          linear-gradient(var(--line) 1px, transparent 1px),
+          linear-gradient(90deg, var(--line) 1px, transparent 1px),
+          radial-gradient(circle at 85% 8%, var(--emerald-soft), transparent 30%);
+        background-size: 32px 32px, 32px 32px, auto;
+        font-family: var(--font-mono);
+        font-size: 15px;
+        line-height: 1.6;
+        overflow-wrap: break-word;
+      }
+      .grid > *, .flex > *, [style*="display: grid"] > *, [style*="display: flex"] > * { min-width: 0; }
+      h1, h2, h3 { font-family: var(--font-display); font-weight: 400; text-wrap: balance; }
+      code { font-family: var(--font-mono); }
+      a { color: var(--emerald); }
+
+      .wrap {
+        width: min(1380px, 100%);
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 190px minmax(0, 1fr);
+        gap: 0 44px;
+        padding: 0 36px 80px;
+      }
+      .main { min-width: 0; }
+      .toc {
+        position: sticky;
+        top: 24px;
+        align-self: start;
+        grid-row: 1 / -1;
+        max-height: calc(100dvh - 48px);
+        overflow-y: auto;
+        padding: 22px 0;
+      }
+      .toc-title {
+        padding-bottom: 10px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      .toc a {
+        display: block;
+        padding: 7px 10px;
+        border-left: 2px solid transparent;
+        border-radius: 0 6px 6px 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+        text-decoration: none;
+      }
+      .toc a:hover, .toc a.active { color: var(--ink); background: var(--paper-warm); }
+      .toc a.active { border-left-color: var(--emerald); }
+
+      header { padding: 76px 0 36px; border-bottom: 1px solid var(--line-strong); }
+      .eyebrow { color: var(--emerald); font-size: 12px; font-weight: 600; letter-spacing: 0.18em; text-transform: uppercase; }
+      header h1 { max-width: 1000px; margin: 14px 0 18px; font-size: clamp(58px, 7.5vw, 96px); line-height: 0.92; letter-spacing: -0.025em; }
+      .dateline { color: var(--muted); font-size: 14px; line-height: 1.6; }
+      .legend { display: flex; flex-wrap: wrap; gap: 13px 23px; margin-top: 30px; color: var(--muted); font-size: 12px; }
+      .legend-item { display: inline-flex; align-items: center; gap: 8px; }
+      .legend-box { width: 26px; height: 16px; border: 1px solid var(--line-strong); background: var(--paper); }
+      .legend-seam { width: 28px; border-top: 2px dashed var(--slate); }
+      .legend-leak { width: 28px; border-top: 2px solid var(--red); position: relative; }
+      .legend-leak::after { content: ""; position: absolute; right: -1px; top: -4px; border-left: 6px solid var(--red); border-top: 3px solid transparent; border-bottom: 3px solid transparent; }
+      .legend-deep { width: 26px; height: 16px; border: 3px solid var(--deep); background: var(--paper); }
+      .scan-note { margin-top: 20px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+
+      #candidates { display: grid; gap: 64px; padding-top: 48px; }
+      article {
+        background: color-mix(in srgb, var(--paper) 96%, transparent 4%);
+        border: 1px solid var(--line-strong);
+        box-shadow: 0 18px 50px rgba(42, 33, 23, 0.06);
+        animation: fade-up 0.48s ease-out both;
+        animation-delay: calc(var(--i, 0) * 0.07s);
+      }
+      .candidate-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; padding: 28px 30px 22px; border-bottom: 1px solid var(--line); }
+      .candidate-number { color: var(--muted); font-size: 11px; letter-spacing: 0.14em; }
+      .candidate-head h2 { margin: 7px 0 0; font-size: clamp(40px, 4.4vw, 56px); line-height: 1.02; }
+      .badges { display: flex; flex-wrap: wrap; justify-content: flex-end; align-content: start; gap: 8px; }
+      .badge { display: inline-flex; align-items: center; min-height: 29px; padding: 5px 10px; border-radius: 999px; font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+      .badge-strong { color: var(--emerald); background: var(--emerald-soft); }
+      .badge-worth { color: var(--amber); background: var(--amber-soft); }
+      .badge-spec { color: var(--slate); background: var(--slate-soft); }
+      .badge-dep { color: var(--muted); border: 1px solid var(--line-strong); }
+      .candidate-body { padding: 26px 30px 30px; }
+      .files { margin: 0 0 23px; color: var(--muted); font-size: 12px; line-height: 1.75; overflow-wrap: anywhere; }
+      .files strong { color: var(--ink); font-weight: 600; }
+      .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: stretch; }
+      .compare-panel { min-width: 0; overflow: hidden; border: 1px solid var(--line); background: var(--paper-warm); }
+      .compare-label { display: flex; justify-content: space-between; gap: 12px; padding: 12px 15px; border-bottom: 1px solid var(--line); color: var(--muted); font-size: 10px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+      .compare-label.before { color: var(--red); }
+      .compare-label.after { color: var(--emerald); }
+      .visual { min-height: 370px; padding: 19px; display: grid; align-content: center; }
+      .explain-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 22px; margin-top: 24px; }
+      .explain-block h3 { margin: 0 0 8px; color: var(--muted); font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; }
+      .explain-block p { margin: 0; font-size: 14px; line-height: 1.7; }
+      .wins { list-style: none; margin: 0; padding: 0; font-size: 13px; line-height: 1.9; }
+      .wins li { position: relative; padding-left: 14px; }
+      .wins li::before { content: "↳"; position: absolute; left: 0; color: var(--emerald); }
+      .callout { margin-top: 22px; padding: 14px 16px; border-left: 3px solid var(--amber); background: var(--amber-soft); color: var(--amber); font-size: 12px; line-height: 1.65; }
+
+      .diagram-shell__hint { margin: 0 0 7px; color: var(--muted); font-size: 10px; }
+      .mermaid-wrap { position: relative; height: 330px; overflow: hidden; cursor: grab; background: var(--paper); border: 1px solid var(--line); }
+      .mermaid-wrap.is-panning { cursor: grabbing; user-select: none; }
+      .mermaid-viewport { position: relative; width: 100%; height: 100%; overflow: hidden; }
+      .mermaid-canvas { position: absolute; inset: 0 auto auto 0; transform-origin: top left; }
+      .zoom-controls { position: absolute; top: 6px; right: 6px; z-index: 10; display: flex; align-items: center; gap: 2px; padding: 2px; background: var(--paper); border: 1px solid var(--line); }
+      .zoom-controls button { width: 28px; height: 28px; border: 0; background: transparent; color: var(--muted); font-family: var(--font-mono); font-size: 12px; cursor: pointer; }
+      .zoom-controls button:hover { background: var(--paper-warm); color: var(--ink); }
+      .zoom-label { padding: 0 5px; color: var(--muted); font-size: 10px; }
+
+      .module-stack { display: grid; gap: 7px; }
+      .module-box { padding: 12px 14px; border: 1px solid var(--line-strong); background: var(--paper); text-align: center; font-size: 11px; line-height: 1.5; }
+      .module-box.shallow { border-left: 4px solid var(--red); }
+      .module-box.deep { border: 4px solid var(--deep); padding: 14px; background: var(--paper); }
+      .module-box.deep .deep-label { color: var(--emerald); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+      .arrow-down { height: 18px; display: grid; place-items: center; color: var(--muted); font-size: 16px; }
+      .internal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--slate); }
+      .internal-grid span { padding: 9px 5px; background: var(--paper-warm); color: var(--muted); font-size: 10px; line-height: 1.45; text-align: center; }
+      .specimen-mass { height: 150px; display: grid; align-content: end; padding: 14px; border: 1px solid var(--line); background: repeating-linear-gradient(0deg, transparent, transparent 19px, var(--line) 20px); }
+      .mass-interface { height: 72px; display: grid; place-items: center; background: var(--red-soft); border: 1px solid var(--red); color: var(--red); font-size: 11px; line-height: 1.5; text-align: center; }
+      .mass-implementation { height: 78px; display: grid; place-items: center; background: var(--paper); border: 1px solid var(--line-strong); color: var(--muted); font-size: 11px; line-height: 1.5; text-align: center; }
+      .mass-interface.small { height: 28px; background: var(--emerald-soft); border-color: var(--emerald); color: var(--emerald); }
+      .mass-implementation.tall { height: 118px; border: 4px solid var(--deep); color: var(--ink); }
+
+      .identity-before { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; position: relative; }
+      .identity-source { min-height: 118px; padding: 11px 8px; border: 1px solid var(--red); background: var(--red-soft); color: var(--red); font-size: 10px; line-height: 1.6; text-align: center; }
+      .drift-line { grid-column: 1 / -1; margin-top: 9px; padding: 9px; border-top: 2px solid var(--red); color: var(--red); font-size: 10px; line-height: 1.5; text-align: center; }
+      .identity-after { display: grid; gap: 12px; }
+      .identity-consumers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+      .identity-consumers span { padding: 10px 5px; border: 1px solid var(--line-strong); background: var(--paper); color: var(--muted); font-size: 10px; line-height: 1.45; text-align: center; }
+
+      .session-cross { display: grid; gap: 6px; }
+      .cross-band { min-height: 45px; display: grid; place-items: center; padding: 9px; border-left: 4px solid var(--red); background: var(--red-soft); color: var(--red); font-size: 10px; line-height: 1.5; text-align: center; }
+      .cross-band.deep { min-height: 146px; border: 4px solid var(--deep); background: var(--paper); color: var(--ink); }
+      .cross-band.keep { border-left-color: var(--slate); background: var(--slate-soft); color: var(--slate); }
+      .seam-note { padding-top: 9px; border-top: 2px dashed var(--slate); color: var(--slate); font-size: 10px; line-height: 1.5; text-align: center; }
+
+      #top-recommendation { margin-top: 64px; padding: 42px; border: 4px solid var(--deep); background: var(--paper); box-shadow: 14px 14px 0 var(--emerald-soft); }
+      #top-recommendation .top-label { color: var(--emerald); font-size: 12px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; }
+      #top-recommendation h2 { margin: 13px 0 16px; font-size: clamp(48px, 6.5vw, 72px); line-height: 1; }
+      #top-recommendation p { max-width: 900px; margin: 0; font-size: 15px; line-height: 1.8; }
+      footer { padding: 46px 0 0; color: var(--muted); font-size: 11px; line-height: 1.75; }
+
+      @keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; } }
+      @media (max-width: 1000px) {
+        .wrap { grid-template-columns: 1fr; padding-top: 0; }
+        .toc { position: sticky; top: 0; z-index: 100; grid-row: auto; display: flex; align-items: center; gap: 4px; max-height: none; overflow-x: auto; margin: 0 -36px; padding: 10px 36px; background: var(--bg); border-bottom: 1px solid var(--line); }
+        .toc-title { display: none; }
+        .toc a { flex-shrink: 0; white-space: nowrap; border-left: 0; border-bottom: 2px solid transparent; border-radius: 4px 4px 0 0; }
+        .toc a.active { border-bottom-color: var(--emerald); }
+        header { padding-top: 52px; }
+        article, #top-recommendation { scroll-margin-top: 58px; }
+      }
+      @media (max-width: 760px) {
+        .wrap { padding-left: 16px; padding-right: 16px; }
+        .toc { margin: 0 -16px; padding-left: 16px; padding-right: 16px; }
+        header { padding-top: 42px; }
+        h1 { font-size: clamp(46px, 18vw, 68px); }
+        .candidate-head { grid-template-columns: 1fr; padding: 22px 18px 18px; }
+        .badges { justify-content: flex-start; }
+        .candidate-body { padding: 20px 18px 22px; }
+        .comparison, .explain-grid { grid-template-columns: 1fr; }
+        .visual { min-height: 280px; }
+        .internal-grid, .identity-consumers { grid-template-columns: 1fr; }
+        #top-recommendation { padding: 26px 22px; box-shadow: 8px 8px 0 var(--emerald-soft); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <nav class="toc" id="toc" aria-label="Architecture candidates">
+        <div class="toc-title">Candidates</div>
+        <a href="#oscilloscope">01 Oscilloscope session</a>
+        <a href="#specimens">02 Focused specimens</a>
+        <a href="#catalog-identity">03 Catalog identity</a>
+        <a href="#binaural">04 Binaural session</a>
+        <a href="#top-recommendation">Top recommendation</a>
+      </nav>
+
+      <main class="main">
+        <header>
+          <div class="eyebrow">Architecture review / KKB</div>
+          <h1>Deepening opportunities</h1>
+          <p class="dateline">2026-07-23 · scoped from 50 recent commits, current plans, reports, tests, and implementation</p>
+          <div class="legend" aria-label="Diagram legend">
+            <span class="legend-item"><span class="legend-box"></span>solid box = module</span>
+            <span class="legend-item"><span class="legend-seam"></span>dashed line = seam</span>
+            <span class="legend-item"><span class="legend-leak"></span>red arrow = leakage</span>
+            <span class="legend-item"><span class="legend-deep"></span>thick box = deep module</span>
+          </div>
+          <p class="scan-note">No <code>CONTEXT.md</code> or <code>docs/adr/</code> records exist. Domain names follow current repository plans and reports.</p>
+        </header>
+
+        <section id="candidates">
+          <article id="oscilloscope" style="--i:0">
+            <div class="candidate-head">
+              <div>
+                <div class="candidate-number">Candidate 01</div>
+                <h2>Put oscilloscope lifecycle behind one session module</h2>
+              </div>
+              <div class="badges">
+                <span class="badge badge-strong">Strong</span>
+                <span class="badge badge-dep">local-substitutable</span>
+              </div>
+            </div>
+            <div class="candidate-body">
+              <p class="files"><strong>Files</strong> · <code>apps/web/components/oscilloscope/oscilloscope-client.tsx</code> · <code>apps/web/components/oscilloscope/__tests__/oscilloscope-client.test.tsx</code> · <code>apps/web/lib/oscilloscope/create-mic-provider.ts</code> · <code>packages/audio/src/oscilloscope/runtime.ts</code></p>
+              <div class="comparison">
+                <div class="compare-panel">
+                  <div class="compare-label before"><span>Before</span><span>lifecycle leaks into React</span></div>
+                  <div class="visual">
+                    <section class="diagram-shell">
+                      <p class="diagram-shell__hint">Drag to pan · Ctrl/Cmd + wheel to zoom · click to expand</p>
+                      <div class="mermaid-wrap">
+                        <div class="zoom-controls">
+                          <button type="button" data-action="zoom-in" title="Zoom in">+</button>
+                          <button type="button" data-action="zoom-out" title="Zoom out">−</button>
+                          <button type="button" data-action="zoom-fit" title="Fit">↻</button>
+                          <button type="button" data-action="zoom-one" title="One-to-one">1:1</button>
+                          <button type="button" data-action="zoom-expand" title="Open full size">⛶</button>
+                          <span class="zoom-label">loading</span>
+                        </div>
+                        <div class="mermaid-viewport"><div class="mermaid-canvas"></div></div>
+                      </div>
+                      <script type="text/plain" class="diagram-source">
+flowchart TD
+  C["OscilloscopeClient<br/>React + session rules"]
+  C --> U["support detection<br/>+ lazy loading"]
+  C --> M["mic request races"]
+  C --> H["hash + presets<br/>+ presentation"]
+  U --> R["oscilloscope runtime"]
+  M --> P["mic adapter"]
+  classDef leak fill:#f8e2dd,stroke:#b23b2b,color:#7d2419,stroke-width:2px;
+  classDef normal fill:#fffdfa,stroke:#b9aa98,color:#29251f;
+  class C leak;
+  class U,M,H,R,P normal;
+                      </script>
+                    </section>
+                  </div>
+                </div>
+                <div class="compare-panel">
+                  <div class="compare-label after"><span>After</span><span>one test surface</span></div>
+                  <div class="visual">
+                    <section class="diagram-shell">
+                      <p class="diagram-shell__hint">Drag to pan · Ctrl/Cmd + wheel to zoom · click to expand</p>
+                      <div class="mermaid-wrap">
+                        <div class="zoom-controls">
+                          <button type="button" data-action="zoom-in" title="Zoom in">+</button>
+                          <button type="button" data-action="zoom-out" title="Zoom out">−</button>
+                          <button type="button" data-action="zoom-fit" title="Fit">↻</button>
+                          <button type="button" data-action="zoom-one" title="One-to-one">1:1</button>
+                          <button type="button" data-action="zoom-expand" title="Open full size">⛶</button>
+                          <span class="zoom-label">loading</span>
+                        </div>
+                        <div class="mermaid-viewport"><div class="mermaid-canvas"></div></div>
+                      </div>
+                      <script type="text/plain" class="diagram-source">
+flowchart TD
+  A["React adapter<br/>canvas + subscribe + intents"] --> Q["Oscilloscope session module"]
+  H["URL/hash adapter"] --> A
+  Q --> R["oscilloscope runtime"]
+  Q --> P["live / fake mic adapters"]
+  Q --> X["support + race + disposal implementation"]
+  classDef deep fill:#283731,stroke:#197356,color:#f4f0e8,stroke-width:4px;
+  classDef adapter fill:#e7eaec,stroke:#55616b,color:#29251f,stroke-dasharray:5 4;
+  classDef normal fill:#fffdfa,stroke:#b9aa98,color:#29251f;
+  class Q deep;
+  class A,H,P adapter;
+  class R,X normal;
+                      </script>
+                    </section>
+                  </div>
+                </div>
+              </div>
+              <div class="explain-grid">
+                <div class="explain-block"><h3>Problem</h3><p><code>OscilloscopeClient</code> hides a session state machine inside React; 677 lines of DOM tests reach through presentation to verify races, teardown, support, and source switching.</p></div>
+                <div class="explain-block"><h3>Solution</h3><p>Concentrate reusable startup, source switching, stale-request cancellation, failure, and disposal implementation in one app-local deep session module; keep URL/hash behavior in the React adapter.</p></div>
+                <div class="explain-block"><h3>Benefits</h3><ul class="wins"><li>locality: races live together</li><li>interface becomes test surface</li><li>leverage across future adapters</li><li>React tests shrink sharply</li></ul></div>
+              </div>
+              <div class="callout">Deletion test: removing the session module would spread lifecycle rules back across React, mic setup, and runtime callers. The seam earns its place.</div>
+            </div>
+          </article>
+
+          <article id="specimens" style="--i:1">
+            <div class="candidate-head">
+              <div>
+                <div class="candidate-number">Candidate 02</div>
+                <h2>Deepen focused specimen routing without widening its interface</h2>
+              </div>
+              <div class="badges">
+                <span class="badge badge-strong">Strong</span>
+                <span class="badge badge-dep">in-process</span>
+              </div>
+            </div>
+            <div class="candidate-body">
+              <p class="files"><strong>Files</strong> · <code>apps/web/components/ui-catalog/focused-specimens.tsx</code> · <code>catalog-surfaces.tsx</code> · <code>category-surface.tsx</code> · <code>demos/*</code> · <code>__tests__/catalog-surface-rendering.test.tsx</code></p>
+              <div class="comparison">
+                <div class="compare-panel">
+                  <div class="compare-label before"><span>Before</span><span>2,223-line hot spot</span></div>
+                  <div class="visual">
+                    <div class="module-stack">
+                      <div class="module-box">Catalog workbench</div><div class="arrow-down">↓</div>
+                      <div class="module-box shallow">Catalog surface routing</div><div class="arrow-down">↓</div>
+                      <div class="module-box shallow">Focused specimen page layout</div><div class="arrow-down">↓</div>
+                      <div class="specimen-mass">
+                        <div class="mass-interface">wide internal interface<br/>dispatch + family rules + concrete specimens</div>
+                        <div class="mass-implementation">one high-churn implementation file</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="compare-panel">
+                  <div class="compare-label after"><span>After</span><span>external seam stays small</span></div>
+                  <div class="visual">
+                    <div class="module-stack">
+                      <div class="module-box">Catalog workbench</div><div class="arrow-down">↓</div>
+                      <div class="module-box deep">
+                        <div class="deep-label">Focused specimen module</div>
+                        <div class="mass-interface small" style="margin-top:10px">one external interface</div>
+                        <div class="internal-grid" aria-label="Internal specimen modules">
+                          <span>input family</span><span>data family</span><span>overlay family</span>
+                          <span>audio demos</span><span>utilities</span><span>one-off specimens</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="explain-grid">
+                <div class="explain-block"><h3>Problem</h3><p>One module mixes routing, page framing, family grouping, error containment, and concrete specimen implementation; understanding one catalog item crosses distant regions of the same file.</p></div>
+                <div class="explain-block"><h3>Solution</h3><p>Preserve the current external seam while moving family and shared-demo implementation behind internal seams, following the existing <code>demos/*</code> pattern only where two consumers prove leverage.</p></div>
+                <div class="explain-block"><h3>Benefits</h3><ul class="wins"><li>locality per specimen family</li><li>external interface stays small</li><li>tests follow owning modules</li><li>shared demos retain leverage</li></ul></div>
+              </div>
+              <div class="callout">Aligned with <code>docs/plans/2026-06-22-ui-catalog-next-pass.md</code>. Do not create one-consumer adapters: one adapter is a hypothetical seam.</div>
+            </div>
+          </article>
+
+          <article id="catalog-identity" style="--i:2">
+            <div class="candidate-head">
+              <div>
+                <div class="candidate-number">Candidate 03</div>
+                <h2>Concentrate catalog identity in one deep module</h2>
+              </div>
+              <div class="badges">
+                <span class="badge badge-worth">Worth exploring</span>
+                <span class="badge badge-dep">in-process</span>
+              </div>
+            </div>
+            <div class="candidate-body">
+              <p class="files"><strong>Files</strong> · <code>apps/web/components/ui-catalog/catalog-data.ts</code> · <code>focused-specimens.tsx</code> · <code>__tests__/catalog-data.test.ts</code> · <code>__tests__/catalog-surface-rendering.test.tsx</code> · <code>packages/ui/package.json</code></p>
+              <div class="comparison">
+                <div class="compare-panel">
+                  <div class="compare-label before"><span>Before</span><span>identity drifts</span></div>
+                  <div class="visual">
+                    <div class="identity-before">
+                      <div class="identity-source"><strong>catalog data</strong><br/>id<br/>label<br/>source<br/>category</div>
+                      <div class="identity-source"><strong>render dispatch</strong><br/>id groups<br/>family choices<br/>fallback</div>
+                      <div class="identity-source"><strong>test lists</strong><br/>64 ids<br/>utility ids<br/>heading arrays</div>
+                      <div class="drift-line">red seam: one export change requires coordinated edits</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="compare-panel">
+                  <div class="compare-label after"><span>After</span><span>one identity source</span></div>
+                  <div class="visual">
+                    <div class="identity-after">
+                      <div class="module-box deep">
+                        <div class="deep-label">Catalog identity module</div>
+                        <div class="mass-interface small" style="margin-top:10px">small projection interface</div>
+                        <div class="mass-implementation tall" style="height:108px;margin-top:0">inventory + metadata + render correspondence validation</div>
+                      </div>
+                      <div class="seam-note">one seam, several projections</div>
+                      <div class="identity-consumers"><span>rail + search</span><span>focused routing</span><span>coverage tests</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="explain-grid">
+                <div class="explain-block"><h3>Problem</h3><p>Catalog identity is manually repeated in production data, focused dispatch, and tests, so a new <code>@kkb/ui</code> export can appear complete while coverage still depends on synchronized lists.</p></div>
+                <div class="explain-block"><h3>Solution</h3><p>Concentrate export identity, catalog metadata, and render correspondence validation in one deep module, then let navigation, search, routing, and tests consume projections from it.</p></div>
+                <div class="explain-block"><h3>Benefits</h3><ul class="wins"><li>locality: identity changes once</li><li>leverage across four callers</li><li>coverage observes real exports</li><li>duplicate test list disappears</li></ul></div>
+              </div>
+              <div class="callout">Deletion test: the duplicated test list can vanish without changing behavior; a deeper identity module must concentrate real correspondence, not merely move the list.</div>
+            </div>
+          </article>
+
+          <article id="binaural" style="--i:3">
+            <div class="candidate-head">
+              <div>
+                <div class="candidate-number">Candidate 04</div>
+                <h2>Extract binaural playback state only on the next lifecycle change</h2>
+              </div>
+              <div class="badges">
+                <span class="badge badge-spec">Speculative</span>
+                <span class="badge badge-dep">local-substitutable</span>
+              </div>
+            </div>
+            <div class="candidate-body">
+              <p class="files"><strong>Files</strong> · <code>apps/web/components/binaural-beats/binaural-beats-client.tsx</code> · <code>apps/web/components/binaural-beats/__tests__/binaural-beats-client.test.tsx</code> · <code>apps/web/lib/binaural-beats/create-binaural-beat-engine.ts</code></p>
+              <div class="comparison">
+                <div class="compare-panel">
+                  <div class="compare-label before"><span>Before</span><span>React owns every band</span></div>
+                  <div class="visual">
+                    <div class="session-cross">
+                      <div class="cross-band keep">presentation + controls</div>
+                      <div class="cross-band">play / stop async flags</div>
+                      <div class="cross-band">engine creation + disposal</div>
+                      <div class="cross-band">config update gating</div>
+                      <div class="cross-band keep">preset + hash behavior</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="compare-panel">
+                  <div class="compare-label after"><span>After</span><span>deepen when recurrence arrives</span></div>
+                  <div class="visual">
+                    <div class="session-cross">
+                      <div class="cross-band keep">React adapter: render + hash</div>
+                      <div class="seam-note">dashed seam</div>
+                      <div class="cross-band deep">Binaural playback session<br/><br/>engine ownership<br/>command ordering<br/>state transitions<br/>failure recovery</div>
+                      <div class="seam-note">engine factory remains internal</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="explain-grid">
+                <div class="explain-block"><h3>Problem</h3><p>A 526-line DOM suite now verifies engine lifecycle, deferred play/stop, state flags, and failures through presentation, but only one product engine adapter exists.</p></div>
+                <div class="explain-block"><h3>Solution</h3><p>Wait for the next race or lifecycle feature; then concentrate engine ownership and playback transitions in an app-local deep session module while presets and URL state remain outside.</p></div>
+                <div class="explain-block"><h3>Benefits</h3><ul class="wins"><li>locality for command ordering</li><li>session interface tests behavior</li><li>React tests cover adaptation</li><li>no premature package seam</li></ul></div>
+              </div>
+              <div class="callout">One product adapter plus a test fake leaves the seam hypothetical. Current characterization tests are the safety net, not yet proof that extraction pays.</div>
+            </div>
+          </article>
+        </section>
+
+        <section id="top-recommendation">
+          <div class="top-label">Top recommendation</div>
+          <h2><a href="#oscilloscope">Oscilloscope session module</a></h2>
+          <p>It has the strongest recurrence, the largest behavior suite, and the clearest locality failure: lifecycle bugs currently cross React, mic setup, and the headless runtime, while existing live and fake mic adapters make the internal seam testable.</p>
+        </section>
+
+        <footer>
+          Evidence reviewed: recent 50-commit path frequency; repository README; April architecture reports; June UI catalog plan; July binaural characterization plan; current implementation and tests. This report proposes deepening directions only—no interface design.
+        </footer>
+      </main>
+    </div>
+
+    <script>
+      (function () {
+        const toc = document.getElementById("toc");
+        const links = toc.querySelectorAll("a");
+        const sections = [];
+        links.forEach((link) => {
+          const element = document.getElementById(link.getAttribute("href").slice(1));
+          if (element) sections.push({ element, link });
+        });
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            links.forEach((link) => link.classList.remove("active"));
+            const match = sections.find((section) => section.element === entry.target);
+            if (match) {
+              match.link.classList.add("active");
+              if (window.innerWidth <= 1000) match.link.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+            }
+          });
+        }, { rootMargin: "-10% 0px -78% 0px" });
+        sections.forEach((section) => observer.observe(section.element));
+        links.forEach((link) => {
+          link.addEventListener("click", (event) => {
+            event.preventDefault();
+            const element = document.getElementById(link.getAttribute("href").slice(1));
+            element?.scrollIntoView({ behavior: "smooth", block: "start" });
+            history.replaceState(null, "", link.getAttribute("href"));
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>
