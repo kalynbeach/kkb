@@ -82,6 +82,7 @@ function SidebarProvider({
       }
 
       // This sets the cookie to keep the sidebar state.
+      // biome-ignore lint/suspicious/noDocumentCookie: The sidebar state cookie must remain server-readable, and the Cookie Store API lacks broad browser support.
       document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
     },
     [openProp, _open, setOpenProp],

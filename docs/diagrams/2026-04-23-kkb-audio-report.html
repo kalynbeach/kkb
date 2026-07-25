@@ -11,6 +11,7 @@
             rel="stylesheet"
         />
         <style>
+            /* biome-ignore-all lint/complexity/noImportantStyles: Mermaid emits inline SVG styles, so standalone-report overrides must win. */
             :root {
                 --font-display: "Fraunces", Georgia, serif;
                 --font-body: "Fraunces", Georgia, serif;
@@ -245,17 +246,6 @@
                 stroke-dashoffset: 720;
                 animation: traceDraw 1.2s ease-out 0.3s forwards;
             }
-            @media (prefers-reduced-motion: reduce) {
-                *,
-                *::before,
-                *::after {
-                    animation-duration: 0.01ms !important;
-                    animation-delay: 0ms !important;
-                    transition-duration: 0.01ms !important;
-                    scroll-behavior: auto !important;
-                }
-            }
-
             header.hero {
                 position: relative;
                 overflow: hidden;
@@ -652,6 +642,20 @@
             .zoom-controls button:hover {
                 background: var(--surface2);
                 color: var(--text);
+            }
+            @media (prefers-reduced-motion: reduce) {
+                html {
+                    scroll-behavior: auto;
+                }
+                .animate,
+                .trace-line {
+                    animation-duration: 0.01ms;
+                    animation-delay: 0ms;
+                }
+                .toc a,
+                .zoom-controls button {
+                    transition-duration: 0.01ms;
+                }
             }
             .zoom-label {
                 font-family: var(--font-mono);

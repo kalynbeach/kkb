@@ -145,7 +145,9 @@
         }
       }
 
-      document.querySelectorAll(".diagram-shell").forEach((shell, index) => initDiagram(shell, index));
+      document.querySelectorAll(".diagram-shell").forEach((shell, index) => {
+        initDiagram(shell, index);
+      });
     </script>
     <style>
       :root {
@@ -345,7 +347,10 @@
       footer { padding: 46px 0 0; color: var(--muted); font-size: 11px; line-height: 1.75; }
 
       @keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; scroll-behavior: auto !important; transition-duration: 0.01ms !important; } }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        article { animation-duration: 0.01ms; animation-delay: 0ms; }
+      }
       @media (max-width: 1000px) {
         .wrap { grid-template-columns: 1fr; padding-top: 0; }
         .toc { position: sticky; top: 0; z-index: 100; grid-row: auto; display: flex; align-items: center; gap: 4px; max-height: none; overflow-x: auto; margin: 0 -36px; padding: 10px 36px; background: var(--bg); border-bottom: 1px solid var(--line); }
@@ -649,7 +654,7 @@ flowchart TD
     </div>
 
     <script>
-      (function () {
+      (() => {
         const toc = document.getElementById("toc");
         const links = toc.querySelectorAll("a");
         const sections = [];
@@ -660,7 +665,9 @@ flowchart TD
         const observer = new IntersectionObserver((entries) => {
           entries.forEach((entry) => {
             if (!entry.isIntersecting) return;
-            links.forEach((link) => link.classList.remove("active"));
+            links.forEach((link) => {
+              link.classList.remove("active");
+            });
             const match = sections.find((section) => section.element === entry.target);
             if (match) {
               match.link.classList.add("active");
@@ -668,7 +675,9 @@ flowchart TD
             }
           });
         }, { rootMargin: "-10% 0px -78% 0px" });
-        sections.forEach((section) => observer.observe(section.element));
+        sections.forEach((section) => {
+          observer.observe(section.element);
+        });
         links.forEach((link) => {
           link.addEventListener("click", (event) => {
             event.preventDefault();
