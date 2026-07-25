@@ -11,12 +11,18 @@ type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
 type CarouselOptions = UseCarouselParameters[0];
 type CarouselPlugin = UseCarouselParameters[1];
 
-type CarouselProps = {
+type CarouselBehaviorProps = {
   opts?: CarouselOptions;
   plugins?: CarouselPlugin;
   orientation?: "horizontal" | "vertical";
   setApi?: (api: CarouselApi) => void;
 };
+
+type CarouselAccessibleName =
+  | { "aria-label": string; "aria-labelledby"?: never }
+  | { "aria-label"?: never; "aria-labelledby": string };
+
+type CarouselProps = CarouselBehaviorProps & CarouselAccessibleName;
 
 type CarouselContextProps = {
   carouselRef: ReturnType<typeof useEmblaCarousel>[0];
@@ -25,7 +31,7 @@ type CarouselContextProps = {
   scrollNext: () => void;
   canScrollPrev: boolean;
   canScrollNext: boolean;
-} & CarouselProps;
+} & CarouselBehaviorProps;
 
 const CarouselContext = React.createContext<CarouselContextProps | null>(null);
 
@@ -47,7 +53,7 @@ function Carousel({
   className,
   children,
   ...props
-}: React.ComponentProps<"div"> & CarouselProps) {
+}: React.ComponentProps<"section"> & CarouselProps) {
   const [carouselRef, api] = useEmblaCarousel(
     {
       ...opts,
@@ -71,19 +77,6 @@ function Carousel({
   const scrollNext = React.useCallback(() => {
     api?.scrollNext();
   }, [api]);
-
-  const handleKeyDown = React.useCallback(
-    (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (event.key === "ArrowLeft") {
-        event.preventDefault();
-        scrollPrev();
-      } else if (event.key === "ArrowRight") {
-        event.preventDefault();
-        scrollNext();
-      }
-    },
-    [scrollPrev, scrollNext],
-  );
 
   React.useEffect(() => {
     if (!api || !setApi) return;
@@ -119,7 +112,8 @@ function Carousel({
   return (
     <CarouselContext.Provider value={contextValue}>
       <section
-        onKeyDownCapture={handleKeyDown}
+        role="region"
+        aria-roledescription="carousel"
         className={cn("relative", className)}
         data-slot="carousel"
         {...props}
@@ -130,15 +124,55 @@ function Carousel({
   );
 }
 
-function CarouselContent({ className, ...props }: React.ComponentProps<"div">) {
+type FlattenedCarouselSlide = {
+  key: string;
+  node: React.ReactNode;
+};
+
+const flattenCarouselSlides = (
+  children: React.ReactNode,
+  parentKey = "",
+): FlattenedCarouselSlide[] =>
+  React.Children.toArray(children).flatMap((child, index) => {
+    const childKey = React.isValidElement(child) && child.key !== null ? child.key : index;
+    const key = parentKey ? `${parentKey}/${childKey}` : `${childKey}`;
+
+    if (
+      React.isValidElement<{ children?: React.ReactNode }>(child) &&
+      child.type === React.Fragment
+    ) {
+      return flattenCarouselSlides(child.props.children, key);
+    }
+
+    return [{ key, node: child }];
+  });
+
+function CarouselContent({ className, children, ...props }: React.ComponentProps<"div">) {
   const { carouselRef, orientation } = useCarousel();
+  const slides = flattenCarouselSlides(children);
 
   return (
     <div ref={carouselRef} className="overflow-hidden" data-slot="carousel-content">
       <div
         className={cn("flex", orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col", className)}
         {...props}
-      />
+      >
+        {slides.map(({ key, node: slide }, index) => {
+          if (!React.isValidElement<React.ComponentProps<"div">>(slide)) {
+            return <React.Fragment key={key}>{slide}</React.Fragment>;
+          }
+
+          const hasAccessibleName =
+            slide.props["aria-label"] !== undefined || slide.props["aria-labelledby"] !== undefined;
+
+          return React.cloneElement(slide, {
+            key,
+            ...(hasAccessibleName
+              ? undefined
+              : { "aria-label": `Slide ${index + 1} of ${slides.length}` }),
+          });
+        })}
+      </div>
     </div>
   );
 }
@@ -147,7 +181,10 @@ function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
   const { orientation } = useCarousel();
 
   return (
+    // biome-ignore lint/a11y/useSemanticElements: WAI-ARIA carousel slides use group with a slide role description.
     <div
+      role="group"
+      aria-roledescription="slide"
       data-slot="carousel-item"
       className={cn(
         "min-w-0 shrink-0 grow-0 basis-full",
@@ -175,8 +212,8 @@ function CarouselPrevious({
       className={cn(
         "absolute size-8 rounded-full",
         orientation === "horizontal"
-          ? "top-1/2 -left-12 -translate-y-1/2"
-          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
+          ? "top-1/2 left-2 -translate-y-1/2"
+          : "top-2 left-1/2 -translate-x-1/2 rotate-90",
         className,
       )}
       disabled={!canScrollPrev}
@@ -205,8 +242,8 @@ function CarouselNext({
       className={cn(
         "absolute size-8 rounded-full",
         orientation === "horizontal"
-          ? "top-1/2 -right-12 -translate-y-1/2"
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
+          ? "top-1/2 right-2 -translate-y-1/2"
+          : "bottom-2 left-1/2 -translate-x-1/2 rotate-90",
         className,
       )}
       disabled={!canScrollNext}

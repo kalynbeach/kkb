@@ -20,16 +20,80 @@ describe("Waveform keyboard seeking", () => {
     expect(html).not.toContain("width:30%");
   });
 
-  test("renders a safe zero-valued slider contract when duration is invalid", () => {
+  test("renders an unavailable static waveform when duration is invalid", () => {
     const html = renderToString(
       createElement(Waveform, {
         duration: Number.NaN,
         currentTime: 12,
+        onSeek: () => {},
       }),
     ).replaceAll("<!-- -->", "");
 
-    expect(html).toContain('aria-valuemax="0"');
-    expect(html).not.toContain('aria-valuemax="NaN"');
+    expect(html).toContain('role="img"');
+    expect(html).toContain('aria-label="Audio waveform unavailable"');
+    expect(html).not.toContain('role="slider"');
+    expect(html).not.toContain('tabindex="0"');
+    expect(html).not.toContain("NaN");
+  });
+
+  test("renders valid playback progress without interactive seek semantics", () => {
+    const html = renderToString(
+      createElement(Waveform, {
+        duration: 120,
+        currentTime: 12,
+      }),
+    ).replaceAll("<!-- -->", "");
+
+    expect(html).toContain('role="progressbar"');
+    expect(html).toContain('aria-label="Playback progress"');
+    expect(html).toContain('aria-valuenow="12"');
+    expect(html).toContain('aria-valuemax="120"');
+    expect(html).not.toContain('role="slider"');
+    expect(html).not.toContain('tabindex="0"');
+    expect(html).not.toContain("cursor-pointer");
+  });
+
+  test("keeps precise numeric bounds with readable time values", () => {
+    const html = renderToString(
+      createElement(Waveform, {
+        duration: 125.9,
+        currentTime: 65.9,
+        onSeek: () => {},
+      }),
+    ).replaceAll("<!-- -->", "");
+
+    expect(html).toContain('role="slider"');
+    expect(html).toContain('tabindex="0"');
+    expect(html).toContain('aria-valuenow="65.9"');
+    expect(html).toContain('aria-valuemax="125.9"');
+    expect(html).toContain('aria-valuetext="1:05.9 of 2:05.9"');
+  });
+
+  test("describes sub-second waveform bounds without collapsing them to zero", () => {
+    const html = renderToString(
+      createElement(Waveform, {
+        duration: 0.5,
+        currentTime: 0.25,
+        onSeek: () => {},
+      }),
+    ).replaceAll("<!-- -->", "");
+
+    expect(html).toContain('aria-valuenow="0.25"');
+    expect(html).toContain('aria-valuemax="0.5"');
+    expect(html).toContain('aria-valuetext="0.25 seconds of 0.5 seconds"');
+  });
+
+  test("clamps rendered progress semantics to the duration", () => {
+    const html = renderToString(
+      createElement(Waveform, {
+        duration: 120,
+        currentTime: 150,
+        onSeek: () => {},
+      }),
+    ).replaceAll("<!-- -->", "");
+
+    expect(html).toContain('aria-valuenow="120"');
+    expect(html).toContain('aria-valuetext="2:00 of 2:00"');
   });
 
   test("seeks backward five seconds on ArrowLeft", () => {

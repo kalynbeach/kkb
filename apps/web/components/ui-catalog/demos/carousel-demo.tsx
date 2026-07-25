@@ -37,7 +37,7 @@ const carouselSlides: ReadonlyArray<CarouselSlide> = [
 export function CarouselDemo() {
   return (
     <div className="px-14 py-6">
-      <Carousel opts={{ align: "start", loop: false }}>
+      <Carousel aria-label="Component highlights" opts={{ align: "start", loop: false }}>
         <CarouselContent>
           {carouselSlides.map((slide) => (
             <CarouselItem key={slide.title} className="md:basis-1/2">

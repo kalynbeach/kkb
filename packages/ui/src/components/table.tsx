@@ -1,15 +1,99 @@
 "use client";
 
 import { cn } from "@kkb/ui/lib/utils";
-import type * as React from "react";
+import * as React from "react";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
+  const containerRef = React.useRef<HTMLDivElement>(null);
+  const [isOverflowing, setIsOverflowing] = React.useState(false);
+  const [overflowIndicator, setOverflowIndicator] = React.useState<"start" | "end" | null>(null);
+  const [accessibleLabel, setAccessibleLabel] = React.useState("");
+
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const updateOverflowState = () => {
+      const nextIsOverflowing = container.scrollWidth > container.clientWidth;
+      const nextAccessibleLabel = container.querySelector("caption")?.textContent?.trim() ?? "";
+      const isRtl =
+        container.closest<HTMLElement>("[dir]")?.dir === "rtl" ||
+        window.getComputedStyle(container).direction === "rtl";
+      const maxScrollDistance = container.scrollWidth - container.clientWidth;
+      const scrollDistance = isRtl
+        ? Math.abs(container.scrollLeft)
+        : Math.max(0, container.scrollLeft);
+      const hasHiddenOverflow = nextIsOverflowing && scrollDistance < maxScrollDistance - 1;
+      const nextOverflowIndicator = hasHiddenOverflow ? (isRtl ? "start" : "end") : null;
+
+      setIsOverflowing((current) => (current === nextIsOverflowing ? current : nextIsOverflowing));
+      setOverflowIndicator((current) =>
+        current === nextOverflowIndicator ? current : nextOverflowIndicator,
+      );
+      setAccessibleLabel((current) =>
+        current === nextAccessibleLabel ? current : nextAccessibleLabel,
+      );
+    };
+
+    updateOverflowState();
+
+    const resizeObserver = new ResizeObserver(updateOverflowState);
+    resizeObserver.observe(container);
+    const table = container.querySelector("table");
+    if (table) {
+      resizeObserver.observe(table);
+    }
+
+    const mutationObserver = new MutationObserver(updateOverflowState);
+    mutationObserver.observe(container, {
+      characterData: true,
+      childList: true,
+      subtree: true,
+    });
+    container.addEventListener("scroll", updateOverflowState, { passive: true });
+    window.addEventListener("resize", updateOverflowState);
+
+    return () => {
+      mutationObserver.disconnect();
+      resizeObserver.disconnect();
+      container.removeEventListener("scroll", updateOverflowState);
+      window.removeEventListener("resize", updateOverflowState);
+    };
+  }, []);
+
   return (
-    <div data-slot="table-container" className="relative w-full overflow-x-auto">
-      <table
-        data-slot="table"
-        className={cn("w-full caption-bottom text-sm", className)}
-        {...props}
+    <div className="relative w-full min-w-0 max-w-full" data-slot="table-wrapper">
+      <div
+        ref={containerRef}
+        role={isOverflowing ? "region" : undefined}
+        aria-label={isOverflowing ? accessibleLabel || "Scrollable table" : undefined}
+        tabIndex={isOverflowing ? 0 : undefined}
+        data-overflow={isOverflowing ? "horizontal" : undefined}
+        data-overflow-indicator={overflowIndicator ?? undefined}
+        data-slot="table-container"
+        className="peer w-full overflow-x-auto overscroll-x-contain focus-visible:outline-none"
+        style={
+          overflowIndicator
+            ? {
+                maskImage:
+                  overflowIndicator === "start"
+                    ? "linear-gradient(to right, transparent 0, black 2rem, black 100%)"
+                    : "linear-gradient(to right, black 0, black calc(100% - 2rem), transparent 100%)",
+              }
+            : undefined
+        }
+      >
+        <table
+          data-slot="table"
+          className={cn("w-full caption-bottom text-sm", className)}
+          {...props}
+        />
+      </div>
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 z-10 peer-focus-visible:ring-[3px] peer-focus-visible:ring-inset peer-focus-visible:ring-ring/50"
       />
     </div>
   );

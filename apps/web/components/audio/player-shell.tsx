@@ -13,6 +13,7 @@ import { useEffect, useEffectEvent, useRef } from "react";
 import type { WebPlayer } from "@/lib/audio/create-web-player";
 
 import { shouldPollPlayerTimeline } from "./player-timeline";
+import { syncWaveformSemantics } from "./waveform-semantics";
 
 type PlayerShellProps = {
   player: WebPlayer | null;
@@ -87,6 +88,9 @@ const syncBufferedRanges = (
   );
 };
 
+const resolveDuration = (duration: number, fallbackDuration: number) =>
+  Number.isFinite(duration) && duration > 0 ? duration : fallbackDuration;
+
 function PlayerShell({
   player,
   title,
@@ -119,10 +123,11 @@ function PlayerShell({
   const waveformBufferedRangesRef = useRef<HTMLDivElement>(null);
   const initialTimeline = player?.getTimeline() ?? { currentTime: 0, duration };
   const initialBufferedRanges = player?.getBufferedRanges() ?? [];
+  const initialDuration = resolveDuration(initialTimeline.duration, duration);
   const presenter = createPlayerPresenter({
     status,
     currentTime: initialTimeline.currentTime,
-    duration: initialTimeline.duration || duration,
+    duration: initialDuration,
     bufferedRanges: initialBufferedRanges,
   });
 
@@ -133,7 +138,7 @@ function PlayerShell({
 
     const timeline = player.getTimeline();
     const bufferedRanges = player.getBufferedRanges();
-    const effectiveDuration = timeline.duration || duration;
+    const effectiveDuration = resolveDuration(timeline.duration, duration);
     const nextPresenter = createPlayerPresenter({
       status,
       currentTime: timeline.currentTime,
@@ -158,8 +163,11 @@ function PlayerShell({
     }
 
     if (waveformRootRef.current) {
-      waveformRootRef.current.setAttribute("aria-valuenow", `${Math.round(timeline.currentTime)}`);
-      waveformRootRef.current.setAttribute("aria-valuemax", `${Math.round(effectiveDuration)}`);
+      syncWaveformSemantics({
+        target: waveformRootRef.current,
+        currentTime: timeline.currentTime,
+        duration: effectiveDuration,
+      });
     }
 
     if (waveformProgressRef.current) {
@@ -254,10 +262,9 @@ function PlayerShell({
               progressOverlayRef={waveformProgressRef}
               playheadRef={waveformPlayheadRef}
               bufferedRangesRef={waveformBufferedRangesRef}
-              duration={initialTimeline.duration || duration}
+              duration={initialDuration}
               currentTime={initialTimeline.currentTime}
               bufferedRanges={initialBufferedRanges}
-              getTimeline={player?.getTimeline}
               onSeek={onSeek}
             />
           </div>
@@ -270,7 +277,7 @@ function PlayerShell({
                 style={{ width: `${presenter.progressPercent}%` }}
               />
             </div>
-            <span ref={durationDisplayRef} className="font-mono text-[10px] text-audio-accent-dim">
+            <span ref={durationDisplayRef} className="font-mono text-xs text-audio-accent-muted">
               {presenter.durationLabel}
             </span>
           </div>
@@ -291,10 +298,16 @@ function PlayerShell({
           />
         </div>
 
-        <div className="flex items-center justify-between border-t border-audio-shell-border px-3 py-1.5">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
+        <div className="flex items-start justify-between gap-3 border-t border-audio-shell-border px-3 py-1.5">
+          <div className="flex min-w-0 items-center gap-3">
+            <div
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+              className="flex items-center gap-1.5"
+            >
               <div
+                aria-hidden="true"
                 className={cn(
                   "size-1.5 rounded-full",
                   status === "error" &&
@@ -307,19 +320,24 @@ function PlayerShell({
                     "bg-audio-status-info shadow-[0_0_4px_var(--audio-status-info-glow)]",
                 )}
               />
-              <span className="font-mono text-[10px] uppercase tracking-wider text-audio-label">
+              <span className="font-mono text-xs uppercase tracking-wider text-audio-label">
                 {status}
               </span>
             </div>
-            <span className="font-mono text-[10px] text-audio-divider">|</span>
-            <span ref={bufferedLabelRef} className="font-mono text-[10px] text-audio-label">
+            <span aria-hidden="true" className="font-mono text-xs text-audio-divider">
+              |
+            </span>
+            <span ref={bufferedLabelRef} className="font-mono text-xs text-audio-label">
               buf {formatBufferedLabel(presenter.bufferedSegments)}
             </span>
           </div>
           {error ? (
-            <span className="max-w-48 truncate font-mono text-[10px] text-audio-error-text">
+            <p
+              role="alert"
+              className="max-w-64 break-words text-right font-mono text-xs leading-4 text-audio-error-text"
+            >
               {error}
-            </span>
+            </p>
           ) : null}
         </div>
       </div>

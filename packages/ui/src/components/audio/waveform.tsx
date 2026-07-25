@@ -4,7 +4,7 @@ import { cn } from "@kkb/ui/lib/utils";
 import type { Ref } from "react";
 
 import { Playhead } from "./playhead";
-import type { BufferedRange } from "./presenter";
+import { type BufferedRange, formatAccessibleTime } from "./presenter";
 import { AUDIO_BUFFERED_SEGMENT_CLASS_NAME } from "./theme";
 import { clampTime, getNextSeekTimeForKey } from "./waveform-seek";
 
@@ -49,27 +49,15 @@ type WaveformProps = {
   bufferedRanges?: BufferedRange[];
   className?: string;
   onSeek?: (seconds: number) => void;
-  getTimeline?: () => { currentTime: number; duration: number };
   rootRef?: Ref<HTMLDivElement>;
   progressOverlayRef?: Ref<HTMLDivElement>;
   playheadRef?: Ref<HTMLDivElement>;
   bufferedRangesRef?: Ref<HTMLDivElement>;
 };
 
-const getLiveTimeline = ({
-  currentTime,
-  duration,
-  getTimeline,
-}: {
-  currentTime: number;
-  duration: number;
-  getTimeline?: () => { currentTime: number; duration: number };
-}) => {
-  const timeline = getTimeline?.();
-  return {
-    currentTime: timeline?.currentTime ?? currentTime,
-    duration: timeline?.duration ?? duration,
-  };
+const getTimelineValue = (target: HTMLDivElement, attribute: string) => {
+  const value = Number(target.getAttribute(attribute));
+  return Number.isFinite(value) ? value : 0;
 };
 
 function Waveform({
@@ -78,7 +66,6 @@ function Waveform({
   bufferedRanges = [],
   className,
   onSeek,
-  getTimeline,
   rootRef,
   progressOverlayRef,
   playheadRef,
@@ -86,25 +73,23 @@ function Waveform({
 }: WaveformProps) {
   const safeDuration = Number.isFinite(duration) && duration > 0 ? duration : 0;
   const safeCurrentTime =
-    safeDuration > 0 && Number.isFinite(currentTime) && currentTime >= 0 ? currentTime : 0;
+    safeDuration > 0 && Number.isFinite(currentTime) && currentTime >= 0
+      ? Math.min(currentTime, safeDuration)
+      : 0;
   const progressPercent =
     safeDuration > 0 ? Math.min(100, Math.max(0, (safeCurrentTime / safeDuration) * 100)) : 0;
+  const isSeekable = onSeek !== undefined && safeDuration > 0;
   const hasLiveBufferedRangesLayer = bufferedRangesRef !== undefined;
 
   const handleSeek = (event: React.PointerEvent<HTMLDivElement>) => {
-    const timeline = getLiveTimeline({
-      currentTime,
-      duration,
-      getTimeline,
-    });
-
-    if (!onSeek || timeline.duration <= 0) {
+    const timelineDuration = getTimelineValue(event.currentTarget, "aria-valuemax");
+    if (!onSeek || timelineDuration <= 0) {
       return;
     }
 
     const bounds = event.currentTarget.getBoundingClientRect();
     const ratio = (event.clientX - bounds.left) / bounds.width;
-    onSeek(clampTime(ratio * timeline.duration, timeline.duration));
+    onSeek(clampTime(ratio * timelineDuration, timelineDuration));
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -112,15 +97,10 @@ function Waveform({
       return;
     }
 
-    const timeline = getLiveTimeline({
-      currentTime,
-      duration,
-      getTimeline,
-    });
     const nextTime = getNextSeekTimeForKey({
       key: event.key,
-      currentTime: timeline.currentTime,
-      duration: timeline.duration,
+      currentTime: getTimelineValue(event.currentTarget, "aria-valuenow"),
+      duration: getTimelineValue(event.currentTarget, "aria-valuemax"),
     });
 
     if (nextTime === null) {
@@ -132,17 +112,25 @@ function Waveform({
   };
 
   return (
+    // biome-ignore lint/a11y/noStaticElementInteractions: live duration updates can promote this initially static waveform to an operable slider.
     <div
       ref={rootRef}
-      role="slider"
-      tabIndex={0}
-      aria-valuenow={Math.round(safeCurrentTime)}
-      aria-valuemin={0}
-      aria-valuemax={Math.round(safeDuration)}
-      aria-label="Seek"
-      onPointerDown={handleSeek}
-      onKeyDown={handleKeyDown}
-      className={cn("group relative h-14 w-full cursor-pointer", className)}
+      role={safeDuration <= 0 ? "img" : isSeekable ? "slider" : "progressbar"}
+      tabIndex={isSeekable ? 0 : undefined}
+      aria-valuenow={safeDuration > 0 ? safeCurrentTime : undefined}
+      aria-valuemin={safeDuration > 0 ? 0 : undefined}
+      aria-valuemax={safeDuration > 0 ? safeDuration : undefined}
+      aria-valuetext={
+        safeDuration > 0
+          ? `${formatAccessibleTime(safeCurrentTime)} of ${formatAccessibleTime(safeDuration)}`
+          : undefined
+      }
+      aria-label={
+        safeDuration <= 0 ? "Audio waveform unavailable" : isSeekable ? "Seek" : "Playback progress"
+      }
+      onPointerDown={onSeek ? handleSeek : undefined}
+      onKeyDown={onSeek ? handleKeyDown : undefined}
+      className={cn("relative h-14 w-full", isSeekable && "group cursor-pointer", className)}
     >
       <div
         ref={bufferedRangesRef}

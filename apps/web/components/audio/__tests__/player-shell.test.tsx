@@ -3,6 +3,7 @@ import { renderToString } from "react-dom/server";
 
 import { PlayerShell } from "../player-shell";
 import { shouldPollPlayerTimeline } from "../player-timeline";
+import { syncWaveformSemantics } from "../waveform-semantics";
 
 const createPlayerStub = () => ({
   defaultTrack: {
@@ -38,6 +39,46 @@ describe("PlayerShell", () => {
     expect(shouldPollPlayerTimeline("ready")).toBe(false);
     expect(shouldPollPlayerTimeline("paused")).toBe(false);
     expect(shouldPollPlayerTimeline("error")).toBe(false);
+  });
+
+  test("synchronizes live waveform semantics across valid and invalid durations", () => {
+    const attributes = new Map<string, string>([["role", "img"]]);
+    const target = {
+      getAttribute: (name: string) => attributes.get(name) ?? null,
+      removeAttribute: (name: string) => {
+        attributes.delete(name);
+      },
+      setAttribute: (name: string, value: string) => {
+        attributes.set(name, value);
+      },
+    };
+
+    syncWaveformSemantics({
+      target,
+      currentTime: 150,
+      duration: 120,
+    });
+
+    expect(Object.fromEntries(attributes)).toEqual({
+      role: "slider",
+      tabindex: "0",
+      "aria-label": "Seek",
+      "aria-valuemax": "120",
+      "aria-valuemin": "0",
+      "aria-valuenow": "120",
+      "aria-valuetext": "2:00 of 2:00",
+    });
+
+    syncWaveformSemantics({
+      target,
+      currentTime: 0,
+      duration: Number.NaN,
+    });
+
+    expect(Object.fromEntries(attributes)).toEqual({
+      role: "img",
+      "aria-label": "Audio waveform unavailable",
+    });
   });
 
   test("does not create the browser audio runtime during server render", () => {
@@ -146,6 +187,51 @@ describe("PlayerShell", () => {
     expect(normalizedHtml).not.toContain("kbps");
     expect(normalizedHtml).not.toContain("khz");
     expect(normalizedHtml).not.toContain("stereo");
+  });
+
+  test("announces coarse status and exposes complete errors", () => {
+    const loadingHtml = renderToString(
+      <PlayerShell
+        player={createPlayerStub()}
+        title="Test Tone"
+        subtitle="Local AAC fixture routed through the current media-element path."
+        status="loading"
+        duration={0}
+        sourceId={null}
+        error={null}
+        rate={1}
+        volume={1}
+        onPlay={() => {}}
+        onPause={() => {}}
+        onSeek={() => {}}
+        onSetRate={() => {}}
+        onSetVolume={() => {}}
+      />,
+    ).replaceAll("<!-- -->", "");
+    const errorHtml = renderToString(
+      <PlayerShell
+        player={createPlayerStub()}
+        title="Test Tone"
+        subtitle="Local AAC fixture routed through the current media-element path."
+        status="error"
+        duration={0}
+        sourceId={null}
+        error="The audio source could not be decoded. Choose another track."
+        rate={1}
+        volume={1}
+        onPlay={() => {}}
+        onPause={() => {}}
+        onSeek={() => {}}
+        onSetRate={() => {}}
+        onSetVolume={() => {}}
+      />,
+    ).replaceAll("<!-- -->", "");
+
+    expect(loadingHtml).toContain('role="status"');
+    expect(loadingHtml).toContain('aria-live="polite"');
+    expect(errorHtml).toContain('role="alert"');
+    expect(errorHtml).toContain("The audio source could not be decoded. Choose another track.");
+    expect(errorHtml).not.toContain("max-w-48 truncate");
   });
 
   test("clamps buffered progress display to 100 percent", () => {

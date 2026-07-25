@@ -34,6 +34,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-hover: var(--destructive-hover);
   --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
@@ -53,10 +54,14 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --color-audio-shell-border: var(--audio-shell-border);
   --color-audio-titlebar-border: var(--audio-titlebar-border);
+  --color-audio-panel: var(--audio-panel-mid);
   --color-audio-panel-border: var(--audio-panel-border);
+  --color-audio-control: var(--audio-control-mid);
   --color-audio-title: var(--audio-title);
   --color-audio-meta: var(--audio-meta);
   --color-audio-label: var(--audio-label);
+  --color-audio-shell-label: var(--audio-shell-label);
+  --color-audio-panel-label: var(--audio-panel-label);
   --color-audio-divider: var(--audio-divider);
   --color-audio-accent: var(--audio-accent);
   --color-audio-accent-muted: var(--audio-accent-muted);
@@ -106,6 +111,7 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-hover: oklch(0.52 0.225 27.325);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
@@ -138,8 +144,10 @@
   --audio-window-dot-faint: oklch(0.807 0.096 263.53 / 0.3);
   --audio-title: oklch(0.881 0.024 264.446);
   --audio-meta: oklch(0.733 0.036 270.889);
-  --audio-label: oklch(0.463 0.04 270.395);
-  --audio-divider: oklch(0.405 0.042 270.17);
+  --audio-shell-label: oklch(0.13 0.018 270.4);
+  --audio-panel-label: oklch(0.88 0.03 258);
+  --audio-label: var(--audio-shell-label);
+  --audio-divider: oklch(0.38 0.03 270.2);
   --audio-panel-border: oklch(0.344 0.044 269.831);
   --audio-panel-start: oklch(0.183 0.05 270.309);
   --audio-panel-mid: oklch(0.209 0.053 268.661);
@@ -173,7 +181,7 @@
   --audio-status-warning-glow: oklch(0.837 0.164 84.429 / 0.6);
   --audio-status-error: oklch(0.637 0.208 25.331);
   --audio-status-error-glow: oklch(0.637 0.208 25.331 / 0.6);
-  --audio-error-text: oklch(0.704 0.191 22.216 / 0.8);
+  --audio-error-text: oklch(0.2 0.12 25.1);
   --oscilloscope-trace: color(srgb 0.03 0.78 0.2);
   --oscilloscope-glow: color(srgb 0.74 1 0.71);
   --oscilloscope-shoulder: color(srgb 0.004 0.08 0.018);
@@ -195,7 +203,8 @@
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
+  --destructive: oklch(0.48 0.17 25);
+  --destructive-hover: oklch(0.42 0.15 25);
   --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
@@ -228,8 +237,10 @@
   --audio-window-dot-faint: oklch(0.82 0.102 254.3 / 0.3);
   --audio-title: oklch(0.93 0.02 264.4);
   --audio-meta: oklch(0.79 0.022 267.2);
-  --audio-label: oklch(0.67 0.019 266.3);
-  --audio-divider: oklch(0.6 0.02 266.5);
+  --audio-shell-label: oklch(0.95 0.018 266.3);
+  --audio-panel-label: oklch(0.88 0.03 258);
+  --audio-label: var(--audio-shell-label);
+  --audio-divider: oklch(0.82 0.02 266.5);
   --audio-panel-border: oklch(0.305 0.034 267.8);
   --audio-panel-start: oklch(0.205 0.04 265.8);
   --audio-panel-mid: oklch(0.24 0.043 261.5);
@@ -263,7 +274,7 @@
   --audio-status-warning-glow: oklch(0.86 0.144 84.4 / 0.65);
   --audio-status-error: oklch(0.71 0.188 25.3);
   --audio-status-error-glow: oklch(0.71 0.188 25.3 / 0.65);
-  --audio-error-text: oklch(0.78 0.168 25.1 / 0.85);
+  --audio-error-text: oklch(0.82 0.15 25.1);
   --oscilloscope-trace: color(srgb 0.03 0.78 0.2);
   --oscilloscope-glow: color(srgb 0.74 1 0.71);
   --oscilloscope-shoulder: color(srgb 0.004 0.08 0.018);
@@ -309,6 +320,7 @@
   }
 
   .audio-panel {
+    --audio-label: var(--audio-panel-label);
     @apply relative overflow-hidden border-2 border-audio-panel-border;
     background-image: linear-gradient(
       180deg,
@@ -377,6 +389,28 @@
       0 1px 0 oklch(1 0 0 / 0.5),
       inset 0 1px 0 oklch(1 0 0 / 0.4),
       0 1px 2px oklch(0 0 0 / 0.12);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  [class*="transition-"],
+  [class*="duration-"] {
+    transition-duration: 0.01ms;
+    transition-delay: 0ms;
+  }
+
+  [class*="animate-"] {
+    animation-duration: 0.01ms;
+    animation-iteration-count: 1;
+  }
+
+  .animate-marquee {
+    animation: none;
+    transform: none;
   }
 }
 

@@ -21,12 +21,30 @@ export type PlayerPresenterInput = {
 
 export type PlayerControlMode = "unavailable" | "play" | "pause";
 
-const formatTime = (value: number) => {
+export const formatTime = (value: number) => {
   const totalSeconds = Math.max(0, Math.floor(Number.isFinite(value) ? value : 0));
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
 
   return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+};
+
+export const formatAccessibleTime = (value: number) => {
+  const safeValue = Math.max(0, Number.isFinite(value) ? value : 0);
+  const roundedValue = Number(safeValue.toFixed(3));
+
+  if (roundedValue < 1) {
+    return `${roundedValue} seconds`;
+  }
+
+  const minutes = Math.floor(roundedValue / 60);
+  const seconds = Number((roundedValue - minutes * 60).toFixed(3));
+  const [wholeSeconds, fractionalSeconds] = `${seconds}`.split(".");
+  const secondsLabel = `${wholeSeconds?.padStart(2, "0")}${
+    fractionalSeconds ? `.${fractionalSeconds}` : ""
+  }`;
+
+  return `${minutes}:${secondsLabel}`;
 };
 
 const sanitizeNumber = (value: number) => (Number.isFinite(value) && value > 0 ? value : 0);

@@ -21,8 +21,8 @@
 **Files:** `packages/ui/src/components/audio/waveform.tsx`, `apps/web/lib/audio/catalog/static-track-catalog-data.ts`
 
 - Fixture tracks now provide stable `duration: 2`
-- `Waveform` now clamps invalid duration input to a safe zero-valued slider contract
-- Server-render coverage now checks that invalid durations render `aria-valuemax="0"` instead of `NaN`
+- `Waveform` now exposes invalid duration input as an unavailable image without range attributes
+- Server-render coverage checks that invalid durations do not expose slider focusability or invalid numeric values
 
 ### 3. Fake diagnostics removed from the shell
 

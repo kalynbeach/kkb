@@ -1,6 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { Waveform } from "@kkb/ui/components/audio/waveform";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@kkb/ui/components/carousel";
+import { Table, TableBody, TableCaption, TableCell, TableRow } from "@kkb/ui/components/table";
 import { Window } from "happy-dom";
-import { act, useState } from "react";
+import { act, type ComponentProps, Fragment, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 
 import { itemFromId } from "../../../components/ui-catalog/catalog-data";
@@ -182,6 +191,78 @@ function expectBodyText(environment: DomEnvironment, text: string) {
   expect(environment.document.body.textContent).toContain(text);
 }
 
+function WaveformContractHarness({ onSeek }: { onSeek: (seconds: number) => void }) {
+  const legacyLiveProps: ComponentProps<typeof Waveform> & {
+    getTimeline: () => { currentTime: number; duration: number };
+  } = {
+    currentTime: 0,
+    duration: 0,
+    getTimeline: () => ({ currentTime: 30, duration: 120 }),
+    onSeek,
+  };
+
+  return <Waveform {...legacyLiveProps} />;
+}
+
+function OverflowingTableHarness({ direction }: { direction?: "ltr" | "rtl" }) {
+  return (
+    <div dir={direction}>
+      <Table>
+        <TableCaption>Signal readings</TableCaption>
+        <TableBody>
+          <TableRow>
+            <TableCell>Channel A</TableCell>
+            <TableCell>440 Hz</TableCell>
+          </TableRow>
+        </TableBody>
+      </Table>
+    </div>
+  );
+}
+
+function KeyedFragmentCarouselHarness() {
+  const [reversed, setReversed] = useState(false);
+  const groups = reversed ? ["beta", "alpha"] : ["alpha", "beta"];
+
+  return (
+    <>
+      <button type="button" onClick={() => setReversed((current) => !current)}>
+        Reverse groups
+      </button>
+      <Carousel aria-label="Grouped projects">
+        <CarouselContent>
+          {groups.map((group) => (
+            <Fragment key={group}>
+              <Fragment key="slides">
+                <CarouselItem data-group={group}>
+                  <input aria-label={`${group} title`} defaultValue={group} />
+                </CarouselItem>
+              </Fragment>
+            </Fragment>
+          ))}
+        </CarouselContent>
+      </Carousel>
+    </>
+  );
+}
+
+function CarouselKeyboardHarness() {
+  return (
+    <Carousel aria-label="Featured projects">
+      <CarouselContent>
+        <Fragment key="nested-slides">
+          <CarouselItem>
+            <label htmlFor="carousel-title">Project title</label>
+            <input id="carousel-title" defaultValue="KKB" />
+          </CarouselItem>
+        </Fragment>
+      </CarouselContent>
+      <CarouselPrevious />
+      <CarouselNext />
+    </Carousel>
+  );
+}
+
 function CatalogSearchHarness() {
   const [open, setOpen] = useState(false);
 
@@ -279,6 +360,113 @@ describe("interactive /ui demos", () => {
     expectBodyText(environment, "Pinned views and category browse");
   });
 
+  test("uses reactive waveform props as the only interaction contract", () => {
+    const environment = domEnvironment as DomEnvironment;
+    const seekCalls: number[] = [];
+    renderIntoDom(
+      environment,
+      <WaveformContractHarness onSeek={(seconds) => seekCalls.push(seconds)} />,
+    );
+
+    const waveform = environment.document.querySelector<HTMLElement>('[role="img"]');
+    expect(waveform?.getAttribute("aria-label")).toBe("Audio waveform unavailable");
+
+    if (waveform) {
+      waveform.getBoundingClientRect = () =>
+        ({ left: 0, width: 100 }) as ReturnType<HTMLElement["getBoundingClientRect"]>;
+    }
+    act(() => {
+      waveform?.dispatchEvent(
+        new environment.window.PointerEvent("pointerdown", { bubbles: true, clientX: 50 }),
+      );
+    });
+
+    expect(seekCalls).toEqual([]);
+  });
+
+  test("wide tables expose a locally focusable named scroll region", async () => {
+    const environment = domEnvironment as DomEnvironment;
+    renderIntoDom(environment, <OverflowingTableHarness />);
+
+    const container = environment.document.querySelector<HTMLElement>(
+      '[data-slot="table-container"]',
+    );
+    expect(container).not.toBeNull();
+    expect(container?.hasAttribute("role")).toBe(false);
+    expect(container?.hasAttribute("tabindex")).toBe(false);
+
+    if (container) {
+      Object.defineProperties(container, {
+        clientWidth: { configurable: true, value: 200 },
+        scrollWidth: { configurable: true, value: 500 },
+      });
+    }
+
+    const caption = container?.querySelector("caption");
+    if (caption) {
+      caption.textContent = "Updated signal readings";
+    }
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(container?.getAttribute("role")).toBe("region");
+    expect(container?.getAttribute("tabindex")).toBe("0");
+    expect(container?.getAttribute("aria-label")).toBe("Updated signal readings");
+    expect(container?.getAttribute("data-overflow-indicator")).toBe("end");
+    expect(container?.style.maskImage).toContain("linear-gradient");
+    const focusIndicator = environment.document.querySelector<HTMLElement>(
+      '[data-slot="table-wrapper"] > [aria-hidden="true"]',
+    );
+    expect(container?.className).toContain("peer");
+    expect(focusIndicator?.className).toContain("peer-focus-visible:ring-inset");
+
+    if (container) {
+      Object.defineProperty(container, "scrollWidth", { configurable: true, value: 200 });
+    }
+    act(() => {
+      environment.window.dispatchEvent(new environment.window.Event("resize"));
+    });
+
+    expect(container?.hasAttribute("role")).toBe(false);
+    expect(container?.hasAttribute("tabindex")).toBe(false);
+    expect(container?.hasAttribute("data-overflow-indicator")).toBe(false);
+    expect(container?.style.maskImage).toBe("");
+  });
+
+  test("uses a left-edge overflow cue that clears at the RTL scroll end", () => {
+    const environment = domEnvironment as DomEnvironment;
+    renderIntoDom(environment, <OverflowingTableHarness direction="rtl" />);
+
+    const container = environment.document.querySelector<HTMLElement>(
+      '[data-slot="table-container"]',
+    );
+    expect(container).not.toBeNull();
+    if (container) {
+      Object.defineProperties(container, {
+        clientWidth: { configurable: true, value: 200 },
+        scrollWidth: { configurable: true, value: 500 },
+      });
+    }
+
+    act(() => {
+      environment.window.dispatchEvent(new environment.window.Event("resize"));
+    });
+
+    expect(container?.getAttribute("data-overflow-indicator")).toBe("start");
+    expect(container?.style.maskImage).toContain("to right, transparent");
+
+    if (container) {
+      container.scrollLeft = -300;
+      act(() => {
+        container.dispatchEvent(new environment.window.Event("scroll"));
+      });
+    }
+
+    expect(container?.hasAttribute("data-overflow-indicator")).toBe(false);
+    expect(container?.style.maskImage).toBe("");
+  });
+
   test("carousel demo renders manual controls", () => {
     const environment = domEnvironment as DomEnvironment;
     renderIntoDom(environment, <CarouselDemo />);
@@ -288,6 +476,68 @@ describe("interactive /ui demos", () => {
 
     expect(previousButton).toBeDefined();
     expect(nextButton).toBeDefined();
+    expect(
+      environment.document.querySelector('[data-slot="carousel"]')?.getAttribute("aria-label"),
+    ).toBe("Component highlights");
     expectBodyText(environment, "Server sections");
+  });
+
+  test("preserves keyed nested Fragment slide identity when groups reorder", () => {
+    const environment = domEnvironment as DomEnvironment;
+    renderIntoDom(environment, <KeyedFragmentCarouselHarness />);
+
+    const alphaInput = environment.document.querySelector<HTMLInputElement>(
+      'input[aria-label="alpha title"]',
+    );
+    expect(alphaInput).not.toBeNull();
+    if (alphaInput) {
+      alphaInput.value = "edited alpha";
+    }
+
+    dispatchPrimaryClick(getButtonByText(environment, "Reverse groups"), environment.window);
+
+    const slides = Array.from(
+      environment.document.querySelectorAll<HTMLElement>('[data-slot="carousel-item"]'),
+    );
+    expect(slides.map((slide) => slide.dataset.group)).toEqual(["beta", "alpha"]);
+    expect(slides.map((slide) => slide.querySelector<HTMLInputElement>("input")?.value)).toEqual([
+      "beta",
+      "edited alpha",
+    ]);
+    expect(slides.map((slide) => slide.getAttribute("aria-label"))).toEqual([
+      "Slide 1 of 2",
+      "Slide 2 of 2",
+    ]);
+  });
+
+  test("carousel exposes structure without consuming descendant arrow keys", () => {
+    const environment = domEnvironment as DomEnvironment;
+    renderIntoDom(environment, <CarouselKeyboardHarness />);
+
+    const carousel = environment.document.querySelector('[data-slot="carousel"]');
+    const slide = environment.document.querySelector('[data-slot="carousel-item"]');
+    const input = environment.document.querySelector<HTMLInputElement>("#carousel-title");
+
+    expect(carousel?.getAttribute("role")).toBe("region");
+    expect(carousel?.getAttribute("aria-roledescription")).toBe("carousel");
+    expect(carousel?.hasAttribute("tabindex")).toBe(false);
+    expect(slide?.getAttribute("role")).toBe("group");
+    expect(slide?.getAttribute("aria-roledescription")).toBe("slide");
+    expect(slide?.getAttribute("aria-label")).toBe("Slide 1 of 1");
+    expect(input).not.toBeNull();
+
+    const previousButton = getButtonByText(environment, "Previous slide");
+    const nextButton = getButtonByText(environment, "Next slide");
+    expect(previousButton.className).not.toContain("-left-12");
+    expect(nextButton.className).not.toContain("-right-12");
+
+    const arrowEvent = new environment.window.KeyboardEvent("keydown", {
+      bubbles: true,
+      cancelable: true,
+      key: "ArrowRight",
+    });
+    input?.dispatchEvent(arrowEvent);
+
+    expect(arrowEvent.defaultPrevented).toBe(false);
   });
 });

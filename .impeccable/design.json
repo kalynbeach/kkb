@@ -502,16 +502,16 @@
       "destructive-dark": {
         "role": "primary",
         "displayName": "Destructive Dark",
-        "canonical": "oklch(0.704 0.191 22.216)",
+        "canonical": "oklch(0.48 0.17 25)",
         "tonalRamp": [
-          "oklch(0.15 0.191 22.216)",
-          "oklch(0.27 0.191 22.216)",
-          "oklch(0.39 0.191 22.216)",
-          "oklch(0.51 0.191 22.216)",
-          "oklch(0.63 0.191 22.216)",
-          "oklch(0.75 0.191 22.216)",
-          "oklch(0.87 0.191 22.216)",
-          "oklch(0.95 0.191 22.216)"
+          "oklch(0.15 0.17 25)",
+          "oklch(0.27 0.17 25)",
+          "oklch(0.39 0.17 25)",
+          "oklch(0.51 0.17 25)",
+          "oklch(0.63 0.17 25)",
+          "oklch(0.75 0.17 25)",
+          "oklch(0.87 0.17 25)",
+          "oklch(0.95 0.17 25)"
         ]
       },
       "destructive-foreground-dark": {

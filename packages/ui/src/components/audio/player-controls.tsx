@@ -92,9 +92,7 @@ function PlayerControls({
       <div className="grid grid-cols-2 gap-3 px-2">
         {/* Transport owns play/pause only; rate and volume stay in the shared controls layer. */}
         <label className="flex min-w-0 flex-col gap-1">
-          <span className="font-mono text-[10px] uppercase tracking-wider text-audio-label">
-            Rate
-          </span>
+          <span className="font-mono text-xs uppercase tracking-wider text-audio-label">Rate</span>
           <select
             aria-label="Rate"
             disabled={controlsDisabled}
@@ -102,7 +100,7 @@ function PlayerControls({
             onChange={(event) => {
               onSetRate?.(Number(event.target.value));
             }}
-            className="rounded border border-audio-shell-border bg-transparent px-2 py-1 font-mono text-[11px] text-audio-accent-muted"
+            className="rounded border border-audio-shell-border bg-transparent px-2 py-1 font-mono text-xs text-audio-control-icon"
           >
             {PLAYBACK_RATE_OPTIONS.map((option) => (
               <option key={option} value={option}>
@@ -113,7 +111,7 @@ function PlayerControls({
         </label>
 
         <label className="flex min-w-0 flex-col gap-1">
-          <span className="flex items-center justify-between font-mono text-[10px] uppercase tracking-wider text-audio-label">
+          <span className="flex items-center justify-between font-mono text-xs uppercase tracking-wider text-audio-label">
             <span>Volume</span>
             <span>{Math.round(volume * 100)}%</span>
           </span>

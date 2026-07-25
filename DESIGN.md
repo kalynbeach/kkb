@@ -35,7 +35,7 @@ colors:
   muted-foreground-dark: "oklch(0.708 0 0)"
   accent-dark: "oklch(0.269 0 0)"
   accent-foreground-dark: "oklch(0.985 0 0)"
-  destructive-dark: "oklch(0.704 0.191 22.216)"
+  destructive-dark: "oklch(0.48 0.17 25)"
   destructive-foreground-dark: "oklch(0.985 0 0)"
   border-dark: "oklch(1 0 0 / 10%)"
   input-dark: "oklch(1 0 0 / 15%)"
