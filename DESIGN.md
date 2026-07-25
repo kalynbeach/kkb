@@ -1,6 +1,6 @@
 ---
 name: KKB
-description: Shared design system for the KKB monorepo: sharp technical product UI with scoped audio and oscilloscope instrument surfaces.
+description: A dual-mode technical-creative design substrate with stable visual language and selectable atmosphere.
 colors:
   background: "oklch(1 0 0)"
   foreground: "oklch(0.145 0 0)"
@@ -16,39 +16,55 @@ colors:
   muted-foreground: "oklch(0.556 0 0)"
   accent: "oklch(0.97 0 0)"
   accent-foreground: "oklch(0.205 0 0)"
+  destructive: "oklch(0.577 0.245 27.325)"
+  destructive-foreground: "oklch(0.985 0 0)"
   border: "oklch(0.922 0 0)"
   input: "oklch(0.922 0 0)"
   ring: "oklch(0.708 0 0)"
-  paper-white: "oklch(1 0 0)"
-  bench-ink: "oklch(0.145 0 0)"
-  instrument-black: "oklch(0.205 0 0)"
-  rail-gray: "oklch(0.922 0 0)"
-  mute-gray: "oklch(0.556 0 0)"
-  panel-white: "oklch(0.985 0 0)"
-  panel-graphite: "oklch(0.205 0 0)"
-  scope-blue: "oklch(0.768 0.122 252.001)"
-  scope-blue-dark: "oklch(0.183 0.05 270.309)"
-  destructive: "oklch(0.577 0.245 27.325)"
-  destructive-foreground: "oklch(0.985 0 0)"
+  background-dark: "oklch(0.145 0 0)"
+  foreground-dark: "oklch(0.985 0 0)"
+  card-dark: "oklch(0.205 0 0)"
+  card-foreground-dark: "oklch(0.985 0 0)"
+  popover-dark: "oklch(0.205 0 0)"
+  popover-foreground-dark: "oklch(0.985 0 0)"
+  primary-dark: "oklch(0.922 0 0)"
+  primary-foreground-dark: "oklch(0.205 0 0)"
+  secondary-dark: "oklch(0.269 0 0)"
+  secondary-foreground-dark: "oklch(0.985 0 0)"
+  muted-dark: "oklch(0.269 0 0)"
+  muted-foreground-dark: "oklch(0.708 0 0)"
+  accent-dark: "oklch(0.269 0 0)"
+  accent-foreground-dark: "oklch(0.985 0 0)"
+  destructive-dark: "oklch(0.704 0.191 22.216)"
+  destructive-foreground-dark: "oklch(0.985 0 0)"
+  border-dark: "oklch(1 0 0 / 10%)"
+  input-dark: "oklch(1 0 0 / 15%)"
+  ring-dark: "oklch(0.556 0 0)"
   chart-1: "oklch(0.809 0.105 251.813)"
   chart-2: "oklch(0.623 0.214 259.815)"
   chart-3: "oklch(0.546 0.245 262.881)"
   chart-4: "oklch(0.488 0.243 264.376)"
   chart-5: "oklch(0.424 0.199 265.638)"
-  sidebar: "oklch(0.985 0 0)"
-  sidebar-foreground: "oklch(0.145 0 0)"
-  sidebar-primary: "oklch(0.205 0 0)"
-  sidebar-primary-foreground: "oklch(0.985 0 0)"
-  sidebar-accent: "oklch(0.97 0 0)"
-  sidebar-accent-foreground: "oklch(0.205 0 0)"
-  sidebar-border: "oklch(0.922 0 0)"
-  sidebar-ring: "oklch(0.708 0 0)"
   audio-accent: "oklch(0.768 0.122 252.001)"
-  audio-panel: "oklch(0.183 0.05 270.309)"
-  audio-shell: "oklch(0.652 0.026 264.382)"
-  audio-control: "oklch(0.784 0.035 270.937)"
+  audio-accent-dark: "oklch(0.8 0.122 252.001)"
+  audio-panel-start: "oklch(0.183 0.05 270.309)"
+  audio-panel-mid: "oklch(0.209 0.053 268.661)"
+  audio-panel-end: "oklch(0.183 0.05 270.309)"
+  audio-panel-start-dark: "oklch(0.205 0.04 265.8)"
+  audio-panel-mid-dark: "oklch(0.24 0.043 261.5)"
+  audio-panel-end-dark: "oklch(0.205 0.04 265.8)"
+  audio-control-start: "oklch(0.883 0.032 269.793)"
+  audio-control-mid: "oklch(0.784 0.035 270.937)"
+  audio-control-end: "oklch(0.733 0.036 270.889)"
+  audio-control-icon: "oklch(0.443 0.07 274.957)"
+  audio-control-start-dark: "oklch(0.66 0.03 268.4)"
+  audio-control-mid-dark: "oklch(0.58 0.029 268.8)"
+  audio-control-end-dark: "oklch(0.5 0.028 269.1)"
+  audio-control-icon-dark: "oklch(0.91 0.028 259.4)"
   audio-title: "oklch(0.881 0.024 264.446)"
+  audio-title-dark: "oklch(0.93 0.02 264.4)"
   audio-meta: "oklch(0.733 0.036 270.889)"
+  audio-meta-dark: "oklch(0.79 0.022 267.2)"
   oscilloscope-trace: "color(srgb 0.03 0.78 0.2)"
   oscilloscope-glow: "color(srgb 0.74 1 0.71)"
   oscilloscope-shoulder: "color(srgb 0.004 0.08 0.018)"
@@ -125,11 +141,13 @@ typography:
     letterSpacing: "0.08em"
 rounded:
   none: "0px"
-  xs: "1px"
-  sm: "2px"
-  md: "3px"
-  lg: "4px"
-  xl: "6px"
+  sm: "1.8px"
+  md: "2.4px"
+  lg: "3px"
+  xl: "4.2px"
+  2xl: "5.4px"
+  3xl: "6.6px"
+  4xl: "7.8px"
   full: "9999px"
 spacing:
   unit: "4px"
@@ -139,7 +157,6 @@ spacing:
   lg: "16px"
   xl: "24px"
   2xl: "32px"
-  container-padding: "8px"
   focus-ring: "3px"
 components:
   button-primary:
@@ -152,6 +169,13 @@ components:
   button-secondary:
     backgroundColor: "{colors.secondary}"
     textColor: "{colors.secondary-foreground}"
+    typography: "{typography.label-md}"
+    rounded: "{rounded.md}"
+    height: "36px"
+    padding: "0 16px"
+  button-outline:
+    backgroundColor: "{colors.background}"
+    textColor: "{colors.foreground}"
     typography: "{typography.label-md}"
     rounded: "{rounded.md}"
     height: "36px"
@@ -173,192 +197,230 @@ components:
   card:
     backgroundColor: "{colors.card}"
     textColor: "{colors.card-foreground}"
-    rounded: "{rounded.lg}"
+    rounded: "{rounded.xl}"
     padding: "24px"
-  audio-transport-button:
-    backgroundColor: "{colors.audio-control}"
-    textColor: "{colors.primary}"
-    rounded: "{rounded.sm}"
-    height: "28px"
-    width: "32px"
   oscilloscope-trace:
-    backgroundColor: "{colors.oscilloscope-trace}"
+    backgroundColor: "{colors.oscilloscope-shoulder}"
     textColor: "{colors.oscilloscope-glow}"
     rounded: "{rounded.none}"
-    height: "auto"
 ---
 
 # Design System: KKB
 
-## 1. Overview
+## Overview
 
 **Creative North Star: "Dynamic Digital Studio"**
 
-KKB is a technical creative monorepo. Its interface should feel precise, calm, sharp, and instrument-like: mostly neutral, structurally simple, optimized for reading code, inspecting demos, controlling audio, and studying graphics experiments.
+KKB is a design substrate for a personal technical-creative studio. It should feel precise, rhythmic, detailed, and visibly crafted while remaining open enough to support audio systems, shaders, WebGPU, Three.js, high-quality animation, generative graphics, sigils, advanced symbols, diagrams, and interactive technical artifacts.
 
-The default UI language is shadcn-derived and token-driven. It uses the semantic token names from `packages/ui/src/styles/globals.css` (`background`, `foreground`, `card`, `primary`, `muted`, `border`, `ring`, `sidebar`, etc.) so generated design work remains compatible with `@kkb/ui`, Tailwind v4 theme variables, and shadcn/ui component conventions.
+The system distinguishes a stable visual language from selectable atmosphere. Typography, geometry, spacing, symbology, component anatomy, interaction behavior, and accessibility stay consistent across themes by default. Themes primarily change curated light and dark palettes, surface character, visualization colors, shader parameters, procedural texture, and subtle qualities of motion or depth. A theme changes the atmosphere, not the product.
 
-KKB's product foundation is hard-edged and technical. Most app surfaces should be nearly square, using 1-4px radii. Larger radii are exceptions for cards, dialogs, badges, avatars, sliders, switches, and specialized instrument controls. The audio presentation layer can be more tactile; the oscilloscope layer can be more luminous. Neither exception should mutate the broader app foundation.
+`@kkb/ui` is the shared implementation foundation. Its semantic tokens and reusable components keep apps, demos, docs, reports, and experiments within one product family without forcing every surface into the same composition. Operational, editorial, expressive, instrument-like, and immersive surfaces may all use either light or dark mode.
 
 **Key Characteristics:**
 
-- shadcn/ui-compatible semantic tokens remain present for compatibility, while personal studio names (`bench-ink`, `paper-white`, `scope-blue`) carry the design language.
-- TX-02 carries headings, labels, code, telemetry, and compact hardware-style UI.
-- Geist carries readable prose and body copy.
-- Mekzantine carries the primary serif voice for brand marks and compact editorial accents; EB Garamond remains secondary.
-- Cool audio blues are scoped to audio and waveform surfaces.
-- P31 phosphor greens are scoped to oscilloscope traces, glow, and shader-derived visualizations.
-- Edges are sharp by default; roundness must be earned.
+- Complete, deliberately curated light and dark modes are required for every theme.
+- Geist carries readable prose; TX-02 carries technical headings, labels, code, and telemetry.
+- Mekzantine, EB Garamond, and Departure Mono provide deliberate secondary voices rather than replacing the core pairing.
+- Geometry is compact, sharp, and stable across themes; borders and spacing establish hierarchy before shadows.
+- Semantic component roles remain stable while colors, shader treatments, and subtle material feel vary by theme.
+- Dynamic visuals resolve to meaningful static or reduced-motion states.
+- Expressive graphics add identity without replacing navigation, product meaning, or accessibility.
 
-## 2. Colors
+**The Stable Language Rule.** Theme changes preserve typography roles, geometry, spacing rhythm, component anatomy, interaction semantics, and symbology unless an explicitly experimental theme documents an exception.
 
-The shared UI palette in `packages/ui/src/styles/globals.css` is neutral-first and expressed as OKLCH CSS variables. The frontmatter keeps shadcn/ui names for compatibility and also keeps the more personal studio names from the new system. Use semantic names when mapping to live components; use studio names when describing the visual identity.
+**The Atmosphere Rule.** Themes may change color, materials, visualization palettes, shaders, procedural texture, and subtle motion character; they must not silently redesign layout or behavior.
+
+## Colors
+
+The initial KKB theme uses a neutral structural foundation with a cool audio spectrum and P31-inspired oscilloscope spectrum. The frontmatter records the current initial-theme mappings; `packages/ui/src/styles/globals.css` is the live source of truth for conditional light and dark values.
 
 ### Primary
 
-- **Bench Ink / Paper White**: The foundational identity pair. Bench Ink is the default text and technical mark color; Paper White is the default app and document surface.
-- **Instrument Black / Panel White**: The decisive action and dark-surface pair. `primary` maps to Instrument Black; `primary-foreground` maps to Panel White.
-- **Foreground / Background**: shadcn/ui compatibility aliases for Bench Ink and Paper White. Use these names in component code, but do not let the design language collapse into generic token prose.
+- **Bench Ink / Paper White:** The primary light-mode relationship for text, marks, backgrounds, and structural contrast.
+- **Panel White / Instrument Black:** The corresponding high-contrast relationship for dark surfaces and decisive actions.
+- **Primary / Primary Foreground:** The semantic implementation roles used by components. Their visual polarity changes with color mode while their meaning remains stable.
 
 ### Secondary
 
-- **Rail Gray / Mute Gray**: The structural quiet layer for borders, input strokes, secondary copy, descriptions, dormant navigation, and metadata.
-- **Secondary, Muted, Accent**: shadcn/ui compatibility aliases for the quiet neutral fills used by secondary actions, hover states, empty areas, and selected tab backgrounds. In this system, `accent` is deliberately neutral; it is not Scope Blue.
-- **Sidebar Tokens**: Sidebar roles mirror the shadcn vocabulary and should be used for side navigation, rail layouts, and app shells instead of one-off colors.
+- **Secondary / Muted / Accent:** Quiet neutral fills for secondary actions, hover states, grouped controls, inactive areas, and selected surfaces. Their foreground partners are mandatory whenever the fill is used.
+- **Audio Spectrum:** Cool blue and blue-violet values currently carry waveform state, progress, buffer state, signal emphasis, and instrument telemetry. The role is stable; exact values may change by theme and color mode.
 
 ### Tertiary
 
-- **Audio Accent**: Cool blue used for waveform progress, buffered ranges, signal status, audio grid lines, and instrument highlights. Do not use it as a general product accent.
-- **Oscilloscope Trace**: P31 green from the shader trace (`vec3f(0.03, 0.78, 0.2)`). Use only for oscilloscope traces, glow, phosphor state, and shader-derived visualization UI.
-- **Oscilloscope Glow**: The composite shader phosphor tint (`vec3f(0.74, 1.0, 0.71)`) for bloom, hot cores, and luminous trace edges.
+- **Oscilloscope Spectrum:** P31-inspired trace, glow, shoulder, and floor colors describe renderer and phosphor state in the initial theme. Future themes may provide different shader treatments while preserving the semantic distinction between trace, glow, persistence, and background.
+- **Current implementation gap:** The oscilloscope currently reuses one dark-oriented palette in both modes, and its route hard-codes a dark surrounding surface. This does not satisfy the target theme contract; dedicated light and dark oscilloscope treatments remain required implementation work.
+- **Chart Series:** Five ordered chart colors support comparisons and data visualization. Charts must add labels, shapes, patterns, or direct annotations whenever hue alone would be ambiguous.
 
 ### Neutral
 
-- **Card / Popover**: White or near-black semantic surfaces for containers and overlays.
-- **Border / Input / Ring**: Quiet structure and accessible focus affordance. Borders define most hierarchy before shadows do.
-- **Muted Foreground**: Secondary copy, descriptions, metadata, dormant navigation. Do not use it for primary body text when contrast is weak.
+- **Card / Popover / Sidebar:** Semantic surfaces with complete foreground, border, accent, and focus counterparts in both modes.
+- **Border / Input / Ring:** Structural rails and accessible focus affordances. Borders define hierarchy before elevation does.
+- **Muted Foreground:** Secondary copy and metadata only. It must still meet the required contrast for its size and importance.
 
 ### Named Rules
 
-**The Dual Naming Rule.** Keep both vocabularies alive: shadcn/ui names are the implementation contract; studio names are the design language. Generated code should map `bench-ink` to `foreground`, `paper-white` to `background`, `instrument-black` to `primary`, `rail-gray` to `border/input`, and `mute-gray` to `muted-foreground` rather than deleting either side.
+**The Paired Mode Rule.** Every theme ships light and dark as deliberately tuned counterparts. Dark mode is not a mechanical inversion of light mode.
 
-**The Blue-and-Green Scope Rule.** Audio blue belongs to audio and waveform UI. P31 green belongs to oscilloscope traces and shader-derived visualizations. Neither is a general-purpose brand accent.
+**The Semantic Role Rule.** Components consume semantic roles such as `background`, `foreground`, `border`, `ring`, and domain-specific signal roles; they do not branch on theme names or hard-code atmosphere colors.
 
-## 3. Typography
+**The Initial Spectrum Rule.** Audio blue and P31 green describe the current theme, not permanent global hues. Other themes may remap their palettes, but they must preserve domain meaning and accessible state distinctions.
 
-The system uses five type roles: **Geist** for readable continuous sans-serif text, **Mekzantine** for deliberate primary serif and display-serif moments, **EB Garamond** for secondary editorial serif text, **TX-02** for standard monospace UI, and **Departure Mono** for selective lo-fi technical accents.
+## Typography
 
-Use **Geist** through `--font-sans` for body copy, docs prose, descriptions, paragraphs, and other text that benefits from a neutral sans-serif reading rhythm.
+- **Display and Body Font:** Geist, with `ui-sans-serif` and system fallbacks
+- **Technical and Label Font:** TX-02, with `ui-monospace` fallbacks
+- **Primary Serif:** Mekzantine, with EB Garamond fallback
+- **Secondary Serif:** EB Garamond
+- **Accent Mono:** Departure Mono
 
-Use **Mekzantine** through `--font-serif` for primary serif text. It is the default KKB serif face for brand marks, display-serif accents, and compact editorial moments. Apply it deliberately; it should add studio character without replacing the sans-serif product baseline.
-
-Use **EB Garamond** through `--font-serif-secondary` for longer secondary editorial serif text where a more traditional reading rhythm is useful. It remains available, but it is no longer the primary serif token.
-
-Use **TX-02** through `--font-mono` for headings, labels, code, technical metadata, timestamps, audio telemetry, oscilloscope readouts, and compact hardware-style UI. The checked-in font file is `TX-02-VF.woff2`, but components should reference the `font-mono` token rather than hard-coding the file name.
-
-Use **Departure Mono** through `--font-mono-secondary` for selective pixel/lo-fi technical treatments. It should not replace TX-02 as the default monospace font; reserve it for specific components or text where the sharper pixel voice is intentional.
-
-Geist Mono is intentionally not part of the KKB type system.
+The core pairing separates continuous reading from technical context. Geist remains calm and highly legible for prose; TX-02 provides the precise workshop voice for headings, navigation, labels, code, telemetry, timestamps, and instrument UI. Secondary faces add character only when the surface earns a distinct editorial or symbolic register.
 
 ### Hierarchy
 
-- **Headline LG** (TX-02, 600, 32px / 40px, -0.02em): Main technical page headings and catalog titles.
-- **Headline MD** (TX-02, 600, 24px / 32px, -0.01em): Section headings and prominent panel headers.
-- **Headline SM** (TX-02, 600, 20px / 28px, -0.01em): Card titles, demos, and compact page headings.
-- **Body LG / MD / SM** (Geist, 400, 18/16/14px): Prose, descriptions, docs previews, field help, and explanatory UI copy.
-- **Label MD / SM** (TX-02, 500, 14/12px): Buttons, tabs, navigation labels, controls, and terse metadata.
-- **Code SM** (TX-02, 500, 12px / 16px): Inline technical references and compact code-adjacent labels.
-- **Body Serif** (Mekzantine, 18px / 28px): Primary serif marks, compact editorial notes, and display-serif accents.
-- **Body Serif Secondary** (EB Garamond, 18px / 28px): Longer editorial notes, essays, or secondary long-form design writing.
-- **Accent Mono** (Departure Mono, 12px / 16px): Pixel-forward technical accents only.
-- **Audio Label** (TX-02, 10px / 12px, 0.08em): Uppercase audio and instrument labels.
+- **Headline LG** (TX-02, 600, 32px/40px): Main technical page headings and catalog titles.
+- **Headline MD** (TX-02, 600, 24px/32px): Section headings and prominent panel headers.
+- **Headline SM** (TX-02, 600, 20px/28px): Card titles, demos, and compact page headings.
+- **Body LG** (Geist, 400, 18px/28px): Long-form introductions and editorial prose.
+- **Body MD / SM** (Geist, 400, 16px/24px and 14px/20px): Product copy, descriptions, field help, and compact explanatory text.
+- **Label MD / SM** (TX-02, 500, 14px/20px and 12px/16px): Buttons, tabs, navigation, controls, terse metadata, and figure labels.
+- **Code SM** (TX-02, 500, 12px/16px): Inline technical references and compact code-adjacent labels.
+- **Body Serif** (Mekzantine, 400, 18px/28px): Brand marks and deliberate editorial accents.
+- **Body Serif Secondary** (EB Garamond, 400, 18px/28px): Longer secondary editorial passages when a traditional reading rhythm is intentional.
+- **Accent Mono** (Departure Mono, 400, 12px/16px): Pixel-forward or lo-fi technical accents.
+- **Audio Label** (TX-02, 500, 10px/12px, 0.08em tracking): Compact uppercase instrument labels; never use this size for essential explanatory copy.
 
 ### Named Rules
 
-**The TX-02 Heading Rule.** KKB's technical voice uses TX-02 for headings and labels. Do not default product headings back to generic sans unless the surface is prose-heavy.
+**The Geist Reading Rule.** Sustained reading belongs to Geist. Mono identifies technical context; it does not replace readable prose.
 
-**The Geist Body Rule.** Long reading belongs to Geist. Mono identifies technical context; it does not replace readable prose.
+**The TX-02 Workshop Rule.** TX-02 carries the stable technical voice across themes. Color and material may change around it, but the role does not.
 
-## 4. Elevation
+**The Secondary Voice Rule.** Mekzantine, EB Garamond, and Departure Mono are selective accents. A surface must have a specific editorial, symbolic, or lo-fi reason to invoke them.
 
-The general product UI is mostly flat. Hierarchy comes from borders, tonal surfaces, spacing, and focus rings before shadows. Sharp technical surfaces should feel machined, not pillowy.
+## Layout
+
+KKB uses a 4px spatial rhythm and supports different surface purposes without tying them to color mode. Operational surfaces prioritize compact access and predictable control placement. Editorial and report surfaces prioritize reading measure, evidence cadence, provenance, and figure comprehension. Expressive or immersive surfaces may devote substantial area to procedural media while preserving a clear navigation and content path.
+
+Shared composition systems should emerge in `@kkb/ui` when their contracts become reusable: experiment indexes, report figures, metric groups, provenance rails, instrument shells, and status patterns. App-level composition remains appropriate until a stable shared contract exists.
+
+Responsive design is a change in composition, not a proportional scale-down. Complex figures must reflow, summarize, stack, or use an explicitly labeled local scroll region. No visualization, table, code block, canvas, or shader surface may widen the document. Local scroll regions must be keyboard reachable and visibly communicate continuation.
+
+Light and dark modes do not change layout, density rhythm, information hierarchy, symbol meaning, or component APIs. A theme may alter atmosphere only when the interaction model and responsive contract remain intact.
+
+**The Surface–Mode Independence Rule.** Operational, editorial, expressive, instrument-like, and immersive compositions may all be rendered in light or dark mode.
+
+**The No Document Overflow Rule.** Dense technical content stays inside its own responsive or focusable region; it never enlarges the page viewport.
+
+## Elevation & Depth
+
+KKB is flat by default. Resting hierarchy comes from borders, tonal surfaces, spacing, clipping, and contrast. Shadows communicate overlays, active state, or deliberate instrument material—not generic importance.
+
+Themes may tune the softness, warmth, or intensity of depth, but the semantic elevation model stays stable. Dynamic media may use shader glow, bloom, persistence, and compositing as part of the rendered artifact; those effects do not become generic CSS decoration elsewhere.
 
 ### Shadow Vocabulary
 
-- **Surface Low** (`shadow-sm`): Use sparingly for floating sidebars, active tab surfaces, popovers, dropdowns, dialogs, and tooltips.
-- **Input Low** (`shadow-xs`): Use on outline buttons and fields only where a barely-raised edge improves affordance.
-- **Audio Shell** (`0 8px 32px oklch(0 0 0 / 0.5), inset 0 1px 0 oklch(1 0 0 / 0.3)`): Use only for audio instrument chrome.
-- **Oscilloscope Glow**: Shader bloom is part of the oscilloscope renderer, not a general CSS card effect.
+- **Surface Low** (`shadow-sm`): Cards where implementation already uses a slight lift, floating sidebars, active tab surfaces, popovers, dropdowns, dialogs, and tooltips.
+- **Input Low** (`shadow-xs`): Outline buttons and fields where a barely raised edge improves affordance.
+- **Audio Shell** (`0 8px 32px oklch(0 0 0 / 0.5), inset 0 1px 0 oklch(1 0 0 / 0.3)`): Tactile instrument chrome only.
+- **Oscilloscope Glow:** Shader bloom for trace energy and persistence; never a generic success or card effect.
 
 ### Named Rules
 
-**The Flat Product Rule.** A resting product surface should not look lifted. If a shadow does not communicate overlay, active state, or instrument depth, remove it.
+**The Flat-at-Rest Rule.** If a shadow does not communicate overlay, state, or instrument material, remove it.
 
-## 5. Components
+**The Rendered Light Rule.** Shader light belongs to the visual system that produced it. Do not imitate bloom with unrelated component shadows.
 
-Components are compact, predictable, keyboard-first controls with hard technical edges and visible focus. Compose new work from `@kkb/ui` before inventing app-local patterns.
+## Shapes
+
+The core geometry is compact and nearly square. The base radius is 3px, with derived steps from 1.8px to 7.8px. Buttons and inputs use the 2.4px step; cards currently use approximately 4.2px; larger radii are reserved for components whose function benefits from softer containment. Full pills remain appropriate for badges, avatars, sliders, switches, and other inherently rounded controls.
+
+One-pixel borders, ruled divisions, clipped panels, rails, and precise alignment form the recurring silhouette. Instrument surfaces may use thicker or inset borders where physical or optical depth is meaningful. Sigils and advanced symbols should share a stable construction logic across themes even when their color or shader treatment changes.
+
+**The Stable Geometry Rule.** Themes do not change component radii, control dimensions, border logic, or symbol construction by default.
+
+**The Earned Roundness Rule.** Full rounding communicates component type or state; it is not a general styling shortcut.
+
+## Components
+
+Components are compact, predictable, keyboard-first, and built from semantic tokens. Every shared component supports light and dark mode through the same API. Theme-specific appearance comes from token mappings rather than component branches.
 
 ### Buttons
 
-- **Shape:** Sharp rectangle with a small technical radius (`rounded-md` = 3px). Do not use pill buttons except where the component type requires it.
-- **Primary/default:** Dark neutral fill, light text, hover opacity reduction. Use for the main action on a surface.
-- **Secondary:** Light neutral fill, dark text. Use for lower-emphasis actions.
-- **Outline:** Transparent/background fill with border and subtle shadow. Use when the action should sit with form controls.
-- **Ghost:** No resting chrome; show light neutral accent fill on hover. Use for toolbar and navigation actions.
-- **Link:** Text-only with underline on hover. Use for navigation, not primary actions.
-- **Destructive:** Red fill for destructive actions only.
+- **Shape:** Precise rectangle with a 2.4px radius, TX-02 label, and explicit size variants from 24px to 40px.
+- **Primary:** Semantic primary fill with its paired foreground; reserved for the main action in a local surface.
+- **Secondary / Outline:** Quiet tonal or bordered actions that remain visible in both modes.
+- **Ghost:** No resting chrome; hover and active states increase contrast through the semantic accent role.
+- **Link:** Text navigation with a visible underline treatment on hover; not a substitute for a primary action.
+- **Focus:** A visible 3px semantic ring. Compact visible controls may use a larger invisible hit region where needed.
 
-### Chips
+### Chips and Badges
 
-- **Style:** Badges can remain full-pill because their shape communicates label/status, not surface softness.
-- **State:** Use badges for status and labels. Do not turn them into decorative stickers.
+- **Style:** Full rounding is permitted because the silhouette communicates label, status, or compact selection rather than soft surface treatment.
+- **State:** Interactive chips use native controls and expose selected state semantically, such as `aria-pressed`; color alone is insufficient.
+- **Meaning:** Status labels use plain language alongside any icon or sigil.
 
 ### Cards / Containers
 
-- **Corner Style:** Nearly square (`rounded-lg` = 4px). Cards should read as panels, not soft marketing tiles.
-- **Background:** Cards use semantic `card` and `card-foreground`; audio panels use `.audio-*`; oscilloscope viewports use shader-derived greens.
-- **Shadow Strategy:** Cards are bordered first. Use shadows only for overlays or deliberate instrument depth.
-- **Border:** One-pixel borders are structural and neutral. No colored side-stripe accents.
-- **Internal Padding:** Standard card padding is 24px with header/content/footer slots.
+- **Corner Style:** Nearly square, currently approximately 4.2px for the shared Card primitive.
+- **Background:** Semantic card and card-foreground roles, paired per color mode.
+- **Shadow Strategy:** Border-led with only a slight current `shadow-sm`; specialized instrument depth stays in domain components.
+- **Internal Rhythm:** 24px padding and gap are the default shared Card cadence.
+- **Usage:** Prefer ruled lists, grouped sections, or open composition when a card adds no semantic containment.
 
 ### Inputs / Fields
 
-- **Style:** Transparent or subtle dark input background, one-pixel input border, `rounded-md` = 3px, 36px height, 12px horizontal padding.
-- **Focus:** Border shifts to ring color with a visible 3px translucent ring.
-- **Error / Disabled:** Invalid fields use destructive border/ring; disabled fields reduce opacity and disable interaction.
+- **Style:** 36px high, 12px horizontal padding, 2.4px radius, semantic border, transparent light fill, and a subtle dark-mode input fill.
+- **Focus:** Border shifts to the ring role with a visible 3px translucent ring.
+- **Error / Disabled:** Invalid fields use destructive border and ring roles; disabled fields reduce opacity and interaction without hiding their value.
 
 ### Navigation
 
-- **Style:** Navigation is text-first and compact. Default items use muted foreground; hover and active states move to foreground or sidebar accent.
-- **Typography:** TX-02 is appropriate for route indexes, technical nav, and catalog navigation. Use Geist for prose-heavy menus.
-- **Mobile:** Collapse structure; do not invent non-standard navigation affordances for flavor.
+- **Style:** Text-first and compact, with semantic muted, foreground, accent, and focus roles.
+- **Typography:** TX-02 suits route indexes and technical navigation; Geist remains available for prose-heavy menus.
+- **Behavior:** Current location is visible without relying on color alone. Mobile composition may collapse structure but must preserve standard navigation semantics.
+
+### Theme and Mode Controls
+
+- **Provider:** Shared apps use `ThemeProvider` with system preference support.
+- **Control:** Mode controls expose Light, Dark, and System as explicit named options.
+- **Contract:** Switching mode changes semantic mappings and media treatment, not component anatomy or information architecture.
 
 ### Audio Presentation
 
-Audio components may use `.audio-shell`, `.audio-titlebar`, `.audio-panel`, `.audio-transport-button`, scanlines, waveform colors, and glow tokens from `globals.css`. Keep audio-specific blue color and depth decisions inside audio presentation components.
+Audio components may use the dedicated shell, titlebar, panel, control, scanline, waveform, and telemetry roles implemented in `globals.css`. Their tactile depth is a domain treatment, not permission to make the general product UI glossy. Each future theme should provide intentional light and dark audio mappings rather than treating the instrument as permanently dark.
 
-### Oscilloscope Presentation
+### Dynamic Media and Visualizations
 
-Oscilloscope surfaces use P31 phosphor greens from the WebGPU shaders: trace green for core lines, phosphor glow for bloom/hot cores, dark green shoulder/floor values for persistence and panel atmosphere. Treat these as renderer/instrument colors, not generic success colors.
+Shaders, WebGPU, Three.js, audio-reactive graphics, diagrams, and data figures are first-class design-system participants. Reusable contracts belong in `@kkb/ui` once stable. The current oscilloscope route is a known exception: it still has one dark-oriented surrounding treatment and must gain intentionally designed light and dark variants. Each implementation must define:
 
-## 6. Do's and Don'ts
+- light and dark treatments
+- reduced-motion behavior
+- a meaningful static state or fallback
+- accessible labeling or an equivalent textual representation
+- keyboard and touch behavior for exploration
+- responsive behavior that does not widen the document
 
-### Do:
+## Do's and Don'ts
 
-- **Do** preserve shadcn/ui token names and the personal studio color names in frontmatter and generated docs.
-- **Do** treat `packages/ui/src/styles/globals.css` as the live token source of truth.
-- **Do** pair filled colors with matching foreground tokens, especially `primary` with `primary-foreground`.
-- **Do** use the 4px spacing rhythm for component dimensions and layout gaps.
-- **Do** use Geist for prose and body copy; use Mekzantine for primary serif marks and display-serif accents; use EB Garamond through `--font-serif-secondary` for secondary editorial serif text; use TX-02 for headings, labels, code, telemetry, audio metadata, and oscilloscope readouts; use Departure Mono only as a selective secondary monospace accent.
-- **Do** keep roundness low: 1-4px for most controls and panels, 6px only for larger containers, full radius only for badges/avatars/sliders/switches.
-- **Do** use audio blue for audio and waveform state, and P31 green for oscilloscope trace/glow state.
+### Do
 
-### Don't:
+- **Do** treat `packages/ui/src/styles/globals.css` as the live token source of truth and this document as its normative design interpretation.
+- **Do** preserve semantic token names across themes and provide complete light and dark mappings for each theme.
+- **Do** keep typography, geometry, spacing, symbology, component anatomy, and interaction semantics stable by default.
+- **Do** use Geist for continuous reading, TX-02 for technical context, and secondary faces only with a clear editorial or symbolic purpose.
+- **Do** use the 4px rhythm, low radii, structural borders, visible focus, and paired foreground tokens.
+- **Do** move reusable visual and interaction contracts into `@kkb/ui` instead of duplicating them across apps.
+- **Do** design responsive figures as distinct compositions when scaling alone would damage comprehension.
+- **Do** provide meaningful static and reduced-motion states for dynamic media.
 
-- **Don't** replace either vocabulary with the other: semantic shadcn/ui tokens are required for compatibility, and studio names are required for design intent.
-- **Don't** reintroduce Geist Mono; it is not part of the KKB font system.
-- **Don't** use the audio blue accent as a general-purpose brand color.
-- **Don't** use oscilloscope green as a generic success color.
-- **Don't** add shadows where borders, spacing, or tonal contrast are enough.
-- **Don't** use rounded soft cards, pillowy inputs, glassmorphism, heavy gradients, or generic glossy SaaS styling.
-- **Don't** create app-local UI primitives when an equivalent `@kkb/ui` component or token exists.
+### Don't
+
+- **Don't** equate dark mode with technical or expressive work, or light mode with product or operational work.
+- **Don't** generate one color mode by mechanically inverting the other.
+- **Don't** let a theme move controls, change component APIs, replace symbol meanings, or materially alter information hierarchy.
+- **Don't** hard-code theme-specific colors inside shared components when a semantic role should own the decision.
+- **Don't** treat the initial audio blue or oscilloscope green as mandatory hues for every future theme.
+- **Don't** use low-contrast metadata, hover-only exploration, color-only selection, inaccessible horizontal scrolling, or document-level overflow.
+- **Don't** add rounded soft cards, pillowy inputs, glassmorphism, heavy decorative gradients, or generic glossy SaaS styling to the core language.
+- **Don't** create app-local primitives when an equivalent or composable `@kkb/ui` foundation exists.

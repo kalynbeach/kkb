@@ -1,178 +1,1012 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-06-18T00:00:00.000Z",
+  "generatedAt": "2026-07-25T19:46:58.000Z",
   "title": "Design System: KKB",
   "extensions": {
     "colorMeta": {
       "background": {
         "role": "neutral",
-        "displayName": "Background",
-        "canonical": "oklch(1 0 0)",
-        "tonalRamp": [
-          "oklch(0.15 0 0)",
-          "oklch(0.25 0 0)",
-          "oklch(0.37 0 0)",
-          "oklch(0.50 0 0)",
-          "oklch(0.63 0 0)",
-          "oklch(0.76 0 0)",
-          "oklch(0.89 0 0)",
-          "oklch(1 0 0)"
-        ]
-      },
-      "foreground": {
-        "role": "neutral",
-        "displayName": "Foreground",
-        "canonical": "oklch(0.145 0 0)",
-        "tonalRamp": [
-          "oklch(0.145 0 0)",
-          "oklch(0.24 0 0)",
-          "oklch(0.35 0 0)",
-          "oklch(0.48 0 0)",
-          "oklch(0.61 0 0)",
-          "oklch(0.74 0 0)",
-          "oklch(0.87 0 0)",
-          "oklch(0.97 0 0)"
-        ]
-      },
-      "primary": {
-        "role": "primary",
-        "displayName": "Primary",
-        "canonical": "oklch(0.205 0 0)",
-        "tonalRamp": [
-          "oklch(0.15 0 0)",
-          "oklch(0.205 0 0)",
-          "oklch(0.32 0 0)",
-          "oklch(0.45 0 0)",
-          "oklch(0.58 0 0)",
-          "oklch(0.72 0 0)",
-          "oklch(0.86 0 0)",
-          "oklch(0.985 0 0)"
-        ]
-      },
-      "border": {
-        "role": "neutral",
-        "displayName": "Border",
-        "canonical": "oklch(0.922 0 0)",
-        "tonalRamp": [
-          "oklch(0.18 0 0)",
-          "oklch(0.30 0 0)",
-          "oklch(0.43 0 0)",
-          "oklch(0.56 0 0)",
-          "oklch(0.69 0 0)",
-          "oklch(0.82 0 0)",
-          "oklch(0.922 0 0)",
-          "oklch(0.98 0 0)"
-        ]
-      },
-      "audio-accent": {
-        "role": "secondary",
-        "displayName": "Audio Accent",
-        "canonical": "oklch(0.768 0.122 252.001)",
-        "tonalRamp": [
-          "oklch(0.18 0.122 252.001)",
-          "oklch(0.28 0.122 252.001)",
-          "oklch(0.40 0.122 252.001)",
-          "oklch(0.52 0.122 252.001)",
-          "oklch(0.64 0.122 252.001)",
-          "oklch(0.768 0.122 252.001)",
-          "oklch(0.86 0.08 252.001)",
-          "oklch(0.95 0.04 252.001)"
-        ]
-      },
-      "oscilloscope-trace": {
-        "role": "tertiary",
-        "displayName": "Oscilloscope Trace",
-        "canonical": "color(srgb 0.03 0.78 0.2)",
-        "tonalRamp": [
-          "color(srgb 0.004 0.08 0.018)",
-          "color(srgb 0.02 0.20 0.06)",
-          "color(srgb 0.03 0.36 0.1)",
-          "color(srgb 0.03 0.52 0.15)",
-          "color(srgb 0.03 0.78 0.2)",
-          "color(srgb 0.34 0.9 0.42)",
-          "color(srgb 0.74 1 0.71)",
-          "color(srgb 0.93 1 0.9)"
-        ]
-      },
-      "paper-white": {
-        "role": "neutral",
         "displayName": "Paper White",
         "canonical": "oklch(1 0 0)",
         "tonalRamp": [
           "oklch(0.15 0 0)",
-          "oklch(0.25 0 0)",
-          "oklch(0.37 0 0)",
-          "oklch(0.50 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
           "oklch(0.63 0 0)",
-          "oklch(0.76 0 0)",
-          "oklch(0.89 0 0)",
-          "oklch(1 0 0)"
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
         ]
       },
-      "bench-ink": {
+      "foreground": {
         "role": "neutral",
         "displayName": "Bench Ink",
         "canonical": "oklch(0.145 0 0)",
         "tonalRamp": [
-          "oklch(0.145 0 0)",
-          "oklch(0.24 0 0)",
-          "oklch(0.35 0 0)",
-          "oklch(0.48 0 0)",
-          "oklch(0.61 0 0)",
-          "oklch(0.74 0 0)",
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
           "oklch(0.87 0 0)",
-          "oklch(0.97 0 0)"
+          "oklch(0.95 0 0)"
         ]
       },
-      "instrument-black": {
+      "card": {
+        "role": "neutral",
+        "displayName": "Card",
+        "canonical": "oklch(1 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "card-foreground": {
+        "role": "neutral",
+        "displayName": "Card Foreground",
+        "canonical": "oklch(0.145 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "popover": {
+        "role": "neutral",
+        "displayName": "Popover",
+        "canonical": "oklch(1 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "popover-foreground": {
+        "role": "neutral",
+        "displayName": "Popover Foreground",
+        "canonical": "oklch(0.145 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "primary": {
         "role": "primary",
         "displayName": "Instrument Black",
         "canonical": "oklch(0.205 0 0)",
         "tonalRamp": [
           "oklch(0.15 0 0)",
-          "oklch(0.205 0 0)",
-          "oklch(0.32 0 0)",
-          "oklch(0.45 0 0)",
-          "oklch(0.58 0 0)",
-          "oklch(0.72 0 0)",
-          "oklch(0.86 0 0)",
-          "oklch(0.985 0 0)"
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
         ]
       },
-      "rail-gray": {
+      "primary-foreground": {
+        "role": "primary",
+        "displayName": "Primary Foreground",
+        "canonical": "oklch(0.985 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "secondary": {
+        "role": "neutral",
+        "displayName": "Secondary",
+        "canonical": "oklch(0.97 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "secondary-foreground": {
+        "role": "neutral",
+        "displayName": "Secondary Foreground",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Muted",
+        "canonical": "oklch(0.97 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "muted-foreground": {
+        "role": "neutral",
+        "displayName": "Muted Foreground",
+        "canonical": "oklch(0.556 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "accent": {
+        "role": "neutral",
+        "displayName": "Accent",
+        "canonical": "oklch(0.97 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "accent-foreground": {
+        "role": "neutral",
+        "displayName": "Accent Foreground",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "destructive": {
+        "role": "primary",
+        "displayName": "Destructive",
+        "canonical": "oklch(0.577 0.245 27.325)",
+        "tonalRamp": [
+          "oklch(0.15 0.245 27.325)",
+          "oklch(0.27 0.245 27.325)",
+          "oklch(0.39 0.245 27.325)",
+          "oklch(0.51 0.245 27.325)",
+          "oklch(0.63 0.245 27.325)",
+          "oklch(0.75 0.245 27.325)",
+          "oklch(0.87 0.245 27.325)",
+          "oklch(0.95 0.245 27.325)"
+        ]
+      },
+      "destructive-foreground": {
+        "role": "primary",
+        "displayName": "Destructive Foreground",
+        "canonical": "oklch(0.985 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "border": {
         "role": "neutral",
         "displayName": "Rail Gray",
         "canonical": "oklch(0.922 0 0)",
         "tonalRamp": [
-          "oklch(0.18 0 0)",
-          "oklch(0.30 0 0)",
-          "oklch(0.43 0 0)",
-          "oklch(0.56 0 0)",
-          "oklch(0.69 0 0)",
-          "oklch(0.82 0 0)",
-          "oklch(0.922 0 0)",
-          "oklch(0.98 0 0)"
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
         ]
       },
-      "mute-gray": {
+      "input": {
         "role": "neutral",
-        "displayName": "Mute Gray",
-        "canonical": "oklch(0.556 0 0)",
-        "tonalRamp": ["oklch(0.556 0 0)"]
+        "displayName": "Input",
+        "canonical": "oklch(0.922 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
       },
-      "scope-blue": {
+      "ring": {
+        "role": "neutral",
+        "displayName": "Ring",
+        "canonical": "oklch(0.708 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "background-dark": {
+        "role": "neutral",
+        "displayName": "Night Bench",
+        "canonical": "oklch(0.145 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "foreground-dark": {
+        "role": "neutral",
+        "displayName": "Panel White",
+        "canonical": "oklch(0.985 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "card-dark": {
+        "role": "neutral",
+        "displayName": "Card Dark",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "card-foreground-dark": {
+        "role": "neutral",
+        "displayName": "Card Foreground Dark",
+        "canonical": "oklch(0.985 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "popover-dark": {
+        "role": "neutral",
+        "displayName": "Popover Dark",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "popover-foreground-dark": {
+        "role": "neutral",
+        "displayName": "Popover Foreground Dark",
+        "canonical": "oklch(0.985 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "primary-dark": {
+        "role": "primary",
+        "displayName": "Primary Dark",
+        "canonical": "oklch(0.922 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "primary-foreground-dark": {
+        "role": "primary",
+        "displayName": "Primary Foreground Dark",
+        "canonical": "oklch(0.205 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "secondary-dark": {
+        "role": "neutral",
+        "displayName": "Secondary Dark",
+        "canonical": "oklch(0.269 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "secondary-foreground-dark": {
+        "role": "neutral",
+        "displayName": "Secondary Foreground Dark",
+        "canonical": "oklch(0.985 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "muted-dark": {
+        "role": "neutral",
+        "displayName": "Muted Dark",
+        "canonical": "oklch(0.269 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "muted-foreground-dark": {
+        "role": "neutral",
+        "displayName": "Muted Foreground Dark",
+        "canonical": "oklch(0.708 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "accent-dark": {
+        "role": "neutral",
+        "displayName": "Accent Dark",
+        "canonical": "oklch(0.269 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "accent-foreground-dark": {
+        "role": "neutral",
+        "displayName": "Accent Foreground Dark",
+        "canonical": "oklch(0.985 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "destructive-dark": {
+        "role": "primary",
+        "displayName": "Destructive Dark",
+        "canonical": "oklch(0.704 0.191 22.216)",
+        "tonalRamp": [
+          "oklch(0.15 0.191 22.216)",
+          "oklch(0.27 0.191 22.216)",
+          "oklch(0.39 0.191 22.216)",
+          "oklch(0.51 0.191 22.216)",
+          "oklch(0.63 0.191 22.216)",
+          "oklch(0.75 0.191 22.216)",
+          "oklch(0.87 0.191 22.216)",
+          "oklch(0.95 0.191 22.216)"
+        ]
+      },
+      "destructive-foreground-dark": {
+        "role": "primary",
+        "displayName": "Destructive Foreground Dark",
+        "canonical": "oklch(0.985 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "border-dark": {
+        "role": "neutral",
+        "displayName": "Border Dark",
+        "canonical": "oklch(1 0 0 / 10%)",
+        "tonalRamp": [
+          "oklch(0.15 0 0 / 10%)",
+          "oklch(0.27 0 0 / 10%)",
+          "oklch(0.39 0 0 / 10%)",
+          "oklch(0.51 0 0 / 10%)",
+          "oklch(0.63 0 0 / 10%)",
+          "oklch(0.75 0 0 / 10%)",
+          "oklch(0.87 0 0 / 10%)",
+          "oklch(0.95 0 0 / 10%)"
+        ]
+      },
+      "input-dark": {
+        "role": "neutral",
+        "displayName": "Input Dark",
+        "canonical": "oklch(1 0 0 / 15%)",
+        "tonalRamp": [
+          "oklch(0.15 0 0 / 15%)",
+          "oklch(0.27 0 0 / 15%)",
+          "oklch(0.39 0 0 / 15%)",
+          "oklch(0.51 0 0 / 15%)",
+          "oklch(0.63 0 0 / 15%)",
+          "oklch(0.75 0 0 / 15%)",
+          "oklch(0.87 0 0 / 15%)",
+          "oklch(0.95 0 0 / 15%)"
+        ]
+      },
+      "ring-dark": {
+        "role": "neutral",
+        "displayName": "Ring Dark",
+        "canonical": "oklch(0.556 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "chart-1": {
         "role": "secondary",
-        "displayName": "Scope Blue",
+        "displayName": "Chart 1",
+        "canonical": "oklch(0.809 0.105 251.813)",
+        "tonalRamp": [
+          "oklch(0.15 0.105 251.813)",
+          "oklch(0.27 0.105 251.813)",
+          "oklch(0.39 0.105 251.813)",
+          "oklch(0.51 0.105 251.813)",
+          "oklch(0.63 0.105 251.813)",
+          "oklch(0.75 0.105 251.813)",
+          "oklch(0.87 0.105 251.813)",
+          "oklch(0.95 0.105 251.813)"
+        ]
+      },
+      "chart-2": {
+        "role": "secondary",
+        "displayName": "Chart 2",
+        "canonical": "oklch(0.623 0.214 259.815)",
+        "tonalRamp": [
+          "oklch(0.15 0.214 259.815)",
+          "oklch(0.27 0.214 259.815)",
+          "oklch(0.39 0.214 259.815)",
+          "oklch(0.51 0.214 259.815)",
+          "oklch(0.63 0.214 259.815)",
+          "oklch(0.75 0.214 259.815)",
+          "oklch(0.87 0.214 259.815)",
+          "oklch(0.95 0.214 259.815)"
+        ]
+      },
+      "chart-3": {
+        "role": "secondary",
+        "displayName": "Chart 3",
+        "canonical": "oklch(0.546 0.245 262.881)",
+        "tonalRamp": [
+          "oklch(0.15 0.245 262.881)",
+          "oklch(0.27 0.245 262.881)",
+          "oklch(0.39 0.245 262.881)",
+          "oklch(0.51 0.245 262.881)",
+          "oklch(0.63 0.245 262.881)",
+          "oklch(0.75 0.245 262.881)",
+          "oklch(0.87 0.245 262.881)",
+          "oklch(0.95 0.245 262.881)"
+        ]
+      },
+      "chart-4": {
+        "role": "secondary",
+        "displayName": "Chart 4",
+        "canonical": "oklch(0.488 0.243 264.376)",
+        "tonalRamp": [
+          "oklch(0.15 0.243 264.376)",
+          "oklch(0.27 0.243 264.376)",
+          "oklch(0.39 0.243 264.376)",
+          "oklch(0.51 0.243 264.376)",
+          "oklch(0.63 0.243 264.376)",
+          "oklch(0.75 0.243 264.376)",
+          "oklch(0.87 0.243 264.376)",
+          "oklch(0.95 0.243 264.376)"
+        ]
+      },
+      "chart-5": {
+        "role": "secondary",
+        "displayName": "Chart 5",
+        "canonical": "oklch(0.424 0.199 265.638)",
+        "tonalRamp": [
+          "oklch(0.15 0.199 265.638)",
+          "oklch(0.27 0.199 265.638)",
+          "oklch(0.39 0.199 265.638)",
+          "oklch(0.51 0.199 265.638)",
+          "oklch(0.63 0.199 265.638)",
+          "oklch(0.75 0.199 265.638)",
+          "oklch(0.87 0.199 265.638)",
+          "oklch(0.95 0.199 265.638)"
+        ]
+      },
+      "audio-accent": {
+        "role": "secondary",
+        "displayName": "Audio Signal Blue",
         "canonical": "oklch(0.768 0.122 252.001)",
         "tonalRamp": [
-          "oklch(0.18 0.122 252.001)",
-          "oklch(0.28 0.122 252.001)",
-          "oklch(0.40 0.122 252.001)",
-          "oklch(0.52 0.122 252.001)",
-          "oklch(0.64 0.122 252.001)",
-          "oklch(0.768 0.122 252.001)",
-          "oklch(0.86 0.08 252.001)",
-          "oklch(0.95 0.04 252.001)"
+          "oklch(0.15 0.122 252.001)",
+          "oklch(0.27 0.122 252.001)",
+          "oklch(0.39 0.122 252.001)",
+          "oklch(0.51 0.122 252.001)",
+          "oklch(0.63 0.122 252.001)",
+          "oklch(0.75 0.122 252.001)",
+          "oklch(0.87 0.122 252.001)",
+          "oklch(0.95 0.122 252.001)"
+        ]
+      },
+      "audio-accent-dark": {
+        "role": "secondary",
+        "displayName": "Audio Signal Blue — Dark",
+        "canonical": "oklch(0.8 0.122 252.001)",
+        "tonalRamp": [
+          "oklch(0.15 0.122 252.001)",
+          "oklch(0.27 0.122 252.001)",
+          "oklch(0.39 0.122 252.001)",
+          "oklch(0.51 0.122 252.001)",
+          "oklch(0.63 0.122 252.001)",
+          "oklch(0.75 0.122 252.001)",
+          "oklch(0.87 0.122 252.001)",
+          "oklch(0.95 0.122 252.001)"
+        ]
+      },
+      "audio-panel-start": {
+        "role": "secondary",
+        "displayName": "Audio Panel Start",
+        "canonical": "oklch(0.183 0.05 270.309)",
+        "tonalRamp": [
+          "oklch(0.15 0.05 270.309)",
+          "oklch(0.27 0.05 270.309)",
+          "oklch(0.39 0.05 270.309)",
+          "oklch(0.51 0.05 270.309)",
+          "oklch(0.63 0.05 270.309)",
+          "oklch(0.75 0.05 270.309)",
+          "oklch(0.87 0.05 270.309)",
+          "oklch(0.95 0.05 270.309)"
+        ]
+      },
+      "audio-panel-mid": {
+        "role": "secondary",
+        "displayName": "Audio Panel Mid",
+        "canonical": "oklch(0.209 0.053 268.661)",
+        "tonalRamp": [
+          "oklch(0.15 0.053 268.661)",
+          "oklch(0.27 0.053 268.661)",
+          "oklch(0.39 0.053 268.661)",
+          "oklch(0.51 0.053 268.661)",
+          "oklch(0.63 0.053 268.661)",
+          "oklch(0.75 0.053 268.661)",
+          "oklch(0.87 0.053 268.661)",
+          "oklch(0.95 0.053 268.661)"
+        ]
+      },
+      "audio-panel-end": {
+        "role": "secondary",
+        "displayName": "Audio Panel End",
+        "canonical": "oklch(0.183 0.05 270.309)",
+        "tonalRamp": [
+          "oklch(0.15 0.05 270.309)",
+          "oklch(0.27 0.05 270.309)",
+          "oklch(0.39 0.05 270.309)",
+          "oklch(0.51 0.05 270.309)",
+          "oklch(0.63 0.05 270.309)",
+          "oklch(0.75 0.05 270.309)",
+          "oklch(0.87 0.05 270.309)",
+          "oklch(0.95 0.05 270.309)"
+        ]
+      },
+      "audio-panel-start-dark": {
+        "role": "secondary",
+        "displayName": "Audio Panel Start Dark",
+        "canonical": "oklch(0.205 0.04 265.8)",
+        "tonalRamp": [
+          "oklch(0.15 0.04 265.8)",
+          "oklch(0.27 0.04 265.8)",
+          "oklch(0.39 0.04 265.8)",
+          "oklch(0.51 0.04 265.8)",
+          "oklch(0.63 0.04 265.8)",
+          "oklch(0.75 0.04 265.8)",
+          "oklch(0.87 0.04 265.8)",
+          "oklch(0.95 0.04 265.8)"
+        ]
+      },
+      "audio-panel-mid-dark": {
+        "role": "secondary",
+        "displayName": "Audio Panel Mid Dark",
+        "canonical": "oklch(0.24 0.043 261.5)",
+        "tonalRamp": [
+          "oklch(0.15 0.043 261.5)",
+          "oklch(0.27 0.043 261.5)",
+          "oklch(0.39 0.043 261.5)",
+          "oklch(0.51 0.043 261.5)",
+          "oklch(0.63 0.043 261.5)",
+          "oklch(0.75 0.043 261.5)",
+          "oklch(0.87 0.043 261.5)",
+          "oklch(0.95 0.043 261.5)"
+        ]
+      },
+      "audio-panel-end-dark": {
+        "role": "secondary",
+        "displayName": "Audio Panel End Dark",
+        "canonical": "oklch(0.205 0.04 265.8)",
+        "tonalRamp": [
+          "oklch(0.15 0.04 265.8)",
+          "oklch(0.27 0.04 265.8)",
+          "oklch(0.39 0.04 265.8)",
+          "oklch(0.51 0.04 265.8)",
+          "oklch(0.63 0.04 265.8)",
+          "oklch(0.75 0.04 265.8)",
+          "oklch(0.87 0.04 265.8)",
+          "oklch(0.95 0.04 265.8)"
+        ]
+      },
+      "audio-control-start": {
+        "role": "secondary",
+        "displayName": "Audio Control Start",
+        "canonical": "oklch(0.883 0.032 269.793)",
+        "tonalRamp": [
+          "oklch(0.15 0.032 269.793)",
+          "oklch(0.27 0.032 269.793)",
+          "oklch(0.39 0.032 269.793)",
+          "oklch(0.51 0.032 269.793)",
+          "oklch(0.63 0.032 269.793)",
+          "oklch(0.75 0.032 269.793)",
+          "oklch(0.87 0.032 269.793)",
+          "oklch(0.95 0.032 269.793)"
+        ]
+      },
+      "audio-control-mid": {
+        "role": "secondary",
+        "displayName": "Audio Control Mid",
+        "canonical": "oklch(0.784 0.035 270.937)",
+        "tonalRamp": [
+          "oklch(0.15 0.035 270.937)",
+          "oklch(0.27 0.035 270.937)",
+          "oklch(0.39 0.035 270.937)",
+          "oklch(0.51 0.035 270.937)",
+          "oklch(0.63 0.035 270.937)",
+          "oklch(0.75 0.035 270.937)",
+          "oklch(0.87 0.035 270.937)",
+          "oklch(0.95 0.035 270.937)"
+        ]
+      },
+      "audio-control-end": {
+        "role": "secondary",
+        "displayName": "Audio Control End",
+        "canonical": "oklch(0.733 0.036 270.889)",
+        "tonalRamp": [
+          "oklch(0.15 0.036 270.889)",
+          "oklch(0.27 0.036 270.889)",
+          "oklch(0.39 0.036 270.889)",
+          "oklch(0.51 0.036 270.889)",
+          "oklch(0.63 0.036 270.889)",
+          "oklch(0.75 0.036 270.889)",
+          "oklch(0.87 0.036 270.889)",
+          "oklch(0.95 0.036 270.889)"
+        ]
+      },
+      "audio-control-icon": {
+        "role": "secondary",
+        "displayName": "Audio Control Icon",
+        "canonical": "oklch(0.443 0.07 274.957)",
+        "tonalRamp": [
+          "oklch(0.15 0.07 274.957)",
+          "oklch(0.27 0.07 274.957)",
+          "oklch(0.39 0.07 274.957)",
+          "oklch(0.51 0.07 274.957)",
+          "oklch(0.63 0.07 274.957)",
+          "oklch(0.75 0.07 274.957)",
+          "oklch(0.87 0.07 274.957)",
+          "oklch(0.95 0.07 274.957)"
+        ]
+      },
+      "audio-control-start-dark": {
+        "role": "secondary",
+        "displayName": "Audio Control Start Dark",
+        "canonical": "oklch(0.66 0.03 268.4)",
+        "tonalRamp": [
+          "oklch(0.15 0.03 268.4)",
+          "oklch(0.27 0.03 268.4)",
+          "oklch(0.39 0.03 268.4)",
+          "oklch(0.51 0.03 268.4)",
+          "oklch(0.63 0.03 268.4)",
+          "oklch(0.75 0.03 268.4)",
+          "oklch(0.87 0.03 268.4)",
+          "oklch(0.95 0.03 268.4)"
+        ]
+      },
+      "audio-control-mid-dark": {
+        "role": "secondary",
+        "displayName": "Audio Control Mid Dark",
+        "canonical": "oklch(0.58 0.029 268.8)",
+        "tonalRamp": [
+          "oklch(0.15 0.029 268.8)",
+          "oklch(0.27 0.029 268.8)",
+          "oklch(0.39 0.029 268.8)",
+          "oklch(0.51 0.029 268.8)",
+          "oklch(0.63 0.029 268.8)",
+          "oklch(0.75 0.029 268.8)",
+          "oklch(0.87 0.029 268.8)",
+          "oklch(0.95 0.029 268.8)"
+        ]
+      },
+      "audio-control-end-dark": {
+        "role": "secondary",
+        "displayName": "Audio Control End Dark",
+        "canonical": "oklch(0.5 0.028 269.1)",
+        "tonalRamp": [
+          "oklch(0.15 0.028 269.1)",
+          "oklch(0.27 0.028 269.1)",
+          "oklch(0.39 0.028 269.1)",
+          "oklch(0.51 0.028 269.1)",
+          "oklch(0.63 0.028 269.1)",
+          "oklch(0.75 0.028 269.1)",
+          "oklch(0.87 0.028 269.1)",
+          "oklch(0.95 0.028 269.1)"
+        ]
+      },
+      "audio-control-icon-dark": {
+        "role": "secondary",
+        "displayName": "Audio Control Icon Dark",
+        "canonical": "oklch(0.91 0.028 259.4)",
+        "tonalRamp": [
+          "oklch(0.15 0.028 259.4)",
+          "oklch(0.27 0.028 259.4)",
+          "oklch(0.39 0.028 259.4)",
+          "oklch(0.51 0.028 259.4)",
+          "oklch(0.63 0.028 259.4)",
+          "oklch(0.75 0.028 259.4)",
+          "oklch(0.87 0.028 259.4)",
+          "oklch(0.95 0.028 259.4)"
+        ]
+      },
+      "audio-title": {
+        "role": "secondary",
+        "displayName": "Audio Title",
+        "canonical": "oklch(0.881 0.024 264.446)",
+        "tonalRamp": [
+          "oklch(0.15 0.024 264.446)",
+          "oklch(0.27 0.024 264.446)",
+          "oklch(0.39 0.024 264.446)",
+          "oklch(0.51 0.024 264.446)",
+          "oklch(0.63 0.024 264.446)",
+          "oklch(0.75 0.024 264.446)",
+          "oklch(0.87 0.024 264.446)",
+          "oklch(0.95 0.024 264.446)"
+        ]
+      },
+      "audio-title-dark": {
+        "role": "secondary",
+        "displayName": "Audio Title Dark",
+        "canonical": "oklch(0.93 0.02 264.4)",
+        "tonalRamp": [
+          "oklch(0.15 0.02 264.4)",
+          "oklch(0.27 0.02 264.4)",
+          "oklch(0.39 0.02 264.4)",
+          "oklch(0.51 0.02 264.4)",
+          "oklch(0.63 0.02 264.4)",
+          "oklch(0.75 0.02 264.4)",
+          "oklch(0.87 0.02 264.4)",
+          "oklch(0.95 0.02 264.4)"
+        ]
+      },
+      "audio-meta": {
+        "role": "secondary",
+        "displayName": "Audio Meta",
+        "canonical": "oklch(0.733 0.036 270.889)",
+        "tonalRamp": [
+          "oklch(0.15 0.036 270.889)",
+          "oklch(0.27 0.036 270.889)",
+          "oklch(0.39 0.036 270.889)",
+          "oklch(0.51 0.036 270.889)",
+          "oklch(0.63 0.036 270.889)",
+          "oklch(0.75 0.036 270.889)",
+          "oklch(0.87 0.036 270.889)",
+          "oklch(0.95 0.036 270.889)"
+        ]
+      },
+      "audio-meta-dark": {
+        "role": "secondary",
+        "displayName": "Audio Meta Dark",
+        "canonical": "oklch(0.79 0.022 267.2)",
+        "tonalRamp": [
+          "oklch(0.15 0.022 267.2)",
+          "oklch(0.27 0.022 267.2)",
+          "oklch(0.39 0.022 267.2)",
+          "oklch(0.51 0.022 267.2)",
+          "oklch(0.63 0.022 267.2)",
+          "oklch(0.75 0.022 267.2)",
+          "oklch(0.87 0.022 267.2)",
+          "oklch(0.95 0.022 267.2)"
+        ]
+      },
+      "oscilloscope-trace": {
+        "role": "tertiary",
+        "displayName": "P31 Trace",
+        "canonical": "color(srgb 0.03 0.78 0.2)",
+        "tonalRamp": [
+          "color-mix(in srgb, color(srgb 0.03 0.78 0.2) 20%, black)",
+          "color-mix(in srgb, color(srgb 0.03 0.78 0.2) 35%, black)",
+          "color-mix(in srgb, color(srgb 0.03 0.78 0.2) 50%, black)",
+          "color-mix(in srgb, color(srgb 0.03 0.78 0.2) 65%, black)",
+          "color-mix(in srgb, color(srgb 0.03 0.78 0.2) 80%, white)",
+          "color-mix(in srgb, color(srgb 0.03 0.78 0.2) 90%, white)",
+          "color-mix(in srgb, color(srgb 0.03 0.78 0.2) 96%, white)",
+          "color-mix(in srgb, color(srgb 0.03 0.78 0.2) 100%, white)"
+        ]
+      },
+      "oscilloscope-glow": {
+        "role": "tertiary",
+        "displayName": "Oscilloscope Glow",
+        "canonical": "color(srgb 0.74 1 0.71)",
+        "tonalRamp": [
+          "color-mix(in srgb, color(srgb 0.74 1 0.71) 20%, black)",
+          "color-mix(in srgb, color(srgb 0.74 1 0.71) 35%, black)",
+          "color-mix(in srgb, color(srgb 0.74 1 0.71) 50%, black)",
+          "color-mix(in srgb, color(srgb 0.74 1 0.71) 65%, black)",
+          "color-mix(in srgb, color(srgb 0.74 1 0.71) 80%, white)",
+          "color-mix(in srgb, color(srgb 0.74 1 0.71) 90%, white)",
+          "color-mix(in srgb, color(srgb 0.74 1 0.71) 96%, white)",
+          "color-mix(in srgb, color(srgb 0.74 1 0.71) 100%, white)"
+        ]
+      },
+      "oscilloscope-shoulder": {
+        "role": "tertiary",
+        "displayName": "Oscilloscope Shoulder",
+        "canonical": "color(srgb 0.004 0.08 0.018)",
+        "tonalRamp": [
+          "color-mix(in srgb, color(srgb 0.004 0.08 0.018) 20%, black)",
+          "color-mix(in srgb, color(srgb 0.004 0.08 0.018) 35%, black)",
+          "color-mix(in srgb, color(srgb 0.004 0.08 0.018) 50%, black)",
+          "color-mix(in srgb, color(srgb 0.004 0.08 0.018) 65%, black)",
+          "color-mix(in srgb, color(srgb 0.004 0.08 0.018) 80%, white)",
+          "color-mix(in srgb, color(srgb 0.004 0.08 0.018) 90%, white)",
+          "color-mix(in srgb, color(srgb 0.004 0.08 0.018) 96%, white)",
+          "color-mix(in srgb, color(srgb 0.004 0.08 0.018) 100%, white)"
+        ]
+      },
+      "oscilloscope-floor": {
+        "role": "tertiary",
+        "displayName": "Oscilloscope Floor",
+        "canonical": "color(srgb 0.42 0.64 0.38)",
+        "tonalRamp": [
+          "color-mix(in srgb, color(srgb 0.42 0.64 0.38) 20%, black)",
+          "color-mix(in srgb, color(srgb 0.42 0.64 0.38) 35%, black)",
+          "color-mix(in srgb, color(srgb 0.42 0.64 0.38) 50%, black)",
+          "color-mix(in srgb, color(srgb 0.42 0.64 0.38) 65%, black)",
+          "color-mix(in srgb, color(srgb 0.42 0.64 0.38) 80%, white)",
+          "color-mix(in srgb, color(srgb 0.42 0.64 0.38) 90%, white)",
+          "color-mix(in srgb, color(srgb 0.42 0.64 0.38) 96%, white)",
+          "color-mix(in srgb, color(srgb 0.42 0.64 0.38) 100%, white)"
         ]
       }
     },
@@ -189,46 +1023,55 @@
         "displayName": "Headline SM",
         "purpose": "Card titles, demos, and compact page headings."
       },
+      "body-lg": {
+        "displayName": "Body LG",
+        "purpose": "Long-form introductions and editorial prose."
+      },
       "body-md": {
         "displayName": "Body MD",
-        "purpose": "Readable prose and explanatory UI copy."
+        "purpose": "Readable product prose and explanatory UI copy."
       },
       "label-md": {
         "displayName": "Label MD",
-        "purpose": "Buttons, tabs, navigation labels, controls, and terse metadata."
+        "purpose": "Buttons, tabs, navigation, controls, and terse metadata."
       },
       "audio-label": {
         "displayName": "Audio Label",
-        "purpose": "Uppercase audio and instrument labels."
+        "purpose": "Compact uppercase instrument labels; not essential explanatory copy."
       }
     },
     "shadows": [
       {
         "name": "surface-low",
         "value": "shadow-sm",
-        "purpose": "Floating sidebars, active tab surfaces, popovers, dropdowns, dialogs, and tooltips."
+        "purpose": "Current shared cards, floating sidebars, active tab surfaces, popovers, dropdowns, dialogs, and tooltips."
       },
       {
         "name": "input-low",
         "value": "shadow-xs",
-        "purpose": "Outline buttons and fields where a barely-raised edge improves affordance."
+        "purpose": "Outline buttons and fields where a barely raised edge improves affordance."
       },
       {
         "name": "audio-shell",
         "value": "0 8px 32px oklch(0 0 0 / 0.5), inset 0 1px 0 oklch(1 0 0 / 0.3)",
-        "purpose": "Only for audio instrument chrome."
+        "purpose": "Tactile instrument chrome only."
       }
     ],
     "motion": [
       {
         "name": "state-fast",
         "value": "75ms",
-        "purpose": "Pressed transport button feedback and immediate mechanical states."
+        "purpose": "Pressed transport feedback and immediate mechanical states."
       },
       {
         "name": "state-standard",
         "value": "150-250ms",
         "purpose": "Default hover, focus, selected, open, and closed state changes."
+      },
+      {
+        "name": "ambient-contract",
+        "value": "theme-defined",
+        "purpose": "Themes may tune ambient intensity and easing, but must provide reduced-motion and meaningful static states."
       }
     ],
     "breakpoints": [
@@ -251,78 +1094,160 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "Sharp technical product action aligned with shadcn/ui primary tokens.",
+      "description": "Compact TX-02 action bound to semantic theme roles.",
       "html": "<button class=\"ds-btn-primary\">Run check</button>",
-      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; height: 36px; padding: 0 16px; border: 0; border-radius: 3px; background: var(--primary); color: var(--primary-foreground); font: 500 14px/20px var(--font-tx-02), ui-monospace, monospace; transition: background-color 180ms ease-out, box-shadow 180ms ease-out; } .ds-btn-primary:hover { background: oklch(0.205 0 0 / 0.9); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px oklch(0.708 0 0 / 0.5); } .ds-btn-primary:disabled { pointer-events: none; opacity: 0.5; }"
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: 2.4px; background: var(--primary); color: var(--primary-foreground); font: 500 14px/20px var(--font-tx-02), ui-monospace, monospace; transition: background-color 180ms ease-out, box-shadow 180ms ease-out; } .ds-btn-primary:hover { background: color-mix(in oklch, var(--primary) 90%, transparent); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); } .ds-btn-primary:disabled { pointer-events: none; opacity: 0.5; }"
+    },
+    {
+      "name": "Outline Button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Quiet bordered action with explicit mode-aware fill, hover, and focus states.",
+      "html": "<button class=\"ds-btn-outline\">Inspect result</button>",
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 1px solid var(--border); border-radius: 2.4px; background: var(--background); color: var(--foreground); box-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 8%, transparent); font: 500 14px/20px var(--font-tx-02), ui-monospace, monospace; transition: background-color 180ms ease-out, color 180ms ease-out, box-shadow 180ms ease-out; } :host-context(.dark) .ds-btn-outline { background: color-mix(in oklch, var(--input) 30%, transparent); border-color: var(--input); } .ds-btn-outline:hover { background: var(--accent); color: var(--accent-foreground); } :host-context(.dark) .ds-btn-outline:hover { background: color-mix(in oklch, var(--input) 50%, transparent); } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "description": "Compact full-round label whose geometry communicates status or category.",
+      "html": "<span class=\"ds-badge\">Still testing</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; justify-content: center; width: fit-content; gap: 4px; padding: 2px 8px; border: 1px solid transparent; border-radius: 9999px; background: var(--secondary); color: var(--secondary-foreground); font: 500 12px/16px var(--font-tx-02), ui-monospace, monospace; white-space: nowrap; } .ds-badge:focus-visible { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); }"
     },
     {
       "name": "Text Input",
       "kind": "input",
       "refersTo": "input",
-      "description": "Sharp 36px field with transparent fill, structural border, and strong focus ring.",
-      "html": "<input class=\"ds-input\" placeholder=\"Signal name\" />",
-      "css": ".ds-input { width: 100%; min-width: 0; height: 36px; padding: 0 12px; border: 1px solid var(--input); border-radius: 3px; background: transparent; color: var(--foreground); font: 400 14px/20px var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; transition: color 180ms ease-out, box-shadow 180ms ease-out, border-color 180ms ease-out; } .ds-input::placeholder { color: var(--muted-foreground); } .ds-input:focus-visible { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px oklch(0.708 0 0 / 0.5); } .ds-input:disabled { cursor: not-allowed; opacity: 0.5; }"
+      "description": "Sharp 36px field with semantic border and a strong mode-independent focus contract.",
+      "html": "<label class=\"ds-field\"><span>Signal name</span><input class=\"ds-input\" name=\"signal-name\" placeholder=\"e.g. carrier-left…\" autocomplete=\"off\" /></label>",
+      "css": ".ds-field { display: grid; gap: 6px; color: var(--foreground); font: 500 12px/16px var(--font-tx-02), ui-monospace, monospace; } .ds-input { width: 100%; min-width: 0; height: 36px; padding: 0 12px; border: 1px solid var(--input); border-radius: 2.4px; background: transparent; color: var(--foreground); font: 400 16px/24px var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; transition: color 180ms ease-out, box-shadow 180ms ease-out, border-color 180ms ease-out; } @media (min-width: 768px) { .ds-input { font-size: 14px; line-height: 20px; } } :host-context(.dark) .ds-input { background: color-mix(in oklch, var(--input) 30%, transparent); } .ds-input::placeholder { color: var(--muted-foreground); } .ds-input:focus-visible { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); } .ds-input:disabled { cursor: not-allowed; opacity: 0.5; }"
     },
     {
       "name": "Panel Card",
       "kind": "card",
       "refersTo": "card",
-      "description": "Nearly square bordered panel; sharp, technical, and flat by default.",
+      "description": "Nearly square bordered panel with the current shared Card spacing rhythm.",
       "html": "<section class=\"ds-card\"><h3>Runtime report</h3><p>Inspect audio state, route output, and render health.</p></section>",
-      "css": ".ds-card { display: flex; flex-direction: column; gap: 24px; padding: 24px; border: 1px solid var(--border); border-radius: 4px; background: var(--card); color: var(--card-foreground); } .ds-card h3 { margin: 0; font: 600 20px/28px var(--font-tx-02), ui-monospace, monospace; letter-spacing: -0.01em; } .ds-card p { margin: 0; color: var(--muted-foreground); font: 400 14px/20px var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }"
+      "css": ".ds-card { display: flex; flex-direction: column; gap: 24px; padding: 24px; border: 1px solid var(--border); border-radius: 4.2px; background: var(--card); color: var(--card-foreground); box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); } .ds-card h3 { margin: 0; font: 600 20px/28px var(--font-tx-02), ui-monospace, monospace; letter-spacing: -0.01em; } .ds-card p { margin: 0; color: var(--muted-foreground); font: 400 14px/20px var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }"
+    },
+    {
+      "name": "Audio Transport Button",
+      "kind": "custom",
+      "description": "Tactile domain control whose gradient materials live in the sidecar because the frontmatter component schema cannot represent gradients.",
+      "html": "<button class=\"ds-audio-transport\" aria-label=\"Play\"><svg viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M4 2.5 13 8l-9 5.5z\" /></svg></button>",
+      "css": ".ds-audio-transport { display: inline-flex; width: 32px; height: 28px; align-items: center; justify-content: center; border: 1px solid var(--audio-control-border); border-radius: 1.8px; background: linear-gradient(180deg, var(--audio-control-start), var(--audio-control-mid) 40%, var(--audio-control-end)); color: var(--audio-control-icon); box-shadow: 0 1px 0 color-mix(in oklch, white 50%, transparent), inset 0 1px 0 color-mix(in oklch, white 40%, transparent), 0 1px 2px color-mix(in oklch, black 12%, transparent); transition: box-shadow 75ms ease-out; } .ds-audio-transport svg { width: 14px; height: 14px; fill: currentColor; } .ds-audio-transport:active { background: linear-gradient(180deg, var(--audio-control-active-start), var(--audio-control-active-mid) 60%, var(--audio-control-active-end)); box-shadow: inset 0 2px 4px color-mix(in oklch, black 20%, transparent), inset 0 0 1px color-mix(in oklch, black 10%, transparent); } .ds-audio-transport:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); }"
     },
     {
       "name": "Oscilloscope Trace",
       "kind": "custom",
       "refersTo": "oscilloscope-trace",
-      "description": "P31 green shader-derived trace treatment reserved for oscilloscope surfaces.",
-      "html": "<div class=\"ds-scope\"><svg viewBox=\"0 0 320 90\" aria-label=\"Oscilloscope trace\"><path d=\"M0 48 C 34 12, 52 10, 76 48 S 122 84, 154 48 S 214 10, 240 48 S 292 84, 320 42\"/></svg></div>",
-      "css": ".ds-scope { border: 1px solid color(srgb 0.03 0.78 0.2 / 0.22); border-radius: 0; background: #020604; box-shadow: inset 0 0 0 1px color(srgb 0.004 0.08 0.018 / 0.8); padding: 16px; } .ds-scope svg { display: block; width: 100%; height: auto; overflow: visible; } .ds-scope path { fill: none; stroke: color(srgb 0.03 0.78 0.2); stroke-width: 3; stroke-linecap: square; filter: drop-shadow(0 0 10px color(srgb 0.74 1 0.71 / 0.45)); }"
+      "description": "Current dark-oriented P31 preview; dedicated light and dark oscilloscope treatments remain implementation work.",
+      "html": "<div class=\"ds-scope\"><svg viewBox=\"0 0 320 90\" role=\"img\" aria-label=\"Oscilloscope trace showing a repeating signal\"><path d=\"M0 48 C34 12 52 10 76 48s46 36 78 0 60-38 86 0 52 36 80-6\" /></svg></div>",
+      "css": ".ds-scope { padding: 16px; border: 1px solid color-mix(in srgb, var(--oscilloscope-trace) 22%, transparent); border-radius: 0; background: var(--oscilloscope-shoulder); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--oscilloscope-floor) 45%, transparent); } .ds-scope svg { display: block; width: 100%; height: auto; overflow: visible; } .ds-scope path { fill: none; stroke: var(--oscilloscope-trace); stroke-width: 3; stroke-linecap: square; filter: drop-shadow(0 0 10px color-mix(in srgb, var(--oscilloscope-glow) 45%, transparent)); }"
     }
   ],
   "narrative": {
     "northStar": "Dynamic Digital Studio",
-    "overview": "KKB is a sharp technical creative monorepo. Its design system preserves shadcn/ui semantic tokens, TX-02-forward technical typography, low-radius machined surfaces, scoped audio blues, and shader-derived oscilloscope greens.",
+    "overview": "KKB is a design substrate for a personal technical-creative studio. It should feel precise, rhythmic, detailed, and visibly crafted while remaining open enough to support audio systems, shaders, WebGPU, Three.js, high-quality animation, generative graphics, sigils, advanced symbols, diagrams, and interactive technical artifacts.\n\nThe system distinguishes a stable visual language from selectable atmosphere. Typography, geometry, spacing, symbology, component anatomy, interaction behavior, and accessibility stay consistent across themes by default. Themes primarily change curated light and dark palettes, surface character, visualization colors, shader parameters, procedural texture, and subtle qualities of motion or depth. A theme changes the atmosphere, not the product.\n\n`@kkb/ui` is the shared implementation foundation. Its semantic tokens and reusable components keep apps, demos, docs, reports, and experiments within one product family without forcing every surface into the same composition. Operational, editorial, expressive, instrument-like, and immersive surfaces may all use either light or dark mode.",
     "keyCharacteristics": [
-      "shadcn/ui-compatible semantic tokens remain the canonical frontmatter vocabulary.",
-      "TX-02 carries headings, labels, code, telemetry, and compact hardware-style UI.",
-      "Geist carries readable prose and body copy.",
-      "Cool audio blues are scoped to audio and waveform surfaces.",
-      "P31 phosphor greens are scoped to oscilloscope traces, glow, and shader-derived visualizations.",
-      "Edges are sharp by default; roundness must be earned."
+      "Complete, deliberately curated light and dark modes are required for every theme.",
+      "Geist carries readable prose; TX-02 carries technical headings, labels, code, and telemetry.",
+      "Mekzantine, EB Garamond, and Departure Mono provide deliberate secondary voices rather than replacing the core pairing.",
+      "Geometry is compact, sharp, and stable across themes; borders and spacing establish hierarchy before shadows.",
+      "Semantic component roles remain stable while colors, shader treatments, and subtle material feel vary by theme.",
+      "Dynamic visuals resolve to meaningful static or reduced-motion states.",
+      "Expressive graphics add identity without replacing navigation, product meaning, or accessibility."
     ],
     "rules": [
       {
-        "name": "The Semantic Token Rule",
-        "body": "Use shadcn/ui token names in docs and components. Descriptive names are prose, not replacements for semantic token names.",
+        "name": "The Stable Language Rule",
+        "body": "Theme changes preserve typography roles, geometry, spacing rhythm, component anatomy, interaction semantics, and symbology unless an explicitly experimental theme documents an exception.",
+        "section": "overview"
+      },
+      {
+        "name": "The Atmosphere Rule",
+        "body": "Themes may change color, materials, visualization palettes, shaders, procedural texture, and subtle motion character; they must not silently redesign layout or behavior.",
+        "section": "overview"
+      },
+      {
+        "name": "The Paired Mode Rule",
+        "body": "Every theme ships light and dark as deliberately tuned counterparts. Dark mode is not a mechanical inversion of light mode.",
         "section": "colors"
       },
       {
-        "name": "The Blue-and-Green Scope Rule",
-        "body": "Audio blue belongs to audio and waveform UI. P31 green belongs to oscilloscope traces and shader-derived visualizations.",
+        "name": "The Semantic Role Rule",
+        "body": "Components consume semantic roles such as `background`, `foreground`, `border`, `ring`, and domain-specific signal roles; they do not branch on theme names or hard-code atmosphere colors.",
         "section": "colors"
       },
       {
-        "name": "The TX-02 Heading Rule",
-        "body": "KKB's technical voice uses TX-02 for headings and labels.",
+        "name": "The Initial Spectrum Rule",
+        "body": "Audio blue and P31 green describe the current theme, not permanent global hues. Other themes may remap their palettes, but they must preserve domain meaning and accessible state distinctions.",
+        "section": "colors"
+      },
+      {
+        "name": "The Geist Reading Rule",
+        "body": "Sustained reading belongs to Geist. Mono identifies technical context; it does not replace readable prose.",
         "section": "typography"
       },
       {
-        "name": "The Flat Product Rule",
-        "body": "A resting product surface should not look lifted.",
+        "name": "The TX-02 Workshop Rule",
+        "body": "TX-02 carries the stable technical voice across themes. Color and material may change around it, but the role does not.",
+        "section": "typography"
+      },
+      {
+        "name": "The Secondary Voice Rule",
+        "body": "Mekzantine, EB Garamond, and Departure Mono are selective accents. A surface must have a specific editorial, symbolic, or lo-fi reason to invoke them.",
+        "section": "typography"
+      },
+      {
+        "name": "The Surface–Mode Independence Rule",
+        "body": "Operational, editorial, expressive, instrument-like, and immersive compositions may all be rendered in light or dark mode.",
+        "section": "layout"
+      },
+      {
+        "name": "The No Document Overflow Rule",
+        "body": "Dense technical content stays inside its own responsive or focusable region; it never enlarges the page viewport.",
+        "section": "layout"
+      },
+      {
+        "name": "The Flat-at-Rest Rule",
+        "body": "If a shadow does not communicate overlay, state, or instrument material, remove it.",
         "section": "elevation"
+      },
+      {
+        "name": "The Rendered Light Rule",
+        "body": "Shader light belongs to the visual system that produced it. Do not imitate bloom with unrelated component shadows.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Stable Geometry Rule",
+        "body": "Themes do not change component radii, control dimensions, border logic, or symbol construction by default.",
+        "section": "shapes"
+      },
+      {
+        "name": "The Earned Roundness Rule",
+        "body": "Full rounding communicates component type or state; it is not a general styling shortcut.",
+        "section": "shapes"
       }
     ],
     "dos": [
-      "Do preserve shadcn/ui token names in frontmatter and generated docs.",
-      "Do keep roundness low: 1-4px for most controls and panels, 6px only for larger containers, full radius only for badges/avatars/sliders/switches.",
-      "Do use audio blue for audio and waveform state, and P31 green for oscilloscope trace/glow state."
+      "Do treat `packages/ui/src/styles/globals.css` as the live token source of truth and this document as its normative design interpretation.",
+      "Do preserve semantic token names across themes and provide complete light and dark mappings for each theme.",
+      "Do keep typography, geometry, spacing, symbology, component anatomy, and interaction semantics stable by default.",
+      "Do use Geist for continuous reading, TX-02 for technical context, and secondary faces only with a clear editorial or symbolic purpose.",
+      "Do use the 4px rhythm, low radii, structural borders, visible focus, and paired foreground tokens.",
+      "Do move reusable visual and interaction contracts into `@kkb/ui` instead of duplicating them across apps.",
+      "Do design responsive figures as distinct compositions when scaling alone would damage comprehension.",
+      "Do provide meaningful static and reduced-motion states for dynamic media."
     ],
     "donts": [
-      "Don't replace semantic shadcn/ui tokens with descriptive aliases in frontmatter.",
-      "Don't use the audio blue accent as a general-purpose brand color.",
-      "Don't use oscilloscope green as a generic success color.",
-      "Don't use rounded soft cards, pillowy inputs, glassmorphism, heavy gradients, or generic glossy SaaS styling."
+      "Don't equate dark mode with technical or expressive work, or light mode with product or operational work.",
+      "Don't generate one color mode by mechanically inverting the other.",
+      "Don't let a theme move controls, change component APIs, replace symbol meanings, or materially alter information hierarchy.",
+      "Don't hard-code theme-specific colors inside shared components when a semantic role should own the decision.",
+      "Don't treat the initial audio blue or oscilloscope green as mandatory hues for every future theme.",
+      "Don't use low-contrast metadata, hover-only exploration, color-only selection, inaccessible horizontal scrolling, or document-level overflow.",
+      "Don't add rounded soft cards, pillowy inputs, glassmorphism, heavy decorative gradients, or generic glossy SaaS styling to the core language.",
+      "Don't create app-local primitives when an equivalent or composable `@kkb/ui` foundation exists."
     ]
   }
 }
