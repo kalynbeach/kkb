@@ -24,15 +24,26 @@ KKB separates its stable core visual language from its variable theme expression
 The following should remain consistent across themes by default, especially during the initial development of the system:
 
 - Typography families, roles, scale, and hierarchy
-- Geometry, including radii, borders, control dimensions, and grid logic
+- Radius-none structural geometry, borders, control dimensions, and grid logic
 - Spacing and density rhythm
 - Component anatomy and interaction behavior
-- Sigils, icons, symbols, and their semantic meanings
+- Phosphor utility icons, custom KKB sigils and symbols, and their distinct semantic roles
 - Focus, selection, disabled, loading, success, and error semantics
 - Foundational motion language
 - Accessibility and reduced-motion requirements
 
 These elements create a recognizable KKB identity regardless of the active theme or color mode.
+
+Structural surfaces and ordinary controls use `radius-none`. Rounded geometry is permitted only when the shape itself communicates identity or mechanical behavior, and only on the functional part that requires it. The approved exceptions are:
+
+- avatars
+- badges and chips
+- radio indicators
+- slider, switch, progress, and scroll tracks and thumbs
+- drawer drag handles
+- circular knobs, dials, and indicators whose mechanical model is inherently round
+
+These exceptions do not authorize rounded containers, fields, ordinary buttons, menu items, overlays, or decorative softening. Any new shared exception must pass the same functional test and be added to this list before adoption.
 
 ### Theme expression
 
@@ -46,7 +57,7 @@ Themes should primarily change the atmosphere of KKB rather than redesign its st
 - Subtle motion differences such as ambient intensity or easing character
 - Restrained shifts in warmth, sharpness, depth, and energy
 
-A theme should feel like a different atmosphere within the same product and component system.
+A theme should feel like a different atmosphere within the same product and component system. The initial foundation deliberately limits atmosphere to one curated light/dark pair; additional theme worlds remain future work.
 
 Typography, geometry, or symbology may eventually vary in explicitly experimental themes, but these are exceptions rather than ordinary theme behavior.
 
@@ -59,7 +70,7 @@ Light and dark modes are universal capabilities of the KKB design system, not pr
 - Reports, tools, editorial pages, instrument surfaces, and immersive experiences should all be able to use either mode.
 - Surface purpose and color mode are independent axes: an operational, editorial, expressive, instrument-like, or immersive surface can be light or dark.
 - Components should consume semantic roles rather than theme-specific color values.
-- Shader-capable themes should define light, dark, reduced-motion, and meaningful static fallback treatments.
+- Dynamic media should define light, dark, reduced-motion, meaningful static, responsive, and accessible representations.
 
 A useful model is:
 
@@ -73,7 +84,7 @@ The KKB design system can be understood as a set of related layers:
 2. **Shared primitives** — theme-aware buttons, fields, panels, navigation, overlays, typography, and other reusable `@kkb/ui` building blocks.
 3. **Composition systems** — indexes, report layouts, instrument shells, figure frames, provenance rails, catalogs, and other recurring arrangements.
 4. **Dynamic media systems** — audio-reactive interfaces, shaders, WebGPU, Three.js, generative graphics, and their static or reduced-motion representations.
-5. **Symbolic identity** — sigils, icons, diagrams, glyph systems, and technical marks that create a recognizable KKB visual vocabulary.
+5. **Symbolic identity** — Phosphor provides the initial utility-icon vocabulary; custom KKB sigils, diagrams, glyph systems, and technical marks remain a separate identity layer.
 6. **Theme worlds** — distinct visual atmospheres built on the shared semantic and component contracts, each with intentionally designed light and dark modes.
 
 ## Working Principles for `@kkb/ui`
@@ -81,11 +92,18 @@ The KKB design system can be understood as a set of related layers:
 - Shared components should consume semantic tokens and remain unaware of specific theme names.
 - Theme switching should not move controls, change component APIs, replace symbols, or materially alter information hierarchy.
 - Compact visible controls may use larger invisible hit regions to preserve the visual language while meeting accessibility requirements.
-- Dynamic visuals must have intentional reduced-motion and static states rather than merely disappearing.
+- Dynamic visuals must define light, dark, reduced-motion, meaningful static, responsive, and accessible representations rather than merely disappearing or relying on one mode.
 - Complex visualizations need responsive reflow, a summarized mobile form, a stacked representation, or an explicitly labeled local scroller; they must not widen the page.
 - Shared figure, metric, provenance, status, symbol, and visualization patterns should live in `@kkb/ui` when their contracts are reusable.
 - Current neutral-first colors and domain-specific accent rules should be understood as properties of the initial theme unless intentionally elevated into system-wide semantic contracts.
 - The foundation should constrain semantics, interaction quality, and coherence while leaving substantial room for future visual exploration.
+
+## Ratified Initial Foundation
+
+- Phosphor is the initial utility-icon foundation. It is distinct from future custom KKB sigils, symbols, diagrams, and identity marks.
+- Full migration of shared primitives from Radix UI to Base UI is approved near-term work. The existing Base UI Combobox is the current foothold, not a reason to defer the broader migration.
+- The radius-none contract and approved Base UI sequence supersede the earlier subtle 1–3px structural-radius direction and the earlier plan to evaluate primitive migration only after composition work. Dated reports and plans remain historical records rather than current authority.
+- JSON-render remains an experimental repository capability but is outside the active design-system roadmap.
 
 ## Inspiration
 

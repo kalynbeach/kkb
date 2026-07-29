@@ -141,13 +141,6 @@ typography:
     letterSpacing: "0.08em"
 rounded:
   none: "0px"
-  sm: "1.8px"
-  md: "2.4px"
-  lg: "3px"
-  xl: "4.2px"
-  2xl: "5.4px"
-  3xl: "6.6px"
-  4xl: "7.8px"
   full: "9999px"
 spacing:
   unit: "4px"
@@ -163,41 +156,41 @@ components:
     backgroundColor: "{colors.primary}"
     textColor: "{colors.primary-foreground}"
     typography: "{typography.label-md}"
-    rounded: "{rounded.md}"
+    rounded: "{rounded.none}"
     height: "36px"
     padding: "0 16px"
   button-secondary:
     backgroundColor: "{colors.secondary}"
     textColor: "{colors.secondary-foreground}"
     typography: "{typography.label-md}"
-    rounded: "{rounded.md}"
+    rounded: "{rounded.none}"
     height: "36px"
     padding: "0 16px"
   button-outline:
     backgroundColor: "{colors.background}"
     textColor: "{colors.foreground}"
     typography: "{typography.label-md}"
-    rounded: "{rounded.md}"
+    rounded: "{rounded.none}"
     height: "36px"
     padding: "0 16px"
   button-ghost:
     backgroundColor: "transparent"
     textColor: "{colors.foreground}"
     typography: "{typography.label-md}"
-    rounded: "{rounded.md}"
+    rounded: "{rounded.none}"
     height: "36px"
     padding: "0 16px"
   input:
     backgroundColor: "transparent"
     textColor: "{colors.foreground}"
     typography: "{typography.body-sm}"
-    rounded: "{rounded.md}"
+    rounded: "{rounded.none}"
     height: "36px"
     padding: "0 12px"
   card:
     backgroundColor: "{colors.card}"
     textColor: "{colors.card-foreground}"
-    rounded: "{rounded.xl}"
+    rounded: "{rounded.none}"
     padding: "24px"
   oscilloscope-trace:
     backgroundColor: "{colors.oscilloscope-shoulder}"
@@ -217,14 +210,17 @@ The system distinguishes a stable visual language from selectable atmosphere. Ty
 
 `@kkb/ui` is the shared implementation foundation. Its semantic tokens and reusable components keep apps, demos, docs, reports, and experiments within one product family without forcing every surface into the same composition. Operational, editorial, expressive, instrument-like, and immersive surfaces may all use either light or dark mode.
 
+The initial atmosphere is intentionally limited to one curated light/dark pair. Phosphor is the initial utility-icon vocabulary, distinct from custom KKB sigils and symbols. Full migration of shared primitives from Radix UI to Base UI is approved near-term work, with the existing Base UI Combobox serving as the current foothold; this supersedes the earlier sequence that deferred migration until after composition work. JSON-render remains an experimental capability outside the active design-system roadmap.
+
 **Key Characteristics:**
 
 - Complete, deliberately curated light and dark modes are required for every theme.
 - Geist carries readable prose; TX-02 carries technical headings, labels, code, and telemetry.
 - Mekzantine, EB Garamond, and Departure Mono provide deliberate secondary voices rather than replacing the core pairing.
-- Geometry is compact, sharp, and stable across themes; borders and spacing establish hierarchy before shadows.
+- Structural surfaces and ordinary controls use radius-none; explicitly named functional mechanics retain inherent roundness.
+- Phosphor carries utility icons while custom KKB sigils and symbols remain a separate identity layer.
 - Semantic component roles remain stable while colors, shader treatments, and subtle material feel vary by theme.
-- Dynamic visuals resolve to meaningful static or reduced-motion states.
+- Dynamic visuals provide light, dark, reduced-motion, meaningful static, responsive, and accessible representations.
 - Expressive graphics add identity without replacing navigation, product meaning, or accessibility.
 
 **The Stable Language Rule.** Theme changes preserve typography roles, geometry, spacing rhythm, component anatomy, interaction semantics, and symbology unless an explicitly experimental theme documents an exception.
@@ -333,36 +329,41 @@ Themes may tune the softness, warmth, or intensity of depth, but the semantic el
 
 ## Shapes
 
-The core geometry is compact and nearly square. The base radius is 3px, with derived steps from 1.8px to 7.8px. Buttons and inputs use the 2.4px step; cards currently use approximately 4.2px; larger radii are reserved for components whose function benefits from softer containment. Full pills remain appropriate for badges, avatars, sliders, switches, and other inherently rounded controls.
+The core geometry is strictly square. Structural surfaces and ordinary controls use radius-none (`0px`): buttons, fields, cards, panels, menu items, overlays, navigation items, and containers do not receive rounding for decoration or soft containment. This contract supersedes the obsolete subtle 1–3px structural-radius direction. The current shared stylesheet and components still contain legacy radii; issue #72 owns implementation of this ratified target.
 
-One-pixel borders, ruled divisions, clipped panels, rails, and precise alignment form the recurring silhouette. Instrument surfaces may use thicker or inset borders where physical or optical depth is meaningful. Sigils and advanced symbols should share a stable construction logic across themes even when their color or shader treatment changes.
+Rounded geometry is permitted only when the shape itself communicates identity or mechanical behavior, and only on the functional part that requires it. The approved exceptions are avatars; badges and chips; radio indicators; slider, switch, progress, and scroll tracks and thumbs; drawer drag handles; and circular knobs, dials, or indicators whose mechanical model is inherently round. A new shared exception must pass the same functional test and be documented here before adoption.
 
-**The Stable Geometry Rule.** Themes do not change component radii, control dimensions, border logic, or symbol construction by default.
+One-pixel borders, ruled divisions, clipped panels, rails, and precise alignment form the recurring silhouette. Instrument surfaces may use thicker or inset borders where physical or optical depth is meaningful, but their structural containers and ordinary controls remain square. Sigils and advanced symbols should share a stable construction logic across themes even when their color or shader treatment changes.
 
-**The Earned Roundness Rule.** Full rounding communicates component type or state; it is not a general styling shortcut.
+**The Stable Geometry Rule.** Themes do not change component geometry, control dimensions, border logic, or symbol construction by default.
+
+**The Functional Roundness Rule.** Rounded geometry is limited to the approved identity and mechanical exceptions; it never softens an ordinary structural surface or control.
 
 ## Components
 
-Components are compact, predictable, keyboard-first, and built from semantic tokens. Every shared component supports light and dark mode through the same API. Theme-specific appearance comes from token mappings rather than component branches.
+Components are compact, predictable, keyboard-first, and built from semantic tokens. Every shared component supports light and dark mode through the same API. Theme-specific appearance comes from token mappings rather than component branches. Shared primitives are approved to migrate from Radix UI to Base UI in bounded work after the initial acceptance surface is established; the Base UI Combobox is the current foothold.
 
 ### Buttons
 
-- **Shape:** Precise rectangle with a 2.4px radius, TX-02 label, and explicit size variants from 24px to 40px.
+- **Shape:** Precise radius-none rectangle (`0px`) with a TX-02 label and explicit size variants from 24px to 40px.
 - **Primary:** Semantic primary fill with its paired foreground; reserved for the main action in a local surface.
 - **Secondary / Outline:** Quiet tonal or bordered actions that remain visible in both modes.
 - **Ghost:** No resting chrome; hover and active states increase contrast through the semantic accent role.
 - **Link:** Text navigation with a visible underline treatment on hover; not a substitute for a primary action.
 - **Focus:** A visible 3px semantic ring. Compact visible controls may use a larger invisible hit region where needed.
 
-### Chips and Badges
+### Functional Rounded Elements
 
-- **Style:** Full rounding is permitted because the silhouette communicates label, status, or compact selection rather than soft surface treatment.
-- **State:** Interactive chips use native controls and expose selected state semantically, such as `aria-pressed`; color alone is insufficient.
-- **Meaning:** Status labels use plain language alongside any icon or sigil.
+- **Identity:** Avatars may be circular. Badges and chips may use full rounding because their silhouette communicates identity, status, category, or compact selection.
+- **Choice:** Radio indicators retain circular geometry because that shape distinguishes their single-choice behavior.
+- **Tracks and thumbs:** Slider, switch, progress, and scroll tracks and thumbs may be rounded where the shape communicates travel, position, or completion.
+- **Drag and instrument mechanics:** Drawer drag handles and circular knobs, dials, or indicators may be rounded where their physical model is inherently round.
+- **Scope:** The exception applies only to the functional subpart. It does not round the surrounding field, panel, button, overlay, or container.
+- **State:** Interactive elements expose state semantically; color alone is insufficient.
 
 ### Cards / Containers
 
-- **Corner Style:** Nearly square, currently approximately 4.2px for the shared Card primitive.
+- **Corner Style:** Square (`0px`). The current shared Card still carries a legacy radius until issue #72 implements this contract.
 - **Background:** Semantic card and card-foreground roles, paired per color mode.
 - **Shadow Strategy:** Border-led with only a slight current `shadow-sm`; specialized instrument depth stays in domain components.
 - **Internal Rhythm:** 24px padding and gap are the default shared Card cadence.
@@ -370,7 +371,7 @@ Components are compact, predictable, keyboard-first, and built from semantic tok
 
 ### Inputs / Fields
 
-- **Style:** 36px high, 12px horizontal padding, 2.4px radius, semantic border, transparent light fill, and a subtle dark-mode input fill.
+- **Style:** 36px high, 12px horizontal padding, radius-none geometry (`0px`), semantic border, transparent light fill, and a subtle dark-mode input fill.
 - **Focus:** Border shifts to the ring role with a visible 3px translucent ring.
 - **Error / Disabled:** Invalid fields use destructive border and ring roles; disabled fields reduce opacity and interaction without hiding their value.
 
@@ -379,6 +380,12 @@ Components are compact, predictable, keyboard-first, and built from semantic tok
 - **Style:** Text-first and compact, with semantic muted, foreground, accent, and focus roles.
 - **Typography:** TX-02 suits route indexes and technical navigation; Geist remains available for prose-heavy menus.
 - **Behavior:** Current location is visible without relying on color alone. Mobile composition may collapse structure but must preserve standard navigation semantics.
+
+### Icons and Symbols
+
+- **Utility vocabulary:** Phosphor is the initial shared icon foundation for navigation, actions, state, and common interface concepts.
+- **Identity vocabulary:** Custom KKB sigils, symbols, diagrams, and technical marks remain a distinct layer; they do not replace familiar utility icons without a documented semantic reason.
+- **Migration status:** Phosphor adoption is approved work, not current repository-wide completion. Utility conventions and rollout are owned by issues #73 and #74.
 
 ### Theme and Mode Controls
 
@@ -409,10 +416,11 @@ Shaders, WebGPU, Three.js, audio-reactive graphics, diagrams, and data figures a
 - **Do** preserve semantic token names across themes and provide complete light and dark mappings for each theme.
 - **Do** keep typography, geometry, spacing, symbology, component anatomy, and interaction semantics stable by default.
 - **Do** use Geist for continuous reading, TX-02 for technical context, and secondary faces only with a clear editorial or symbolic purpose.
-- **Do** use the 4px rhythm, low radii, structural borders, visible focus, and paired foreground tokens.
+- **Do** use the 4px rhythm, radius-none structural geometry, structural borders, visible focus, and paired foreground tokens.
+- **Do** limit rounded geometry to the approved functional parts whose identity or mechanical behavior requires it.
 - **Do** move reusable visual and interaction contracts into `@kkb/ui` instead of duplicating them across apps.
 - **Do** design responsive figures as distinct compositions when scaling alone would damage comprehension.
-- **Do** provide meaningful static and reduced-motion states for dynamic media.
+- **Do** provide light, dark, reduced-motion, meaningful static, responsive, and accessible representations for dynamic media.
 
 ### Don't
 
@@ -422,5 +430,7 @@ Shaders, WebGPU, Three.js, audio-reactive graphics, diagrams, and data figures a
 - **Don't** hard-code theme-specific colors inside shared components when a semantic role should own the decision.
 - **Don't** treat the initial audio blue or oscilloscope green as mandatory hues for every future theme.
 - **Don't** use low-contrast metadata, hover-only exploration, color-only selection, inaccessible horizontal scrolling, or document-level overflow.
+- **Don't** round ordinary buttons, fields, cards, panels, menus, overlays, navigation items, or containers.
 - **Don't** add rounded soft cards, pillowy inputs, glassmorphism, heavy decorative gradients, or generic glossy SaaS styling to the core language.
 - **Don't** create app-local primitives when an equivalent or composable `@kkb/ui` foundation exists.
+- **Don't** treat JSON-render as part of the active design-system roadmap.

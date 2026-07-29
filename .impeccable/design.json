@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-25T19:46:58.000Z",
+  "generatedAt": "2026-07-29T03:52:33.000Z",
   "title": "Design System: KKB",
   "extensions": {
     "colorMeta": {
@@ -1096,7 +1096,7 @@
       "refersTo": "button-primary",
       "description": "Compact TX-02 action bound to semantic theme roles.",
       "html": "<button class=\"ds-btn-primary\">Run check</button>",
-      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: 2.4px; background: var(--primary); color: var(--primary-foreground); font: 500 14px/20px var(--font-tx-02), ui-monospace, monospace; transition: background-color 180ms ease-out, box-shadow 180ms ease-out; } .ds-btn-primary:hover { background: color-mix(in oklch, var(--primary) 90%, transparent); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); } .ds-btn-primary:disabled { pointer-events: none; opacity: 0.5; }"
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: 0; background: var(--primary); color: var(--primary-foreground); font: 500 14px/20px var(--font-tx-02), ui-monospace, monospace; transition: background-color 180ms ease-out, box-shadow 180ms ease-out; } .ds-btn-primary:hover { background: color-mix(in oklch, var(--primary) 90%, transparent); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); } .ds-btn-primary:disabled { pointer-events: none; opacity: 0.5; }"
     },
     {
       "name": "Outline Button",
@@ -1104,7 +1104,7 @@
       "refersTo": "button-outline",
       "description": "Quiet bordered action with explicit mode-aware fill, hover, and focus states.",
       "html": "<button class=\"ds-btn-outline\">Inspect result</button>",
-      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 1px solid var(--border); border-radius: 2.4px; background: var(--background); color: var(--foreground); box-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 8%, transparent); font: 500 14px/20px var(--font-tx-02), ui-monospace, monospace; transition: background-color 180ms ease-out, color 180ms ease-out, box-shadow 180ms ease-out; } :host-context(.dark) .ds-btn-outline { background: color-mix(in oklch, var(--input) 30%, transparent); border-color: var(--input); } .ds-btn-outline:hover { background: var(--accent); color: var(--accent-foreground); } :host-context(.dark) .ds-btn-outline:hover { background: color-mix(in oklch, var(--input) 50%, transparent); } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); }"
+      "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 1px solid var(--border); border-radius: 0; background: var(--background); color: var(--foreground); box-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 8%, transparent); font: 500 14px/20px var(--font-tx-02), ui-monospace, monospace; transition: background-color 180ms ease-out, color 180ms ease-out, box-shadow 180ms ease-out; } :host-context(.dark) .ds-btn-outline { background: color-mix(in oklch, var(--input) 30%, transparent); border-color: var(--input); } .ds-btn-outline:hover { background: var(--accent); color: var(--accent-foreground); } :host-context(.dark) .ds-btn-outline:hover { background: color-mix(in oklch, var(--input) 50%, transparent); } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); }"
     },
     {
       "name": "Status Badge",
@@ -1119,22 +1119,22 @@
       "refersTo": "input",
       "description": "Sharp 36px field with semantic border and a strong mode-independent focus contract.",
       "html": "<label class=\"ds-field\"><span>Signal name</span><input class=\"ds-input\" name=\"signal-name\" placeholder=\"e.g. carrier-left…\" autocomplete=\"off\" /></label>",
-      "css": ".ds-field { display: grid; gap: 6px; color: var(--foreground); font: 500 12px/16px var(--font-tx-02), ui-monospace, monospace; } .ds-input { width: 100%; min-width: 0; height: 36px; padding: 0 12px; border: 1px solid var(--input); border-radius: 2.4px; background: transparent; color: var(--foreground); font: 400 16px/24px var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; transition: color 180ms ease-out, box-shadow 180ms ease-out, border-color 180ms ease-out; } @media (min-width: 768px) { .ds-input { font-size: 14px; line-height: 20px; } } :host-context(.dark) .ds-input { background: color-mix(in oklch, var(--input) 30%, transparent); } .ds-input::placeholder { color: var(--muted-foreground); } .ds-input:focus-visible { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); } .ds-input:disabled { cursor: not-allowed; opacity: 0.5; }"
+      "css": ".ds-field { display: grid; gap: 6px; color: var(--foreground); font: 500 12px/16px var(--font-tx-02), ui-monospace, monospace; } .ds-input { width: 100%; min-width: 0; height: 36px; padding: 0 12px; border: 1px solid var(--input); border-radius: 0; background: transparent; color: var(--foreground); font: 400 16px/24px var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; transition: color 180ms ease-out, box-shadow 180ms ease-out, border-color 180ms ease-out; } @media (min-width: 768px) { .ds-input { font-size: 14px; line-height: 20px; } } :host-context(.dark) .ds-input { background: color-mix(in oklch, var(--input) 30%, transparent); } .ds-input::placeholder { color: var(--muted-foreground); } .ds-input:focus-visible { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); } .ds-input:disabled { cursor: not-allowed; opacity: 0.5; }"
     },
     {
       "name": "Panel Card",
       "kind": "card",
       "refersTo": "card",
-      "description": "Nearly square bordered panel with the current shared Card spacing rhythm.",
+      "description": "Square bordered panel with the shared Card spacing rhythm and ratified radius-none geometry.",
       "html": "<section class=\"ds-card\"><h3>Runtime report</h3><p>Inspect audio state, route output, and render health.</p></section>",
-      "css": ".ds-card { display: flex; flex-direction: column; gap: 24px; padding: 24px; border: 1px solid var(--border); border-radius: 4.2px; background: var(--card); color: var(--card-foreground); box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); } .ds-card h3 { margin: 0; font: 600 20px/28px var(--font-tx-02), ui-monospace, monospace; letter-spacing: -0.01em; } .ds-card p { margin: 0; color: var(--muted-foreground); font: 400 14px/20px var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }"
+      "css": ".ds-card { display: flex; flex-direction: column; gap: 24px; padding: 24px; border: 1px solid var(--border); border-radius: 0; background: var(--card); color: var(--card-foreground); box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1); } .ds-card h3 { margin: 0; font: 600 20px/28px var(--font-tx-02), ui-monospace, monospace; letter-spacing: -0.01em; } .ds-card p { margin: 0; color: var(--muted-foreground); font: 400 14px/20px var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif; }"
     },
     {
       "name": "Audio Transport Button",
       "kind": "custom",
       "description": "Tactile domain control whose gradient materials live in the sidecar because the frontmatter component schema cannot represent gradients.",
       "html": "<button class=\"ds-audio-transport\" aria-label=\"Play\"><svg viewBox=\"0 0 16 16\" aria-hidden=\"true\"><path d=\"M4 2.5 13 8l-9 5.5z\" /></svg></button>",
-      "css": ".ds-audio-transport { display: inline-flex; width: 32px; height: 28px; align-items: center; justify-content: center; border: 1px solid var(--audio-control-border); border-radius: 1.8px; background: linear-gradient(180deg, var(--audio-control-start), var(--audio-control-mid) 40%, var(--audio-control-end)); color: var(--audio-control-icon); box-shadow: 0 1px 0 color-mix(in oklch, white 50%, transparent), inset 0 1px 0 color-mix(in oklch, white 40%, transparent), 0 1px 2px color-mix(in oklch, black 12%, transparent); transition: box-shadow 75ms ease-out; } .ds-audio-transport svg { width: 14px; height: 14px; fill: currentColor; } .ds-audio-transport:active { background: linear-gradient(180deg, var(--audio-control-active-start), var(--audio-control-active-mid) 60%, var(--audio-control-active-end)); box-shadow: inset 0 2px 4px color-mix(in oklch, black 20%, transparent), inset 0 0 1px color-mix(in oklch, black 10%, transparent); } .ds-audio-transport:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); }"
+      "css": ".ds-audio-transport { display: inline-flex; width: 32px; height: 28px; align-items: center; justify-content: center; border: 1px solid var(--audio-control-border); border-radius: 0; background: linear-gradient(180deg, var(--audio-control-start), var(--audio-control-mid) 40%, var(--audio-control-end)); color: var(--audio-control-icon); box-shadow: 0 1px 0 color-mix(in oklch, white 50%, transparent), inset 0 1px 0 color-mix(in oklch, white 40%, transparent), 0 1px 2px color-mix(in oklch, black 12%, transparent); transition: box-shadow 75ms ease-out; } .ds-audio-transport svg { width: 14px; height: 14px; fill: currentColor; } .ds-audio-transport:active { background: linear-gradient(180deg, var(--audio-control-active-start), var(--audio-control-active-mid) 60%, var(--audio-control-active-end)); box-shadow: inset 0 2px 4px color-mix(in oklch, black 20%, transparent), inset 0 0 1px color-mix(in oklch, black 10%, transparent); } .ds-audio-transport:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); }"
     },
     {
       "name": "Oscilloscope Trace",
@@ -1147,14 +1147,15 @@
   ],
   "narrative": {
     "northStar": "Dynamic Digital Studio",
-    "overview": "KKB is a design substrate for a personal technical-creative studio. It should feel precise, rhythmic, detailed, and visibly crafted while remaining open enough to support audio systems, shaders, WebGPU, Three.js, high-quality animation, generative graphics, sigils, advanced symbols, diagrams, and interactive technical artifacts.\n\nThe system distinguishes a stable visual language from selectable atmosphere. Typography, geometry, spacing, symbology, component anatomy, interaction behavior, and accessibility stay consistent across themes by default. Themes primarily change curated light and dark palettes, surface character, visualization colors, shader parameters, procedural texture, and subtle qualities of motion or depth. A theme changes the atmosphere, not the product.\n\n`@kkb/ui` is the shared implementation foundation. Its semantic tokens and reusable components keep apps, demos, docs, reports, and experiments within one product family without forcing every surface into the same composition. Operational, editorial, expressive, instrument-like, and immersive surfaces may all use either light or dark mode.",
+    "overview": "KKB is a design substrate for a personal technical-creative studio. It should feel precise, rhythmic, detailed, and visibly crafted while remaining open enough to support audio systems, shaders, WebGPU, Three.js, high-quality animation, generative graphics, sigils, advanced symbols, diagrams, and interactive technical artifacts.\n\nThe system distinguishes a stable visual language from selectable atmosphere. Typography, geometry, spacing, symbology, component anatomy, interaction behavior, and accessibility stay consistent across themes by default. Themes primarily change curated light and dark palettes, surface character, visualization colors, shader parameters, procedural texture, and subtle qualities of motion or depth. A theme changes the atmosphere, not the product.\n\n`@kkb/ui` is the shared implementation foundation. Its semantic tokens and reusable components keep apps, demos, docs, reports, and experiments within one product family without forcing every surface into the same composition. Operational, editorial, expressive, instrument-like, and immersive surfaces may all use either light or dark mode.\n\nThe initial atmosphere is intentionally limited to one curated light/dark pair. Phosphor is the initial utility-icon vocabulary, distinct from custom KKB sigils and symbols. Full migration of shared primitives from Radix UI to Base UI is approved near-term work, with the existing Base UI Combobox serving as the current foothold; this supersedes the earlier sequence that deferred migration until after composition work. JSON-render remains an experimental capability outside the active design-system roadmap.",
     "keyCharacteristics": [
       "Complete, deliberately curated light and dark modes are required for every theme.",
       "Geist carries readable prose; TX-02 carries technical headings, labels, code, and telemetry.",
       "Mekzantine, EB Garamond, and Departure Mono provide deliberate secondary voices rather than replacing the core pairing.",
-      "Geometry is compact, sharp, and stable across themes; borders and spacing establish hierarchy before shadows.",
+      "Structural surfaces and ordinary controls use radius-none; explicitly named functional mechanics retain inherent roundness.",
+      "Phosphor carries utility icons while custom KKB sigils and symbols remain a separate identity layer.",
       "Semantic component roles remain stable while colors, shader treatments, and subtle material feel vary by theme.",
-      "Dynamic visuals resolve to meaningful static or reduced-motion states.",
+      "Dynamic visuals provide light, dark, reduced-motion, meaningful static, responsive, and accessible representations.",
       "Expressive graphics add identity without replacing navigation, product meaning, or accessibility."
     ],
     "rules": [
@@ -1220,12 +1221,12 @@
       },
       {
         "name": "The Stable Geometry Rule",
-        "body": "Themes do not change component radii, control dimensions, border logic, or symbol construction by default.",
+        "body": "Themes do not change component geometry, control dimensions, border logic, or symbol construction by default.",
         "section": "shapes"
       },
       {
-        "name": "The Earned Roundness Rule",
-        "body": "Full rounding communicates component type or state; it is not a general styling shortcut.",
+        "name": "The Functional Roundness Rule",
+        "body": "Rounded geometry is limited to the approved identity and mechanical exceptions; it never softens an ordinary structural surface or control.",
         "section": "shapes"
       }
     ],
@@ -1234,10 +1235,11 @@
       "Do preserve semantic token names across themes and provide complete light and dark mappings for each theme.",
       "Do keep typography, geometry, spacing, symbology, component anatomy, and interaction semantics stable by default.",
       "Do use Geist for continuous reading, TX-02 for technical context, and secondary faces only with a clear editorial or symbolic purpose.",
-      "Do use the 4px rhythm, low radii, structural borders, visible focus, and paired foreground tokens.",
+      "Do use the 4px rhythm, radius-none structural geometry, structural borders, visible focus, and paired foreground tokens.",
+      "Do limit rounded geometry to the approved functional parts whose identity or mechanical behavior requires it.",
       "Do move reusable visual and interaction contracts into `@kkb/ui` instead of duplicating them across apps.",
       "Do design responsive figures as distinct compositions when scaling alone would damage comprehension.",
-      "Do provide meaningful static and reduced-motion states for dynamic media."
+      "Do provide light, dark, reduced-motion, meaningful static, responsive, and accessible representations for dynamic media."
     ],
     "donts": [
       "Don't equate dark mode with technical or expressive work, or light mode with product or operational work.",
@@ -1246,8 +1248,10 @@
       "Don't hard-code theme-specific colors inside shared components when a semantic role should own the decision.",
       "Don't treat the initial audio blue or oscilloscope green as mandatory hues for every future theme.",
       "Don't use low-contrast metadata, hover-only exploration, color-only selection, inaccessible horizontal scrolling, or document-level overflow.",
+      "Don't round ordinary buttons, fields, cards, panels, menus, overlays, navigation items, or containers.",
       "Don't add rounded soft cards, pillowy inputs, glassmorphism, heavy decorative gradients, or generic glossy SaaS styling to the core language.",
-      "Don't create app-local primitives when an equivalent or composable `@kkb/ui` foundation exists."
+      "Don't create app-local primitives when an equivalent or composable `@kkb/ui` foundation exists.",
+      "Don't treat JSON-render as part of the active design-system roadmap."
     ]
   }
 }

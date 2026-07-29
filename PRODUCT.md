@@ -44,8 +44,9 @@ KKB is developed as a Bun-workspace Turborepo with shared packages and Next.js a
 - `@kkb/ui` is the default source for shared interface primitives, tokens, hooks, and reusable presentation patterns.
 - Browser and session orchestration remains app-owned until a reusable contract is clear.
 - Shared packages should remain headless or presentation-focused according to their documented architectural boundaries.
-- The system must support complete light and dark modes across themes and surface types.
-- Dynamic audio, shader, WebGPU, 3D, and generative work should degrade to meaningful static or reduced-motion states when necessary.
+- The initial design atmosphere is one deliberately curated light/dark pair; additional theme worlds remain future work.
+- Dynamic audio, shader, WebGPU, 3D, and generative work must provide light, dark, reduced-motion, meaningful static, responsive, and accessible representations.
+- JSON-render remains an existing experimental capability but is outside the active design-system roadmap.
 - KKB is personal-first. It is not currently defined as a general-purpose product for external customers.
 - Experimental work may be incomplete or uncertain; interfaces and documentation should communicate status rather than imply unsupported maturity.
 
@@ -56,6 +57,8 @@ The product name is KKB, with the internal package namespace `@kkb/*`.
 KKB's voice is technical, rhythmic, detailed, beautiful, and bold. It should communicate expert confidence with visible craft: precise without becoming sterile, expressive without becoming generic spectacle, and direct without becoming corporate.
 
 The design system is a coherent canvas rather than a single finished aesthetic. Stable typography, geometry, symbology, interaction behavior, and accessibility contracts preserve identity, while themes provide selectable atmospheres through curated light and dark palettes, shader variations, materials, and subtle changes in feel.
+
+Structural surfaces and ordinary controls use radius-none. Rounded geometry is reserved for explicitly documented elements whose shape communicates identity or mechanical behavior. Phosphor is the initial utility-icon vocabulary, separate from custom KKB sigils and symbols. `@kkb/ui` will migrate from Radix primitives to Base UI as approved near-term foundation work.
 
 `docs/design/kkb-design.md` is the durable source for the current design intent and inspiration synthesis. `https://internet.dev/` remains a positive reference for craft culture, directness, density, workshop energy, and visible care for web work.
 
