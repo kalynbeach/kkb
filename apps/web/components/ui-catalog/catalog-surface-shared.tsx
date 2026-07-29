@@ -148,7 +148,7 @@ function StaticTinyPreview({ item }: { item: CatalogItem }) {
   if (item.category === "Feedback") {
     return (
       <span aria-hidden="true" className="flex h-10 w-20 items-center gap-1 border bg-muted/20 p-2">
-        <span className="size-3 rounded-full bg-foreground" />
+        <span className="size-3 bg-foreground" />
         <span className="grid flex-1 gap-1">
           <span className="h-1.5 bg-muted-foreground/60" />
           <span className="h-1.5 w-10 bg-muted-foreground/40" />

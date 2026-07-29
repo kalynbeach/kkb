@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-29T03:52:33.000Z",
+  "generatedAt": "2026-07-29T04:33:40.987Z",
   "title": "Design System: KKB",
   "extensions": {
     "colorMeta": {
@@ -172,7 +172,7 @@
       "muted-foreground": {
         "role": "neutral",
         "displayName": "Muted Foreground",
-        "canonical": "oklch(0.556 0 0)",
+        "canonical": "oklch(0.5 0 0)",
         "tonalRamp": [
           "oklch(0.15 0 0)",
           "oklch(0.27 0 0)",
@@ -242,6 +242,81 @@
           "oklch(0.75 0 0)",
           "oklch(0.87 0 0)",
           "oklch(0.95 0 0)"
+        ]
+      },
+      "success": {
+        "role": "secondary",
+        "displayName": "Success",
+        "canonical": "oklch(0.45 0.13 145)",
+        "tonalRamp": [
+          "oklch(0.15 0.13 145)",
+          "oklch(0.27 0.13 145)",
+          "oklch(0.39 0.13 145)",
+          "oklch(0.51 0.13 145)",
+          "oklch(0.63 0.13 145)",
+          "oklch(0.75 0.13 145)",
+          "oklch(0.87 0.13 145)",
+          "oklch(0.95 0.13 145)"
+        ]
+      },
+      "success-foreground": {
+        "role": "neutral",
+        "displayName": "Success Foreground",
+        "canonical": "oklch(0.985 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "warning": {
+        "role": "secondary",
+        "displayName": "Warning",
+        "canonical": "oklch(0.52 0.1 75)",
+        "tonalRamp": [
+          "oklch(0.15 0.1 75)",
+          "oklch(0.27 0.1 75)",
+          "oklch(0.39 0.1 75)",
+          "oklch(0.51 0.1 75)",
+          "oklch(0.63 0.1 75)",
+          "oklch(0.75 0.1 75)",
+          "oklch(0.87 0.1 75)",
+          "oklch(0.95 0.1 75)"
+        ]
+      },
+      "warning-foreground": {
+        "role": "neutral",
+        "displayName": "Warning Foreground",
+        "canonical": "oklch(0.985 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "scrim": {
+        "role": "neutral",
+        "displayName": "Overlay Scrim",
+        "canonical": "oklch(0 0 0 / 50%)",
+        "tonalRamp": [
+          "oklch(0 0 0 / 20%)",
+          "oklch(0 0 0 / 30%)",
+          "oklch(0 0 0 / 40%)",
+          "oklch(0 0 0 / 50%)",
+          "oklch(0 0 0 / 60%)",
+          "oklch(0 0 0 / 70%)",
+          "oklch(0 0 0 / 80%)",
+          "oklch(0 0 0 / 90%)"
         ]
       },
       "border": {
@@ -527,6 +602,81 @@
           "oklch(0.75 0 0)",
           "oklch(0.87 0 0)",
           "oklch(0.95 0 0)"
+        ]
+      },
+      "success-dark": {
+        "role": "secondary",
+        "displayName": "Success Dark",
+        "canonical": "oklch(0.78 0.13 145)",
+        "tonalRamp": [
+          "oklch(0.15 0.13 145)",
+          "oklch(0.27 0.13 145)",
+          "oklch(0.39 0.13 145)",
+          "oklch(0.51 0.13 145)",
+          "oklch(0.63 0.13 145)",
+          "oklch(0.75 0.13 145)",
+          "oklch(0.87 0.13 145)",
+          "oklch(0.95 0.13 145)"
+        ]
+      },
+      "success-foreground-dark": {
+        "role": "neutral",
+        "displayName": "Success Foreground Dark",
+        "canonical": "oklch(0.145 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "warning-dark": {
+        "role": "secondary",
+        "displayName": "Warning Dark",
+        "canonical": "oklch(0.82 0.14 85)",
+        "tonalRamp": [
+          "oklch(0.15 0.14 85)",
+          "oklch(0.27 0.14 85)",
+          "oklch(0.39 0.14 85)",
+          "oklch(0.51 0.14 85)",
+          "oklch(0.63 0.14 85)",
+          "oklch(0.75 0.14 85)",
+          "oklch(0.87 0.14 85)",
+          "oklch(0.95 0.14 85)"
+        ]
+      },
+      "warning-foreground-dark": {
+        "role": "neutral",
+        "displayName": "Warning Foreground Dark",
+        "canonical": "oklch(0.145 0 0)",
+        "tonalRamp": [
+          "oklch(0.15 0 0)",
+          "oklch(0.27 0 0)",
+          "oklch(0.39 0 0)",
+          "oklch(0.51 0 0)",
+          "oklch(0.63 0 0)",
+          "oklch(0.75 0 0)",
+          "oklch(0.87 0 0)",
+          "oklch(0.95 0 0)"
+        ]
+      },
+      "scrim-dark": {
+        "role": "neutral",
+        "displayName": "Overlay Scrim Dark",
+        "canonical": "oklch(0 0 0 / 65%)",
+        "tonalRamp": [
+          "oklch(0 0 0 / 20%)",
+          "oklch(0 0 0 / 30%)",
+          "oklch(0 0 0 / 40%)",
+          "oklch(0 0 0 / 50%)",
+          "oklch(0 0 0 / 60%)",
+          "oklch(0 0 0 / 70%)",
+          "oklch(0 0 0 / 80%)",
+          "oklch(0 0 0 / 90%)"
         ]
       },
       "border-dark": {

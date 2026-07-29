@@ -25,6 +25,31 @@ describe("ui catalog focused surfaces", () => {
     }
   });
 
+  test("renders the initial theme geometry and state acceptance surface", () => {
+    const designSystem = itemFromId("design-system");
+    const html = renderCatalogSurfaceHtml(designSystem);
+
+    expect(specimenTitlesFor(designSystem)).toEqual([
+      "Semantic color",
+      "Typography",
+      "Geometry",
+      "Spacing",
+      "Interaction and status states",
+      "Scoped instrument color",
+      "Implementation",
+      "State contract",
+      "Scoped color",
+    ]);
+    expect(html).toContain("radius-none structure");
+    expect(html).toContain("bg-success");
+    expect(html).toContain("text-success-foreground");
+    expect(html).toContain("bg-warning");
+    expect(html).toContain("text-warning-foreground");
+    expect(html).toContain('aria-busy="true"');
+    expect(html).toContain('aria-invalid="true"');
+    expect(html).toContain("Destructive: this action cannot be undone.");
+  });
+
   test("keeps broad duplicate rendered specimen signatures limited", () => {
     const signatures = new Map<string, string[]>();
 

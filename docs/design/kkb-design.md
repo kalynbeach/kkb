@@ -28,7 +28,7 @@ The following should remain consistent across themes by default, especially duri
 - Spacing and density rhythm
 - Component anatomy and interaction behavior
 - Phosphor utility icons, custom KKB sigils and symbols, and their distinct semantic roles
-- Focus, selection, disabled, loading, success, and error semantics
+- Focus, selection, disabled, loading, success, warning, and error semantics
 - Foundational motion language
 - Accessibility and reduced-motion requirements
 
@@ -96,6 +96,8 @@ The KKB design system can be understood as a set of related layers:
 - Complex visualizations need responsive reflow, a summarized mobile form, a stacked representation, or an explicitly labeled local scroller; they must not widen the page.
 - Shared figure, metric, provenance, status, symbol, and visualization patterns should live in `@kkb/ui` when their contracts are reusable.
 - Current neutral-first colors and domain-specific accent rules should be understood as properties of the initial theme unless intentionally elevated into system-wide semantic contracts.
+- Generic success and warning states use paired semantic fill/foreground roles in both modes; visible copy or iconography carries meaning alongside color.
+- Overlay components use the semantic scrim role rather than embedding atmosphere-specific black values.
 - The foundation should constrain semantics, interaction quality, and coherence while leaving substantial room for future visual exploration.
 
 ## Ratified Initial Foundation

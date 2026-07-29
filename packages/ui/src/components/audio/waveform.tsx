@@ -170,7 +170,7 @@ function Waveform({
             <div
               key={bar.id}
               className={cn(
-                "flex-1 rounded-[2px] transition-colors duration-100",
+                "flex-1 transition-colors duration-100",
                 isPlayed
                   ? "bg-audio-waveform-played shadow-[0_0_8px_var(--audio-accent-glow)]"
                   : "bg-audio-waveform-idle group-hover:bg-audio-waveform-idle-hover",

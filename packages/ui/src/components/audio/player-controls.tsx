@@ -100,7 +100,7 @@ function PlayerControls({
             onChange={(event) => {
               onSetRate?.(Number(event.target.value));
             }}
-            className="rounded border border-audio-shell-border bg-transparent px-2 py-1 font-mono text-xs text-audio-control-icon"
+            className="border border-audio-shell-border bg-transparent px-2 py-1 font-mono text-xs text-audio-control-icon"
           >
             {PLAYBACK_RATE_OPTIONS.map((option) => (
               <option key={option} value={option}>

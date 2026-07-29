@@ -11,6 +11,7 @@
   --font-serif-secondary: var(--font-eb-garamond), ui-serif, serif;
   --font-mono: var(--font-tx-02), ui-monospace, monospace;
   --font-mono-secondary: var(--font-departure-mono), ui-monospace, monospace;
+  --radius-xs: calc(var(--radius) * 0.4);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -36,6 +37,11 @@
   --color-destructive: var(--destructive);
   --color-destructive-hover: var(--destructive-hover);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-scrim: var(--scrim);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -95,7 +101,7 @@
 }
 
 :root {
-  --radius: 0.1875rem;
+  --radius: 0;
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
@@ -107,12 +113,17 @@
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
+  --muted-foreground: oklch(0.5 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-hover: oklch(0.52 0.225 27.325);
   --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.45 0.13 145);
+  --success-foreground: oklch(0.985 0 0);
+  --warning: oklch(0.52 0.1 75);
+  --warning-foreground: oklch(0.985 0 0);
+  --scrim: oklch(0 0 0 / 50%);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -206,6 +217,11 @@
   --destructive: oklch(0.48 0.17 25);
   --destructive-hover: oklch(0.42 0.15 25);
   --destructive-foreground: oklch(0.985 0 0);
+  --success: oklch(0.78 0.13 145);
+  --success-foreground: oklch(0.145 0 0);
+  --warning: oklch(0.82 0.14 85);
+  --warning-foreground: oklch(0.145 0 0);
+  --scrim: oklch(0 0 0 / 65%);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
@@ -283,7 +299,7 @@
 
 @layer components {
   .audio-shell {
-    @apply rounded-lg border border-audio-shell-border p-1;
+    @apply border border-audio-shell-border p-1;
     background-image: linear-gradient(
       180deg,
       var(--audio-shell-top) 0%,
@@ -298,7 +314,7 @@
   }
 
   .audio-subshell {
-    @apply rounded-b-lg border border-t-0 border-audio-shell-border p-1;
+    @apply border border-t-0 border-audio-shell-border p-1;
     background-image: linear-gradient(
       180deg,
       var(--audio-shell-upper) 0%,
@@ -349,7 +365,7 @@
   }
 
   .audio-transport-button {
-    @apply flex h-7 w-8 cursor-pointer items-center justify-center rounded-sm border border-audio-control-border transition-shadow duration-75;
+    @apply flex h-7 w-8 cursor-pointer items-center justify-center border border-audio-control-border transition-shadow duration-75;
     background-image: linear-gradient(
       180deg,
       var(--audio-control-start) 0%,

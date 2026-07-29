@@ -61,4 +61,6 @@ Public areas currently include:
 - `@kkb/ui/styles/globals.css` — Tailwind source, semantic tokens, and shared styles
 - `@kkb/ui/json-render*` — experimental integration; not part of the current design-system hardening scope
 
-`packages/ui/src/styles/globals.css` is the live token source. See [`../../docs/design/kkb-design.md`](../../docs/design/kkb-design.md) for normative design intent.
+`packages/ui/src/styles/globals.css` is the live token source. The initial theme publishes paired `success` / `success-foreground` and `warning` / `warning-foreground` roles plus a semantic `scrim` for overlays. Structural radii resolve to `0`; full rounding is reserved for the functional exceptions documented in the design contract.
+
+See [`../../docs/design/kkb-design.md`](../../docs/design/kkb-design.md) for normative design intent.

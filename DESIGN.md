@@ -13,11 +13,16 @@ colors:
   secondary: "oklch(0.97 0 0)"
   secondary-foreground: "oklch(0.205 0 0)"
   muted: "oklch(0.97 0 0)"
-  muted-foreground: "oklch(0.556 0 0)"
+  muted-foreground: "oklch(0.5 0 0)"
   accent: "oklch(0.97 0 0)"
   accent-foreground: "oklch(0.205 0 0)"
   destructive: "oklch(0.577 0.245 27.325)"
   destructive-foreground: "oklch(0.985 0 0)"
+  success: "oklch(0.45 0.13 145)"
+  success-foreground: "oklch(0.985 0 0)"
+  warning: "oklch(0.52 0.1 75)"
+  warning-foreground: "oklch(0.985 0 0)"
+  scrim: "oklch(0 0 0 / 50%)"
   border: "oklch(0.922 0 0)"
   input: "oklch(0.922 0 0)"
   ring: "oklch(0.708 0 0)"
@@ -37,6 +42,11 @@ colors:
   accent-foreground-dark: "oklch(0.985 0 0)"
   destructive-dark: "oklch(0.48 0.17 25)"
   destructive-foreground-dark: "oklch(0.985 0 0)"
+  success-dark: "oklch(0.78 0.13 145)"
+  success-foreground-dark: "oklch(0.145 0 0)"
+  warning-dark: "oklch(0.82 0.14 85)"
+  warning-foreground-dark: "oklch(0.145 0 0)"
+  scrim-dark: "oklch(0 0 0 / 65%)"
   border-dark: "oklch(1 0 0 / 10%)"
   input-dark: "oklch(1 0 0 / 15%)"
   ring-dark: "oklch(0.556 0 0)"
@@ -240,6 +250,8 @@ The initial KKB theme uses a neutral structural foundation with a cool audio spe
 ### Secondary
 
 - **Secondary / Muted / Accent:** Quiet neutral fills for secondary actions, hover states, grouped controls, inactive areas, and selected surfaces. Their foreground partners are mandatory whenever the fill is used.
+- **Success / Success Foreground:** Confirmed completion and healthy status. The initial light mapping uses a deep green with light text; dark mode uses a lighter green with dark text. Visible copy or iconography must accompany the color.
+- **Warning / Warning Foreground:** Recoverable risk or attention state. The initial light mapping uses a deep amber-brown with light text; dark mode uses a brighter amber with dark text. Visible copy or iconography must accompany the color.
 - **Audio Spectrum:** Cool blue and blue-violet values currently carry waveform state, progress, buffer state, signal emphasis, and instrument telemetry. The role is stable; exact values may change by theme and color mode.
 
 ### Tertiary
@@ -252,6 +264,7 @@ The initial KKB theme uses a neutral structural foundation with a cool audio spe
 
 - **Card / Popover / Sidebar:** Semantic surfaces with complete foreground, border, accent, and focus counterparts in both modes.
 - **Border / Input / Ring:** Structural rails and accessible focus affordances. Borders define hierarchy before elevation does.
+- **Scrim:** The semantic overlay veil. Its light and dark mappings may differ, while overlay components remain unaware of atmosphere-specific values.
 - **Muted Foreground:** Secondary copy and metadata only. It must still meet the required contrast for its size and importance.
 
 ### Named Rules
