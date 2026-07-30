@@ -165,7 +165,7 @@ export function InputSection() {
               <SlidersHorizontal className="size-4" />
               Density
             </div>
-            <Slider defaultValue={[72]} max={100} step={1} aria-label="Density" />
+            <Slider defaultValue={[72]} max={100} step={1} getAriaLabel={() => "Density"} />
           </div>
         </div>
       </ComponentCard>

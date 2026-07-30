@@ -70,10 +70,13 @@ export function CatalogWorkbench() {
 
       <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
         <div className="flex min-h-14 items-center gap-3 px-3 md:px-4">
-          <Button variant="ghost" size="icon" asChild className="shrink-0">
-            <Link href="/" aria-label="Return home">
-              <ArrowLeftIcon aria-hidden="true" focusable="false" weight="regular" />
-            </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="shrink-0"
+            render={<Link href="/" aria-label="Return home" />}
+          >
+            <ArrowLeftIcon aria-hidden="true" focusable="false" weight="regular" />
           </Button>
           <div className="min-w-0 flex-1">
             <p className="font-mono text-[11px] text-muted-foreground">@kkb/ui</p>

@@ -282,6 +282,17 @@ describe("OscilloscopeClient", () => {
       <OscilloscopeClient createMicProvider={createMicProvider} createScope={createScope} />,
     );
 
+    expect(
+      environment.document
+        .querySelector('[data-testid="oscilloscope-trail-slider"] input[type="range"]')
+        ?.getAttribute("aria-label"),
+    ).toBe("Trail length");
+    expect(
+      environment.document
+        .querySelector('[data-testid="oscilloscope-bloom-slider"] input[type="range"]')
+        ?.getAttribute("aria-label"),
+    ).toBe("Bloom intensity");
+
     const micButton = getButtonByText(environment, "Mic");
 
     dispatchClick(micButton, environment.window);

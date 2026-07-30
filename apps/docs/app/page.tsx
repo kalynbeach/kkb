@@ -9,13 +9,14 @@ export default function Home() {
         <p className="text-muted-foreground">docs</p>
       </div>
       <div className="flex gap-3">
-        <Button asChild>
-          <Link href="/">Home</Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <a href="https://github.com/kalynbeach/kkb" target="_blank" rel="noopener noreferrer">
-            GitHub
-          </a>
+        <Button render={<Link href="/" />}>Home</Button>
+        <Button
+          variant="outline"
+          render={
+            <a href="https://github.com/kalynbeach/kkb" target="_blank" rel="noopener noreferrer" />
+          }
+        >
+          GitHub
         </Button>
       </div>
     </div>

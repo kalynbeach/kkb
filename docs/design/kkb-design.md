@@ -103,39 +103,32 @@ The KKB design system can be understood as a set of related layers:
 ## Ratified Initial Foundation
 
 - Phosphor is the initial utility-icon foundation. It is distinct from future custom KKB sigils, symbols, diagrams, and identity marks.
-- Full migration of shared primitives from Radix UI to Base UI is approved near-term work. The existing Base UI Combobox is the current foothold, not a reason to defer the broader migration.
+- Owned shared primitives use Base UI, with native implementations where Base has no matching primitive. Composition uses Base `render`; retained Radix packages are transitive dependencies of out-of-scope integrations.
 - The radius-none contract and approved Base UI sequence supersede the earlier subtle 1–3px structural-radius direction and the earlier plan to evaluate primitive migration only after composition work. Dated reports and plans remain historical records rather than current authority.
 - JSON-render remains an experimental repository capability but is outside the active design-system roadmap.
 
 ## Current Implementation and Roadmap Status
 
-> Snapshot recorded 2026-07-30 before #73 implementation began. This section captures implementation and sequencing evidence at that point in time; the design contracts above remain authoritative if repository status changes.
-
 ### Foundation state
 
-- `main` was clean and synchronized with `origin/main` at `efbcd35` (`feat(ui): implement initial theme contract (#72)`), with no open pull requests.
-- The latest CI run passed type checking, tests, and Biome checks.
-- Recent work established the product and design direction, hardened accessibility, cleared repository lint diagnostics, ratified the initial foundation through #71, and implemented its shared theme contract through #72.
-- The shared foundation now demonstrates radius-none structural geometry, paired semantic light and dark roles, documented functional rounding exceptions, semantic status foregrounds, overlay scrims, and an expanded `/ui` acceptance surface.
-- The foundation is implemented, but the broader migration is not complete. The snapshot contained 34 Radix-importing source files, 35 Lucide-importing source files, one Base UI consumer, and no Phosphor imports.
+- The radius-none, paired-mode, semantic-token, scrim, and Phosphor acceptance contracts are implemented in the shared foundation.
+- Issue #77 migrated all owned Radix-backed primitives to Base UI or the approved native implementations. Owned source no longer imports the direct `radix-ui` package.
+- `components.json` uses shadcn's `base-vega` reference metadata because the locked shadcn release does not publish a Base `new-york` registry. This metadata does not apply the Vega preset or replace KKB tokens and presentation.
+- Base-specific composition, event details, state attributes, positioning variables, and menu click semantics are reflected in owned consumers.
+- Radix remains transitively through `@json-render/shadcn`, `cmdk`, and `vaul`; those integrations are outside the active primitive migration.
 
 ### Known follow-up concerns
 
-- `DESIGN.md` still contains obsolete implementation-status prose assigning radius and Card work to the now-closed #72. That generated design record should be corrected when it is next synchronized.
-- CI does not currently run production builds. A manual `bun run build` passed during this review, but build regressions are not CI-visible.
-- Desktop and mobile browser verification for #72 is recorded in the issue acceptance criteria, but the repository does not retain a durable browser artifact or automated supported-route matrix for that verification.
-- #77 spans most shared primitives and is the highest-risk foundation migration. It should proceed in bounded batches that preserve tests, type checks, production builds, formatting, and representative browser behavior after each batch.
-- #82 describes documentation elements such as code, tables, and callouts that the current lightweight docs shell does not yet contain. Those criteria should remain conditional on existing content unless introducing those elements is explicitly brought into scope.
-- The current `#78 → #79 → #80` route-adoption sequence may be more serialized than necessary. After #78 proves the shared route pattern, #79 and #80 could potentially proceed independently, while #80 remains separately blocked by #37.
+- CI does not currently run production builds, so build evidence remains a manual acceptance requirement.
+- #74 owns the remaining repository-wide Lucide-to-Phosphor sweep and direct Lucide removal.
+- #82 criteria for documentation elements remain conditional until those elements exist in the docs shell.
+- Final route adoption should retain an explicit supported-route matrix; `/json-render` remains outside this roadmap.
 
 ### Recommended near-term sequence
 
-1. Complete #73 first. It is the sole unblocked root of the active design-system roadmap and establishes reusable Phosphor conventions before the Base UI migration.
-2. Before #77, make production-build evidence part of the migration safety contract, either through CI or an explicitly recorded per-batch validation requirement.
-3. #37 may proceed independently alongside #73. It corrects the audio seek surface and clears a later blocker for #80 without expanding the design-system foundation scope.
-4. Complete #77 in bounded primitive batches, then complete the residual Phosphor migration in #74 before beginning broad composition or route adoption.
-5. After #74, #75 and #82 can proceed independently. After #75, #76 and #83 can proceed independently. Route-level adoption follows those shared composition proofs, with #78 as the first complete route.
-6. Before final adoption and acceptance work, enumerate the supported route matrix explicitly. `/json-render` remains outside this roadmap.
+1. Complete the residual Phosphor migration in #74.
+2. Proceed with shared composition and documentation work after the foundation migration is accepted.
+3. Keep route-level adoption and dynamic-media work bound to the paired-mode, accessibility, and no-document-overflow contracts.
 
 ## Utility Icon Conventions
 

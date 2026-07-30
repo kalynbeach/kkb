@@ -49,7 +49,21 @@ Phosphor is the shared utility-icon vocabulary. Use regular weight by default an
 
 Icon-only controls need an accessible name on the interactive element. Mark icons as hidden from assistive technology when they repeat visible copy, a parent label, or purely structural meaning. Lucide remains installed only for unmigrated consumers until the repository-wide migration is complete.
 
-`components.json` records Phosphor as the intended generator vocabulary, but current Radix-based shadcn registry previews may still emit Lucide imports. Review every generated diff and normalize migrated files to these conventions; #77 owns the Base UI generator foundation and #74 owns final Lucide removal.
+`components.json` records Phosphor as the intended generator vocabulary. It uses `base-vega` only as shadcn's Base UI reference metadata because the locked CLI does not publish a Base `new-york` registry; KKB tokens and presentation remain authoritative. Review every generated diff rather than overwriting local sources. #74 owns final removal of residual Lucide consumers.
+
+## Primitive foundation
+
+Owned shared primitives use `@base-ui/react`. Composition uses Base UI's `render` prop instead of Radix `asChild`; callers should pass a single render element and provide its content as the component's children.
+
+```tsx
+<Button render={<a href="/ui" />}>Open workbench</Button>
+```
+
+KKB keeps its public compound names while mapping behavior to Base UI: `HoverCard` uses Preview Card, menu families use Menu, and `Sheet` remains Dialog behavior. `AspectRatio` and `Label` are native CSS/HTML implementations. Controlled callbacks keep their established first values and expose Base event details as the second argument; Slider remains `number[]`, and single-value ToggleGroup remains a string.
+
+`PopoverAnchor` was removed in this migration. Base UI 1.6.0 has no Popover Anchor part, and KKB does not provide a compatibility adapter; use the trigger or the Positioner `anchor` contract supported by Base UI instead. Repository source checks confirmed there are no owned `PopoverAnchor` callers.
+
+The lockfile still contains transitive Radix packages owned by `@json-render/shadcn`, `cmdk`, and `vaul`. These are not shared primitive dependencies and remain outside the migration scope.
 
 ## Imports
 

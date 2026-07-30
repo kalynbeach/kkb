@@ -3,6 +3,8 @@ import { renderToString } from "react-dom/server";
 
 import { type CatalogItem, componentItems, itemFromId, utilityItems } from "../catalog-data";
 import { CatalogSurface } from "../catalog-surfaces";
+import { PreviewWall } from "../preview-wall";
+import { InputSection } from "../sections/input-section";
 
 function renderCatalogSurfaceHtml(item: CatalogItem) {
   return renderToString(
@@ -18,11 +20,33 @@ function specimenTitlesFor(item: CatalogItem) {
   );
 }
 
+function rangeInputLabels(html: string) {
+  return [...html.matchAll(/<input[^>]*>/g)]
+    .map(([input]) => input)
+    .filter((input) => input?.includes('type="range"'))
+    .map((input) => input?.match(/aria-label="([^"]+)"/)?.[1]);
+}
+
 describe("ui catalog focused surfaces", () => {
   test("renders focused specimen headings for every component and utility route", () => {
     for (const item of [...componentItems, ...utilityItems]) {
       expect(specimenTitlesFor(item).length).toBeGreaterThan(0);
     }
+  });
+
+  test("names every catalog Slider range input through the thumb contract", () => {
+    const focusedSlider = renderCatalogSurfaceHtml(itemFromId("slider"));
+    const previewWall = renderToString(<PreviewWall onSelect={() => undefined} />);
+    const inputSection = renderToString(<InputSection />);
+
+    expect(rangeInputLabels(focusedSlider)).toEqual([
+      "Low density",
+      "Medium density",
+      "High density",
+      "Preview density",
+    ]);
+    expect(rangeInputLabels(previewWall)).toEqual(["Density", "Volume"]);
+    expect(rangeInputLabels(inputSection)).toEqual(["Density"]);
   });
 
   test("renders the initial theme geometry and state acceptance surface", () => {
@@ -81,7 +105,7 @@ describe("ui catalog focused surfaces", () => {
       "Icon Left",
       "Icon Right",
       "With Spinner",
-      "asChild",
+      "render",
       "Long Text",
     ]);
     expect(specimenTitlesFor(itemFromId("input"))).toEqual([

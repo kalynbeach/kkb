@@ -17,22 +17,20 @@ export function ModeToggle() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <SunIcon
-            aria-hidden="true"
-            className="scale-100 rotate-0 transition-all motion-reduce:transition-none dark:scale-0 dark:-rotate-90"
-            focusable="false"
-            weight="regular"
-          />
-          <MoonIcon
-            aria-hidden="true"
-            className="absolute scale-0 rotate-90 transition-all motion-reduce:transition-none dark:scale-100 dark:rotate-0"
-            focusable="false"
-            weight="regular"
-          />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
+      <DropdownMenuTrigger render={<Button variant="outline" size="icon" />}>
+        <SunIcon
+          aria-hidden="true"
+          className="scale-100 rotate-0 transition-all motion-reduce:transition-none dark:scale-0 dark:-rotate-90"
+          focusable="false"
+          weight="regular"
+        />
+        <MoonIcon
+          aria-hidden="true"
+          className="absolute scale-0 rotate-90 transition-all motion-reduce:transition-none dark:scale-100 dark:rotate-0"
+          focusable="false"
+          weight="regular"
+        />
+        <span className="sr-only">Toggle theme</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuRadioGroup value={theme} onValueChange={setTheme}>

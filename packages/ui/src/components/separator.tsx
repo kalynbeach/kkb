@@ -1,22 +1,28 @@
 "use client";
 
+import { Separator as SeparatorPrimitive } from "@base-ui/react/separator";
 import { cn } from "@kkb/ui/lib/utils";
-import { Separator as SeparatorPrimitive } from "radix-ui";
 import type * as React from "react";
+
+interface SeparatorProps extends Omit<SeparatorPrimitive.Props, "role"> {
+  decorative?: boolean;
+  role?: React.AriaRole;
+}
 
 function Separator({
   className,
   orientation = "horizontal",
   decorative = true,
+  role,
   ...props
-}: React.ComponentProps<typeof SeparatorPrimitive.Root>) {
+}: SeparatorProps) {
   return (
-    <SeparatorPrimitive.Root
+    <SeparatorPrimitive
       data-slot="separator"
-      decorative={decorative}
       orientation={orientation}
+      role={decorative ? "none" : (role ?? "separator")}
       className={cn(
-        "bg-border shrink-0 data-[orientation=horizontal]:h-px data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-px",
+        "shrink-0 bg-border data-horizontal:h-px data-horizontal:w-full data-vertical:h-full data-vertical:w-px",
         className,
       )}
       {...props}
@@ -24,4 +30,5 @@ function Separator({
   );
 }
 
+export type { SeparatorProps };
 export { Separator };

@@ -10,7 +10,9 @@ import {
 } from "@kkb/ui/components/input-group";
 
 import { cn } from "@kkb/ui/lib/utils";
-import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
+import { CaretDownIcon } from "@phosphor-icons/react/dist/csr/CaretDown";
+import { CheckIcon } from "@phosphor-icons/react/dist/csr/Check";
+import { XIcon } from "@phosphor-icons/react/dist/csr/X";
 import * as React from "react";
 
 const Combobox = ComboboxPrimitive.Root;
@@ -27,9 +29,11 @@ function ComboboxTrigger({ className, children, ...props }: ComboboxPrimitive.Tr
       {...props}
     >
       {children}
-      <ChevronDownIcon
+      <CaretDownIcon
+        aria-hidden="true"
+        focusable="false"
         data-slot="combobox-trigger-icon"
-        className="text-muted-foreground pointer-events-none size-4"
+        className="pointer-events-none size-4 text-muted-foreground"
       />
     </ComboboxPrimitive.Trigger>
   );
@@ -43,7 +47,7 @@ function ComboboxClear({ className, ...props }: ComboboxPrimitive.Clear.Props) {
       className={cn(className)}
       {...props}
     >
-      <XIcon className="pointer-events-none" />
+      <XIcon aria-hidden="true" focusable="false" className="pointer-events-none" />
     </ComboboxPrimitive.Clear>
   );
 }
@@ -64,16 +68,17 @@ function ComboboxInput({
       <ComboboxPrimitive.Input render={<InputGroupInput disabled={disabled} />} {...props} />
       <InputGroupAddon align="inline-end">
         {showTrigger && (
-          <InputGroupButton
-            size="icon-xs"
-            variant="ghost"
-            asChild
-            data-slot="input-group-button"
-            className="group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent"
-            disabled={disabled}
-          >
-            <ComboboxTrigger />
-          </InputGroupButton>
+          <ComboboxTrigger
+            render={
+              <InputGroupButton
+                size="icon-xs"
+                variant="ghost"
+                data-slot="input-group-button"
+                className="group-has-data-[slot=combobox-clear]/input-group:hidden data-pressed:bg-transparent"
+                disabled={disabled}
+              />
+            }
+          />
         )}
         {showClear && <ComboboxClear disabled={disabled} />}
       </InputGroupAddon>
@@ -149,7 +154,11 @@ function ComboboxItem({ className, children, ...props }: ComboboxPrimitive.Item.
           <span className="pointer-events-none absolute right-2 flex size-4 items-center justify-center" />
         }
       >
-        <CheckIcon className="pointer-events-none size-4 pointer-coarse:size-5" />
+        <CheckIcon
+          aria-hidden="true"
+          focusable="false"
+          className="pointer-events-none size-4 pointer-coarse:size-5"
+        />
       </ComboboxPrimitive.ItemIndicator>
     </ComboboxPrimitive.Item>
   );
@@ -241,7 +250,7 @@ function ComboboxChip({
           className="-ml-1 opacity-50 hover:opacity-100"
           data-slot="combobox-chip-remove"
         >
-          <XIcon className="pointer-events-none" />
+          <XIcon aria-hidden="true" focusable="false" className="pointer-events-none" />
         </ComboboxPrimitive.ChipRemove>
       )}
     </ComboboxPrimitive.Chip>

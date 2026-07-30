@@ -1,5 +1,13 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@kkb/ui/components/accordion";
+import { AlertDialog, AlertDialogAction } from "@kkb/ui/components/alert-dialog";
 import { Waveform } from "@kkb/ui/components/audio/waveform";
+import { Button } from "@kkb/ui/components/button";
 import {
   Carousel,
   CarouselContent,
@@ -7,16 +15,25 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@kkb/ui/components/carousel";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@kkb/ui/components/form";
 import { Table, TableBody, TableCaption, TableCell, TableRow } from "@kkb/ui/components/table";
 import { Window } from "happy-dom";
-import { act, type ComponentProps, Fragment, useState } from "react";
+import { act, type ComponentProps, createRef, Fragment, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
+import { useForm } from "react-hook-form";
 
 import { itemFromId } from "../../../components/ui-catalog/catalog-data";
 import { CatalogSearchSession } from "../../../components/ui-catalog/catalog-search";
 import { CarouselDemo } from "../../../components/ui-catalog/demos/carousel-demo";
 import { CommandDemo } from "../../../components/ui-catalog/demos/command-demo";
-import { DropdownMenuDemo } from "../../../components/ui-catalog/demos/menu-demo";
 import {
   DialogSheetDemo,
   PopoverHoverCardTooltipDemo,
@@ -35,6 +52,7 @@ const globalKeys = [
   "window",
   "navigator",
   "HTMLElement",
+  "HTMLButtonElement",
   "HTMLFormElement",
   "Element",
   "Node",
@@ -92,6 +110,7 @@ function installDomGlobals(window: Window) {
     window,
     navigator: window.navigator,
     HTMLElement: window.HTMLElement,
+    HTMLButtonElement: window.HTMLButtonElement,
     HTMLFormElement: window.HTMLFormElement,
     Element: window.Element,
     Node: window.Node,
@@ -169,6 +188,17 @@ function dispatchPrimaryClick(target: Element, window: Window) {
         bubbles: true,
         button: 0,
         ctrlKey: false,
+        isPrimary: true,
+        pointerType: "mouse",
+      }),
+    );
+    target.dispatchEvent(
+      new window.PointerEvent("pointerup", {
+        bubbles: true,
+        button: 0,
+        ctrlKey: false,
+        isPrimary: true,
+        pointerType: "mouse",
       }),
     );
     target.dispatchEvent(new window.MouseEvent("mousedown", { bubbles: true, button: 0 }));
@@ -263,6 +293,38 @@ function CarouselKeyboardHarness() {
   );
 }
 
+function AlertDialogActionHarness({ onAction }: { onAction: () => void }) {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <>
+      <span data-testid="alert-dialog-state">{open ? "open" : "closed"}</span>
+      <AlertDialog open={open} onOpenChange={setOpen}>
+        <AlertDialogAction onClick={onAction}>Confirm action</AlertDialogAction>
+      </AlertDialog>
+    </>
+  );
+}
+
+function AccordionCollapsibleHarness() {
+  return (
+    <>
+      <Accordion defaultValue="one">
+        <AccordionItem value="one">
+          <AccordionTrigger>Required disclosure</AccordionTrigger>
+          <AccordionContent>Required content</AccordionContent>
+        </AccordionItem>
+      </Accordion>
+      <Accordion collapsible defaultValue="one">
+        <AccordionItem value="one">
+          <AccordionTrigger>Optional disclosure</AccordionTrigger>
+          <AccordionContent>Optional content</AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </>
+  );
+}
+
 function CatalogSearchHarness() {
   const [open, setOpen] = useState(false);
 
@@ -283,6 +345,27 @@ function CatalogSearchHarness() {
   );
 }
 
+function FormAriaHarness() {
+  const methods = useForm({ defaultValues: { density: "" } });
+
+  return (
+    <Form {...methods}>
+      <FormField
+        control={methods.control}
+        name="density"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Density</FormLabel>
+            <FormControl render={<input {...field} />} />
+            <FormDescription>Choose a density.</FormDescription>
+            <FormMessage>Density is required.</FormMessage>
+          </FormItem>
+        )}
+      />
+    </Form>
+  );
+}
+
 let domEnvironment: DomEnvironment | null = null;
 
 beforeEach(() => {
@@ -295,6 +378,65 @@ afterEach(() => {
 });
 
 describe("interactive /ui demos", () => {
+  test("Base render composition preserves one anchor, props, refs, and handlers", () => {
+    const environment = domEnvironment as DomEnvironment;
+    const anchorRef = createRef<HTMLAnchorElement>();
+    let buttonClicks = 0;
+    let anchorClicks = 0;
+
+    renderIntoDom(
+      environment,
+      <Button
+        className="composed-button"
+        onClick={() => {
+          buttonClicks += 1;
+        }}
+        render={
+          <a
+            href="/ui"
+            onClick={() => {
+              anchorClicks += 1;
+            }}
+            ref={anchorRef}
+          />
+        }
+      >
+        Open workbench
+      </Button>,
+    );
+
+    const anchor = environment.document.querySelector("a[href='/ui']");
+    expect(anchor).toBe(anchorRef.current);
+    expect(anchor?.className).toContain("composed-button");
+    expect(anchor?.querySelector("button")).toBeNull();
+
+    if (!anchor) {
+      throw new Error("Expected composed anchor");
+    }
+
+    dispatchPrimaryClick(anchor, environment.window);
+    expect(buttonClicks).toBe(1);
+    expect(anchorClicks).toBe(1);
+  });
+
+  test("FormControl renders one named input with linked description and message", () => {
+    const environment = domEnvironment as DomEnvironment;
+    renderIntoDom(environment, <FormAriaHarness />);
+
+    const input = environment.document.querySelector<HTMLInputElement>(
+      '[data-slot="form-control"]',
+    );
+    const label = environment.document.querySelector('[data-slot="form-label"]');
+    const description = environment.document.querySelector('[data-slot="form-description"]');
+    const message = environment.document.querySelector('[data-slot="form-message"]');
+
+    expect(input?.tagName).toBe("INPUT");
+    expect(label?.getAttribute("for")).toBe(input?.id);
+    expect(input?.getAttribute("aria-describedby")).toBe(description?.id);
+    expect(message?.textContent).toBe("Density is required.");
+    expect(input?.parentElement?.querySelectorAll("input")).toHaveLength(1);
+  });
+
   test("dialog demo flips local open state", () => {
     const environment = domEnvironment as DomEnvironment;
     renderIntoDom(environment, <DialogSheetDemo />);
@@ -313,15 +455,43 @@ describe("interactive /ui demos", () => {
     expectBodyText(environment, "Popoveropen");
   });
 
-  test("dropdown menu demo updates trigger state", () => {
+  test("alert dialog action composes its callback and dismisses", async () => {
     const environment = domEnvironment as DomEnvironment;
-    renderIntoDom(environment, <DropdownMenuDemo />);
+    let actionCalls = 0;
+    renderIntoDom(
+      environment,
+      <AlertDialogActionHarness
+        onAction={() => {
+          actionCalls += 1;
+        }}
+      />,
+    );
 
-    const trigger = getButtonByText(environment, "Open menu");
+    expect(
+      environment.document.querySelector('[data-testid="alert-dialog-state"]')?.textContent,
+    ).toBe("open");
 
-    dispatchPrimaryClick(trigger, environment.window);
+    dispatchPrimaryClick(getButtonByText(environment, "Confirm action"), environment.window);
+    expect(actionCalls).toBe(1);
+    expect(
+      environment.document.querySelector('[data-testid="alert-dialog-state"]')?.textContent,
+    ).toBe("closed");
+  });
 
-    expect(trigger.getAttribute("aria-expanded")).toBe("true");
+  test("single accordion only collapses when collapsible is enabled", () => {
+    const environment = domEnvironment as DomEnvironment;
+    renderIntoDom(environment, <AccordionCollapsibleHarness />);
+
+    const required = getButtonByText(environment, "Required disclosure");
+    const optional = getButtonByText(environment, "Optional disclosure");
+    expect(required.getAttribute("aria-expanded")).toBe("true");
+    expect(optional.getAttribute("aria-expanded")).toBe("true");
+
+    dispatchPrimaryClick(required, environment.window);
+    dispatchPrimaryClick(optional, environment.window);
+
+    expect(required.getAttribute("aria-expanded")).toBe("true");
+    expect(optional.getAttribute("aria-expanded")).toBe("false");
   });
 
   test("command demo opens command palette content", () => {

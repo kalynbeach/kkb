@@ -228,8 +228,8 @@ export function PopoverHoverCardTooltipDemo() {
 
         <div className="grid gap-3 rounded-md bg-muted/20 p-4">
           <HoverCard openDelay={120} closeDelay={120}>
-            <HoverCardTrigger asChild>
-              <Button variant="secondary">Preview hover card</Button>
+            <HoverCardTrigger render={<Button variant="secondary" />}>
+              Preview hover card
             </HoverCardTrigger>
             <HoverCardContent align="start" className="space-y-2">
               <p className="text-sm font-medium">Overlay release note</p>
@@ -240,10 +240,8 @@ export function PopoverHoverCardTooltipDemo() {
           </HoverCard>
 
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" className="justify-start">
-                Focus tooltip target
-              </Button>
+            <TooltipTrigger render={<Button variant="ghost" className="justify-start" />}>
+              Focus tooltip target
             </TooltipTrigger>
             <TooltipContent side="bottom">Short helper copy belongs in a tooltip.</TooltipContent>
           </Tooltip>

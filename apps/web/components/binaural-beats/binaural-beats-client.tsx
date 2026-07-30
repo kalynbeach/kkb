@@ -83,7 +83,7 @@ function NumberControl({
         </div>
         <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_5.5rem]">
           <Slider
-            aria-label={label}
+            getAriaLabel={() => label}
             data-testid={`binaural-${configKey}-slider`}
             max={max}
             min={min}

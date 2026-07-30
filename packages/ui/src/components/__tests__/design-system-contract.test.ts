@@ -2,10 +2,16 @@ import { describe, expect, test } from "bun:test";
 import { createElement } from "react";
 import { renderToString } from "react-dom/server";
 
+import { AspectRatio } from "../aspect-ratio";
 import { Badge } from "../badge";
 import { buttonVariants } from "../button-variants";
 import { Code } from "../code";
+import { Label } from "../label";
+import { Progress } from "../progress";
+import { Separator } from "../separator";
 import { Slider } from "../slider";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../tabs";
+import { toggleVariants } from "../toggle-variants";
 
 function styleBlock(styles: string, selector: ":root" | ".dark") {
   const escapedSelector = selector.replace(".", "\\.");
@@ -157,6 +163,148 @@ describe("design-system style contracts", () => {
     expect(combobox).toContain("rounded-full");
     expect(drawer).toContain("rounded-full");
     expect(slider).toContain("rounded-full");
+  });
+
+  test("native foundations preserve aspect ratio and label association", () => {
+    const aspectRatioHtml = renderToString(
+      createElement(AspectRatio, { ratio: 16 / 9, "aria-label": "Preview" }),
+    );
+    const labelHtml = renderToString(createElement(Label, { htmlFor: "frequency" }, "Frequency"));
+
+    expect(aspectRatioHtml).toContain('data-slot="aspect-ratio"');
+    expect(aspectRatioHtml).toContain("--ratio:1.7777777777777777");
+    expect(labelHtml).toContain('for="frequency"');
+    expect(labelHtml).not.toContain("font-mono");
+  });
+
+  test("slider range SSR preserves two named inputs and per-thumb accessible text", () => {
+    const sliderHtml = renderToString(
+      createElement(Slider, {
+        defaultValue: [20, 80],
+        getAriaLabel: (index) => (index === 0 ? "Minimum density" : "Maximum density"),
+        getAriaValueText: (_formattedValue, value, index) =>
+          `${index === 0 ? "Minimum" : "Maximum"}: ${value}%`,
+        name: "density",
+      }),
+    );
+
+    expect(sliderHtml.match(/<input[^>]+type="range"/g)).toHaveLength(2);
+    expect(sliderHtml.match(/name="density"/g)).toHaveLength(2);
+    expect(sliderHtml).toContain('aria-label="Minimum density"');
+    expect(sliderHtml).toContain('aria-label="Maximum density"');
+    expect(sliderHtml).toContain('aria-valuetext="Minimum: 20%"');
+    expect(sliderHtml).toContain('aria-valuetext="Maximum: 80%"');
+  });
+
+  test("separator defaults to decorative and exposes semantic opt-in", () => {
+    const decorativeHtml = renderToString(createElement(Separator));
+    const semanticHtml = renderToString(createElement(Separator, { decorative: false }));
+
+    expect(decorativeHtml).toContain('role="none"');
+    expect(semanticHtml).toContain('role="separator"');
+  });
+
+  test("tabs forward vertical orientation to Base Root", () => {
+    const tabsHtml = renderToString(
+      createElement(
+        Tabs,
+        { defaultValue: "one", orientation: "vertical" },
+        createElement(
+          TabsList,
+          null,
+          createElement(TabsTrigger, { value: "one" }, "One"),
+          createElement(TabsTrigger, { value: "two" }, "Two"),
+        ),
+        createElement(TabsContent, { value: "one" }, "Panel one"),
+        createElement(TabsContent, { value: "two" }, "Panel two"),
+      ),
+    );
+
+    expect(tabsHtml).toContain('data-orientation="vertical"');
+    expect(tabsHtml).toContain('aria-orientation="vertical"');
+  });
+
+  test("progress retains KKB thickness, colors, and Base anatomy", () => {
+    const progressHtml = renderToString(createElement(Progress, { value: 64 }));
+
+    expect(progressHtml).toContain('data-slot="progress"');
+    expect(progressHtml).toContain('data-slot="progress-track"');
+    expect(progressHtml).toContain('data-slot="progress-indicator"');
+    expect(progressHtml).toContain("h-2");
+    expect(progressHtml).toContain("bg-primary/20");
+    expect(progressHtml).not.toContain("h-1.5");
+  });
+
+  test("toggle variants use Base pressed state from the shared source", () => {
+    const classes = toggleVariants();
+
+    expect(classes).toContain("data-pressed:bg-accent");
+    expect(classes).not.toContain("data-[state=on]");
+  });
+
+  test("owned primitives contain no direct Radix contracts", async () => {
+    const names = [
+      "accordion",
+      "alert-dialog",
+      "aspect-ratio",
+      "avatar",
+      "badge",
+      "breadcrumb",
+      "button-group",
+      "button",
+      "checkbox",
+      "collapsible",
+      "context-menu",
+      "dialog",
+      "direction",
+      "dropdown-menu",
+      "form",
+      "hover-card",
+      "item",
+      "label",
+      "menubar",
+      "navigation-menu",
+      "popover",
+      "progress",
+      "radio-group",
+      "scroll-area",
+      "select",
+      "separator",
+      "sheet",
+      "sidebar",
+      "slider",
+      "switch",
+      "tabs",
+      "toggle-group",
+      "toggle",
+      "toggle-variants",
+      "tooltip",
+    ];
+
+    const sources = await Promise.all(
+      names.map((name) =>
+        Bun.file(
+          new URL(`../${name}.${name === "toggle-variants" ? "ts" : "tsx"}`, import.meta.url),
+        ).text(),
+      ),
+    );
+
+    for (const source of sources) {
+      expect(source).not.toContain('from "radix-ui"');
+      expect(source).not.toContain("@radix-ui/");
+      expect(source).not.toContain("--radix-");
+      expect(source).not.toContain("asChild");
+    }
+
+    const joinedSources = sources.join("\n");
+    expect(joinedSources).toContain("@base-ui/react");
+    expect(joinedSources).not.toContain("PopoverAnchor");
+    expect(sources[names.indexOf("navigation-menu")]).toContain(
+      'data-slot="navigation-menu-viewport"',
+    );
+    expect(sources[names.indexOf("toggle-variants")]).toContain("data-pressed");
+    expect(sources[names.indexOf("toggle")]).toContain('from "./toggle-variants"');
+    expect(sources[names.indexOf("toggle-group")]).toContain('from "./toggle-variants"');
   });
 
   test("published audio utilities and reduced-motion behavior are defined", async () => {

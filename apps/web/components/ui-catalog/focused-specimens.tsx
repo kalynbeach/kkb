@@ -65,6 +65,7 @@ import { Command, CommandInput, CommandItem, CommandList } from "@kkb/ui/compone
 import {
   ContextMenu,
   ContextMenuContent,
+  ContextMenuGroup,
   ContextMenuItem,
   ContextMenuSeparator,
   ContextMenuShortcut,
@@ -92,6 +93,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -142,6 +144,7 @@ import { Label } from "@kkb/ui/components/label";
 import {
   Menubar,
   MenubarContent,
+  MenubarGroup,
   MenubarItem,
   MenubarMenu,
   MenubarSeparator,
@@ -166,7 +169,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@kkb/ui/components/pagination";
-import { Popover, PopoverContent, PopoverTrigger } from "@kkb/ui/components/popover";
+import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from "@kkb/ui/components/popover";
 import { Progress } from "@kkb/ui/components/progress";
 import { RadioGroup, RadioGroupItem } from "@kkb/ui/components/radio-group";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@kkb/ui/components/resizable";
@@ -667,9 +670,7 @@ function DialogSpecimen() {
     <>
       <SpecimenStage title="Trigger and modal">
         <Dialog>
-          <DialogTrigger asChild>
-            <Button>Open dialog</Button>
-          </DialogTrigger>
+          <DialogTrigger render={<Button />}>Open dialog</DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Inspect component</DialogTitle>
@@ -827,7 +828,7 @@ function InputExamples({ item }: { item: CatalogItem }) {
         <SpecimenStage title={`${item.label} closed state`}>
           <div className="grid gap-3">
             <Select defaultValue="preview">
-              <SelectTrigger>
+              <SelectTrigger aria-label="Preview mode">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -941,15 +942,15 @@ function InputExamples({ item }: { item: CatalogItem }) {
       <>
         <SpecimenStage title="Slider values">
           <div className="grid gap-5">
-            <Slider defaultValue={[24]} max={100} aria-label="Low density" />
-            <Slider defaultValue={[64]} max={100} aria-label="Medium density" />
-            <Slider defaultValue={[92]} max={100} aria-label="High density" />
+            <Slider defaultValue={[24]} max={100} getAriaLabel={() => "Low density"} />
+            <Slider defaultValue={[64]} max={100} getAriaLabel={() => "Medium density"} />
+            <Slider defaultValue={[92]} max={100} getAriaLabel={() => "High density"} />
           </div>
         </SpecimenStage>
         <SpecimenStage title="Slider density control">
           <Field>
             <FieldLabel>Preview density</FieldLabel>
-            <Slider defaultValue={[72]} max={100} aria-label="Preview density" />
+            <Slider defaultValue={[72]} max={100} getAriaLabel={() => "Preview density"} />
             <FieldDescription>Range controls stay labeled and bounded.</FieldDescription>
           </Field>
         </SpecimenStage>
@@ -1522,10 +1523,8 @@ function DisclosureExamples({ item }: { item: CatalogItem }) {
         <Collapsible defaultOpen>
           <div className="flex items-center justify-between gap-4">
             <p className="font-mono text-sm">Implementation notes</p>
-            <CollapsibleTrigger asChild>
-              <Button variant="ghost" size="sm">
-                Toggle
-              </Button>
+            <CollapsibleTrigger render={<Button variant="ghost" size="sm" />}>
+              Toggle
             </CollapsibleTrigger>
           </div>
           <CollapsibleContent className="pt-3 text-sm leading-6 text-muted-foreground">
@@ -1547,18 +1546,19 @@ function OverlayExamples({ item }: { item: CatalogItem }) {
         <TooltipProvider>
           <div className="flex flex-wrap gap-2">
             <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline">Popover</Button>
-              </PopoverTrigger>
+              <PopoverTrigger render={<Button variant="outline" />}>Popover</PopoverTrigger>
               <PopoverContent className="w-64">
+                <PopoverTitle className="sr-only">Popover controls</PopoverTitle>
                 <p className="text-sm">Tune density and component state.</p>
               </PopoverContent>
             </Popover>
             <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" aria-label="Show notification tooltip">
-                  <Bell className="size-4" />
-                </Button>
+              <TooltipTrigger
+                render={
+                  <Button variant="outline" size="icon" aria-label="Show notification tooltip" />
+                }
+              >
+                <Bell className="size-4" />
               </TooltipTrigger>
               <TooltipContent>Notification state</TooltipContent>
             </Tooltip>
@@ -1574,9 +1574,7 @@ function OverlayBench() {
     <TooltipProvider>
       <div className="flex flex-wrap gap-2">
         <Dialog>
-          <DialogTrigger asChild>
-            <Button variant="outline">Dialog</Button>
-          </DialogTrigger>
+          <DialogTrigger render={<Button variant="outline" />}>Dialog</DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Inspect component</DialogTitle>
@@ -1588,9 +1586,7 @@ function OverlayBench() {
           </DialogContent>
         </Dialog>
         <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="outline">Alert</Button>
-          </AlertDialogTrigger>
+          <AlertDialogTrigger render={<Button variant="outline" />}>Alert</AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
               <AlertDialogTitle>Reset demo state?</AlertDialogTitle>
@@ -1603,9 +1599,7 @@ function OverlayBench() {
           </AlertDialogContent>
         </AlertDialog>
         <Sheet>
-          <SheetTrigger asChild>
-            <Button variant="outline">Sheet</Button>
-          </SheetTrigger>
+          <SheetTrigger render={<Button variant="outline" />}>Sheet</SheetTrigger>
           <SheetContent>
             <SheetHeader>
               <SheetTitle>Component metadata</SheetTitle>
@@ -1628,26 +1622,23 @@ function OverlayBench() {
           </DrawerContent>
         </Drawer>
         <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline">Popover</Button>
-          </PopoverTrigger>
+          <PopoverTrigger render={<Button variant="outline" />}>Popover</PopoverTrigger>
           <PopoverContent className="w-64">
+            <PopoverTitle className="sr-only">Popover controls</PopoverTitle>
             <p className="text-sm">Tune density and component state.</p>
           </PopoverContent>
         </Popover>
         <HoverCard>
-          <HoverCardTrigger asChild>
-            <Button variant="outline">Hover card</Button>
-          </HoverCardTrigger>
+          <HoverCardTrigger render={<Button variant="outline" />}>Hover card</HoverCardTrigger>
           <HoverCardContent>
             <p className="text-sm">Preview metadata without leaving flow.</p>
           </HoverCardContent>
         </HoverCard>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="outline" size="icon" aria-label="Show notification tooltip">
-              <Bell className="size-4" />
-            </Button>
+          <TooltipTrigger
+            render={<Button variant="outline" size="icon" aria-label="Show notification tooltip" />}
+          >
+            <Bell className="size-4" />
           </TooltipTrigger>
           <TooltipContent>Notification state</TooltipContent>
         </Tooltip>
@@ -1661,8 +1652,8 @@ function AlertDialogSpecimen() {
     <>
       <SpecimenStage title="Trigger and modal">
         <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive">Delete capture</Button>
+          <AlertDialogTrigger render={<Button variant="destructive" />}>
+            Delete capture
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -1820,31 +1811,23 @@ function FeedbackExamples({ item }: { item: CatalogItem }) {
             </Badge>
           </div>
         </SpecimenStage>
-        <SpecimenStage title="asChild" bodyClassName="grid min-h-36 place-items-center">
+        <SpecimenStage title="render" bodyClassName="grid min-h-36 place-items-center">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge asChild>
-              <a href="#badge-link">
-                Default
-                <ExternalLink className="size-3" />
-              </a>
+            <Badge render={<a href="#badge-link" />}>
+              Default
+              <ExternalLink className="size-3" />
             </Badge>
-            <Badge asChild variant="secondary">
-              <a href="#badge-link-secondary">
-                Secondary
-                <ExternalLink className="size-3" />
-              </a>
+            <Badge variant="secondary" render={<a href="#badge-link-secondary" />}>
+              Secondary
+              <ExternalLink className="size-3" />
             </Badge>
-            <Badge asChild variant="destructive">
-              <a href="#badge-link-destructive">
-                Destructive
-                <ExternalLink className="size-3" />
-              </a>
+            <Badge variant="destructive" render={<a href="#badge-link-destructive" />}>
+              Destructive
+              <ExternalLink className="size-3" />
             </Badge>
-            <Badge asChild variant="outline">
-              <a href="#badge-link-outline">
-                Outline
-                <ExternalLink className="size-3" />
-              </a>
+            <Badge variant="outline" render={<a href="#badge-link-outline" />}>
+              Outline
+              <ExternalLink className="size-3" />
             </Badge>
           </div>
         </SpecimenStage>
@@ -1930,15 +1913,17 @@ function MenuExamples({ item }: { item: CatalogItem }) {
       <>
         <SpecimenStage title="Dropdown menu trigger">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">Open menu</Button>
+            <DropdownMenuTrigger render={<Button variant="outline" />}>
+              Open menu
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
-              <DropdownMenuLabel>Catalog</DropdownMenuLabel>
-              <DropdownMenuItem>Preview</DropdownMenuItem>
-              <DropdownMenuItem>Open source</DropdownMenuItem>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Catalog</DropdownMenuLabel>
+                <DropdownMenuItem>Preview</DropdownMenuItem>
+                <DropdownMenuItem>Open source</DropdownMenuItem>
+                <DropdownMenuCheckboxItem checked>Verified</DropdownMenuCheckboxItem>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem checked>Verified</DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </SpecimenStage>
@@ -1967,13 +1952,17 @@ function MenuExamples({ item }: { item: CatalogItem }) {
               Right click surface
             </ContextMenuTrigger>
             <ContextMenuContent>
-              <ContextMenuItem>Open</ContextMenuItem>
-              <ContextMenuItem>Duplicate</ContextMenuItem>
+              <ContextMenuGroup>
+                <ContextMenuItem>Open</ContextMenuItem>
+                <ContextMenuItem>Duplicate</ContextMenuItem>
+              </ContextMenuGroup>
               <ContextMenuSeparator />
-              <ContextMenuItem>
-                Inspect
-                <ContextMenuShortcut>⌘I</ContextMenuShortcut>
-              </ContextMenuItem>
+              <ContextMenuGroup>
+                <ContextMenuItem>
+                  Inspect
+                  <ContextMenuShortcut>⌘I</ContextMenuShortcut>
+                </ContextMenuItem>
+              </ContextMenuGroup>
             </ContextMenuContent>
           </ContextMenu>
         </SpecimenStage>
@@ -2000,20 +1989,26 @@ function MenuExamples({ item }: { item: CatalogItem }) {
             <MenubarMenu>
               <MenubarTrigger>File</MenubarTrigger>
               <MenubarContent>
-                <MenubarItem>New capture</MenubarItem>
-                <MenubarItem>
-                  Save
-                  <MenubarShortcut>⌘S</MenubarShortcut>
-                </MenubarItem>
+                <MenubarGroup>
+                  <MenubarItem>New capture</MenubarItem>
+                  <MenubarItem>
+                    Save
+                    <MenubarShortcut>⌘S</MenubarShortcut>
+                  </MenubarItem>
+                </MenubarGroup>
                 <MenubarSeparator />
-                <MenubarItem>Export</MenubarItem>
+                <MenubarGroup>
+                  <MenubarItem>Export</MenubarItem>
+                </MenubarGroup>
               </MenubarContent>
             </MenubarMenu>
             <MenubarMenu>
               <MenubarTrigger>View</MenubarTrigger>
               <MenubarContent>
-                <MenubarItem>Preview</MenubarItem>
-                <MenubarItem>Components</MenubarItem>
+                <MenubarGroup>
+                  <MenubarItem>Preview</MenubarItem>
+                  <MenubarItem>Components</MenubarItem>
+                </MenubarGroup>
               </MenubarContent>
             </MenubarMenu>
           </Menubar>

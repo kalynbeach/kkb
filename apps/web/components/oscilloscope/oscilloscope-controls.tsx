@@ -262,7 +262,7 @@ export function OscilloscopeControls({
                 </span>
               </div>
               <Slider
-                aria-label="Trail length"
+                getAriaLabel={() => "Trail length"}
                 data-testid="oscilloscope-trail-slider"
                 id="oscilloscope-trail"
                 max={128}
@@ -290,7 +290,7 @@ export function OscilloscopeControls({
                 </span>
               </div>
               <Slider
-                aria-label="Bloom intensity"
+                getAriaLabel={() => "Bloom intensity"}
                 data-testid="oscilloscope-bloom-slider"
                 id="oscilloscope-bloom"
                 max={1.5}

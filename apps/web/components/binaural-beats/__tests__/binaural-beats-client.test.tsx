@@ -186,7 +186,7 @@ function getNumericInput(environment: DomEnvironment, configKey: keyof BinauralB
 
 function getSliderThumb(environment: DomEnvironment, configKey: keyof BinauralBeatConfig) {
   const thumb = environment.document.querySelector(
-    `[data-testid="binaural-${configKey}-slider"] [data-slot="slider-thumb"]`,
+    `[data-testid="binaural-${configKey}-slider"] [data-slot="slider-thumb"] input[type="range"]`,
   );
 
   if (!(thumb instanceof environment.window.HTMLElement)) {
@@ -385,6 +385,12 @@ describe("BinauralBeatsClient", () => {
     expect(getNumericInput(environment, "fadeSeconds").value).toBe(
       String(DEFAULT_BINAURAL_BEAT_CONFIG.fadeSeconds),
     );
+    expect(getSliderThumb(environment, "carrierFrequencyHz").getAttribute("aria-label")).toBe(
+      "Carrier",
+    );
+    expect(getSliderThumb(environment, "beatFrequencyHz").getAttribute("aria-label")).toBe("Beat");
+    expect(getSliderThumb(environment, "volume").getAttribute("aria-label")).toBe("Volume");
+    expect(getSliderThumb(environment, "fadeSeconds").getAttribute("aria-label")).toBe("Fade");
   });
 
   test("selects a preset and replaces the URL hash", async () => {

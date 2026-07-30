@@ -25,6 +25,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -34,7 +35,7 @@ import { Field, FieldLabel } from "@kkb/ui/components/field";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@kkb/ui/components/input-group";
 import { Kbd, KbdGroup } from "@kkb/ui/components/kbd";
 import { NativeSelect, NativeSelectOption } from "@kkb/ui/components/native-select";
-import { Popover, PopoverContent, PopoverTrigger } from "@kkb/ui/components/popover";
+import { Popover, PopoverContent, PopoverTitle, PopoverTrigger } from "@kkb/ui/components/popover";
 import {
   Select,
   SelectContent,
@@ -219,7 +220,7 @@ function FormPreview() {
         </Field>
         <div className="grid gap-3 sm:grid-cols-2">
           <Select defaultValue="preview">
-            <SelectTrigger>
+            <SelectTrigger aria-label="Preview mode">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -238,7 +239,12 @@ function FormPreview() {
             <FieldLabel htmlFor="preview-verified">Verified</FieldLabel>
           </Field>
           <Switch id="preview-enabled" defaultChecked aria-label="Enabled" />
-          <Slider defaultValue={[72]} max={100} className="min-w-32 flex-1" aria-label="Density" />
+          <Slider
+            defaultValue={[72]}
+            max={100}
+            className="min-w-32 flex-1"
+            getAriaLabel={() => "Density"}
+          />
         </div>
       </div>
     </div>
@@ -251,28 +257,27 @@ function MenuOverlayPreview() {
       <div className="space-y-4">
         <div className="flex flex-wrap gap-2">
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">Dropdown</Button>
+            <DropdownMenuTrigger render={<Button variant="outline" />}>
+              Dropdown
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuLabel>Inspect</DropdownMenuLabel>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Inspect</DropdownMenuLabel>
+                <DropdownMenuItem>Copy import</DropdownMenuItem>
+                <DropdownMenuCheckboxItem checked>Show states</DropdownMenuCheckboxItem>
+              </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Copy import</DropdownMenuItem>
-              <DropdownMenuCheckboxItem checked>Show states</DropdownMenuCheckboxItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline">Popover</Button>
-            </PopoverTrigger>
+            <PopoverTrigger render={<Button variant="outline" />}>Popover</PopoverTrigger>
             <PopoverContent className="w-64">
+              <PopoverTitle className="sr-only">Contextual controls</PopoverTitle>
               <p className="text-sm">Density, token, and state controls stay contextual.</p>
             </PopoverContent>
           </Popover>
           <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline">Dialog</Button>
-            </DialogTrigger>
+            <DialogTrigger render={<Button variant="outline" />}>Dialog</DialogTrigger>
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Inspect component</DialogTitle>
@@ -284,10 +289,8 @@ function MenuOverlayPreview() {
             </DialogContent>
           </Dialog>
           <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="icon" aria-label="Status">
-                <Bell className="size-4" />
-              </Button>
+            <TooltipTrigger render={<Button variant="outline" size="icon" aria-label="Status" />}>
+              <Bell className="size-4" />
             </TooltipTrigger>
             <TooltipContent>Status</TooltipContent>
           </Tooltip>

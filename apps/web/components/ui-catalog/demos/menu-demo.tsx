@@ -5,6 +5,7 @@ import { Button } from "@kkb/ui/components/button";
 import {
   ContextMenu,
   ContextMenuContent,
+  ContextMenuGroup,
   ContextMenuItem,
   ContextMenuLabel,
   ContextMenuSeparator,
@@ -14,6 +15,7 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
@@ -26,6 +28,7 @@ import {
   Menubar,
   MenubarCheckboxItem,
   MenubarContent,
+  MenubarGroup,
   MenubarItem,
   MenubarMenu,
   MenubarRadioGroup,
@@ -68,36 +71,26 @@ export function DropdownMenuDemo() {
       </div>
 
       <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
-        <DropdownMenuTrigger asChild>
-          <Button
-            variant="outline"
-            onPointerDown={(event) => {
-              if (event.button === 0 && !event.ctrlKey) {
-                setMenuOpen((current) => !current);
-              }
-            }}
-          >
-            Open menu
-          </Button>
-        </DropdownMenuTrigger>
+        <DropdownMenuTrigger render={<Button variant="outline" />}>Open menu</DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-56">
-          <DropdownMenuLabel>Catalog controls</DropdownMenuLabel>
-          {dropdownActions.map((action) => (
-            <DropdownMenuItem key={action.label}>
-              {action.label}
-              <DropdownMenuShortcut>{action.shortcut}</DropdownMenuShortcut>
-            </DropdownMenuItem>
-          ))}
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Catalog controls</DropdownMenuLabel>
+            {dropdownActions.map((action) => (
+              <DropdownMenuItem key={action.label}>
+                {action.label}
+                <DropdownMenuShortcut>{action.shortcut}</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            ))}
+            <DropdownMenuCheckboxItem checked={showCounts} onCheckedChange={setShowCounts}>
+              Show section counts
+            </DropdownMenuCheckboxItem>
+          </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuCheckboxItem checked={showCounts} onCheckedChange={setShowCounts}>
-            Show section counts
-          </DropdownMenuCheckboxItem>
-          <DropdownMenuSeparator />
-          <DropdownMenuLabel>Alignment</DropdownMenuLabel>
           <DropdownMenuRadioGroup
             value={alignment}
             onValueChange={(value: string) => setAlignment(value as AlignmentMode)}
           >
+            <DropdownMenuLabel>Alignment</DropdownMenuLabel>
             <DropdownMenuRadioItem value="grid">Grid</DropdownMenuRadioItem>
             <DropdownMenuRadioItem value="stack">Stack</DropdownMenuRadioItem>
           </DropdownMenuRadioGroup>
@@ -132,21 +125,25 @@ export function ContextMenuDemo() {
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent className="w-52">
-          <ContextMenuLabel>Section surface</ContextMenuLabel>
-          {contextActions.map((action) => (
-            <ContextMenuItem
-              key={action.label}
-              onSelect={() =>
-                setSurfaceState(action.label === "Mark reviewed" ? "review" : "ready")
-              }
-            >
-              {action.label}
-            </ContextMenuItem>
-          ))}
+          <ContextMenuGroup>
+            <ContextMenuLabel>Section surface</ContextMenuLabel>
+            {contextActions.map((action) => (
+              <ContextMenuItem
+                key={action.label}
+                onClick={() =>
+                  setSurfaceState(action.label === "Mark reviewed" ? "review" : "ready")
+                }
+              >
+                {action.label}
+              </ContextMenuItem>
+            ))}
+          </ContextMenuGroup>
           <ContextMenuSeparator />
-          <ContextMenuItem inset>
-            {surfaceState === "review" ? "Review state active" : "Ready to review"}
-          </ContextMenuItem>
+          <ContextMenuGroup>
+            <ContextMenuItem inset>
+              {surfaceState === "review" ? "Review state active" : "Ready to review"}
+            </ContextMenuItem>
+          </ContextMenuGroup>
         </ContextMenuContent>
       </ContextMenu>
     </div>
@@ -170,9 +167,11 @@ export function MenubarDemo() {
         <MenubarMenu>
           <MenubarTrigger>View</MenubarTrigger>
           <MenubarContent>
-            <MenubarCheckboxItem checked={showHints} onCheckedChange={setShowHints}>
-              Show hints
-            </MenubarCheckboxItem>
+            <MenubarGroup>
+              <MenubarCheckboxItem checked={showHints} onCheckedChange={setShowHints}>
+                Show hints
+              </MenubarCheckboxItem>
+            </MenubarGroup>
             <MenubarSeparator />
             <MenubarRadioGroup
               value={density}
@@ -187,8 +186,10 @@ export function MenubarDemo() {
         <MenubarMenu>
           <MenubarTrigger>Actions</MenubarTrigger>
           <MenubarContent>
-            <MenubarItem>Duplicate section</MenubarItem>
-            <MenubarItem>Export snapshot</MenubarItem>
+            <MenubarGroup>
+              <MenubarItem>Duplicate section</MenubarItem>
+              <MenubarItem>Export snapshot</MenubarItem>
+            </MenubarGroup>
           </MenubarContent>
         </MenubarMenu>
       </Menubar>

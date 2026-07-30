@@ -103,10 +103,8 @@ export function NavigationSection() {
                   Active-section tracking stays isolated inside the client nav boundary.
                 </p>
               </div>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  Details
-                </Button>
+              <CollapsibleTrigger render={<Button variant="ghost" size="sm" />}>
+                Details
               </CollapsibleTrigger>
             </div>
             <CollapsibleContent className="pt-3">

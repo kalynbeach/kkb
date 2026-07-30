@@ -220,7 +220,7 @@ The system distinguishes a stable visual language from selectable atmosphere. Ty
 
 `@kkb/ui` is the shared implementation foundation. Its semantic tokens and reusable components keep apps, demos, docs, reports, and experiments within one product family without forcing every surface into the same composition. Operational, editorial, expressive, instrument-like, and immersive surfaces may all use either light or dark mode.
 
-The initial atmosphere is intentionally limited to one curated light/dark pair. Phosphor is the initial utility-icon vocabulary, distinct from custom KKB sigils and symbols. Full migration of shared primitives from Radix UI to Base UI is approved near-term work, with the existing Base UI Combobox serving as the current foothold; this supersedes the earlier sequence that deferred migration until after composition work. JSON-render remains an experimental capability outside the active design-system roadmap.
+The initial atmosphere is intentionally limited to one curated light/dark pair. Phosphor is the initial utility-icon vocabulary, distinct from custom KKB sigils and symbols. Owned shared primitives use Base UI, with native implementations where Base has no matching primitive; retained Radix packages are transitive dependencies of out-of-scope integrations. JSON-render remains an experimental capability outside the active design-system roadmap.
 
 **Key Characteristics:**
 
@@ -354,7 +354,7 @@ One-pixel borders, ruled divisions, clipped panels, rails, and precise alignment
 
 ## Components
 
-Components are compact, predictable, keyboard-first, and built from semantic tokens. Every shared component supports light and dark mode through the same API. Theme-specific appearance comes from token mappings rather than component branches. Shared primitives are approved to migrate from Radix UI to Base UI in bounded work after the initial acceptance surface is established; the Base UI Combobox is the current foothold.
+Components are compact, predictable, keyboard-first, and built from semantic tokens. Every shared component supports light and dark mode through the same API. Theme-specific appearance comes from token mappings rather than component branches. Owned shared primitives use Base UI composition, event details, state attributes, and positioning contracts while preserving KKB component names and presentation.
 
 ### Buttons
 
