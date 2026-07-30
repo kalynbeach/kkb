@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
+    "@phosphor-icons/react": "catalog:",
     "@json-render/core": "catalog:",
     "@json-render/react": "catalog:",
     "@json-render/shadcn": "catalog:",

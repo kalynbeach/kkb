@@ -92,6 +92,7 @@ export function CatalogRail({
                     </p>
                     <button
                       type="button"
+                      aria-current={currentCategoryActive ? "page" : undefined}
                       aria-label={`Show all ${category} items`}
                       onClick={() => onSelect(categoryId(category))}
                       className={cn(
@@ -139,11 +140,12 @@ function CompactNavButton({
     <button
       type="button"
       ref={activeButtonRef}
+      aria-current={active ? "page" : undefined}
       onClick={onClick}
       className={cn(
         "min-h-11 shrink-0 rounded-md px-3 font-mono text-xs transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
         active
-          ? "bg-foreground text-background"
+          ? "bg-foreground font-semibold text-background underline decoration-2 underline-offset-4"
           : "text-muted-foreground hover:bg-accent/70 hover:text-foreground",
       )}
     >
@@ -166,11 +168,12 @@ function RailButton({
   return (
     <button
       type="button"
+      aria-current={active ? "page" : undefined}
       onClick={onClick}
       className={cn(
         "flex min-h-8 w-full items-center gap-2 rounded-md px-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",
         active
-          ? "bg-foreground text-background"
+          ? "bg-foreground font-medium text-background underline underline-offset-4"
           : "text-muted-foreground hover:bg-accent/70 hover:text-foreground",
         className,
       )}

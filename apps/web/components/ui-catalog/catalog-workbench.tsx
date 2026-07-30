@@ -3,7 +3,8 @@
 import { Button } from "@kkb/ui/components/button";
 import { Kbd, KbdGroup } from "@kkb/ui/components/kbd";
 import { ModeToggle } from "@kkb/ui/components/mode-toggle";
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeftIcon } from "@phosphor-icons/react/dist/csr/ArrowLeft";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/csr/MagnifyingGlass";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import * as React from "react";
@@ -71,7 +72,7 @@ export function CatalogWorkbench() {
         <div className="flex min-h-14 items-center gap-3 px-3 md:px-4">
           <Button variant="ghost" size="icon" asChild className="shrink-0">
             <Link href="/" aria-label="Return home">
-              <ArrowLeft className="size-4" />
+              <ArrowLeftIcon aria-hidden="true" focusable="false" weight="regular" />
             </Link>
           </Button>
           <div className="min-w-0 flex-1">
@@ -86,7 +87,12 @@ export function CatalogWorkbench() {
             className="hidden min-w-64 justify-start gap-2 text-muted-foreground md:inline-flex"
             onClick={() => setSearchOpen(true)}
           >
-            <Search className="size-4" />
+            <MagnifyingGlassIcon
+              aria-hidden="true"
+              data-icon="inline-start"
+              focusable="false"
+              weight="regular"
+            />
             Search...
             <KbdGroup className="ml-auto">
               <Kbd>⌘</Kbd>
@@ -101,7 +107,7 @@ export function CatalogWorkbench() {
             onClick={() => setSearchOpen(true)}
             aria-label="Search catalog"
           >
-            <Search className="size-4" />
+            <MagnifyingGlassIcon aria-hidden="true" focusable="false" weight="regular" />
           </Button>
           <ModeToggle />
         </div>

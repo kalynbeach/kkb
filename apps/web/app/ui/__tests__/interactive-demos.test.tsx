@@ -343,6 +343,8 @@ describe("interactive /ui demos", () => {
       'input[placeholder="Search component, category, source..."]',
     );
     expect(input).not.toBeNull();
+    expect(input?.getAttribute("aria-label")).toBe("Search KKB UI catalog");
+    expectBodyText(environment, "Current catalog item");
 
     if (input) {
       input.value = "audio";

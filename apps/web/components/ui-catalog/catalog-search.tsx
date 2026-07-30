@@ -13,7 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@kkb/ui/components/dialog";
-import { Check } from "lucide-react";
+import { CheckIcon } from "@phosphor-icons/react/dist/csr/Check";
 import * as React from "react";
 
 import { type CatalogItem, categoryMeta, itemFromId } from "./catalog-data";
@@ -88,6 +88,7 @@ function CatalogSearchContent({
       className="[&_[cmdk-group-heading]]:text-muted-foreground **:data-[slot=command-input-wrapper]:h-12 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group]]:px-2 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5"
     >
       <CommandInput
+        aria-label="Search KKB UI catalog"
         value={query}
         onValueChange={setQuery}
         placeholder="Search component, category, source..."
@@ -130,14 +131,24 @@ function CatalogCommandItem({
 }) {
   return (
     <CommandItem value={item.id} onSelect={() => onSelect(item.id)} className="py-2.5">
-      <CatalogItemIcon item={item} className="size-4" />
+      <CatalogItemIcon item={item} className="size-5" />
       <span className="grid min-w-0 flex-1 gap-0.5">
         <span className="truncate font-mono font-bold">{item.label}</span>
         <span className="truncate font-mono text-[11px] text-muted-foreground">
           {catalogItemMeta(item)}
         </span>
       </span>
-      {item.id === selectedItemId ? <Check className="mt-0.5 size-4" /> : null}
+      {item.id === selectedItemId ? (
+        <>
+          <CheckIcon
+            aria-hidden="true"
+            className="mt-0.5 size-5"
+            focusable="false"
+            weight="regular"
+          />
+          <span className="sr-only">Current catalog item</span>
+        </>
+      ) : null}
       <CommandShortcut className="mt-0.5">{item.kind}</CommandShortcut>
     </CommandItem>
   );

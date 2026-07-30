@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@kkb/ui/lib/utils";
-import { ChevronRight } from "lucide-react";
+import { CaretRightIcon } from "@phosphor-icons/react/dist/csr/CaretRight";
 import * as React from "react";
 
 import { type CatalogItem, itemFromId } from "./catalog-data";
@@ -13,7 +13,12 @@ export function SurfaceHeader({ item, action }: { item: CatalogItem; action?: Re
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2 font-mono text-[11px] text-muted-foreground">
           <span>{item.category}</span>
-          <ChevronRight className="size-3" />
+          <CaretRightIcon
+            aria-hidden="true"
+            className="size-3"
+            focusable="false"
+            weight="regular"
+          />
           <span>{item.kind}</span>
         </div>
         <h2 className="mt-1 truncate font-mono text-xl font-semibold tracking-[-0.02em]">

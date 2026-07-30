@@ -8,8 +8,8 @@ import {
   DialogTitle,
 } from "@kkb/ui/components/dialog";
 import { cn } from "@kkb/ui/lib/utils";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/csr/MagnifyingGlass";
 import { Command as CommandPrimitive } from "cmdk";
-import { SearchIcon } from "lucide-react";
 import type * as React from "react";
 
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
@@ -62,7 +62,12 @@ function CommandInput({
 }: React.ComponentProps<typeof CommandPrimitive.Input>) {
   return (
     <div data-slot="command-input-wrapper" className="flex h-9 items-center gap-2 border-b px-3">
-      <SearchIcon className="size-4 shrink-0 opacity-50" />
+      <MagnifyingGlassIcon
+        aria-hidden="true"
+        className="size-5 shrink-0 opacity-50"
+        focusable="false"
+        weight="regular"
+      />
       <CommandPrimitive.Input
         data-slot="command-input"
         className={cn(

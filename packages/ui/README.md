@@ -43,6 +43,14 @@ The live stylesheet expects these variables on an ancestor of the app content:
 
 Consumers own font loading and provide the variables through their framework's font integration. The stylesheet includes system fallbacks, but the KKB typography contract requires the intended font files.
 
+## Utility icons
+
+Phosphor is the shared utility-icon vocabulary. Use regular weight by default and let component anatomy own standard sizing: 16px for ordinary controls and inline actions, 12px for subordinate separators or dense metadata, and 20px for roomier catalog or standalone utility contexts. Icons inherit semantic `currentColor`; do not use color or weight as the only state signal. Prefer per-icon `@phosphor-icons/react/dist/csr/*` imports in client components and matching `dist/ssr/*` imports in server components so builds do not traverse the complete icon catalog.
+
+Icon-only controls need an accessible name on the interactive element. Mark icons as hidden from assistive technology when they repeat visible copy, a parent label, or purely structural meaning. Lucide remains installed only for unmigrated consumers until the repository-wide migration is complete.
+
+`components.json` records Phosphor as the intended generator vocabulary, but current Radix-based shadcn registry previews may still emit Lucide imports. Review every generated diff and normalize migrated files to these conventions; #77 owns the Base UI generator foundation and #74 owns final Lucide removal.
+
 ## Imports
 
 Import components and utilities through explicit package subpaths:

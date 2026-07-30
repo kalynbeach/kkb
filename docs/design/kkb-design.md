@@ -107,6 +107,48 @@ The KKB design system can be understood as a set of related layers:
 - The radius-none contract and approved Base UI sequence supersede the earlier subtle 1–3px structural-radius direction and the earlier plan to evaluate primitive migration only after composition work. Dated reports and plans remain historical records rather than current authority.
 - JSON-render remains an experimental repository capability but is outside the active design-system roadmap.
 
+## Current Implementation and Roadmap Status
+
+> Snapshot recorded 2026-07-30 before #73 implementation began. This section captures implementation and sequencing evidence at that point in time; the design contracts above remain authoritative if repository status changes.
+
+### Foundation state
+
+- `main` was clean and synchronized with `origin/main` at `efbcd35` (`feat(ui): implement initial theme contract (#72)`), with no open pull requests.
+- The latest CI run passed type checking, tests, and Biome checks.
+- Recent work established the product and design direction, hardened accessibility, cleared repository lint diagnostics, ratified the initial foundation through #71, and implemented its shared theme contract through #72.
+- The shared foundation now demonstrates radius-none structural geometry, paired semantic light and dark roles, documented functional rounding exceptions, semantic status foregrounds, overlay scrims, and an expanded `/ui` acceptance surface.
+- The foundation is implemented, but the broader migration is not complete. The snapshot contained 34 Radix-importing source files, 35 Lucide-importing source files, one Base UI consumer, and no Phosphor imports.
+
+### Known follow-up concerns
+
+- `DESIGN.md` still contains obsolete implementation-status prose assigning radius and Card work to the now-closed #72. That generated design record should be corrected when it is next synchronized.
+- CI does not currently run production builds. A manual `bun run build` passed during this review, but build regressions are not CI-visible.
+- Desktop and mobile browser verification for #72 is recorded in the issue acceptance criteria, but the repository does not retain a durable browser artifact or automated supported-route matrix for that verification.
+- #77 spans most shared primitives and is the highest-risk foundation migration. It should proceed in bounded batches that preserve tests, type checks, production builds, formatting, and representative browser behavior after each batch.
+- #82 describes documentation elements such as code, tables, and callouts that the current lightweight docs shell does not yet contain. Those criteria should remain conditional on existing content unless introducing those elements is explicitly brought into scope.
+- The current `#78 → #79 → #80` route-adoption sequence may be more serialized than necessary. After #78 proves the shared route pattern, #79 and #80 could potentially proceed independently, while #80 remains separately blocked by #37.
+
+### Recommended near-term sequence
+
+1. Complete #73 first. It is the sole unblocked root of the active design-system roadmap and establishes reusable Phosphor conventions before the Base UI migration.
+2. Before #77, make production-build evidence part of the migration safety contract, either through CI or an explicitly recorded per-batch validation requirement.
+3. #37 may proceed independently alongside #73. It corrects the audio seek surface and clears a later blocker for #80 without expanding the design-system foundation scope.
+4. Complete #77 in bounded primitive batches, then complete the residual Phosphor migration in #74 before beginning broad composition or route adoption.
+5. After #74, #75 and #82 can proceed independently. After #75, #76 and #83 can proceed independently. Route-level adoption follows those shared composition proofs, with #78 as the first complete route.
+6. Before final adoption and acceptance work, enumerate the supported route matrix explicitly. `/json-render` remains outside this roadmap.
+
+## Utility Icon Conventions
+
+Phosphor is the shared utility-icon vocabulary. The #73 acceptance slice applies it to the top-level `/ui` workbench navigation, search, and mode glyphs while Lucide remains temporarily available inside unmigrated primitives, components, and routes.
+
+- Use the regular Phosphor weight by default. Bold or fill weights are reserved for cases where increased emphasis or a filled state has semantic value, and weight must never be the only state signal.
+- Use 16px icons in ordinary buttons, fields, compact navigation, and inline actions; 12px icons for subordinate separators or dense metadata; and 20px icons for roomier catalog, search, or standalone utility contexts. Larger sizes require an explicitly illustrative or instrument-specific role.
+- Keep icons optically centered in a square box and aligned by their container. Do not use negative margins, arbitrary stroke overrides, or per-icon transforms to force alignment. Button and component sizing rules should own icon dimensions where available.
+- Icons inherit `currentColor` from semantic foreground roles. Domain colors are allowed only when the icon communicates that domain; interaction, selection, success, warning, and error meaning must not rely on icon color alone. Light and dark modes preserve the same glyph, size, and weight.
+- Icon-only controls require an accessible name on the interactive element and a visible focus treatment. Icons that accompany visible copy, repeat a parent label, separate metadata, or otherwise add no independent meaning are explicitly hidden from assistive technology.
+- Familiar utility icons and future KKB sigils remain separate vocabularies. Do not replace a conventional action or navigation symbol with an identity mark unless the new symbol has a documented, learnable semantic role.
+- During the staged migration, new or migrated acceptance-surface icons use Phosphor while untouched Lucide consumers remain stable. #74 owns the residual monorepo sweep and removal of Lucide.
+
 ## Inspiration
 
 - [Stencil](https://stencil.so/)
