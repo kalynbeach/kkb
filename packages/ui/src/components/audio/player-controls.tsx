@@ -1,7 +1,11 @@
 "use client";
 
 import { cn } from "@kkb/ui/lib/utils";
-import { Pause, Play, SkipBack, SkipForward, Square } from "lucide-react";
+import { PauseIcon } from "@phosphor-icons/react/dist/csr/Pause";
+import { PlayIcon } from "@phosphor-icons/react/dist/csr/Play";
+import { SkipBackIcon } from "@phosphor-icons/react/dist/csr/SkipBack";
+import { SkipForwardIcon } from "@phosphor-icons/react/dist/csr/SkipForward";
+import { StopIcon } from "@phosphor-icons/react/dist/csr/Stop";
 
 import type { PlayerControlMode } from "./presenter";
 
@@ -69,23 +73,48 @@ function PlayerControls({
     <div className={cn("flex flex-col gap-2 py-1.5", className)}>
       <div className="flex items-center justify-center gap-[3px]">
         <TransportButton disabled={isPreviousDisabled} onClick={onPrevious} label="Previous">
-          <SkipBack className="size-[11px] fill-audio-control-icon-muted text-audio-control-icon-muted" />
+          <SkipBackIcon
+            aria-hidden="true"
+            focusable="false"
+            weight="fill"
+            className="size-[11px] fill-audio-control-icon-muted text-audio-control-icon-muted"
+          />
         </TransportButton>
 
         <TransportButton disabled={isPlayDisabled} onClick={onPlay} label="Play">
-          <Play className="size-3 fill-audio-control-icon text-audio-control-icon" />
+          <PlayIcon
+            aria-hidden="true"
+            focusable="false"
+            weight="fill"
+            className="size-3 fill-audio-control-icon text-audio-control-icon"
+          />
         </TransportButton>
 
         <TransportButton disabled={isPauseDisabled} onClick={onPause} label="Pause">
-          <Pause className="size-3 fill-audio-control-icon text-audio-control-icon" />
+          <PauseIcon
+            aria-hidden="true"
+            focusable="false"
+            weight="fill"
+            className="size-3 fill-audio-control-icon text-audio-control-icon"
+          />
         </TransportButton>
 
         <TransportButton disabled={isStopDisabled} onClick={onStop} label="Stop">
-          <Square className="size-2.5 fill-audio-control-icon-muted text-audio-control-icon-muted" />
+          <StopIcon
+            aria-hidden="true"
+            focusable="false"
+            weight="fill"
+            className="size-2.5 fill-audio-control-icon-muted text-audio-control-icon-muted"
+          />
         </TransportButton>
 
         <TransportButton disabled={isNextDisabled} onClick={onNext} label="Next">
-          <SkipForward className="size-[11px] fill-audio-control-icon-muted text-audio-control-icon-muted" />
+          <SkipForwardIcon
+            aria-hidden="true"
+            focusable="false"
+            weight="fill"
+            className="size-[11px] fill-audio-control-icon-muted text-audio-control-icon-muted"
+          />
         </TransportButton>
       </div>
 

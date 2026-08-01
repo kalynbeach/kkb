@@ -19,7 +19,10 @@ import {
 } from "@kkb/ui/components/item";
 import { ScrollArea } from "@kkb/ui/components/scroll-area";
 import { Separator } from "@kkb/ui/components/separator";
-import { Layers3, ListFilter, Package2, ScrollText } from "lucide-react";
+import { FunnelIcon } from "@phosphor-icons/react/dist/ssr/Funnel";
+import { PackageIcon } from "@phosphor-icons/react/dist/ssr/Package";
+import { ScrollIcon } from "@phosphor-icons/react/dist/ssr/Scroll";
+import { StackIcon } from "@phosphor-icons/react/dist/ssr/Stack";
 
 import { ComponentCard } from "../component-card";
 import { ResizableDemo } from "../demos/resizable-demo";
@@ -103,7 +106,7 @@ export function LayoutSection() {
           <ItemGroup className="rounded-md border-border/80">
             <Item variant="muted" size="sm">
               <ItemMedia variant="icon">
-                <Layers3 className="size-4" />
+                <StackIcon aria-hidden="true" focusable="false" className="size-4" />
               </ItemMedia>
               <ItemContent>
                 <ItemTitle>Catalog shell</ItemTitle>
@@ -118,7 +121,7 @@ export function LayoutSection() {
             <ItemSeparator />
             <Item size="sm">
               <ItemMedia variant="icon">
-                <Package2 className="size-4" />
+                <PackageIcon aria-hidden="true" focusable="false" className="size-4" />
               </ItemMedia>
               <ItemContent>
                 <ItemTitle>Shared primitives</ItemTitle>
@@ -133,7 +136,7 @@ export function LayoutSection() {
             <ItemSeparator />
             <Item size="sm">
               <ItemMedia variant="icon">
-                <ListFilter className="size-4" />
+                <FunnelIcon aria-hidden="true" focusable="false" className="size-4" />
               </ItemMedia>
               <ItemContent>
                 <ItemTitle>Curated coverage</ItemTitle>
@@ -190,7 +193,7 @@ export function LayoutSection() {
           <Empty className="min-h-52 rounded-md border-dashed bg-muted/20">
             <EmptyHeader>
               <EmptyMedia variant="icon">
-                <ScrollText className="size-5" />
+                <ScrollIcon aria-hidden="true" focusable="false" className="size-5" />
               </EmptyMedia>
               <EmptyTitle>No blocks selected</EmptyTitle>
               <EmptyDescription>

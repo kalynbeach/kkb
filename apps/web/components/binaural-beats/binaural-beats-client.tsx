@@ -5,7 +5,8 @@ import { Field, FieldContent, FieldGroup, FieldLabel } from "@kkb/ui/components/
 import { Input } from "@kkb/ui/components/input";
 import { Slider } from "@kkb/ui/components/slider";
 import { cn } from "@kkb/ui/lib/utils";
-import { Pause, Play } from "lucide-react";
+import { PauseIcon } from "@phosphor-icons/react/dist/csr/Pause";
+import { PlayIcon } from "@phosphor-icons/react/dist/csr/Play";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -323,7 +324,11 @@ export function BinauralBeatsClient({
               }}
               type="button"
             >
-              {isPlaying || isStopping ? <Pause /> : <Play />}
+              {isPlaying || isStopping ? (
+                <PauseIcon aria-hidden="true" data-icon="inline-start" focusable="false" />
+              ) : (
+                <PlayIcon aria-hidden="true" data-icon="inline-start" focusable="false" />
+              )}
               {isStarting ? "Starting" : isStopping ? "Stopping" : isPlaying ? "Stop" : "Play"}
             </Button>
           </div>

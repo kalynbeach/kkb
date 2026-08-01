@@ -28,7 +28,10 @@ import {
   PaginationPrevious,
 } from "@kkb/ui/components/pagination";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@kkb/ui/components/tabs";
-import { ChevronRight, Compass, LayoutTemplate, PanelsTopLeft } from "lucide-react";
+import { BrowserIcon } from "@phosphor-icons/react/dist/ssr/Browser";
+import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr/CaretRight";
+import { CompassIcon } from "@phosphor-icons/react/dist/ssr/Compass";
+import { LayoutIcon } from "@phosphor-icons/react/dist/ssr/Layout";
 
 import { ComponentCard } from "../component-card";
 import { NavigationMenuDemo } from "../demos/navigation-menu-demo";
@@ -140,11 +143,11 @@ export function NavigationSection() {
 
           <div className="grid gap-3 rounded-md bg-muted/20 p-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
-              <Compass className="size-4" />
+              <CompassIcon aria-hidden="true" focusable="false" className="size-4" />
               Route context stays lightweight and readable.
             </div>
             <div className="flex items-center gap-2">
-              <PanelsTopLeft className="size-4" />
+              <BrowserIcon aria-hidden="true" focusable="false" className="size-4" />
               Useful for nested docs or settings flows.
             </div>
           </div>
@@ -164,7 +167,7 @@ export function NavigationSection() {
       >
         <div className="space-y-4 p-6">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <LayoutTemplate className="size-4" />
+            <LayoutIcon aria-hidden="true" focusable="false" className="size-4" />
             Page 3 of 8
           </div>
           <Pagination className="justify-start">
@@ -196,7 +199,7 @@ export function NavigationSection() {
           </Pagination>
           <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
             <span>dense lists</span>
-            <ChevronRight className="size-3" />
+            <CaretRightIcon aria-hidden="true" focusable="false" className="size-3" />
             <span>stable affordances</span>
           </div>
         </div>

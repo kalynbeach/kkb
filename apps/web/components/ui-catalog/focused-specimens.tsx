@@ -225,23 +225,21 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@kkb/ui/components/tooltip";
-import {
-  Bell,
-  Boxes,
-  Check,
-  CircleAlert,
-  Component,
-  Download,
-  ExternalLink,
-  Grid2X2,
-  Loader2,
-  Mail,
-  Plus,
-  Search,
-  Settings,
-  SlidersHorizontal,
-  X,
-} from "lucide-react";
+import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/csr/ArrowSquareOut";
+import { BellIcon } from "@phosphor-icons/react/dist/csr/Bell";
+import { CheckIcon } from "@phosphor-icons/react/dist/csr/Check";
+import { CubeIcon } from "@phosphor-icons/react/dist/csr/Cube";
+import { CubeFocusIcon } from "@phosphor-icons/react/dist/csr/CubeFocus";
+import { DownloadIcon } from "@phosphor-icons/react/dist/csr/Download";
+import { EnvelopeIcon } from "@phosphor-icons/react/dist/csr/Envelope";
+import { GearIcon } from "@phosphor-icons/react/dist/csr/Gear";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/csr/MagnifyingGlass";
+import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
+import { SlidersHorizontalIcon } from "@phosphor-icons/react/dist/csr/SlidersHorizontal";
+import { SpinnerGapIcon } from "@phosphor-icons/react/dist/csr/SpinnerGap";
+import { SquaresFourIcon } from "@phosphor-icons/react/dist/csr/SquaresFour";
+import { WarningCircleIcon } from "@phosphor-icons/react/dist/csr/WarningCircle";
+import { XIcon } from "@phosphor-icons/react/dist/csr/X";
 import * as React from "react";
 
 import { type CatalogItem, componentItems, itemFromId } from "./catalog-data";
@@ -447,7 +445,7 @@ function ButtonSpecimen() {
             <Button>Default</Button>
             <Button size="lg">Large</Button>
             <Button size="icon" aria-label="Settings">
-              <Settings className="size-4" />
+              <GearIcon aria-hidden="true" focusable="false" className="size-4" />
             </Button>
           </div>
         </div>
@@ -455,15 +453,15 @@ function ButtonSpecimen() {
       <SpecimenStage title="Icons and states">
         <div className="flex flex-wrap items-center gap-2">
           <Button>
-            <Plus className="size-4" />
+            <PlusIcon aria-hidden="true" focusable="false" className="size-4" />
             Add source
           </Button>
           <Button variant="outline">
             Download
-            <Download className="size-4" />
+            <DownloadIcon aria-hidden="true" focusable="false" className="size-4" />
           </Button>
           <Button disabled>
-            <Loader2 className="size-4 animate-spin" />
+            <SpinnerGapIcon aria-hidden="true" focusable="false" className="size-4 animate-spin" />
             Loading
           </Button>
           <Button aria-invalid variant="outline">
@@ -501,13 +499,13 @@ function ButtonGroupSpecimen() {
         <div className="flex flex-wrap gap-2">
           <ButtonGroup>
             <Button variant="outline" size="icon" aria-label="Grid">
-              <Grid2X2 className="size-4" />
+              <SquaresFourIcon aria-hidden="true" focusable="false" className="size-4" />
             </Button>
             <Button variant="outline" size="icon" aria-label="Tune">
-              <SlidersHorizontal className="size-4" />
+              <SlidersHorizontalIcon aria-hidden="true" focusable="false" className="size-4" />
             </Button>
             <Button variant="outline" size="icon" aria-label="Confirm">
-              <Check className="size-4" />
+              <CheckIcon aria-hidden="true" focusable="false" className="size-4" />
             </Button>
           </ButtonGroup>
           <Button variant="secondary">Run selected</Button>
@@ -640,7 +638,7 @@ function InputSpecimen() {
           <FieldLabel htmlFor="input-email">Notify collaborator</FieldLabel>
           <InputGroup>
             <InputGroupAddon>
-              <Mail className="size-4" />
+              <EnvelopeIcon aria-hidden="true" focusable="false" className="size-4" />
             </InputGroupAddon>
             <InputGroupInput id="input-email" placeholder="kalyn@example.com" />
           </InputGroup>
@@ -650,13 +648,13 @@ function InputSpecimen() {
       <SpecimenStage title="Grouped search">
         <InputGroup>
           <InputGroupAddon>
-            <Search className="size-4" />
+            <MagnifyingGlassIcon aria-hidden="true" focusable="false" className="size-4" />
             <InputGroupText>Filter</InputGroupText>
           </InputGroupAddon>
           <InputGroupInput defaultValue="button" />
           <InputGroupAddon align="inline-end">
             <InputGroupButton size="icon-xs" variant="ghost" aria-label="Clear filter">
-              <X className="size-3" />
+              <XIcon aria-hidden="true" focusable="false" className="size-3" />
             </InputGroupButton>
           </InputGroupAddon>
         </InputGroup>
@@ -758,7 +756,7 @@ function ActionExamples({ item }: { item: CatalogItem }) {
       <SpecimenStage title={`${item.label} states`}>
         <div className="flex flex-wrap items-center gap-2">
           <Toggle defaultPressed>
-            <Grid2X2 className="size-4" />
+            <SquaresFourIcon aria-hidden="true" focusable="false" className="size-4" />
             Grid
           </Toggle>
           <Toggle aria-invalid>Invalid</Toggle>
@@ -792,7 +790,7 @@ function ActionBench() {
       </ButtonGroup>
       <div className="flex flex-wrap items-center gap-2">
         <Toggle defaultPressed>
-          <Grid2X2 className="size-4" />
+          <SquaresFourIcon aria-hidden="true" focusable="false" className="size-4" />
           Grid
         </Toggle>
         <ToggleGroup type="multiple" defaultValue={["labels"]}>
@@ -1039,13 +1037,13 @@ function InputExamples({ item }: { item: CatalogItem }) {
         <SpecimenStage title="Input Group addons">
           <InputGroup>
             <InputGroupAddon>
-              <Search className="size-4" />
+              <MagnifyingGlassIcon aria-hidden="true" focusable="false" className="size-4" />
               <InputGroupText>Filter</InputGroupText>
             </InputGroupAddon>
             <InputGroupInput defaultValue="card" />
             <InputGroupAddon align="inline-end">
               <InputGroupButton size="icon-xs" variant="ghost" aria-label="Clear">
-                <X className="size-3" />
+                <XIcon aria-hidden="true" focusable="false" className="size-3" />
               </InputGroupButton>
             </InputGroupAddon>
           </InputGroup>
@@ -1239,7 +1237,7 @@ function LayoutExamples({ item }: { item: CatalogItem }) {
         <Empty className="min-h-72 border">
           <EmptyHeader>
             <EmptyMedia variant="icon">
-              <Boxes className="size-5" />
+              <CubeIcon aria-hidden="true" focusable="false" className="size-5" />
             </EmptyMedia>
             <EmptyTitle>No captures selected</EmptyTitle>
             <EmptyDescription>Choose an audio pass or create a new capture.</EmptyDescription>
@@ -1411,7 +1409,7 @@ function NavigationExamples({ item }: { item: CatalogItem }) {
                       {["Preview", "Tokens", "Components"].map((label) => (
                         <SidebarMenuItem key={label}>
                           <SidebarMenuButton>
-                            <Component />
+                            <CubeFocusIcon aria-hidden="true" focusable="false" />
                             <span>{label}</span>
                           </SidebarMenuButton>
                         </SidebarMenuItem>
@@ -1558,7 +1556,7 @@ function OverlayExamples({ item }: { item: CatalogItem }) {
                   <Button variant="outline" size="icon" aria-label="Show notification tooltip" />
                 }
               >
-                <Bell className="size-4" />
+                <BellIcon aria-hidden="true" focusable="false" className="size-4" />
               </TooltipTrigger>
               <TooltipContent>Notification state</TooltipContent>
             </Tooltip>
@@ -1638,7 +1636,7 @@ function OverlayBench() {
           <TooltipTrigger
             render={<Button variant="outline" size="icon" aria-label="Show notification tooltip" />}
           >
-            <Bell className="size-4" />
+            <BellIcon aria-hidden="true" focusable="false" className="size-4" />
           </TooltipTrigger>
           <TooltipContent>Notification state</TooltipContent>
         </Tooltip>
@@ -1695,12 +1693,12 @@ function FeedbackExamples({ item }: { item: CatalogItem }) {
       <SpecimenStage title="Alert variants" className="md:col-span-2">
         <div className="grid gap-3">
           <Alert>
-            <Check className="size-4" />
+            <CheckIcon aria-hidden="true" focusable="false" className="size-4" />
             <AlertTitle>Capture ready</AlertTitle>
             <AlertDescription>Waveform analysis completed.</AlertDescription>
           </Alert>
           <Alert variant="destructive">
-            <CircleAlert className="size-4" />
+            <WarningCircleIcon aria-hidden="true" focusable="false" className="size-4" />
             <AlertTitle>Capture failed</AlertTitle>
             <AlertDescription>Reconnect the input source.</AlertDescription>
           </Alert>
@@ -1754,19 +1752,19 @@ function FeedbackExamples({ item }: { item: CatalogItem }) {
         <SpecimenStage title="Icon Left" bodyClassName="grid min-h-36 place-items-center">
           <div className="flex flex-wrap items-center gap-2">
             <Badge>
-              <Check className="size-3" />
+              <CheckIcon aria-hidden="true" focusable="false" className="size-3" />
               Default
             </Badge>
             <Badge variant="secondary">
-              <Check className="size-3" />
+              <CheckIcon aria-hidden="true" focusable="false" className="size-3" />
               Secondary
             </Badge>
             <Badge variant="destructive">
-              <CircleAlert className="size-3" />
+              <WarningCircleIcon aria-hidden="true" focusable="false" className="size-3" />
               Destructive
             </Badge>
             <Badge variant="outline">
-              <Check className="size-3" />
+              <CheckIcon aria-hidden="true" focusable="false" className="size-3" />
               Outline
             </Badge>
           </div>
@@ -1775,38 +1773,54 @@ function FeedbackExamples({ item }: { item: CatalogItem }) {
           <div className="flex flex-wrap items-center gap-2">
             <Badge>
               Default
-              <Check className="size-3" />
+              <CheckIcon aria-hidden="true" focusable="false" className="size-3" />
             </Badge>
             <Badge variant="secondary">
               Secondary
-              <Check className="size-3" />
+              <CheckIcon aria-hidden="true" focusable="false" className="size-3" />
             </Badge>
             <Badge variant="destructive">
               Destructive
-              <X className="size-3" />
+              <XIcon aria-hidden="true" focusable="false" className="size-3" />
             </Badge>
             <Badge variant="outline">
               Outline
-              <Check className="size-3" />
+              <CheckIcon aria-hidden="true" focusable="false" className="size-3" />
             </Badge>
           </div>
         </SpecimenStage>
         <SpecimenStage title="With Spinner" bodyClassName="grid min-h-36 place-items-center">
           <div className="flex flex-wrap items-center gap-2">
             <Badge>
-              <Loader2 className="size-3 animate-spin" />
+              <SpinnerGapIcon
+                aria-hidden="true"
+                focusable="false"
+                className="size-3 animate-spin"
+              />
               Default
             </Badge>
             <Badge variant="secondary">
-              <Loader2 className="size-3 animate-spin" />
+              <SpinnerGapIcon
+                aria-hidden="true"
+                focusable="false"
+                className="size-3 animate-spin"
+              />
               Secondary
             </Badge>
             <Badge variant="destructive">
-              <Loader2 className="size-3 animate-spin" />
+              <SpinnerGapIcon
+                aria-hidden="true"
+                focusable="false"
+                className="size-3 animate-spin"
+              />
               Destructive
             </Badge>
             <Badge variant="outline">
-              <Loader2 className="size-3 animate-spin" />
+              <SpinnerGapIcon
+                aria-hidden="true"
+                focusable="false"
+                className="size-3 animate-spin"
+              />
               Outline
             </Badge>
           </div>
@@ -1815,19 +1829,19 @@ function FeedbackExamples({ item }: { item: CatalogItem }) {
           <div className="flex flex-wrap items-center gap-2">
             <Badge render={<a href="#badge-link" />}>
               Default
-              <ExternalLink className="size-3" />
+              <ArrowSquareOutIcon aria-hidden="true" focusable="false" className="size-3" />
             </Badge>
             <Badge variant="secondary" render={<a href="#badge-link-secondary" />}>
               Secondary
-              <ExternalLink className="size-3" />
+              <ArrowSquareOutIcon aria-hidden="true" focusable="false" className="size-3" />
             </Badge>
             <Badge variant="destructive" render={<a href="#badge-link-destructive" />}>
               Destructive
-              <ExternalLink className="size-3" />
+              <ArrowSquareOutIcon aria-hidden="true" focusable="false" className="size-3" />
             </Badge>
             <Badge variant="outline" render={<a href="#badge-link-outline" />}>
               Outline
-              <ExternalLink className="size-3" />
+              <ArrowSquareOutIcon aria-hidden="true" focusable="false" className="size-3" />
             </Badge>
           </div>
         </SpecimenStage>
@@ -1935,7 +1949,7 @@ function MenuExamples({ item }: { item: CatalogItem }) {
             <Separator className="my-1" />
             <div className="flex items-center justify-between px-2 py-1.5 text-sm">
               Verified
-              <Check className="size-4" />
+              <CheckIcon aria-hidden="true" focusable="false" className="size-4" />
             </div>
           </div>
         </SpecimenStage>

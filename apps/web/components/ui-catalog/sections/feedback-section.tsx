@@ -4,7 +4,9 @@ import { Button } from "@kkb/ui/components/button";
 import { Progress } from "@kkb/ui/components/progress";
 import { Skeleton } from "@kkb/ui/components/skeleton";
 import { Spinner } from "@kkb/ui/components/spinner";
-import { AlertTriangle, CheckCircle2, Zap } from "lucide-react";
+import { CheckCircleIcon } from "@phosphor-icons/react/dist/ssr/CheckCircle";
+import { LightningIcon } from "@phosphor-icons/react/dist/ssr/Lightning";
+import { WarningIcon } from "@phosphor-icons/react/dist/ssr/Warning";
 
 import { ComponentCard } from "../component-card";
 
@@ -17,14 +19,14 @@ export function FeedbackSection() {
       >
         <div className="space-y-3 p-6">
           <Alert>
-            <CheckCircle2 className="size-4" />
+            <CheckCircleIcon aria-hidden="true" focusable="false" className="size-4" />
             <AlertTitle>Catalog hierarchy pass saved</AlertTitle>
             <AlertDescription>
               Core primitives, instrument bays, and support exports now have separate scan paths.
             </AlertDescription>
           </Alert>
           <Alert variant="destructive">
-            <AlertTriangle className="size-4" />
+            <WarningIcon aria-hidden="true" focusable="false" className="size-4" />
             <AlertTitle>Browser verification failed</AlertTitle>
             <AlertDescription>
               Fix clipped overlays or overflow findings, then rerun the focused Browser check.
@@ -86,7 +88,11 @@ export function FeedbackSection() {
           <div className="space-y-3 rounded-md bg-muted/20 p-4">
             <div className="flex items-center justify-between">
               <Skeleton className="h-4 w-28" />
-              <Zap className="size-4 text-muted-foreground" />
+              <LightningIcon
+                aria-hidden="true"
+                focusable="false"
+                className="size-4 text-muted-foreground"
+              />
             </div>
             <Skeleton className="h-3 w-full" />
             <Skeleton className="h-3 w-5/6" />

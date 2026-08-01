@@ -61,7 +61,13 @@ import {
   TooltipTrigger,
 } from "@kkb/ui/components/tooltip";
 import { cn } from "@kkb/ui/lib/utils";
-import { Bell, Download, ExternalLink, Loader2, Plus, Search, Settings } from "lucide-react";
+import { ArrowSquareOutIcon } from "@phosphor-icons/react/dist/csr/ArrowSquareOut";
+import { BellIcon } from "@phosphor-icons/react/dist/csr/Bell";
+import { DownloadIcon } from "@phosphor-icons/react/dist/csr/Download";
+import { GearIcon } from "@phosphor-icons/react/dist/csr/Gear";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/csr/MagnifyingGlass";
+import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
+import { SpinnerGapIcon } from "@phosphor-icons/react/dist/csr/SpinnerGap";
 import type { ReactNode } from "react";
 
 import { chartData } from "./catalog-preview-data";
@@ -140,25 +146,45 @@ function ActionPreview() {
         <Button>Run checks</Button>
         <Button variant="secondary">Save note</Button>
         <Button variant="outline">
-          <ExternalLink className="size-4" />
+          <ArrowSquareOutIcon
+            aria-hidden="true"
+            data-icon="inline-start"
+            focusable="false"
+            className="size-4"
+          />
           Open
         </Button>
         <Button variant="ghost">Dismiss</Button>
       </div>
       <div className="flex flex-wrap items-center gap-2">
         <Button size="sm">
-          <Plus className="size-4" />
+          <PlusIcon
+            aria-hidden="true"
+            data-icon="inline-start"
+            focusable="false"
+            className="size-4"
+          />
           Add
         </Button>
         <Button size="sm" variant="outline">
           Export
-          <Download className="size-4" />
+          <DownloadIcon
+            aria-hidden="true"
+            data-icon="inline-end"
+            focusable="false"
+            className="size-4"
+          />
         </Button>
         <Button size="icon" variant="outline" aria-label="Settings">
-          <Settings className="size-4" />
+          <GearIcon aria-hidden="true" focusable="false" className="size-4" />
         </Button>
         <Button disabled>
-          <Loader2 className="size-4 animate-spin" />
+          <SpinnerGapIcon
+            aria-hidden="true"
+            data-icon="inline-start"
+            focusable="false"
+            className="size-4 animate-spin"
+          />
           Syncing
         </Button>
       </div>
@@ -213,7 +239,7 @@ function FormPreview() {
           <FieldLabel htmlFor="catalog-filter">Filter</FieldLabel>
           <InputGroup>
             <InputGroupAddon>
-              <Search className="size-4" />
+              <MagnifyingGlassIcon aria-hidden="true" focusable="false" className="size-4" />
             </InputGroupAddon>
             <InputGroupInput id="catalog-filter" defaultValue="audio waveform" />
           </InputGroup>
@@ -290,7 +316,7 @@ function MenuOverlayPreview() {
           </Dialog>
           <Tooltip>
             <TooltipTrigger render={<Button variant="outline" size="icon" aria-label="Status" />}>
-              <Bell className="size-4" />
+              <BellIcon aria-hidden="true" focusable="false" className="size-4" />
             </TooltipTrigger>
             <TooltipContent>Status</TooltipContent>
           </Tooltip>

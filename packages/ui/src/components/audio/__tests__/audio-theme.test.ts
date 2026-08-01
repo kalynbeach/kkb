@@ -28,4 +28,11 @@ describe("shared audio theme tokens", () => {
       expect(file).not.toMatch(FORBIDDEN_AUDIO_COLOR_LITERAL);
     }
   });
+
+  test("keeps transport controls on the filled Phosphor treatment", async () => {
+    const controls = await readFile("../player-controls.tsx");
+
+    expect(controls).toContain("@phosphor-icons/react/dist/csr/");
+    expect(controls.match(/weight="fill"/g)).toHaveLength(5);
+  });
 });

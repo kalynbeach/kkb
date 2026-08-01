@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { readdir } from "node:fs/promises";
 import { renderToString } from "react-dom/server";
 
 import { itemFromId } from "../../../components/ui-catalog/catalog-data";
@@ -11,6 +12,59 @@ import UiPage from "../page";
 async function renderUiPageHtml() {
   const page = await UiPage({ searchParams: Promise.resolve({}) });
   return renderToString(page).replaceAll("<!-- -->", "");
+}
+
+type OwnedSource = {
+  path: string;
+  text: string;
+};
+
+const generatedDirectories = new Set([".next", ".turbo", "coverage", "dist", "node_modules"]);
+
+async function readOwnedTypeScriptSources(directory: URL): Promise<OwnedSource[]> {
+  const sources: OwnedSource[] = [];
+  const entries = await readdir(directory, { withFileTypes: true });
+
+  for (const entry of entries) {
+    const entryUrl = new URL(entry.isDirectory() ? `${entry.name}/` : entry.name, directory);
+
+    if (entry.isDirectory()) {
+      if (!generatedDirectories.has(entry.name)) {
+        sources.push(...(await readOwnedTypeScriptSources(entryUrl)));
+      }
+      continue;
+    }
+
+    if (entry.name.endsWith(".ts") || entry.name.endsWith(".tsx")) {
+      sources.push({ path: entryUrl.pathname, text: await Bun.file(entryUrl).text() });
+    }
+  }
+
+  return sources;
+}
+
+async function readDirectWorkspaceFiles(repositoryRoot: URL, fileName: string) {
+  const files: OwnedSource[] = [];
+
+  for (const workspaceDirectory of ["apps/", "packages/"]) {
+    const directory = new URL(workspaceDirectory, repositoryRoot);
+    const entries = await readdir(directory, { withFileTypes: true });
+
+    for (const entry of entries) {
+      if (!entry.isDirectory()) {
+        continue;
+      }
+
+      const fileUrl = new URL(`${entry.name}/${fileName}`, directory);
+      const file = Bun.file(fileUrl);
+
+      if (await file.exists()) {
+        files.push({ path: fileUrl.pathname, text: await file.text() });
+      }
+    }
+  }
+
+  return files;
 }
 
 describe("/ui page", () => {
@@ -79,6 +133,36 @@ describe("/ui page", () => {
     expect(html).toContain('class="size-4 text-muted-foreground"');
     expect(html).toContain('fill="currentColor"');
     expect(html).not.toContain("aria-label");
+  });
+
+  test("keeps owned monorepo UI source and metadata on Phosphor", async () => {
+    const repositoryRoot = new URL("../../../../../", import.meta.url);
+    const [ownedSources, workspaceManifests, componentConfigs, rootManifest] = await Promise.all([
+      Promise.all([
+        readOwnedTypeScriptSources(new URL("apps/", repositoryRoot)),
+        readOwnedTypeScriptSources(new URL("packages/", repositoryRoot)),
+      ]).then((groups) => groups.flat()),
+      readDirectWorkspaceFiles(repositoryRoot, "package.json"),
+      readDirectWorkspaceFiles(repositoryRoot, "components.json"),
+      Bun.file(new URL("package.json", repositoryRoot)).text(),
+    ]);
+    const legacyImportPattern = /(?:from\s+|import\s*)["']lucide-react(?:\/[^"']*)?["']/;
+
+    expect(ownedSources.length).toBeGreaterThan(0);
+    expect(
+      ownedSources
+        .filter((source) => legacyImportPattern.test(source.text))
+        .map((source) => source.path),
+    ).toEqual([]);
+
+    for (const manifest of [rootManifest, ...workspaceManifests.map((file) => file.text)]) {
+      expect(manifest).not.toContain('"lucide-react"');
+    }
+
+    expect(componentConfigs.length).toBeGreaterThan(0);
+    for (const config of componentConfigs) {
+      expect(JSON.parse(config.text).iconLibrary).toBe("phosphor");
+    }
   });
 
   test("uses Phosphor across the migrated top-level workbench glyph boundary", async () => {

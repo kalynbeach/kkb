@@ -398,7 +398,7 @@ Components are compact, predictable, keyboard-first, and built from semantic tok
 
 - **Utility vocabulary:** Phosphor is the initial shared icon foundation for navigation, actions, state, and common interface concepts.
 - **Identity vocabulary:** Custom KKB sigils, symbols, diagrams, and technical marks remain a distinct layer; they do not replace familiar utility icons without a documented semantic reason.
-- **Migration status:** Phosphor adoption is approved work, not current repository-wide completion. Utility conventions and rollout are owned by issues #73 and #74.
+- **Migration status:** Issues #73 and #74 completed Phosphor adoption across owned shared components and application consumers. Direct Lucide declarations are removed; any transitive Lucide retained by out-of-scope integrations does not define the KKB utility vocabulary.
 
 ### Theme and Mode Controls
 

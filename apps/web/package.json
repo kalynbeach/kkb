@@ -14,7 +14,6 @@
     "@kkb/audio": "workspace:*",
     "@kkb/ui": "workspace:*",
     "@phosphor-icons/react": "catalog:",
-    "lucide-react": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"

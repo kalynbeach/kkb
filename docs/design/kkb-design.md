@@ -111,28 +111,28 @@ The KKB design system can be understood as a set of related layers:
 
 ### Foundation state
 
-- The radius-none, paired-mode, semantic-token, scrim, and Phosphor acceptance contracts are implemented in the shared foundation.
+- The radius-none, paired-mode, semantic-token, scrim, and Phosphor contracts are implemented across the owned shared foundation and application consumers.
 - Issue #77 migrated all owned Radix-backed primitives to Base UI or the approved native implementations. Owned source no longer imports the direct `radix-ui` package.
+- Issue #74 completed the owned Lucide-to-Phosphor migration and removed direct Lucide declarations from workspace manifests and the root catalog.
 - `components.json` uses shadcn's `base-vega` reference metadata because the locked shadcn release does not publish a Base `new-york` registry. This metadata does not apply the Vega preset or replace KKB tokens and presentation.
 - Base-specific composition, event details, state attributes, positioning variables, and menu click semantics are reflected in owned consumers.
-- Radix remains transitively through `@json-render/shadcn`, `cmdk`, and `vaul`; those integrations are outside the active primitive migration.
+- Radix remains transitively through `@json-render/shadcn`, `cmdk`, and `vaul`; Lucide remains transitively through `@json-render/shadcn`. Those integrations are outside the active design-system roadmap.
 
 ### Known follow-up concerns
 
 - CI does not currently run production builds, so build evidence remains a manual acceptance requirement.
-- #74 owns the remaining repository-wide Lucide-to-Phosphor sweep and direct Lucide removal.
 - #82 criteria for documentation elements remain conditional until those elements exist in the docs shell.
 - Final route adoption should retain an explicit supported-route matrix; `/json-render` remains outside this roadmap.
 
 ### Recommended near-term sequence
 
-1. Complete the residual Phosphor migration in #74.
-2. Proceed with shared composition and documentation work after the foundation migration is accepted.
-3. Keep route-level adoption and dynamic-media work bound to the paired-mode, accessibility, and no-document-overflow contracts.
+1. Proceed with shared composition and documentation work now that the foundation migrations are complete.
+2. Keep route-level adoption and dynamic-media work bound to the paired-mode, accessibility, and no-document-overflow contracts.
+3. Preserve the owned-import and direct-dependency boundaries while out-of-scope integrations retain their transitive dependencies.
 
 ## Utility Icon Conventions
 
-Phosphor is the shared utility-icon vocabulary. The #73 acceptance slice applies it to the top-level `/ui` workbench navigation, search, and mode glyphs while Lucide remains temporarily available inside unmigrated primitives, components, and routes.
+Phosphor is the shared utility-icon vocabulary across owned shared components and application consumers. Issue #73 established the acceptance surface, and #74 completed the remaining owned migration and direct Lucide removal.
 
 - Use the regular Phosphor weight by default. Bold or fill weights are reserved for cases where increased emphasis or a filled state has semantic value, and weight must never be the only state signal.
 - Use 16px icons in ordinary buttons, fields, compact navigation, and inline actions; 12px icons for subordinate separators or dense metadata; and 20px icons for roomier catalog, search, or standalone utility contexts. Larger sizes require an explicitly illustrative or instrument-specific role.
@@ -140,7 +140,7 @@ Phosphor is the shared utility-icon vocabulary. The #73 acceptance slice applies
 - Icons inherit `currentColor` from semantic foreground roles. Domain colors are allowed only when the icon communicates that domain; interaction, selection, success, warning, and error meaning must not rely on icon color alone. Light and dark modes preserve the same glyph, size, and weight.
 - Icon-only controls require an accessible name on the interactive element and a visible focus treatment. Icons that accompany visible copy, repeat a parent label, separate metadata, or otherwise add no independent meaning are explicitly hidden from assistive technology.
 - Familiar utility icons and future KKB sigils remain separate vocabularies. Do not replace a conventional action or navigation symbol with an identity mark unless the new symbol has a documented, learnable semantic role.
-- During the staged migration, new or migrated acceptance-surface icons use Phosphor while untouched Lucide consumers remain stable. #74 owns the residual monorepo sweep and removal of Lucide.
+- Owned icon consumers use direct per-icon Phosphor entry points. Transitive Lucide retained by out-of-scope integrations does not define the KKB utility vocabulary.
 
 ## Inspiration
 

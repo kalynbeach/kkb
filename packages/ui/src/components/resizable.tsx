@@ -1,7 +1,7 @@
 "use client";
 
 import { cn } from "@kkb/ui/lib/utils";
-import { GripVerticalIcon } from "lucide-react";
+import { DotsSixVerticalIcon } from "@phosphor-icons/react/dist/csr/DotsSixVertical";
 import * as ResizablePrimitive from "react-resizable-panels";
 
 function ResizablePanelGroup({ className, ...props }: ResizablePrimitive.GroupProps) {
@@ -36,7 +36,7 @@ function ResizableHandle({
     >
       {withHandle && (
         <div className="bg-border z-10 flex h-4 w-3 items-center justify-center rounded-xs border">
-          <GripVerticalIcon className="size-2.5" />
+          <DotsSixVerticalIcon aria-hidden="true" focusable="false" className="size-2.5" />
         </div>
       )}
     </ResizablePrimitive.Separator>

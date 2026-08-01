@@ -1,12 +1,10 @@
 "use client";
 
-import {
-  CircleCheckIcon,
-  InfoIcon,
-  Loader2Icon,
-  OctagonXIcon,
-  TriangleAlertIcon,
-} from "lucide-react";
+import { CheckCircleIcon } from "@phosphor-icons/react/dist/csr/CheckCircle";
+import { InfoIcon } from "@phosphor-icons/react/dist/csr/Info";
+import { SpinnerGapIcon } from "@phosphor-icons/react/dist/csr/SpinnerGap";
+import { WarningIcon } from "@phosphor-icons/react/dist/csr/Warning";
+import { XCircleIcon } from "@phosphor-icons/react/dist/csr/XCircle";
 import { useTheme } from "next-themes";
 import { Toaster as Sonner, type ToasterProps } from "sonner";
 
@@ -18,11 +16,13 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={theme as ToasterProps["theme"]}
       className="toaster group"
       icons={{
-        success: <CircleCheckIcon className="size-4" />,
-        info: <InfoIcon className="size-4" />,
-        warning: <TriangleAlertIcon className="size-4" />,
-        error: <OctagonXIcon className="size-4" />,
-        loading: <Loader2Icon className="size-4 animate-spin" />,
+        success: <CheckCircleIcon aria-hidden="true" focusable="false" className="size-4" />,
+        info: <InfoIcon aria-hidden="true" focusable="false" className="size-4" />,
+        warning: <WarningIcon aria-hidden="true" focusable="false" className="size-4" />,
+        error: <XCircleIcon aria-hidden="true" focusable="false" className="size-4" />,
+        loading: (
+          <SpinnerGapIcon aria-hidden="true" focusable="false" className="size-4 animate-spin" />
+        ),
       }}
       style={
         {

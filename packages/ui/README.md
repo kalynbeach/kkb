@@ -47,9 +47,9 @@ Consumers own font loading and provide the variables through their framework's f
 
 Phosphor is the shared utility-icon vocabulary. Use regular weight by default and let component anatomy own standard sizing: 16px for ordinary controls and inline actions, 12px for subordinate separators or dense metadata, and 20px for roomier catalog or standalone utility contexts. Icons inherit semantic `currentColor`; do not use color or weight as the only state signal. Prefer per-icon `@phosphor-icons/react/dist/csr/*` imports in client components and matching `dist/ssr/*` imports in server components so builds do not traverse the complete icon catalog.
 
-Icon-only controls need an accessible name on the interactive element. Mark icons as hidden from assistive technology when they repeat visible copy, a parent label, or purely structural meaning. Lucide remains installed only for unmigrated consumers until the repository-wide migration is complete.
+Icon-only controls need an accessible name on the interactive element. Mark icons as hidden from assistive technology when they repeat visible copy, a parent label, or purely structural meaning. Owned shared components and application consumers use Phosphor; direct Lucide declarations have been removed. Out-of-scope integrations may retain Lucide transitively without changing the KKB utility-icon contract.
 
-`components.json` records Phosphor as the intended generator vocabulary. It uses `base-vega` only as shadcn's Base UI reference metadata because the locked CLI does not publish a Base `new-york` registry; KKB tokens and presentation remain authoritative. Review every generated diff rather than overwriting local sources. #74 owns final removal of residual Lucide consumers.
+`components.json` records Phosphor as the generator vocabulary. It uses `base-vega` only as shadcn's Base UI reference metadata because the locked CLI does not publish a Base `new-york` registry; KKB tokens and presentation remain authoritative. Review every generated diff rather than overwriting local sources.
 
 ## Primitive foundation
 

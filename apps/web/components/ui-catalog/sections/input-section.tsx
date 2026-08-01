@@ -21,7 +21,10 @@ import { Switch } from "@kkb/ui/components/switch";
 import { Textarea } from "@kkb/ui/components/textarea";
 import { Toggle } from "@kkb/ui/components/toggle";
 import { ToggleGroup, ToggleGroupItem } from "@kkb/ui/components/toggle-group";
-import { Activity, Bell, Search, SlidersHorizontal } from "lucide-react";
+import { BellIcon } from "@phosphor-icons/react/dist/ssr/Bell";
+import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
+import { PulseIcon } from "@phosphor-icons/react/dist/ssr/Pulse";
+import { SlidersHorizontalIcon } from "@phosphor-icons/react/dist/ssr/SlidersHorizontal";
 
 import { ComponentCard } from "../component-card";
 import { CalendarDemo, SelectDemo } from "../demos/select-calendar-demo";
@@ -55,7 +58,7 @@ export function InputSection() {
           <Input placeholder="Search primitives" defaultValue="audio waveform" />
           <InputGroup>
             <InputGroupAddon>
-              <Search className="size-4" />
+              <MagnifyingGlassIcon aria-hidden="true" focusable="false" className="size-4" />
               <InputGroupText>Filter</InputGroupText>
             </InputGroupAddon>
             <InputGroupInput defaultValue="focused state coverage" />
@@ -143,11 +146,11 @@ export function InputSection() {
         <div className="space-y-5 p-6">
           <div className="flex flex-wrap gap-3">
             <Toggle defaultPressed aria-label="Show scope traces">
-              <Activity className="size-4" />
+              <PulseIcon aria-hidden="true" focusable="false" className="size-4" />
               Scope traces
             </Toggle>
             <Toggle aria-label="Watch browser checks">
-              <Bell className="size-4" />
+              <BellIcon aria-hidden="true" focusable="false" className="size-4" />
               Watch checks
             </Toggle>
           </div>
@@ -162,7 +165,7 @@ export function InputSection() {
 
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <SlidersHorizontal className="size-4" />
+              <SlidersHorizontalIcon aria-hidden="true" focusable="false" className="size-4" />
               Density
             </div>
             <Slider defaultValue={[72]} max={100} step={1} getAriaLabel={() => "Density"} />

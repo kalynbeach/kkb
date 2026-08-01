@@ -324,7 +324,13 @@ describe("BinauralBeatsClient", () => {
 
     await renderIntoDomAsync(environment, <BinauralBeatsClient createEngine={createEngine} />);
 
-    expect(getPlaybackButton(environment, "Play").disabled).toBe(false);
+    const playButton = getPlaybackButton(environment, "Play");
+    const playIcon = playButton.querySelector("svg");
+
+    expect(playButton.disabled).toBe(false);
+    expect(playButton.textContent?.trim()).toBe("Play");
+    expect(playIcon?.getAttribute("aria-hidden")).toBe("true");
+    expect(playIcon?.getAttribute("focusable")).toBe("false");
   });
 
   test("creates one engine and destroys it on unmount", async () => {

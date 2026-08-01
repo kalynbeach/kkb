@@ -2,8 +2,9 @@
 
 import { Button } from "@kkb/ui/components/button";
 import { cn } from "@kkb/ui/lib/utils";
+import { ArrowLeftIcon } from "@phosphor-icons/react/dist/csr/ArrowLeft";
+import { ArrowRightIcon } from "@phosphor-icons/react/dist/csr/ArrowRight";
 import useEmblaCarousel, { type UseEmblaCarouselType } from "embla-carousel-react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 import * as React from "react";
 
 type CarouselApi = UseEmblaCarouselType[1];
@@ -220,7 +221,7 @@ function CarouselPrevious({
       onClick={scrollPrev}
       {...props}
     >
-      <ArrowLeft />
+      <ArrowLeftIcon aria-hidden="true" focusable="false" />
       <span className="sr-only">Previous slide</span>
     </Button>
   );
@@ -250,7 +251,7 @@ function CarouselNext({
       onClick={scrollNext}
       {...props}
     >
-      <ArrowRight />
+      <ArrowRightIcon aria-hidden="true" focusable="false" />
       <span className="sr-only">Next slide</span>
     </Button>
   );

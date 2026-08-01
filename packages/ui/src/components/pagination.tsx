@@ -1,6 +1,8 @@
 import type { Button } from "@kkb/ui/components/button";
 import { cn } from "@kkb/ui/lib/utils";
-import { ChevronLeftIcon, ChevronRightIcon, MoreHorizontalIcon } from "lucide-react";
+import { CaretLeftIcon } from "@phosphor-icons/react/dist/ssr/CaretLeft";
+import { CaretRightIcon } from "@phosphor-icons/react/dist/ssr/CaretRight";
+import { DotsThreeIcon } from "@phosphor-icons/react/dist/ssr/DotsThree";
 import type * as React from "react";
 
 import { buttonVariants } from "./button-variants";
@@ -61,7 +63,7 @@ function PaginationPrevious({ className, ...props }: React.ComponentProps<typeof
       className={cn("gap-1 px-2.5 sm:pl-2.5", className)}
       {...props}
     >
-      <ChevronLeftIcon />
+      <CaretLeftIcon aria-hidden="true" focusable="false" />
       <span className="hidden sm:block">Previous</span>
     </PaginationLink>
   );
@@ -76,7 +78,7 @@ function PaginationNext({ className, ...props }: React.ComponentProps<typeof Pag
       {...props}
     >
       <span className="hidden sm:block">Next</span>
-      <ChevronRightIcon />
+      <CaretRightIcon aria-hidden="true" focusable="false" />
     </PaginationLink>
   );
 }
@@ -89,7 +91,7 @@ function PaginationEllipsis({ className, ...props }: React.ComponentProps<"span"
       className={cn("flex size-9 items-center justify-center", className)}
       {...props}
     >
-      <MoreHorizontalIcon className="size-4" />
+      <DotsThreeIcon focusable="false" className="size-4" />
       <span className="sr-only">More pages</span>
     </span>
   );
