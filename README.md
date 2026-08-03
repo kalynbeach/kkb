@@ -6,7 +6,7 @@
 
 This repo is a Bun-workspace Turborepo with Next.js 16, React 19, TypeScript 6, Tailwind CSS 4, and Biome.
 
-- `apps/web` is the active demo/sandbox host for audio, oscilloscope, binaural beats, shared UI, and JSON rendering work.
+- `apps/web` is the active integration host for audio, oscilloscope, binaural beats, the `@kkb/ui` inventory, and JSON rendering work.
 - `apps/docs` is a lightweight docs shell; canonical planning and research docs currently live under `docs/`.
 - `packages/audio` contains headless audio playback, Web Audio source, metrics, worklet, oscilloscope runtime, and WebGPU renderer code.
 - `packages/ableton` contains Ableton Live extension experiments and related utilities.
@@ -18,7 +18,7 @@ This repo is a Bun-workspace Turborepo with Next.js 16, React 19, TypeScript 6, 
 - `apps/docs` (`@kkb/docs`) — early-stage Next.js docs shell on port 3001.
 - `packages/audio` (`@kkb/audio`) — headless browser audio runtime, source contracts, worklet helpers, metrics, oscilloscope runtime, signal providers, and WebGPU renderer.
 - `packages/ableton` (`@kkb/ableton`) — Ableton Live extension experiments, packaged `.ablx` artifacts, and shared Live utilities.
-- `packages/ui` (`@kkb/ui`) — shared React UI package with shadcn-derived primitives, audio UI presentation, and json-render adapters.
+- `packages/ui` (`@kkb/ui`) — private, source-consumed React UI package with Base UI-backed primitives, shared tokens and hooks, audio presentation, and json-render adapters.
 - `packages/typescript-config` (`@kkb/typescript-config`) — shared TypeScript configs used by all workspaces.
 
 ## Active web routes
@@ -28,7 +28,7 @@ This repo is a Bun-workspace Turborepo with Next.js 16, React 19, TypeScript 6, 
 - `/audio` — audio player demo using `@kkb/audio` runtime and `@kkb/ui` presentation pieces.
 - `/binaural-beats` — binaural beat generator backed by app-local Web Audio orchestration.
 - `/oscilloscope` — WebGPU oscilloscope demo driven by internal oscillators or live mic input.
-- `/ui` — curated component catalog and visual verification route for `@kkb/ui`.
+- `/ui` — complete `@kkb/ui` component inventory and visual verification workbench, organized around a dense Preview wall and focused component item views.
 - `/json-render` — JSON-driven rendering demos backed by `@kkb/ui/json-render`.
 
 ## Quick commands
@@ -90,15 +90,15 @@ Substantive repository docs live under `docs/`:
 - `docs/reports/` — architecture reviews, codebase reports, and recommendations.
 - `docs/diagrams/` — diagrams, generated visual reports, and architecture references.
 
-Start with the latest relevant document in `docs/reports/` or `docs/plans/` before changing architecture, roadmap, or product direction.
+For design-system direction, start with `docs/design/kkb-design.md`; dated plans and reports are implementation history unless the current design document explicitly carries them forward. For other architecture, roadmap, or product work, start with the latest relevant document in `docs/reports/` or `docs/plans/`.
 
 ## Architectural boundaries
 
-- `apps/web` owns browser/session orchestration: routes, React lifecycle, catalog fixtures, `Audio`, `AudioContext`, `getUserMedia`, URL/hash state, and demo composition.
+- `apps/web` owns browser/session orchestration: routes, React lifecycle, `/ui` catalog fixtures, `Audio`, `AudioContext`, `getUserMedia`, URL/hash state, and app-owned demo composition. `/ui` inventories and verifies `@kkb/ui`; it is not a gallery for complete application shells.
 - `apps/docs` owns the Next.js docs shell; long-form planning, reports, research, specs, and diagrams stay under root `docs/` until the docs app has an explicit content pipeline.
 - `packages/audio` owns headless runtime behavior: playback engine, source contracts, metrics, worklet utilities, oscilloscope runtime, signal providers, XY mode, and renderer code.
 - `packages/ableton` owns Ableton Live extension code, vendor SDK/CLI tarball references, extension builds, and `.ablx` packaging.
-- `packages/ui` owns reusable UI primitives and presentation surfaces; feature/session orchestration usually stays in apps until a reusable contract is clear.
+- `packages/ui` owns reusable UI primitives, tokens, hooks, and presentation components. Feature/session orchestration and complete route composition stay in apps; promote presentation only after a reusable contract is demonstrated by real consumers.
 - `packages/typescript-config` owns shared TypeScript configuration only.
 
 ## Notes

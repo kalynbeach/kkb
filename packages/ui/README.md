@@ -1,6 +1,12 @@
 # @kkb/ui
 
-Shared UI primitives, tokens, hooks, and presentation components for the KKB monorepo.
+Private, source-consumed UI workspace for the KKB monorepo. It provides shared primitives, semantic tokens, hooks, and reusable presentation components; it is not published as a standalone external package.
+
+## Package contract
+
+`@kkb/ui` owns reusable interface foundations with stable component-level contracts. Apps own routes, browser and session orchestration, feature data, and complete product composition. Keep feature-specific composition app-local until real consumers demonstrate a reusable presentation seam; do not add complete experiment or instrument shells merely to create a `/ui` specimen.
+
+The normative design contract is [`../../docs/design/kkb-design.md`](../../docs/design/kkb-design.md). The live semantic token source is `src/styles/globals.css`.
 
 ## Consumer setup
 
@@ -72,17 +78,28 @@ Import components and utilities through explicit package subpaths:
 ```tsx
 import { Button } from "@kkb/ui/components/button";
 import { Waveform } from "@kkb/ui/components/audio/waveform";
+import { createPlayerPresenter } from "@kkb/ui/components/audio/presenter";
+import { AUDIO_SCANLINES_CLASS_NAME } from "@kkb/ui/components/audio/theme";
+import { useIsMobile } from "@kkb/ui/hooks/use-mobile";
 import { cn } from "@kkb/ui/lib/utils";
 ```
 
 Public areas currently include:
 
-- `@kkb/ui/components/*` — shared primitives and presentation components
+- `@kkb/ui/components/*` — shared primitives and reusable presentation components, including audio component paths
+- `@kkb/ui/components/audio/presenter` — headless audio presentation-state derivation
+- `@kkb/ui/components/audio/theme` — scoped audio-theme contract
 - `@kkb/ui/hooks/*` — shared React hooks
 - `@kkb/ui/lib/*` — shared utilities
-- `@kkb/ui/styles/globals.css` — Tailwind source, semantic tokens, and shared styles
-- `@kkb/ui/json-render*` — experimental integration; not part of the current design-system hardening scope
+- `@kkb/ui/styles/*.css` — Tailwind source, semantic tokens, and shared styles
+- `@kkb/ui/json-render`, `/catalog`, and `/registry` — experimental adapter integration outside the active design-system roadmap
 
 `packages/ui/src/styles/globals.css` is the live token source. The initial theme publishes paired `success` / `success-foreground` and `warning` / `warning-foreground` roles plus a semantic `scrim` for overlays. Structural radii resolve to `0`; full rounding is reserved for the functional exceptions documented in the design contract.
 
-See [`../../docs/design/kkb-design.md`](../../docs/design/kkb-design.md) for normative design intent.
+## Inventory and verification surfaces
+
+The web app's [`/ui`](http://localhost:3000/ui) route is the complete component inventory and visual acceptance workbench for this package. Its default Preview is a dense wall of live components; focused `?item=` views show each component's own variants and states. The route should stay close to the established [shadcn/create inspection model](https://ui.shadcn.com/create?preset=b1D0enCq&base=base&item=preview) and must not become a workshop index, docs site, or gallery of complete application shells.
+
+[`/json-render`](http://localhost:3000/json-render) is a separate adapter demo surface. Its presence does not place JSON-render inside the active design-system roadmap.
+
+Do not duplicate the complete inventory in this README. Use `package.json` for public export families and `/ui` for visual coverage.

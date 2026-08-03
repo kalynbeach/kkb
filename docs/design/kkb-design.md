@@ -82,7 +82,7 @@ The KKB design system can be understood as a set of related layers:
 
 1. **Semantic foundation** — paired light/dark color roles, typography, spacing, borders, elevation, focus, state, accessibility, and motion contracts.
 2. **Shared primitives** — theme-aware buttons, fields, panels, navigation, overlays, typography, and other reusable `@kkb/ui` building blocks.
-3. **Composition systems** — indexes, report layouts, instrument shells, figure frames, provenance rails, catalogs, and other recurring arrangements.
+3. **Composition systems** — recurring arrangements such as indexes, report layouts, figure frames, provenance rails, catalogs, and instrument presentation, but only after real consumers demonstrate a stable reusable contract.
 4. **Dynamic media systems** — audio-reactive interfaces, shaders, WebGPU, Three.js, generative graphics, and their static or reduced-motion representations.
 5. **Symbolic identity** — Phosphor provides the initial utility-icon vocabulary; custom KKB sigils, diagrams, glyph systems, and technical marks remain a separate identity layer.
 6. **Theme worlds** — distinct visual atmospheres built on the shared semantic and component contracts, each with intentionally designed light and dark modes.
@@ -94,7 +94,8 @@ The KKB design system can be understood as a set of related layers:
 - Compact visible controls may use larger invisible hit regions to preserve the visual language while meeting accessibility requirements.
 - Dynamic visuals must define light, dark, reduced-motion, meaningful static, responsive, and accessible representations rather than merely disappearing or relying on one mode.
 - Complex visualizations need responsive reflow, a summarized mobile form, a stacked representation, or an explicitly labeled local scroller; they must not widen the page.
-- Shared figure, metric, provenance, status, symbol, and visualization patterns should live in `@kkb/ui` when their contracts are reusable.
+- Shared figure, metric, provenance, status, symbol, and visualization patterns should live in `@kkb/ui` when real consumers demonstrate reusable component-level contracts.
+- Complete route composition, experiment/session behavior, and workshop indexing remain app-owned. Do not manufacture complete experiment or instrument shells solely to populate the `/ui` catalog.
 - Current neutral-first colors and domain-specific accent rules should be understood as properties of the initial theme unless intentionally elevated into system-wide semantic contracts.
 - Generic success and warning states use paired semantic fill/foreground roles in both modes; visible copy or iconography carries meaning alongside color.
 - Overlay components use the semantic scrim role rather than embedding atmosphere-specific black values.
@@ -106,6 +107,7 @@ The KKB design system can be understood as a set of related layers:
 - Owned shared primitives use Base UI, with native implementations where Base has no matching primitive. Composition uses Base `render`; retained Radix packages are transitive dependencies of out-of-scope integrations.
 - The radius-none contract and approved Base UI sequence supersede the earlier subtle 1–3px structural-radius direction and the earlier plan to evaluate primitive migration only after composition work. Dated reports and plans remain historical records rather than current authority.
 - JSON-render remains an experimental repository capability but is outside the active design-system roadmap.
+- The web app's `/ui` route is the complete `@kkb/ui` component inventory and visual acceptance workbench. It follows the [shadcn/create Preview and focused-item model](https://ui.shadcn.com/create?preset=b1D0enCq&base=base&item=preview); it is not a docs site, workshop index, or gallery of complete application shells.
 
 ## Current Implementation and Roadmap Status
 
@@ -117,18 +119,22 @@ The KKB design system can be understood as a set of related layers:
 - `components.json` uses shadcn's `base-vega` reference metadata because the locked shadcn release does not publish a Base `new-york` registry. This metadata does not apply the Vega preset or replace KKB tokens and presentation.
 - Base-specific composition, event details, state attributes, positioning variables, and menu click semantics are reflected in owned consumers.
 - Radix remains transitively through `@json-render/shadcn`, `cmdk`, and `vaul`; Lucide remains transitively through `@json-render/shadcn`. Those integrations are outside the active design-system roadmap.
+- `/ui` already provides URL-backed Preview, design-system, category, component, and utility views. Issue #86 owns final inventory parity, focused-specimen quality, shadcn/create fidelity, and the known catalog accessibility defects.
 
 ### Known follow-up concerns
 
 - CI does not currently run production builds, so build evidence remains a manual acceptance requirement.
+- `/ui` inventory is manually declared today; completion requires parity coverage against the supported public component surface rather than two duplicated hardcoded lists.
+- The catalog still needs its final focused-specimen audit and fixes for the known unlabeled chart container and audio-swatch contrast failure.
 - #82 criteria for documentation elements remain conditional until those elements exist in the docs shell.
 - Final route adoption should retain an explicit supported-route matrix; `/json-render` remains outside this roadmap.
 
 ### Recommended near-term sequence
 
-1. Proceed with shared composition and documentation work now that the foundation migrations are complete.
-2. Keep route-level adoption and dynamic-media work bound to the paired-mode, accessibility, and no-document-overflow contracts.
-3. Preserve the owned-import and direct-dependency boundaries while out-of-scope integrations retain their transitive dependencies.
+1. Complete and verify the `/ui` component inventory through issue #86: Preview-wall coverage, focused component specimens, inventory parity, accessibility, and light/dark desktop/mobile verification.
+2. Continue documentation and route-level adoption independently. Keep complete route composition app-owned, and promote presentation into `@kkb/ui` only after real consumers demonstrate a reusable seam.
+3. Keep dynamic-media work bound to the paired-mode, reduced-motion, meaningful-static, accessibility, and no-document-overflow contracts.
+4. Preserve the owned-import and direct-dependency boundaries while out-of-scope integrations retain their transitive dependencies.
 
 ## Utility Icon Conventions
 

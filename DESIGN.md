@@ -218,7 +218,7 @@ KKB is a design substrate for a personal technical-creative studio. It should fe
 
 The system distinguishes a stable visual language from selectable atmosphere. Typography, geometry, spacing, symbology, component anatomy, interaction behavior, and accessibility stay consistent across themes by default. Themes primarily change curated light and dark palettes, surface character, visualization colors, shader parameters, procedural texture, and subtle qualities of motion or depth. A theme changes the atmosphere, not the product.
 
-`@kkb/ui` is the shared implementation foundation. Its semantic tokens and reusable components keep apps, demos, docs, reports, and experiments within one product family without forcing every surface into the same composition. Operational, editorial, expressive, instrument-like, and immersive surfaces may all use either light or dark mode.
+`@kkb/ui` is the shared implementation foundation. Its semantic tokens and reusable components keep apps, demos, docs, reports, and experiments within one product family without forcing every surface into the same composition. Operational, editorial, expressive, instrument-like, and immersive surfaces may all use either light or dark mode. The web app's `/ui` route inventories and visually verifies these components through a dense Preview wall and focused component item views; it does not host complete application shells.
 
 The initial atmosphere is intentionally limited to one curated light/dark pair. Phosphor is the initial utility-icon vocabulary, distinct from custom KKB sigils and symbols. Owned shared primitives use Base UI, with native implementations where Base has no matching primitive; retained Radix packages are transitive dependencies of out-of-scope integrations. JSON-render remains an experimental capability outside the active design-system roadmap.
 
@@ -311,7 +311,7 @@ The core pairing separates continuous reading from technical context. Geist rema
 
 KKB uses a 4px spatial rhythm and supports different surface purposes without tying them to color mode. Operational surfaces prioritize compact access and predictable control placement. Editorial and report surfaces prioritize reading measure, evidence cadence, provenance, and figure comprehension. Expressive or immersive surfaces may devote substantial area to procedural media while preserving a clear navigation and content path.
 
-Shared composition systems should emerge in `@kkb/ui` when their contracts become reusable: experiment indexes, report figures, metric groups, provenance rails, instrument shells, and status patterns. App-level composition remains appropriate until a stable shared contract exists.
+Shared composition systems should emerge in `@kkb/ui` only after real consumers demonstrate stable component-level contracts. Report figures, metric groups, provenance treatments, instrument presentation, and status patterns may become shared when recurrence makes the seam clear. Workshop indexes, routes, browser/session behavior, and complete product composition remain app-owned; `/ui` must not manufacture application-level shells merely to create catalog specimens.
 
 Responsive design is a change in composition, not a proportional scale-down. Complex figures must reflow, summarize, stack, or use an explicitly labeled local scroll region. No visualization, table, code block, canvas, or shader surface may widen the document. Local scroll regions must be keyboard reachable and visibly communicate continuation.
 
@@ -342,7 +342,7 @@ Themes may tune the softness, warmth, or intensity of depth, but the semantic el
 
 ## Shapes
 
-The core geometry is strictly square. Structural surfaces and ordinary controls use radius-none (`0px`): buttons, fields, cards, panels, menu items, overlays, navigation items, and containers do not receive rounding for decoration or soft containment. This contract supersedes the obsolete subtle 1–3px structural-radius direction. The current shared stylesheet and components still contain legacy radii; issue #72 owns implementation of this ratified target.
+The core geometry is strictly square. Structural surfaces and ordinary controls use radius-none (`0px`): buttons, fields, cards, panels, menu items, overlays, navigation items, and containers do not receive rounding for decoration or soft containment. This contract supersedes the obsolete subtle 1–3px structural-radius direction and is implemented across the owned shared foundation.
 
 Rounded geometry is permitted only when the shape itself communicates identity or mechanical behavior, and only on the functional part that requires it. The approved exceptions are avatars; badges and chips; radio indicators; slider, switch, progress, and scroll tracks and thumbs; drawer drag handles; and circular knobs, dials, or indicators whose mechanical model is inherently round. A new shared exception must pass the same functional test and be documented here before adoption.
 
@@ -376,7 +376,7 @@ Components are compact, predictable, keyboard-first, and built from semantic tok
 
 ### Cards / Containers
 
-- **Corner Style:** Square (`0px`). The current shared Card still carries a legacy radius until issue #72 implements this contract.
+- **Corner Style:** Square (`0px`) across the owned shared Card and structural foundation.
 - **Background:** Semantic card and card-foreground roles, paired per color mode.
 - **Shadow Strategy:** Border-led with only a slight current `shadow-sm`; specialized instrument depth stays in domain components.
 - **Internal Rhythm:** 24px padding and gap are the default shared Card cadence.
@@ -446,4 +446,6 @@ Shaders, WebGPU, Three.js, audio-reactive graphics, diagrams, and data figures a
 - **Don't** round ordinary buttons, fields, cards, panels, menus, overlays, navigation items, or containers.
 - **Don't** add rounded soft cards, pillowy inputs, glassmorphism, heavy decorative gradients, or generic glossy SaaS styling to the core language.
 - **Don't** create app-local primitives when an equivalent or composable `@kkb/ui` foundation exists.
+- **Don't** turn `/ui` into a workshop index, docs site, or gallery of complete experiment and instrument applications; it is the component inventory and focused inspection surface.
+- **Don't** extract complete route composition into `@kkb/ui` before real consumers establish a reusable component seam.
 - **Don't** treat JSON-render as part of the active design-system roadmap.

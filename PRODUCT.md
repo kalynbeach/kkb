@@ -37,12 +37,13 @@ KKB is developed as a Bun-workspace Turborepo with shared packages and Next.js a
 4. Document decisions, evidence, constraints, and follow-up work in the repository.
 5. Share selected routes, artifacts, code, or reports with collaborators and peers.
 
-`apps/web` is the active integration and visual-verification host. `apps/docs` is an early documentation shell. Shared behavior belongs in packages such as `@kkb/audio`, while reusable interface foundations belong in `@kkb/ui`.
+`apps/web` is the active integration and visual-verification host. Its `/ui` route is the complete `@kkb/ui` component inventory: a dense Preview wall plus focused component item views, not a gallery of complete application shells. `apps/docs` is an early documentation shell. Shared behavior belongs in packages such as `@kkb/audio`, while reusable interface foundations belong in `@kkb/ui`.
 
 ## Capabilities and Constraints
 
-- `@kkb/ui` is the default source for shared interface primitives, tokens, hooks, and reusable presentation patterns.
-- Browser and session orchestration remains app-owned until a reusable contract is clear.
+- `@kkb/ui` is the default source for shared interface primitives, tokens, hooks, and reusable presentation components.
+- Browser and session orchestration, workshop indexes, and complete route composition remain app-owned.
+- Presentation moves into `@kkb/ui` only after real consumers demonstrate a reusable contract; the `/ui` catalog does not manufacture application-level abstractions to fill inventory views.
 - Shared packages should remain headless or presentation-focused according to their documented architectural boundaries.
 - The initial design atmosphere is one deliberately curated light/dark pair; additional theme worlds remain future work.
 - Dynamic audio, shader, WebGPU, 3D, and generative work must provide light, dark, reduced-motion, meaningful static, responsive, and accessible representations.
@@ -58,7 +59,7 @@ KKB's voice is technical, rhythmic, detailed, beautiful, and bold. It should com
 
 The design system is a coherent canvas rather than a single finished aesthetic. Stable typography, geometry, symbology, interaction behavior, and accessibility contracts preserve identity, while themes provide selectable atmospheres through curated light and dark palettes, shader variations, materials, and subtle changes in feel.
 
-Structural surfaces and ordinary controls use radius-none. Rounded geometry is reserved for explicitly documented elements whose shape communicates identity or mechanical behavior. Phosphor is the initial utility-icon vocabulary, separate from custom KKB sigils and symbols. `@kkb/ui` will migrate from Radix primitives to Base UI as approved near-term foundation work.
+Structural surfaces and ordinary controls use radius-none. Rounded geometry is reserved for explicitly documented elements whose shape communicates identity or mechanical behavior. Phosphor is the initial utility-icon vocabulary, separate from custom KKB sigils and symbols. Owned `@kkb/ui` primitives use Base UI or the approved native implementations; Radix remains only through out-of-scope transitive integrations.
 
 `docs/design/kkb-design.md` is the durable source for the current design intent and inspiration synthesis. `https://internet.dev/` remains a positive reference for craft culture, directness, density, workshop energy, and visible care for web work.
 
@@ -68,7 +69,7 @@ The repository contains real implementations and artifacts that future work may 
 
 - Active web routes for audio, binaural beats, oscilloscope, shared UI, and JSON rendering
 - Headless audio runtime and WebGPU oscilloscope work under shared packages
-- The `@kkb/ui` component library and visual catalog
+- The `@kkb/ui` component library and `/ui` component inventory and visual acceptance workbench
 - Ableton extension experiments and packaged artifacts
 - Architecture reports, plans, research, specifications, and diagrams under `docs/`
 - The design intent and reviewed references in `docs/design/kkb-design.md`
