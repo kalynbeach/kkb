@@ -1,1 +1,2 @@
 @import "@kkb/ui/styles/globals.css";
+@source "../../../node_modules/@json-render/shadcn/dist/index.mjs";
