@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import {
@@ -9,93 +9,71 @@ import {
   itemFromId,
   itemsForCategory,
   resolveCatalogItem,
-  utilityItems,
+  secondaryItems,
+  visualCatalogIds,
 } from "../catalog-data";
 import { getCatalogSearchGroups, searchCatalogItems } from "../catalog-search-index";
 
-const publicComponentIds = [
-  "accordion",
-  "alert-dialog",
-  "alert",
-  "aspect-ratio",
-  "avatar",
-  "badge",
-  "breadcrumb",
-  "button",
-  "button-group",
-  "calendar",
-  "card",
-  "carousel",
-  "chart",
-  "checkbox",
-  "code",
-  "collapsible",
-  "combobox",
-  "command",
-  "context-menu",
-  "dialog",
-  "direction",
-  "drawer",
-  "dropdown-menu",
-  "empty",
-  "field",
-  "form",
-  "hover-card",
-  "input",
-  "input-group",
-  "input-otp",
-  "item",
-  "kbd",
-  "label",
-  "menubar",
-  "mode-toggle",
-  "native-select",
-  "navigation-menu",
-  "pagination",
-  "popover",
-  "progress",
-  "radio-group",
-  "resizable",
-  "scroll-area",
-  "select",
-  "separator",
-  "sheet",
-  "sidebar",
-  "skeleton",
-  "slider",
-  "sonner",
-  "spinner",
-  "switch",
-  "table",
-  "tabs",
-  "textarea",
-  "theme-provider",
-  "toggle",
-  "toggle-group",
-  "tooltip",
-  "audio-player-controls",
-  "audio-playhead",
-  "audio-waveform",
-  "audio-presenter",
-  "audio-theme",
-] as const;
+function workspaceRoot() {
+  return process.cwd().endsWith("/apps/web") ? resolve(process.cwd(), "../..") : process.cwd();
+}
+
+function publicComponentSubpaths() {
+  const root = workspaceRoot();
+  const packageJson = JSON.parse(
+    readFileSync(resolve(root, "packages/ui/package.json"), "utf8"),
+  ) as {
+    exports: Record<string, string>;
+  };
+  const wildcardTarget = packageJson.exports["./components/*"];
+
+  expect(wildcardTarget).toBe("./src/components/*.tsx");
+
+  const componentDirectory = resolve(root, "packages/ui/src/components");
+  const componentFiles = [
+    ...new Bun.Glob("**/*.tsx").scanSync({ cwd: componentDirectory, onlyFiles: true }),
+  ].filter((path) => !path.includes("/__tests__/") && !path.startsWith("__tests__/"));
+  const wildcardSubpaths = componentFiles.map(
+    (path) => `@kkb/ui/components/${path.replace(/\.tsx$/, "")}`,
+  );
+  const explicitSubpaths = Object.entries(packageJson.exports)
+    .filter(([subpath]) => subpath.startsWith("./components/") && !subpath.includes("*"))
+    .map(([subpath]) => `@kkb/ui/${subpath.slice(2)}`);
+
+  return [...wildcardSubpaths, ...explicitSubpaths].sort();
+}
 
 describe("ui catalog data", () => {
-  test("keeps the public component inventory visible to the catalog", () => {
-    const componentIds = new Set(componentItems.map((item) => item.id));
+  test("derives bidirectional inventory parity from the public package component surface", () => {
+    const catalogComponentSubpaths = catalogItems
+      .filter((item) => item.source.startsWith("@kkb/ui/components/"))
+      .map((item) => item.source)
+      .sort();
 
-    for (const id of publicComponentIds) {
-      expect(componentIds.has(id)).toBe(true);
-    }
+    expect(catalogComponentSubpaths).toEqual(publicComponentSubpaths());
+    expect(new Set(catalogComponentSubpaths).size).toBe(catalogComponentSubpaths.length);
   });
 
-  test("catalogs public utilities separately from visual components", () => {
-    expect(utilityItems.map((item) => item.id)).toEqual([
-      "use-mobile",
-      "json-render",
-      "json-render-catalog",
-      "json-render-registry",
+  test("classifies every public visual component and supporting export explicitly", () => {
+    expect(componentItems.map((item) => item.id)).toEqual(visualCatalogIds);
+    expect(componentItems.every((item) => item.entryType === "visual")).toBe(true);
+    expect(
+      secondaryItems.map(({ id, entryType, experimental }) => ({
+        id,
+        entryType,
+        experimental: Boolean(experimental),
+      })),
+    ).toEqual([
+      { id: "direction", entryType: "provider", experimental: false },
+      { id: "theme-provider", entryType: "provider", experimental: false },
+      { id: "use-mobile", entryType: "hook", experimental: false },
+      { id: "audio-presenter", entryType: "presenter", experimental: false },
+      { id: "audio-theme", entryType: "theme", experimental: false },
+      { id: "json-render", entryType: "integration", experimental: true },
+      { id: "json-render-catalog", entryType: "integration", experimental: true },
+      { id: "json-render-registry", entryType: "integration", experimental: true },
     ]);
+    expect(itemFromId("mode-toggle").entryType).toBe("visual");
   });
 
   test("backs URL item selection with stable category ids and preview fallback", () => {
@@ -109,19 +87,20 @@ describe("ui catalog data", () => {
   });
 
   test("keeps category source paths backed by local files", () => {
-    const workspaceRoot = process.cwd().endsWith("/apps/web")
-      ? resolve(process.cwd(), "../..")
-      : process.cwd();
+    const root = workspaceRoot();
     const categoryItems = catalogItems.filter((item) => item.kind === "category");
 
     for (const item of categoryItems) {
-      expect(existsSync(resolve(workspaceRoot, item.source))).toBe(true);
+      expect(existsSync(resolve(root, item.source))).toBe(true);
     }
   });
 
-  test("keeps audio as an instrument category with component exports", () => {
-    expect(itemsForCategory("Audio").map((item) => item.id)).toContain("audio-waveform");
-    expect(itemsForCategory("Audio").map((item) => item.id)).toContain("audio-presenter");
+  test("keeps visual audio components primary and support contracts secondary", () => {
+    const audioItems = itemsForCategory("Audio");
+
+    expect(audioItems.find((item) => item.id === "audio-waveform")?.entryType).toBe("visual");
+    expect(audioItems.find((item) => item.id === "audio-presenter")?.entryType).toBe("presenter");
+    expect(audioItems.find((item) => item.id === "audio-theme")?.entryType).toBe("theme");
   });
 
   test("ranks exact button component matches before related results", () => {
@@ -137,6 +116,13 @@ describe("ui catalog data", () => {
 
     expect(resultIds[0]).toBe("input");
     expect(resultIds.indexOf("category-input")).toBeGreaterThan(resultIds.indexOf("input"));
+  });
+
+  test("keeps secondary exact matches searchable without promoting them by default", () => {
+    expect(searchCatalogItems("audio presenter")[0]?.id).toBe("audio-presenter");
+    expect(searchCatalogItems("").indexOf(itemFromId("audio-presenter"))).toBeGreaterThan(
+      searchCatalogItems("").indexOf(itemFromId("audio-waveform")),
+    );
   });
 
   test("keeps the default search list flat and view-first", () => {

@@ -108,10 +108,16 @@ export function CatalogRail({
                       <RailButton
                         key={item.id}
                         active={selectedItemId === item.id}
+                        catalogItemId={item.id}
                         onClick={() => onSelect(item.id)}
                         className="min-h-7 text-xs"
                       >
                         <span className="min-w-0 flex-1 truncate">{item.label}</span>
+                        {item.kind === "utility" ? (
+                          <span className="shrink-0 font-mono text-[9px] text-muted-foreground">
+                            {item.experimental ? "experimental" : "supporting"}
+                          </span>
+                        ) : null}
                       </RailButton>
                     ))}
                   </div>
@@ -157,10 +163,12 @@ function CompactNavButton({
 function RailButton({
   active,
   onClick,
+  catalogItemId,
   className,
   children,
 }: {
   active: boolean;
+  catalogItemId?: string;
   onClick: () => void;
   className?: string;
   children: ReactNode;
@@ -169,6 +177,7 @@ function RailButton({
     <button
       type="button"
       aria-current={active ? "page" : undefined}
+      data-catalog-item={catalogItemId}
       onClick={onClick}
       className={cn(
         "flex min-h-8 w-full items-center gap-2 rounded-md px-2 text-left text-sm transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50",

@@ -4,8 +4,7 @@ import { cn } from "@kkb/ui/lib/utils";
 import { CaretRightIcon } from "@phosphor-icons/react/dist/csr/CaretRight";
 import * as React from "react";
 
-import { type CatalogItem, itemFromId } from "./catalog-data";
-import { CatalogItemIcon } from "./catalog-icons";
+import type { CatalogItem } from "./catalog-data";
 
 export function SurfaceHeader({ item, action }: { item: CatalogItem; action?: React.ReactNode }) {
   return (
@@ -19,7 +18,7 @@ export function SurfaceHeader({ item, action }: { item: CatalogItem; action?: Re
             focusable="false"
             weight="regular"
           />
-          <span>{item.kind}</span>
+          <span>{item.entryType}</span>
         </div>
         <h2 className="mt-1 truncate font-mono text-xl font-semibold tracking-[-0.02em]">
           {item.label}
@@ -92,91 +91,4 @@ export class DemoBoundary extends React.Component<DemoBoundaryProps, DemoBoundar
 
     return this.props.children;
   }
-}
-
-export function TinyPreview({ id }: { id: string }) {
-  return <StaticTinyPreview item={itemFromId(id)} />;
-}
-
-function StaticTinyPreview({ item }: { item: CatalogItem }) {
-  if (item.category === "Audio") {
-    return (
-      <span
-        aria-hidden="true"
-        className="flex h-10 w-20 items-end gap-1 border border-audio-panel-border bg-audio-accent-softer p-1"
-      >
-        {[24, 56, 36, 72, 48, 64].map((value) => (
-          <span key={value} className="flex-1 bg-audio-accent" style={{ height: `${value}%` }} />
-        ))}
-      </span>
-    );
-  }
-
-  if (item.category === "Data") {
-    return (
-      <span aria-hidden="true" className="flex h-10 w-20 items-end gap-1 border bg-muted/20 p-1">
-        {[40, 80, 55, 70].map((value) => (
-          <span key={value} className="flex-1 bg-foreground" style={{ height: `${value}%` }} />
-        ))}
-      </span>
-    );
-  }
-
-  if (item.category === "Input") {
-    return (
-      <span aria-hidden="true" className="grid h-10 w-20 gap-1 border bg-muted/20 p-2">
-        <span className="h-1.5 w-12 bg-muted-foreground/50" />
-        <span className="h-3 border bg-background" />
-      </span>
-    );
-  }
-
-  if (item.category === "Overlay" || item.category === "Menu") {
-    return (
-      <span aria-hidden="true" className="relative h-10 w-20 border bg-muted/20">
-        <span className="absolute top-2 left-2 h-5 w-10 border bg-background" />
-        <span className="absolute right-2 bottom-2 h-5 w-10 border bg-background" />
-      </span>
-    );
-  }
-
-  if (item.category === "Navigation") {
-    return (
-      <span aria-hidden="true" className="grid h-10 w-20 gap-1 border bg-muted/20 p-2">
-        <span className="h-1.5 w-14 bg-foreground" />
-        <span className="h-1.5 w-10 bg-muted-foreground/50" />
-        <span className="h-1.5 w-12 bg-muted-foreground/50" />
-      </span>
-    );
-  }
-
-  if (item.category === "Feedback") {
-    return (
-      <span aria-hidden="true" className="flex h-10 w-20 items-center gap-1 border bg-muted/20 p-2">
-        <span className="size-3 bg-foreground" />
-        <span className="grid flex-1 gap-1">
-          <span className="h-1.5 bg-muted-foreground/60" />
-          <span className="h-1.5 w-10 bg-muted-foreground/40" />
-        </span>
-      </span>
-    );
-  }
-
-  if (item.category === "Layout") {
-    return (
-      <span aria-hidden="true" className="grid h-10 w-20 grid-cols-[1fr_1.4fr] gap-1 border p-1">
-        <span className="bg-muted" />
-        <span className="grid gap-1">
-          <span className="bg-muted" />
-          <span className="bg-muted" />
-        </span>
-      </span>
-    );
-  }
-
-  return (
-    <span aria-hidden="true" className="grid size-10 place-items-center border bg-muted/20">
-      <CatalogItemIcon item={item} className="size-4 text-muted-foreground" />
-    </span>
-  );
 }

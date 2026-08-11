@@ -119,22 +119,24 @@ The KKB design system can be understood as a set of related layers:
 - `components.json` uses shadcn's `base-vega` reference metadata because the locked shadcn release does not publish a Base `new-york` registry. This metadata does not apply the Vega preset or replace KKB tokens and presentation.
 - Base-specific composition, event details, state attributes, positioning variables, and menu click semantics are reflected in owned consumers.
 - Radix remains transitively through `@json-render/shadcn`, `cmdk`, and `vaul`; Lucide remains transitively through `@json-render/shadcn`. Those integrations are outside the active design-system roadmap.
-- `/ui` already provides URL-backed Preview, design-system, category, component, and utility views. Issue #86 owns final inventory parity, focused-specimen quality, shadcn/create fidelity, and the known catalog accessibility defects.
+- Issue #86 completes the `/ui` catalog acceptance surface: URL-backed Preview, design-system, category, visual-component, and supporting-export views now have package-surface parity coverage, exhaustive focused specimens, and explicit Preview coverage metadata.
+- The catalog registry explicitly separates supported visual components from providers, hooks, presenters, theme constants, and experimental integrations. JSON-render remains searchable but secondary and outside visual inventory acceptance.
+- Catalog charts use the shared chart foundation with one named image semantic, no nested keyboard stop, and an equivalent value table. Audio swatches use paired, mode-safe foreground roles.
+- Dark destructive roles use a lighter destructive surface/text value with a dark paired foreground so both inline invalid-state text and destructive fills meet WCAG AA.
 
 ### Known follow-up concerns
 
 - CI does not currently run production builds, so build evidence remains a manual acceptance requirement.
-- `/ui` inventory is manually declared today; completion requires parity coverage against the supported public component surface rather than two duplicated hardcoded lists.
-- The catalog still needs its final focused-specimen audit and fixes for the known unlabeled chart container and audio-swatch contrast failure.
+- `/ui` product metadata remains intentionally curated in one typed registry, while tests derive the supported public component surface from package exports and matching source files to prevent silent inventory drift.
 - #82 criteria for documentation elements remain conditional until those elements exist in the docs shell.
 - Final route adoption should retain an explicit supported-route matrix; `/json-render` remains outside this roadmap.
 
 ### Recommended near-term sequence
 
-1. Complete and verify the `/ui` component inventory through issue #86: Preview-wall coverage, focused component specimens, inventory parity, accessibility, and light/dark desktop/mobile verification.
-2. Continue documentation and route-level adoption independently. Keep complete route composition app-owned, and promote presentation into `@kkb/ui` only after real consumers demonstrate a reusable seam.
-3. Keep dynamic-media work bound to the paired-mode, reduced-motion, meaningful-static, accessibility, and no-document-overflow contracts.
-4. Preserve the owned-import and direct-dependency boundaries while out-of-scope integrations retain their transitive dependencies.
+1. Continue documentation and route-level adoption independently. Keep complete route composition app-owned, and promote presentation into `@kkb/ui` only after real consumers demonstrate a reusable seam.
+2. Keep dynamic-media work bound to the paired-mode, reduced-motion, meaningful-static, accessibility, and no-document-overflow contracts.
+3. Preserve the owned-import and direct-dependency boundaries while out-of-scope integrations retain their transitive dependencies.
+4. Run the final cross-route design-system acceptance pass through issue #84 after its route-adoption dependencies are complete.
 
 ## Utility Icon Conventions
 

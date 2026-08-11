@@ -40,8 +40,8 @@ colors:
   muted-foreground-dark: "oklch(0.708 0 0)"
   accent-dark: "oklch(0.269 0 0)"
   accent-foreground-dark: "oklch(0.985 0 0)"
-  destructive-dark: "oklch(0.48 0.17 25)"
-  destructive-foreground-dark: "oklch(0.985 0 0)"
+  destructive-dark: "oklch(0.704 0.191 22.216)"
+  destructive-foreground-dark: "oklch(0.145 0 0)"
   success-dark: "oklch(0.78 0.13 145)"
   success-foreground-dark: "oklch(0.145 0 0)"
   warning-dark: "oklch(0.82 0.14 85)"
@@ -56,7 +56,9 @@ colors:
   chart-4: "oklch(0.488 0.243 264.376)"
   chart-5: "oklch(0.424 0.199 265.638)"
   audio-accent: "oklch(0.768 0.122 252.001)"
+  audio-accent-foreground: "oklch(0.15 0.02 270)"
   audio-accent-dark: "oklch(0.8 0.122 252.001)"
+  audio-accent-foreground-dark: "oklch(0.16 0.02 270)"
   audio-panel-start: "oklch(0.183 0.05 270.309)"
   audio-panel-mid: "oklch(0.209 0.053 268.661)"
   audio-panel-end: "oklch(0.183 0.05 270.309)"
@@ -252,7 +254,7 @@ The initial KKB theme uses a neutral structural foundation with a cool audio spe
 - **Secondary / Muted / Accent:** Quiet neutral fills for secondary actions, hover states, grouped controls, inactive areas, and selected surfaces. Their foreground partners are mandatory whenever the fill is used.
 - **Success / Success Foreground:** Confirmed completion and healthy status. The initial light mapping uses a deep green with light text; dark mode uses a lighter green with dark text. Visible copy or iconography must accompany the color.
 - **Warning / Warning Foreground:** Recoverable risk or attention state. The initial light mapping uses a deep amber-brown with light text; dark mode uses a brighter amber with dark text. Visible copy or iconography must accompany the color.
-- **Audio Spectrum:** Cool blue and blue-violet values currently carry waveform state, progress, buffer state, signal emphasis, and instrument telemetry. The role is stable; exact values may change by theme and color mode.
+- **Audio Spectrum:** Cool blue and blue-violet values currently carry waveform state, progress, buffer state, signal emphasis, and instrument telemetry. Filled audio-accent surfaces use their dedicated dark foreground role in both modes; translucent audio surfaces use the surrounding semantic foreground. The role is stable; exact values may change by theme and color mode.
 
 ### Tertiary
 

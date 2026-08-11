@@ -166,8 +166,8 @@ export function DesignSystemCards({ stageClassName }: { stageClassName?: string 
         className={cn("md:col-span-2", stageClassName)}
       >
         <div className="grid gap-3 sm:grid-cols-2">
-          <div className="border border-audio-panel-border bg-audio-accent-softer p-4">
-            <p className="font-mono text-sm text-audio-accent">audio blue</p>
+          <div className="border border-audio-panel-border bg-audio-accent-softer p-4 text-foreground">
+            <p className="font-mono text-sm">audio blue</p>
             <div className="mt-4 flex h-20 items-end gap-1">
               {[28, 64, 42, 80, 54, 72, 36, 60].map((value) => (
                 <div

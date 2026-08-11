@@ -4,7 +4,7 @@ import { DirectionProvider } from "@kkb/ui/components/direction";
 import { ModeToggle } from "@kkb/ui/components/mode-toggle";
 
 import type { CatalogItem } from "./catalog-data";
-import { utilityItems } from "./catalog-data";
+import { secondaryItems } from "./catalog-data";
 import { SpecimenStage } from "./catalog-surface-shared";
 
 export function UtilitiesExamples({ item }: { item?: CatalogItem }) {
@@ -13,11 +13,11 @@ export function UtilitiesExamples({ item }: { item?: CatalogItem }) {
       <>
         <SpecimenStage title="Direction Provider runtime surface">
           <DirectionProvider dir="rtl">
-            <div className="rounded-md border p-3 text-sm">RTL provider specimen</div>
+            <div className="border p-3 text-sm">RTL provider specimen</div>
           </DirectionProvider>
         </SpecimenStage>
         <SpecimenStage title="Direction Provider source reference">
-          <UtilitySourceList />
+          <UtilitySourceReference item={item} />
         </SpecimenStage>
       </>
     );
@@ -30,7 +30,7 @@ export function UtilitiesExamples({ item }: { item?: CatalogItem }) {
           <ModeToggle />
         </SpecimenStage>
         <SpecimenStage title="Mode Toggle source reference">
-          <UtilitySourceList />
+          <UtilitySourceReference item={item} />
         </SpecimenStage>
       </>
     );
@@ -48,7 +48,7 @@ export function UtilitiesExamples({ item }: { item?: CatalogItem }) {
           </div>
         </SpecimenStage>
         <SpecimenStage title="Theme Provider source reference">
-          <UtilitySourceList />
+          <UtilitySourceReference item={item} />
         </SpecimenStage>
       </>
     );
@@ -64,7 +64,7 @@ export function UtilitiesExamples({ item }: { item?: CatalogItem }) {
           </div>
         </SpecimenStage>
         <SpecimenStage title="useIsMobile source reference">
-          <UtilitySourceList />
+          <UtilitySourceReference item={item} />
         </SpecimenStage>
       </>
     );
@@ -76,7 +76,7 @@ export function UtilitiesExamples({ item }: { item?: CatalogItem }) {
         <div className="space-y-4">
           <ModeToggle />
           <DirectionProvider dir="rtl">
-            <div className="rounded-md border p-3 text-sm">RTL provider specimen</div>
+            <div className="border p-3 text-sm">RTL provider specimen</div>
           </DirectionProvider>
           <p className="text-sm text-muted-foreground">
             ThemeProvider wraps the app; this page consumes its light/dark state.
@@ -90,15 +90,26 @@ export function UtilitiesExamples({ item }: { item?: CatalogItem }) {
   );
 }
 
+function UtilitySourceReference({ item }: { item: CatalogItem }) {
+  return (
+    <div className="border p-3">
+      <p className="font-mono text-sm">{item.label}</p>
+      <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{item.source}</p>
+    </div>
+  );
+}
+
 function UtilitySourceList() {
   return (
     <div className="space-y-2">
-      {utilityItems.map((item) => (
-        <div key={item.id} className="border p-3">
-          <p className="font-mono text-sm">{item.label}</p>
-          <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{item.source}</p>
-        </div>
-      ))}
+      {secondaryItems
+        .filter((item) => item.category === "Utilities")
+        .map((item) => (
+          <div key={item.id} className="border p-3">
+            <p className="font-mono text-sm">{item.label}</p>
+            <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{item.source}</p>
+          </div>
+        ))}
     </div>
   );
 }

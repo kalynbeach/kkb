@@ -187,6 +187,8 @@ function dispatchPrimaryClick(target: Element, window: Window) {
       new window.PointerEvent("pointerdown", {
         bubbles: true,
         button: 0,
+        buttons: 1,
+        cancelable: true,
         ctrlKey: false,
         isPrimary: true,
         pointerType: "mouse",
@@ -196,14 +198,26 @@ function dispatchPrimaryClick(target: Element, window: Window) {
       new window.PointerEvent("pointerup", {
         bubbles: true,
         button: 0,
+        cancelable: true,
         ctrlKey: false,
         isPrimary: true,
         pointerType: "mouse",
       }),
     );
-    target.dispatchEvent(new window.MouseEvent("mousedown", { bubbles: true, button: 0 }));
-    target.dispatchEvent(new window.MouseEvent("mouseup", { bubbles: true, button: 0 }));
-    target.dispatchEvent(new window.MouseEvent("click", { bubbles: true, button: 0 }));
+    target.dispatchEvent(
+      new window.MouseEvent("mousedown", {
+        bubbles: true,
+        button: 0,
+        buttons: 1,
+        cancelable: true,
+      }),
+    );
+    target.dispatchEvent(
+      new window.MouseEvent("mouseup", { bubbles: true, button: 0, cancelable: true }),
+    );
+    target.dispatchEvent(
+      new window.MouseEvent("click", { bubbles: true, button: 0, cancelable: true }),
+    );
   });
 }
 

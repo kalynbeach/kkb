@@ -107,6 +107,21 @@ describe("design-system style contracts", () => {
       expect(
         contrastRatio(oklchValue(block, "warning-foreground"), oklchValue(block, "warning")),
       ).toBeGreaterThanOrEqual(4.5);
+      expect(
+        contrastRatio(oklchValue(block, "destructive"), oklchValue(block, "background")),
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(
+        contrastRatio(
+          oklchValue(block, "destructive-foreground"),
+          oklchValue(block, "destructive"),
+        ),
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(
+        contrastRatio(
+          oklchValue(block, "destructive-foreground"),
+          oklchValue(block, "destructive-hover"),
+        ),
+      ).toBeGreaterThanOrEqual(4.5);
     }
   });
 
@@ -201,6 +216,7 @@ describe("design-system style contracts", () => {
     const semanticHtml = renderToString(createElement(Separator, { decorative: false }));
 
     expect(decorativeHtml).toContain('role="none"');
+    expect(decorativeHtml).not.toContain("aria-orientation");
     expect(semanticHtml).toContain('role="separator"');
   });
 
