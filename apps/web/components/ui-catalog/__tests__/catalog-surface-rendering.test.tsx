@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { renderToString } from "react-dom/server";
-import { CATALOG_CHART_ACCESSIBILITY_LAYER } from "../catalog-chart";
+import { CatalogCoverageChart } from "../catalog-chart";
 import {
   type CatalogItem,
   componentItems,
@@ -8,6 +8,7 @@ import {
   secondaryItems,
   visualCatalogIds,
 } from "../catalog-data";
+import { chartData } from "../catalog-preview-data";
 import { CatalogRail } from "../catalog-rail";
 import { CatalogSurface } from "../catalog-surfaces";
 import { PreviewWall } from "../preview-wall";
@@ -181,16 +182,22 @@ describe("ui catalog focused surfaces", () => {
 
   test("renders semantic chart content and mode-safe audio swatches", () => {
     const chartHtml = renderCatalogSurfaceHtml(itemFromId("chart"));
+    const standaloneChartHtml = renderToString(<CatalogCoverageChart />);
     const previewHtml = renderToString(<PreviewWall onSelect={() => undefined} />);
     const audioThemeHtml = renderCatalogSurfaceHtml(itemFromId("audio-theme"));
 
-    expect(CATALOG_CHART_ACCESSIBILITY_LAYER).toBe(false);
     expect(chartHtml.match(/role="img"/g)).toHaveLength(1);
     expect(chartHtml).not.toContain('role="application"');
     expect(chartHtml).toContain('data-chart-semantics="named-image-with-value-table"');
-    expect(chartHtml).toContain("Monthly component coverage values");
-    expect(chartHtml).toContain("Jan");
-    expect(chartHtml).toContain("52");
+    expect(chartHtml).toContain("Bar chart comparing monthly component coverage.");
+    expect(chartHtml).not.toContain("Bar chart showing Jan 52");
+    expect(chartHtml).toContain("Monthly component coverage.");
+    expect(standaloneChartHtml).toContain("Monthly component coverage values");
+    for (const { month, value } of chartData) {
+      expect(chartHtml).toContain(month);
+      expect(chartHtml.match(new RegExp(`>${value}<`, "g"))).toHaveLength(1);
+      expect(standaloneChartHtml.match(new RegExp(`>${value}<`, "g"))).toHaveLength(1);
+    }
     expect(chartHtml).not.toContain('aria-label="Chart specimen"');
     expect(previewHtml).toContain("text-audio-accent-foreground");
     expect(audioThemeHtml).toContain("text-audio-accent-foreground");

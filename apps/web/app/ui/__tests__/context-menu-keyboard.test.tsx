@@ -3,7 +3,7 @@ import { Window } from "happy-dom";
 
 const childProcessFlag = "KKB_CONTEXT_MENU_KEYBOARD_CHILD";
 
-async function runContextMenuKeyboardInteraction() {
+async function runContextMenuKeyboardInteraction(key: "ContextMenu" | "F10", shiftKey: boolean) {
   const window = new Window({ url: "http://localhost/ui?item=context-menu" });
   const originalGlobals = new Map<string, unknown>();
   const globals = {
@@ -67,8 +67,8 @@ async function runContextMenuKeyboardInteraction() {
       new window.KeyboardEvent("keydown", {
         bubbles: true,
         cancelable: true,
-        key: "F10",
-        shiftKey: true,
+        key,
+        shiftKey,
       }),
     );
   });
@@ -88,24 +88,27 @@ async function runContextMenuKeyboardInteraction() {
 }
 
 describe("ContextMenu keyboard contract", () => {
-  test("opens a focused context target with Shift+F10", async () => {
+  test("opens a focused context target with Shift+F10 and the ContextMenu key", async () => {
     if (process.env[childProcessFlag] === "1") {
-      await runContextMenuKeyboardInteraction();
+      const key = process.env.KKB_CONTEXT_MENU_KEY === "ContextMenu" ? "ContextMenu" : "F10";
+      await runContextMenuKeyboardInteraction(key, key === "F10");
       return;
     }
 
-    const result = Bun.spawnSync({
-      cmd: ["bun", "test", import.meta.path],
-      env: { ...process.env, [childProcessFlag]: "1" },
-      stderr: "pipe",
-      stdout: "pipe",
-    });
+    for (const key of ["F10", "ContextMenu"] as const) {
+      const result = Bun.spawnSync({
+        cmd: ["bun", "test", import.meta.path],
+        env: { ...process.env, [childProcessFlag]: "1", KKB_CONTEXT_MENU_KEY: key },
+        stderr: "pipe",
+        stdout: "pipe",
+      });
 
-    if (result.exitCode !== 0) {
-      const output = `${result.stdout.toString()}\n${result.stderr.toString()}`.trim();
-      throw new Error(`Isolated ContextMenu keyboard test failed:\n${output}`);
+      if (result.exitCode !== 0) {
+        const output = `${result.stdout.toString()}\n${result.stderr.toString()}`.trim();
+        throw new Error(`Isolated ContextMenu ${key} keyboard test failed:\n${output}`);
+      }
+
+      expect(result.exitCode).toBe(0);
     }
-
-    expect(result.exitCode).toBe(0);
   });
 });

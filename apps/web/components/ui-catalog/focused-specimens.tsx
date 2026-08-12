@@ -213,7 +213,7 @@ import {
 } from "@kkb/ui/components/sidebar";
 import { Skeleton } from "@kkb/ui/components/skeleton";
 import { Slider } from "@kkb/ui/components/slider";
-import { Toaster } from "@kkb/ui/components/sonner";
+import { Toaster, toast } from "@kkb/ui/components/sonner";
 import { Spinner } from "@kkb/ui/components/spinner";
 import { Switch } from "@kkb/ui/components/switch";
 import {
@@ -252,11 +252,17 @@ import { WarningCircleIcon } from "@phosphor-icons/react/dist/csr/WarningCircle"
 import { XIcon } from "@phosphor-icons/react/dist/csr/X";
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
 
 import { CatalogCoverageChart } from "./catalog-chart";
-import { type CatalogItem, componentItems, itemFromId } from "./catalog-data";
+import {
+  type CatalogItem,
+  componentItems,
+  itemFromId,
+  type VisualCatalogId,
+  visualCatalogIds,
+} from "./catalog-data";
 import { CatalogItemIcon } from "./catalog-icons";
+import { chartData } from "./catalog-preview-data";
 import { DemoBoundary, SpecimenStage } from "./catalog-surface-shared";
 import { PlayerControlsDemo, PlayheadDemo, WaveformDemo } from "./demos/audio-demo";
 import { CarouselDemo } from "./demos/carousel-demo";
@@ -278,9 +284,22 @@ export function FocusedComponentSurface({ item }: { item: CatalogItem }) {
 function renderFocusedExamples(item: CatalogItem) {
   return (
     <DemoBoundary resetKey={item.id}>
-      {item.entryType === "visual" ? focusedExamplesFor(item) : supportingExamplesFor(item)}
+      <FocusedExamplesSelection item={item} />
     </DemoBoundary>
   );
+}
+
+function FocusedExamplesSelection({ item }: { item: CatalogItem }) {
+  if (item.entryType !== "visual") {
+    return supportingExamplesFor(item);
+  }
+
+  const visualId = visualCatalogIds.find((id) => id === item.id);
+  if (!visualId) {
+    throw new Error(`Unknown visual catalog component: ${item.id}`);
+  }
+
+  return focusedExamplesFor(visualId, item);
 }
 
 function supportingExamplesFor(item: CatalogItem) {
@@ -295,8 +314,8 @@ function supportingExamplesFor(item: CatalogItem) {
   return <UtilitiesExamples item={item} />;
 }
 
-function focusedExamplesFor(item: CatalogItem) {
-  switch (item.id) {
+function focusedExamplesFor(visualId: VisualCatalogId, item: CatalogItem) {
+  switch (visualId) {
     case "button":
       return <ButtonSpecimen />;
     case "button-group":
@@ -381,9 +400,9 @@ function focusedExamplesFor(item: CatalogItem) {
     case "audio-playhead":
     case "audio-waveform":
       return <FocusedAudioExamples item={item} />;
-    default:
-      throw new Error(`Missing focused specimen for visual component: ${item.id}`);
   }
+
+  visualId satisfies never;
 }
 
 function FocusedAudioExamples({ item }: { item: CatalogItem }) {
@@ -2309,19 +2328,13 @@ function DataExamples({ item }: { item: CatalogItem }) {
     return (
       <>
         <SpecimenStage title="Chart bars" className="md:col-span-2">
-          <CatalogCoverageChart />
+          <CatalogCoverageChart showValueTable={false} />
         </SpecimenStage>
         <SpecimenStage title="Chart accessible values">
           <Table>
             <TableCaption>Monthly component coverage.</TableCaption>
             <TableBody>
-              {[
-                ["Jan", 52],
-                ["Feb", 86],
-                ["Mar", 68],
-                ["Apr", 44],
-                ["May", 72],
-              ].map(([month, value]) => (
+              {chartData.map(({ month, value }) => (
                 <TableRow key={month}>
                   <TableCell>{month}</TableCell>
                   <TableCell>{value}</TableCell>

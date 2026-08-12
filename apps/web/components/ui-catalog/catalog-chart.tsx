@@ -14,9 +14,13 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-export const CATALOG_CHART_ACCESSIBILITY_LAYER = false;
-
-export function CatalogCoverageChart({ className }: { className?: string }) {
+export function CatalogCoverageChart({
+  className,
+  showValueTable = true,
+}: {
+  className?: string;
+  showValueTable?: boolean;
+}) {
   const titleId = React.useId();
   const descriptionId = React.useId();
 
@@ -26,7 +30,7 @@ export function CatalogCoverageChart({ className }: { className?: string }) {
         Monthly component coverage
       </figcaption>
       <p id={descriptionId} className="sr-only">
-        Bar chart showing Jan 52, Feb 86, Mar 68, Apr 44, and May 72.
+        Bar chart comparing monthly component coverage.
       </p>
       <ChartContainer
         config={chartConfig}
@@ -37,7 +41,7 @@ export function CatalogCoverageChart({ className }: { className?: string }) {
         className="min-h-40 w-full border bg-muted/20 p-2"
       >
         <BarChart
-          accessibilityLayer={CATALOG_CHART_ACCESSIBILITY_LAYER}
+          accessibilityLayer={false}
           data={chartData}
           margin={{ left: 4, right: 4, top: 8 }}
         >
@@ -47,23 +51,25 @@ export function CatalogCoverageChart({ className }: { className?: string }) {
           <Bar dataKey="value" fill="var(--color-value)" radius={0} />
         </BarChart>
       </ChartContainer>
-      <table className="sr-only">
-        <caption>Monthly component coverage values</caption>
-        <thead>
-          <tr>
-            <th scope="col">Month</th>
-            <th scope="col">Coverage</th>
-          </tr>
-        </thead>
-        <tbody>
-          {chartData.map((entry) => (
-            <tr key={entry.month}>
-              <th scope="row">{entry.month}</th>
-              <td>{entry.value}</td>
+      {showValueTable ? (
+        <table className="sr-only">
+          <caption>Monthly component coverage values</caption>
+          <thead>
+            <tr>
+              <th scope="col">Month</th>
+              <th scope="col">Coverage</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {chartData.map((entry) => (
+              <tr key={entry.month}>
+                <th scope="row">{entry.month}</th>
+                <td>{entry.value}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : null}
     </figure>
   );
 }

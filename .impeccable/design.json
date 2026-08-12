@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-29T04:33:40.987Z",
+  "generatedAt": "2026-08-12T19:24:53.000Z",
   "title": "Design System: KKB",
   "extensions": {
     "colorMeta": {
@@ -579,14 +579,14 @@
         "displayName": "Destructive Dark",
         "canonical": "oklch(0.704 0.191 22.216)",
         "tonalRamp": [
-          "oklch(0.15 0.17 25)",
-          "oklch(0.27 0.17 25)",
-          "oklch(0.39 0.17 25)",
-          "oklch(0.51 0.17 25)",
-          "oklch(0.63 0.17 25)",
-          "oklch(0.75 0.17 25)",
-          "oklch(0.87 0.17 25)",
-          "oklch(0.95 0.17 25)"
+          "oklch(0.15 0.191 22.216)",
+          "oklch(0.27 0.191 22.216)",
+          "oklch(0.39 0.191 22.216)",
+          "oklch(0.51 0.191 22.216)",
+          "oklch(0.63 0.191 22.216)",
+          "oklch(0.75 0.191 22.216)",
+          "oklch(0.87 0.191 22.216)",
+          "oklch(0.95 0.191 22.216)"
         ]
       },
       "destructive-foreground-dark": {
@@ -1209,11 +1209,35 @@
       },
       "body-md": {
         "displayName": "Body MD",
-        "purpose": "Readable product prose and explanatory UI copy."
+        "purpose": "Product copy, descriptions, and explanatory text."
+      },
+      "body-sm": {
+        "displayName": "Body SM",
+        "purpose": "Field help and compact explanatory text."
       },
       "label-md": {
         "displayName": "Label MD",
         "purpose": "Buttons, tabs, navigation, controls, and terse metadata."
+      },
+      "label-sm": {
+        "displayName": "Label SM",
+        "purpose": "Compact labels, terse metadata, and figure labels."
+      },
+      "code-sm": {
+        "displayName": "Code SM",
+        "purpose": "Inline technical references and compact code-adjacent labels."
+      },
+      "body-serif": {
+        "displayName": "Body Serif",
+        "purpose": "Brand marks and deliberate editorial accents."
+      },
+      "body-serif-secondary": {
+        "displayName": "Body Serif Secondary",
+        "purpose": "Longer secondary editorial passages with a traditional reading rhythm."
+      },
+      "accent-mono": {
+        "displayName": "Accent Mono",
+        "purpose": "Pixel-forward or lo-fi technical accents."
       },
       "audio-label": {
         "displayName": "Audio Label",
@@ -1279,12 +1303,35 @@
       "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: 0; background: var(--primary); color: var(--primary-foreground); font: 500 14px/20px var(--font-tx-02), ui-monospace, monospace; transition: background-color 180ms ease-out, box-shadow 180ms ease-out; } .ds-btn-primary:hover { background: color-mix(in oklch, var(--primary) 90%, transparent); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); } .ds-btn-primary:disabled { pointer-events: none; opacity: 0.5; }"
     },
     {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Quiet tonal action for supporting choices within a local surface.",
+      "html": "<button class=\"ds-btn-secondary\">Save draft</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: 0; background: var(--secondary); color: var(--secondary-foreground); font: 500 14px/20px var(--font-tx-02), ui-monospace, monospace; transition: background-color 180ms ease-out, box-shadow 180ms ease-out; } .ds-btn-secondary:hover { background: color-mix(in oklch, var(--secondary) 80%, transparent); } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); } .ds-btn-secondary:disabled { pointer-events: none; opacity: 0.5; }"
+    },
+    {
       "name": "Outline Button",
       "kind": "button",
       "refersTo": "button-outline",
       "description": "Quiet bordered action with explicit mode-aware fill, hover, and focus states.",
       "html": "<button class=\"ds-btn-outline\">Inspect result</button>",
       "css": ".ds-btn-outline { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 1px solid var(--border); border-radius: 0; background: var(--background); color: var(--foreground); box-shadow: 0 1px 2px color-mix(in oklch, var(--foreground) 8%, transparent); font: 500 14px/20px var(--font-tx-02), ui-monospace, monospace; transition: background-color 180ms ease-out, color 180ms ease-out, box-shadow 180ms ease-out; } :host-context(.dark) .ds-btn-outline { background: color-mix(in oklch, var(--input) 30%, transparent); border-color: var(--input); } .ds-btn-outline:hover { background: var(--accent); color: var(--accent-foreground); } :host-context(.dark) .ds-btn-outline:hover { background: color-mix(in oklch, var(--input) 50%, transparent); } .ds-btn-outline:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Chrome-free supporting action that gains semantic accent contrast on interaction.",
+      "html": "<button class=\"ds-btn-ghost\">View details</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 36px; padding: 0 16px; border: 0; border-radius: 0; background: transparent; color: var(--foreground); font: 500 14px/20px var(--font-tx-02), ui-monospace, monospace; transition: background-color 180ms ease-out, color 180ms ease-out, box-shadow 180ms ease-out; } .ds-btn-ghost:hover { background: var(--accent); color: var(--accent-foreground); } :host-context(.dark) .ds-btn-ghost:hover { background: color-mix(in oklch, var(--accent) 50%, transparent); } .ds-btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); }"
+    },
+    {
+      "name": "Primary Navigation",
+      "kind": "nav",
+      "description": "Compact text-first navigation with visible current location and semantic interaction states.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Primary\"><a class=\"ds-nav-link\" href=\"#preview\" aria-current=\"page\">Preview</a><a class=\"ds-nav-link\" href=\"#components\">Components</a><a class=\"ds-nav-link\" href=\"#tokens\">Tokens</a></nav>",
+      "css": ".ds-nav { display: inline-flex; align-items: center; gap: 4px; } .ds-nav-link { display: inline-flex; min-height: 36px; align-items: center; padding: 8px 16px; border-radius: 0; color: var(--muted-foreground); font: 500 14px/20px var(--font-tx-02), ui-monospace, monospace; text-decoration: none; transition: background-color 180ms ease-out, color 180ms ease-out, box-shadow 180ms ease-out; } .ds-nav-link:hover { background: var(--accent); color: var(--accent-foreground); } .ds-nav-link[aria-current=\"page\"] { background: color-mix(in oklch, var(--accent) 50%, transparent); color: var(--foreground); } .ds-nav-link:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 50%, transparent); }"
     },
     {
       "name": "Status Badge",
@@ -1327,7 +1374,7 @@
   ],
   "narrative": {
     "northStar": "Dynamic Digital Studio",
-    "overview": "KKB is a design substrate for a personal technical-creative studio. It should feel precise, rhythmic, detailed, and visibly crafted while remaining open enough to support audio systems, shaders, WebGPU, Three.js, high-quality animation, generative graphics, sigils, advanced symbols, diagrams, and interactive technical artifacts.\n\nThe system distinguishes a stable visual language from selectable atmosphere. Typography, geometry, spacing, symbology, component anatomy, interaction behavior, and accessibility stay consistent across themes by default. Themes primarily change curated light and dark palettes, surface character, visualization colors, shader parameters, procedural texture, and subtle qualities of motion or depth. A theme changes the atmosphere, not the product.\n\n`@kkb/ui` is the shared implementation foundation. Its semantic tokens and reusable components keep apps, demos, docs, reports, and experiments within one product family without forcing every surface into the same composition. Operational, editorial, expressive, instrument-like, and immersive surfaces may all use either light or dark mode.\n\nThe initial atmosphere is intentionally limited to one curated light/dark pair. Phosphor is the initial utility-icon vocabulary, distinct from custom KKB sigils and symbols. Full migration of shared primitives from Radix UI to Base UI is approved near-term work, with the existing Base UI Combobox serving as the current foothold; this supersedes the earlier sequence that deferred migration until after composition work. JSON-render remains an experimental capability outside the active design-system roadmap.",
+    "overview": "KKB is a design substrate for a personal technical-creative studio. It should feel precise, rhythmic, detailed, and visibly crafted while remaining open enough to support audio systems, shaders, WebGPU, Three.js, high-quality animation, generative graphics, sigils, advanced symbols, diagrams, and interactive technical artifacts.\n\nThe system distinguishes a stable visual language from selectable atmosphere. Typography, geometry, spacing, symbology, component anatomy, interaction behavior, and accessibility stay consistent across themes by default. Themes primarily change curated light and dark palettes, surface character, visualization colors, shader parameters, procedural texture, and subtle qualities of motion or depth. A theme changes the atmosphere, not the product.\n\n`@kkb/ui` is the shared implementation foundation. Its semantic tokens and reusable components keep apps, demos, docs, reports, and experiments within one product family without forcing every surface into the same composition. Operational, editorial, expressive, instrument-like, and immersive surfaces may all use either light or dark mode. The web app's `/ui` route inventories and visually verifies these components through a dense Preview wall and focused component item views; it does not host complete application shells.\n\nThe initial atmosphere is intentionally limited to one curated light/dark pair. Phosphor is the initial utility-icon vocabulary, distinct from custom KKB sigils and symbols. Owned shared primitives use Base UI, with native implementations where Base has no matching primitive; retained Radix packages are transitive dependencies of out-of-scope integrations. JSON-render remains an experimental capability outside the active design-system roadmap.",
     "keyCharacteristics": [
       "Complete, deliberately curated light and dark modes are required for every theme.",
       "Geist carries readable prose; TX-02 carries technical headings, labels, code, and telemetry.",
@@ -1431,6 +1478,8 @@
       "Don't round ordinary buttons, fields, cards, panels, menus, overlays, navigation items, or containers.",
       "Don't add rounded soft cards, pillowy inputs, glassmorphism, heavy decorative gradients, or generic glossy SaaS styling to the core language.",
       "Don't create app-local primitives when an equivalent or composable `@kkb/ui` foundation exists.",
+      "Don't turn `/ui` into a workshop index, docs site, or gallery of complete experiment and instrument applications; it is the component inventory and focused inspection surface.",
+      "Don't extract complete route composition into `@kkb/ui` before real consumers establish a reusable component seam.",
       "Don't treat JSON-render as part of the active design-system roadmap."
     ]
   }

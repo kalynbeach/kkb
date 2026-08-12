@@ -148,7 +148,7 @@ import {
 } from "@kkb/ui/components/sidebar";
 import { Skeleton } from "@kkb/ui/components/skeleton";
 import { Slider } from "@kkb/ui/components/slider";
-import { Toaster } from "@kkb/ui/components/sonner";
+import { Toaster, toast } from "@kkb/ui/components/sonner";
 import { Spinner } from "@kkb/ui/components/spinner";
 import { Switch } from "@kkb/ui/components/switch";
 import { Table, TableBody, TableCell, TableRow } from "@kkb/ui/components/table";
@@ -165,8 +165,6 @@ import {
 import { BellIcon } from "@phosphor-icons/react/dist/csr/Bell";
 import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/csr/MagnifyingGlass";
 import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-
 import { CatalogCoverageChart } from "./catalog-chart";
 import { itemFromId, type VisualCatalogId, visualCatalogIds } from "./catalog-data";
 import { PlayerControlsDemo, PlayheadDemo, WaveformDemo } from "./demos/audio-demo";
