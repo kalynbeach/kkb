@@ -26,7 +26,11 @@ export function CatalogCoverageChart({
   const descriptionId = React.useId();
 
   return (
-    <figure aria-describedby={descriptionId} className={cn("min-w-0", className)}>
+    <figure
+      aria-describedby={descriptionId}
+      data-chart-semantics={showValueTable ? "named-figure-with-value-table" : "named-figure"}
+      className={cn("min-w-0", className)}
+    >
       <figcaption className="sr-only">{accessibleTitle}</figcaption>
       <p id={descriptionId} className="sr-only">
         Bar chart comparing monthly component coverage.
@@ -34,7 +38,6 @@ export function CatalogCoverageChart({
       <ChartContainer
         config={chartConfig}
         aria-hidden="true"
-        data-chart-semantics={showValueTable ? "named-figure-with-value-table" : "named-figure"}
         className="min-h-40 w-full border bg-muted/20 p-2"
       >
         <BarChart
