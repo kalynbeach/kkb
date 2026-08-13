@@ -27,7 +27,7 @@ export function CatalogCoverageChart({
   const descriptionId = React.useId();
 
   return (
-    <figure className={cn("min-w-0", className)}>
+    <figure aria-describedby={descriptionId} className={cn("min-w-0", className)}>
       <figcaption id={titleId} className="sr-only">
         {accessibleTitle}
       </figcaption>
@@ -36,10 +36,7 @@ export function CatalogCoverageChart({
       </p>
       <ChartContainer
         config={chartConfig}
-        role="img"
-        aria-labelledby={titleId}
-        aria-describedby={descriptionId}
-        data-chart-semantics="named-image-with-value-table"
+        data-chart-semantics={showValueTable ? "named-image-with-value-table" : "named-image"}
         className="min-h-40 w-full border bg-muted/20 p-2"
       >
         <BarChart

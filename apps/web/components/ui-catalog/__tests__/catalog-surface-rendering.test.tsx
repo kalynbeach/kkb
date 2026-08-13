@@ -186,9 +186,11 @@ describe("ui catalog focused surfaces", () => {
     const previewHtml = renderToString(<PreviewWall onSelect={() => undefined} />);
     const audioThemeHtml = renderCatalogSurfaceHtml(itemFromId("audio-theme"));
 
-    expect(chartHtml.match(/role="img"/g)).toHaveLength(1);
+    expect(chartHtml).not.toContain('role="img"');
     expect(chartHtml).not.toContain('role="application"');
-    expect(chartHtml).toContain('data-chart-semantics="named-image-with-value-table"');
+    expect(chartHtml).toContain('data-chart-semantics="named-image"');
+    expect(chartHtml).not.toContain('data-chart-semantics="named-image-with-value-table"');
+    expect(standaloneChartHtml).toContain('data-chart-semantics="named-image-with-value-table"');
     expect(chartHtml).toContain("Bar chart comparing monthly component coverage.");
     expect(chartHtml).not.toContain("Bar chart showing Jan 52");
     expect(chartHtml).toContain("Monthly component coverage.");
