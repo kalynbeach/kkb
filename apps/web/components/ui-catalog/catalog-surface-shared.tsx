@@ -56,7 +56,6 @@ export function SpecimenStage({
 }
 
 type DemoBoundaryProps = {
-  resetKey: string;
   children: React.ReactNode;
 };
 
@@ -69,12 +68,6 @@ export class DemoBoundary extends React.Component<DemoBoundaryProps, DemoBoundar
 
   static getDerivedStateFromError(): DemoBoundaryState {
     return { hasError: true };
-  }
-
-  componentDidUpdate(previousProps: DemoBoundaryProps) {
-    if (previousProps.resetKey !== this.props.resetKey && this.state.hasError) {
-      this.setState({ hasError: false });
-    }
   }
 
   render() {

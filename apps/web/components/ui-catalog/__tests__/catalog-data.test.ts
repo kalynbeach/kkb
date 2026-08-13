@@ -18,40 +18,94 @@ function workspaceRoot() {
   return process.cwd().endsWith("/apps/web") ? resolve(process.cwd(), "../..") : process.cwd();
 }
 
-function publicComponentSubpaths() {
+type UiPackageExports = Record<string, string>;
+
+const catalogEligibleExportPrefixes = ["./components/", "./hooks/", "./json-render"];
+const catalogExcludedExports = new Set(["./lib/*", "./styles/*.css"]);
+
+function uiPackageExports() {
   const root = workspaceRoot();
-  const packageJson = JSON.parse(
-    readFileSync(resolve(root, "packages/ui/package.json"), "utf8"),
-  ) as {
-    exports: Record<string, string>;
-  };
-  const wildcardTarget = packageJson.exports["./components/*"];
+  return (
+    JSON.parse(readFileSync(resolve(root, "packages/ui/package.json"), "utf8")) as {
+      exports: UiPackageExports;
+    }
+  ).exports;
+}
 
-  expect(wildcardTarget).toBe("./src/components/*.tsx");
+function isCatalogEligibleExport(subpath: string) {
+  return catalogEligibleExportPrefixes.some((prefix) => subpath.startsWith(prefix));
+}
 
-  const componentDirectory = resolve(root, "packages/ui/src/components");
-  const componentFiles = [
-    ...new Bun.Glob("**/*.tsx").scanSync({ cwd: componentDirectory, onlyFiles: true }),
+function publicSubpathsForExport(subpath: string, target: string) {
+  if (!subpath.includes("*") && !target.includes("*")) {
+    return [`@kkb/ui/${subpath.slice(2)}`];
+  }
+
+  const [subpathPrefix, subpathSuffix] = subpath.split("*");
+  const [targetPrefix, targetSuffix] = target.split("*");
+
+  if (subpathPrefix === undefined || targetPrefix === undefined || targetSuffix === undefined) {
+    throw new Error(`Unsupported @kkb/ui export pattern: ${subpath} -> ${target}`);
+  }
+
+  const targetDirectory = resolve(workspaceRoot(), "packages/ui", targetPrefix);
+  const files = [
+    ...new Bun.Glob(`**/*${targetSuffix}`).scanSync({ cwd: targetDirectory, onlyFiles: true }),
   ].filter((path) => !path.includes("/__tests__/") && !path.startsWith("__tests__/"));
-  const wildcardSubpaths = componentFiles.map(
-    (path) => `@kkb/ui/components/${path.replace(/\.tsx$/, "")}`,
-  );
-  const explicitSubpaths = Object.entries(packageJson.exports)
-    .filter(([subpath]) => subpath.startsWith("./components/") && !subpath.includes("*"))
-    .map(([subpath]) => `@kkb/ui/${subpath.slice(2)}`);
 
-  return [...wildcardSubpaths, ...explicitSubpaths].sort();
+  return files.map((path) => {
+    const wildcardValue = path.slice(0, -targetSuffix.length);
+    return `@kkb/ui/${subpathPrefix.slice(2)}${wildcardValue}${subpathSuffix ?? ""}`;
+  });
+}
+
+function publicCatalogEligibleSubpaths() {
+  return Object.entries(uiPackageExports())
+    .filter(([subpath]) => isCatalogEligibleExport(subpath))
+    .flatMap(([subpath, target]) => publicSubpathsForExport(subpath, target))
+    .sort();
 }
 
 describe("ui catalog data", () => {
-  test("derives bidirectional inventory parity from the public package component surface", () => {
-    const catalogComponentSubpaths = catalogItems
-      .filter((item) => item.source.startsWith("@kkb/ui/components/"))
+  test("derives bidirectional inventory parity from catalog-eligible package exports", () => {
+    const catalogExportSubpaths = catalogItems
+      .filter((item) => item.source.startsWith("@kkb/ui/"))
       .map((item) => item.source)
       .sort();
 
-    expect(catalogComponentSubpaths).toEqual(publicComponentSubpaths());
-    expect(new Set(catalogComponentSubpaths).size).toBe(catalogComponentSubpaths.length);
+    expect(catalogExportSubpaths).toEqual(publicCatalogEligibleSubpaths());
+    expect(new Set(catalogExportSubpaths).size).toBe(catalogExportSubpaths.length);
+  });
+
+  test("classifies every package export as catalog-eligible or intentionally excluded", () => {
+    for (const subpath of Object.keys(uiPackageExports())) {
+      const classifications = [
+        isCatalogEligibleExport(subpath),
+        catalogExcludedExports.has(subpath),
+      ].filter(Boolean);
+
+      expect(classifications).toHaveLength(1);
+    }
+  });
+
+  test("keeps eligible hooks and integrations synchronized with catalog data", () => {
+    const expectedSupportingSubpaths = publicCatalogEligibleSubpaths().filter(
+      (source) => source.startsWith("@kkb/ui/hooks/") || source.startsWith("@kkb/ui/json-render"),
+    );
+    const catalogSupportingSubpaths = catalogItems
+      .map((item) => item.source)
+      .filter(
+        (source) => source.startsWith("@kkb/ui/hooks/") || source.startsWith("@kkb/ui/json-render"),
+      )
+      .sort();
+
+    expect(expectedSupportingSubpaths.some((source) => source.startsWith("@kkb/ui/hooks/"))).toBe(
+      true,
+    );
+    expect(
+      expectedSupportingSubpaths.some((source) => source.startsWith("@kkb/ui/json-render")),
+    ).toBe(true);
+    expect(catalogSupportingSubpaths).toEqual(expectedSupportingSubpaths);
   });
 
   test("classifies every public visual component and supporting export explicitly", () => {

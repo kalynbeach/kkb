@@ -191,13 +191,16 @@ export function PreviewInventorySpecimen({
   onSelect: (id: string) => void;
 }) {
   const item = itemFromId(id);
+  const titleId = `preview-inventory-${id}-title`;
 
   return (
     <article
+      aria-labelledby={titleId}
       data-catalog-covers={id}
       className="mb-4 inline-block w-full min-w-0 break-inside-avoid border-t border-border bg-muted/20 pt-2 align-top"
     >
       <button
+        id={titleId}
         type="button"
         onClick={() => onSelect(id)}
         className="mb-3 min-h-8 px-1 text-left font-mono text-[11px] text-muted-foreground underline-offset-4 hover:text-foreground hover:underline focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
@@ -325,7 +328,12 @@ function previewFor(id: VisualCatalogId) {
     case "carousel":
       return <CarouselDemo />;
     case "chart":
-      return <CatalogCoverageChart />;
+      return (
+        <CatalogCoverageChart
+          accessibleTitle="Inventory monthly component coverage"
+          showValueTable={false}
+        />
+      );
     case "checkbox":
       return (
         <div className="flex items-center gap-2">

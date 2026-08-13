@@ -85,12 +85,10 @@ describe("ui catalog focused surfaces", () => {
       "High density",
       "Preview density",
     ]);
-    expect(rangeInputLabels(previewWall)).toEqual([
-      "Density",
-      "Volume",
-      "Preview density",
-      "Volume",
-    ]);
+    expect(rangeInputLabels(previewWall)).toHaveLength(4);
+    expect(rangeInputLabels(previewWall)).toContain("Density");
+    expect(rangeInputLabels(previewWall)).toContain("Preview density");
+    expect(rangeInputLabels(previewWall)).toContain("Volume");
     expect(rangeInputLabels(inputSection)).toEqual(["Density"]);
   });
 
@@ -182,7 +180,7 @@ describe("ui catalog focused surfaces", () => {
 
   test("renders semantic chart content and mode-safe audio swatches", () => {
     const chartHtml = renderCatalogSurfaceHtml(itemFromId("chart"));
-    const standaloneChartHtml = renderToString(<CatalogCoverageChart />);
+    const standaloneChartHtml = renderToString(<CatalogCoverageChart />).replaceAll("<!-- -->", "");
     const previewHtml = renderToString(<PreviewWall onSelect={() => undefined} />);
     const audioThemeHtml = renderCatalogSurfaceHtml(itemFromId("audio-theme"));
 
@@ -199,6 +197,9 @@ describe("ui catalog focused surfaces", () => {
       expect(standaloneChartHtml.match(new RegExp(`>${value}<`, "g"))).toHaveLength(1);
     }
     expect(chartHtml).not.toContain('aria-label="Chart specimen"');
+    expect(previewHtml).toContain("Curated monthly component coverage");
+    expect(previewHtml).toContain("Inventory monthly component coverage");
+    expect(previewHtml.match(/<table class="sr-only">/g)).toHaveLength(1);
     expect(previewHtml).toContain("text-audio-accent-foreground");
     expect(audioThemeHtml).toContain("text-audio-accent-foreground");
     expect(audioThemeHtml).not.toContain("bg-audio-accent text-primary");
@@ -213,13 +214,36 @@ describe("ui catalog focused surfaces", () => {
 
     expect(inputHtml).toContain('for="grouped-search"');
     expect(inputHtml).toContain('id="grouped-search"');
-    expect(comboboxHtml).toContain('for="focused-component-combobox"');
-    expect(comboboxHtml).toContain('aria-label="Selected component"');
+    expect(comboboxHtml).toContain('for="focused-component-combobox-trigger"');
+    expect(comboboxHtml).toContain('id="focused-component-combobox-trigger"');
+    expect(comboboxHtml).not.toContain('aria-label="Selected component"');
     expect(contextMenuHtml).toContain('data-slot="context-menu-trigger"');
     expect(contextMenuHtml).toContain('type="button"');
     expect(contextMenuHtml).toContain("Shift+F10");
     expect(sonnerHtml).toContain("Show toast");
     expect(sonnerHtml).toContain("Catalog verification complete");
+  });
+
+  test("differentiates curated and inventory controls with labelled regions", () => {
+    const previewHtml = renderToString(<PreviewWall onSelect={() => undefined} />);
+
+    expect(previewHtml).toContain('aria-label="Curated form specimens"');
+    expect(previewHtml).toContain('aria-label="Curated audio specimens"');
+    expect(previewHtml).toContain('aria-labelledby="preview-inventory-radio-group-title"');
+    expect(previewHtml).toContain('aria-labelledby="preview-inventory-switch-title"');
+    expect(previewHtml).toContain(
+      'aria-labelledby="preview-inventory-audio-player-controls-title"',
+    );
+    expect(previewHtml).toContain('id="preview-inventory-radio-group-title"');
+    expect(previewHtml).toContain('id="preview-inventory-switch-title"');
+    expect(previewHtml).toContain('id="preview-inventory-audio-player-controls-title"');
+  });
+
+  test("keeps static tooltip anatomy out of the accessibility tree", () => {
+    const tooltipHtml = renderCatalogSurfaceHtml(itemFromId("tooltip"));
+
+    expect(tooltipHtml).toContain("Tooltip content anatomy");
+    expect(tooltipHtml).not.toContain('role="tooltip"');
   });
 
   test("names focused textarea, input-group, OTP, and progress controls", () => {

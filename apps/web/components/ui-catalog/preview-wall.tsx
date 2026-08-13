@@ -78,25 +78,28 @@ export function PreviewWall({ onSelect }: { onSelect: (id: string) => void }) {
   return (
     <div className="min-h-full bg-background p-4 md:p-6">
       <div className="grid auto-rows-min gap-x-8 gap-y-6 md:grid-cols-12">
-        <PreviewCell className="md:col-span-12 xl:col-span-4">
+        <PreviewCell
+          label="Curated design token specimens"
+          className="md:col-span-12 xl:col-span-4"
+        >
           <TokenTypeStrip onSelect={onSelect} />
         </PreviewCell>
-        <PreviewCell className="md:col-span-7 xl:col-span-4">
+        <PreviewCell label="Curated action specimens" className="md:col-span-7 xl:col-span-4">
           <ActionPreview />
         </PreviewCell>
-        <PreviewCell className="md:col-span-5 xl:col-span-4">
+        <PreviewCell label="Curated navigation specimens" className="md:col-span-5 xl:col-span-4">
           <NavigationPreview />
         </PreviewCell>
-        <PreviewCell className="md:col-span-6 xl:col-span-4">
+        <PreviewCell label="Curated form specimens" className="md:col-span-6 xl:col-span-4">
           <FormPreview />
         </PreviewCell>
-        <PreviewCell className="md:col-span-6 xl:col-span-4">
+        <PreviewCell label="Curated overlay specimens" className="md:col-span-6 xl:col-span-4">
           <MenuOverlayPreview />
         </PreviewCell>
-        <PreviewCell className="md:col-span-7 xl:col-span-4">
+        <PreviewCell label="Curated data specimens" className="md:col-span-7 xl:col-span-4">
           <DataPreview />
         </PreviewCell>
-        <PreviewCell className="md:col-span-12">
+        <PreviewCell label="Curated audio specimens" className="md:col-span-12">
           <AudioPreview />
         </PreviewCell>
       </div>
@@ -105,8 +108,20 @@ export function PreviewWall({ onSelect }: { onSelect: (id: string) => void }) {
   );
 }
 
-function PreviewCell({ className, children }: { className?: string; children: ReactNode }) {
-  return <section className={cn("min-w-0", className)}>{children}</section>;
+function PreviewCell({
+  label,
+  className,
+  children,
+}: {
+  label: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section aria-label={label} className={cn("min-w-0", className)}>
+      {children}
+    </section>
+  );
 }
 
 function TokenTypeStrip({ onSelect }: { onSelect: (id: string) => void }) {
@@ -356,7 +371,7 @@ function DataPreview() {
         </TableBody>
       </Table>
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
-        <CatalogCoverageChart className="min-w-0" />
+        <CatalogCoverageChart accessibleTitle="Curated monthly component coverage" />
         <KbdGroup>
           <Kbd>⌘</Kbd>
           <Kbd>K</Kbd>

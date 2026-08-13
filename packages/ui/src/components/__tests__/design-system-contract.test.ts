@@ -61,6 +61,16 @@ function contrastRatio(foreground: [number, number, number], background: [number
   return ((luminances[0] ?? 0) + 0.05) / ((luminances[1] ?? 0) + 0.05);
 }
 
+type DesignColorMetadata = {
+  canonical: string;
+};
+
+type DesignMetadata = {
+  extensions: {
+    colorMeta: Record<string, DesignColorMetadata>;
+  };
+};
+
 describe("design-system style contracts", () => {
   test("destructive variants consume their paired semantic foreground", () => {
     const buttonClassName = buttonVariants({ variant: "destructive" });
@@ -85,9 +95,15 @@ describe("design-system style contracts", () => {
   });
 
   test("publishes radius-none geometry and accessible paired status tokens", async () => {
-    const styles = await Bun.file(new URL("../../styles/globals.css", import.meta.url)).text();
+    const [styles, designMetadata] = await Promise.all([
+      Bun.file(new URL("../../styles/globals.css", import.meta.url)).text(),
+      Bun.file(
+        new URL("../../../../../.impeccable/design.json", import.meta.url),
+      ).json() as Promise<DesignMetadata>,
+    ]);
     const light = styleBlock(styles, ":root");
     const dark = styleBlock(styles, ".dark");
+    const colorMeta = designMetadata.extensions.colorMeta;
 
     expect(light).toMatch(/--radius:\s*0;/);
     expect(styles).toContain("--radius-xs: calc(var(--radius) * 0.4)");
@@ -96,6 +112,12 @@ describe("design-system style contracts", () => {
     expect(styles).toContain("--color-warning: var(--warning)");
     expect(styles).toContain("--color-warning-foreground: var(--warning-foreground)");
     expect(styles).toContain("--color-scrim: var(--scrim)");
+    expect(colorMeta["destructive-hover"]?.canonical).toBe(
+      `oklch(${oklchValue(light, "destructive-hover").join(" ")})`,
+    );
+    expect(colorMeta["destructive-hover-dark"]?.canonical).toBe(
+      `oklch(${oklchValue(dark, "destructive-hover").join(" ")})`,
+    );
 
     for (const block of [light, dark]) {
       expect(

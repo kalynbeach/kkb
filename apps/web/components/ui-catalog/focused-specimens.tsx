@@ -283,7 +283,7 @@ export function FocusedComponentSurface({ item }: { item: CatalogItem }) {
 
 function renderFocusedExamples(item: CatalogItem) {
   return (
-    <DemoBoundary resetKey={item.id}>
+    <DemoBoundary key={item.id}>
       <FocusedExamplesSelection item={item} />
     </DemoBoundary>
   );
@@ -1220,7 +1220,7 @@ function ComboboxExamples() {
       </SpecimenStage>
       <SpecimenStage title="Combobox field context">
         <Field>
-          <FieldLabel htmlFor="focused-component-combobox">Component</FieldLabel>
+          <FieldLabel htmlFor="focused-component-combobox-trigger">Component</FieldLabel>
           <Combobox
             items={["alert", "badge", "button", "audio waveform"]}
             value={selectedComponent}
@@ -1229,12 +1229,15 @@ function ComboboxExamples() {
             modal={false}
             defaultOpen
           >
-            <ComboboxTrigger aria-label="Selected component" render={<Button variant="outline" />}>
+            <ComboboxTrigger
+              id="focused-component-combobox-trigger"
+              render={<Button variant="outline" />}
+            >
               {selectedComponent}
             </ComboboxTrigger>
             <ComboboxContent>
               <ComboboxInput
-                id="focused-component-combobox"
+                aria-label="Search available components"
                 placeholder="Find a component"
                 showTrigger={false}
               />
@@ -1855,10 +1858,7 @@ function TooltipSpecimen() {
         </Tooltip>
       </SpecimenStage>
       <SpecimenStage title="Tooltip content anatomy">
-        <div
-          role="tooltip"
-          className="inline-flex bg-primary px-3 py-1.5 text-xs text-primary-foreground"
-        >
+        <div className="inline-flex bg-primary px-3 py-1.5 text-xs text-primary-foreground">
           Catalog status
         </div>
       </SpecimenStage>

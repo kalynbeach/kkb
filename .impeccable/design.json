@@ -229,6 +229,21 @@
           "oklch(0.95 0.245 27.325)"
         ]
       },
+      "destructive-hover": {
+        "role": "primary",
+        "displayName": "Destructive Hover",
+        "canonical": "oklch(0.52 0.225 27.325)",
+        "tonalRamp": [
+          "oklch(0.15 0.225 27.325)",
+          "oklch(0.27 0.225 27.325)",
+          "oklch(0.39 0.225 27.325)",
+          "oklch(0.51 0.225 27.325)",
+          "oklch(0.63 0.225 27.325)",
+          "oklch(0.75 0.225 27.325)",
+          "oklch(0.87 0.225 27.325)",
+          "oklch(0.95 0.225 27.325)"
+        ]
+      },
       "destructive-foreground": {
         "role": "primary",
         "displayName": "Destructive Foreground",
@@ -587,6 +602,21 @@
           "oklch(0.75 0.191 22.216)",
           "oklch(0.87 0.191 22.216)",
           "oklch(0.95 0.191 22.216)"
+        ]
+      },
+      "destructive-hover-dark": {
+        "role": "primary",
+        "displayName": "Destructive Hover Dark",
+        "canonical": "oklch(0.65 0.18 22)",
+        "tonalRamp": [
+          "oklch(0.15 0.18 22)",
+          "oklch(0.27 0.18 22)",
+          "oklch(0.39 0.18 22)",
+          "oklch(0.51 0.18 22)",
+          "oklch(0.63 0.18 22)",
+          "oklch(0.75 0.18 22)",
+          "oklch(0.87 0.18 22)",
+          "oklch(0.95 0.18 22)"
         ]
       },
       "destructive-foreground-dark": {

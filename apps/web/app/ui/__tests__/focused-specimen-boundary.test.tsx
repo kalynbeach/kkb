@@ -54,6 +54,14 @@ async function runFocusedSpecimenBoundaryInteraction() {
 
     expect(window.document.body.textContent).toContain("Demo unavailable");
     expect(window.document.body.textContent).toContain("This demo failed in isolation.");
+
+    React.act(() => root.render(<FocusedComponentSurface item={itemFromId("button")} />));
+    await React.act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(window.document.body.textContent).not.toContain("Demo unavailable");
+    expect(window.document.body.textContent).toContain("Variants and sizes");
   } finally {
     console.error = originalConsoleError;
     React.act(() => root.unmount());
@@ -66,7 +74,7 @@ async function runFocusedSpecimenBoundaryInteraction() {
 }
 
 describe("Focused specimen boundary", () => {
-  test("catches visual selection failures below DemoBoundary", async () => {
+  test("catches visual selection failures and recovers atomically on navigation", async () => {
     if (process.env[childProcessFlag] === "1") {
       await runFocusedSpecimenBoundaryInteraction();
       return;

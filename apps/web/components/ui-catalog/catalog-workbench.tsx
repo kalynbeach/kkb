@@ -60,7 +60,7 @@ export function CatalogWorkbench() {
   }, []);
 
   return (
-    <main className="fixed inset-0 flex min-h-0 flex-col overflow-hidden bg-background text-foreground">
+    <main className="flex h-dvh min-h-0 flex-col overflow-hidden bg-background text-foreground">
       <CatalogSearchDialog
         open={searchOpen}
         selectedItemId={selectedItem.id}

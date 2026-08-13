@@ -20,6 +20,7 @@ function Separator({
   style,
   ...props
 }: SeparatorProps) {
+  // Base UI always emits aria-orientation; this render seam lets decorative separators omit it.
   const state = { orientation };
   const resolvedClassName = typeof className === "function" ? className(state) : className;
   const resolvedStyle = typeof style === "function" ? style(state) : style;

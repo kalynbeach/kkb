@@ -16,6 +16,15 @@ import {
   CarouselPrevious,
 } from "@kkb/ui/components/carousel";
 import {
+  Combobox,
+  ComboboxContent,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+  ComboboxTrigger,
+} from "@kkb/ui/components/combobox";
+import { Field, FieldLabel } from "@kkb/ui/components/field";
+import {
   Form,
   FormControl,
   FormDescription,
@@ -359,6 +368,46 @@ function CatalogSearchHarness() {
   );
 }
 
+function FocusedComboboxLabelHarness() {
+  const [open, setOpen] = useState(true);
+
+  return (
+    <>
+      <span data-testid="focused-combobox-state">{open ? "open" : "closed"}</span>
+      <button type="button" onClick={() => setOpen(false)}>
+        Close component options
+      </button>
+      <Field>
+        <FieldLabel htmlFor="focused-component-combobox-trigger">Component</FieldLabel>
+        <Combobox
+          items={["alert", "badge", "button"]}
+          value="button"
+          open={open}
+          onOpenChange={setOpen}
+          modal={false}
+        >
+          <ComboboxTrigger
+            id="focused-component-combobox-trigger"
+            render={<Button variant="outline" />}
+          >
+            button
+          </ComboboxTrigger>
+          <ComboboxContent>
+            <ComboboxInput aria-label="Search available components" showTrigger={false} />
+            <ComboboxList>
+              {(value: string) => (
+                <ComboboxItem key={value} value={value}>
+                  {value}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+      </Field>
+    </>
+  );
+}
+
 function FormAriaHarness() {
   const methods = useForm({ defaultValues: { density: "" } });
 
@@ -544,6 +593,40 @@ describe("interactive /ui demos", () => {
     expect(reopenedInput).not.toBe(input);
     expect(reopenedInput?.value).toBe("");
     expectBodyText(environment, "Pinned views and category browse");
+  });
+
+  test("keeps the focused Combobox label associated after its popup closes", async () => {
+    const environment = domEnvironment as DomEnvironment;
+    renderIntoDom(environment, <FocusedComboboxLabelHarness />);
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    const label = environment.document.querySelector(
+      'label[for="focused-component-combobox-trigger"]',
+    );
+    const trigger = environment.document.querySelector<HTMLButtonElement>(
+      "#focused-component-combobox-trigger",
+    );
+
+    expect(label?.textContent).toBe("Component");
+    expect(trigger).not.toBeNull();
+    expect(trigger?.hasAttribute("aria-label")).toBe(false);
+    expect(trigger?.getAttribute("aria-expanded")).toBe("true");
+
+    dispatchPrimaryClick(
+      getButtonByText(environment, "Close component options"),
+      environment.window,
+    );
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    expect(
+      environment.document.querySelector('[data-testid="focused-combobox-state"]')?.textContent,
+    ).toBe("closed");
+    expect(environment.document.querySelector("#focused-component-combobox-trigger")).toBe(trigger);
+    expect(label?.getAttribute("for")).toBe(trigger?.id);
   });
 
   test("uses reactive waveform props as the only interaction contract", () => {

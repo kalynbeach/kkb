@@ -15,9 +15,11 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function CatalogCoverageChart({
+  accessibleTitle = "Monthly component coverage",
   className,
   showValueTable = true,
 }: {
+  accessibleTitle?: string;
   className?: string;
   showValueTable?: boolean;
 }) {
@@ -27,7 +29,7 @@ export function CatalogCoverageChart({
   return (
     <figure className={cn("min-w-0", className)}>
       <figcaption id={titleId} className="sr-only">
-        Monthly component coverage
+        {accessibleTitle}
       </figcaption>
       <p id={descriptionId} className="sr-only">
         Bar chart comparing monthly component coverage.
@@ -53,7 +55,7 @@ export function CatalogCoverageChart({
       </ChartContainer>
       {showValueTable ? (
         <table className="sr-only">
-          <caption>Monthly component coverage values</caption>
+          <caption>{accessibleTitle} values</caption>
           <thead>
             <tr>
               <th scope="col">Month</th>
