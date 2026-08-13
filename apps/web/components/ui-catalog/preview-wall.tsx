@@ -78,25 +78,22 @@ export function PreviewWall({ onSelect }: { onSelect: (id: string) => void }) {
   return (
     <div className="min-h-full bg-background p-4 md:p-6">
       <div className="grid auto-rows-min gap-x-8 gap-y-6 md:grid-cols-12">
-        <PreviewCell
-          label="Curated design token specimens"
-          className="md:col-span-12 xl:col-span-4"
-        >
+        <PreviewCell className="md:col-span-12 xl:col-span-4">
           <TokenTypeStrip onSelect={onSelect} />
         </PreviewCell>
-        <PreviewCell label="Curated action specimens" className="md:col-span-7 xl:col-span-4">
+        <PreviewCell className="md:col-span-7 xl:col-span-4">
           <ActionPreview />
         </PreviewCell>
-        <PreviewCell label="Curated navigation specimens" className="md:col-span-5 xl:col-span-4">
+        <PreviewCell className="md:col-span-5 xl:col-span-4">
           <NavigationPreview />
         </PreviewCell>
         <PreviewCell label="Curated form specimens" className="md:col-span-6 xl:col-span-4">
           <FormPreview />
         </PreviewCell>
-        <PreviewCell label="Curated overlay specimens" className="md:col-span-6 xl:col-span-4">
+        <PreviewCell className="md:col-span-6 xl:col-span-4">
           <MenuOverlayPreview />
         </PreviewCell>
-        <PreviewCell label="Curated data specimens" className="md:col-span-7 xl:col-span-4">
+        <PreviewCell className="md:col-span-7 xl:col-span-4">
           <DataPreview />
         </PreviewCell>
         <PreviewCell label="Curated audio specimens" className="md:col-span-12">
@@ -113,7 +110,7 @@ function PreviewCell({
   className,
   children,
 }: {
-  label: string;
+  label?: string;
   className?: string;
   children: ReactNode;
 }) {

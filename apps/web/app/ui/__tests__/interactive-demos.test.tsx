@@ -378,7 +378,12 @@ function FocusedComboboxLabelHarness() {
         Close component options
       </button>
       <Field>
-        <FieldLabel htmlFor="focused-component-combobox-trigger">Component</FieldLabel>
+        <FieldLabel
+          id="focused-component-combobox-label"
+          htmlFor="focused-component-combobox-trigger"
+        >
+          Component
+        </FieldLabel>
         <Combobox
           items={["alert", "badge", "button"]}
           value="button"
@@ -388,6 +393,7 @@ function FocusedComboboxLabelHarness() {
         >
           <ComboboxTrigger
             id="focused-component-combobox-trigger"
+            aria-labelledby="focused-component-combobox-label focused-component-combobox-trigger"
             render={<Button variant="outline" />}
           >
             button
@@ -612,6 +618,9 @@ describe("interactive /ui demos", () => {
     expect(label?.textContent).toBe("Component");
     expect(trigger).not.toBeNull();
     expect(trigger?.hasAttribute("aria-label")).toBe(false);
+    expect(trigger?.getAttribute("aria-labelledby")).toBe(
+      "focused-component-combobox-label focused-component-combobox-trigger",
+    );
     expect(trigger?.getAttribute("aria-expanded")).toBe("true");
 
     dispatchPrimaryClick(
@@ -626,6 +635,7 @@ describe("interactive /ui demos", () => {
       environment.document.querySelector('[data-testid="focused-combobox-state"]')?.textContent,
     ).toBe("closed");
     expect(environment.document.querySelector("#focused-component-combobox-trigger")).toBe(trigger);
+    expect(environment.document.querySelector("#focused-component-combobox-label")).toBe(label);
     expect(label?.getAttribute("for")).toBe(trigger?.id);
   });
 

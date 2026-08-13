@@ -217,7 +217,7 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --destructive-hover: oklch(0.65 0.18 22);
+  --destructive-hover: oklch(0.65 0.18 22.216);
   --destructive-foreground: oklch(0.145 0 0);
   --success: oklch(0.78 0.13 145);
   --success-foreground: oklch(0.145 0 0);

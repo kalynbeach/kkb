@@ -85,10 +85,12 @@ describe("ui catalog focused surfaces", () => {
       "High density",
       "Preview density",
     ]);
-    expect(rangeInputLabels(previewWall)).toHaveLength(4);
-    expect(rangeInputLabels(previewWall)).toContain("Density");
-    expect(rangeInputLabels(previewWall)).toContain("Preview density");
-    expect(rangeInputLabels(previewWall)).toContain("Volume");
+    expect(rangeInputLabels(previewWall).toSorted()).toEqual([
+      "Density",
+      "Preview density",
+      "Volume",
+      "Volume",
+    ]);
     expect(rangeInputLabels(inputSection)).toEqual(["Density"]);
   });
 
@@ -215,7 +217,11 @@ describe("ui catalog focused surfaces", () => {
     expect(inputHtml).toContain('for="grouped-search"');
     expect(inputHtml).toContain('id="grouped-search"');
     expect(comboboxHtml).toContain('for="focused-component-combobox-trigger"');
+    expect(comboboxHtml).toContain('id="focused-component-combobox-label"');
     expect(comboboxHtml).toContain('id="focused-component-combobox-trigger"');
+    expect(comboboxHtml).toContain(
+      'aria-labelledby="focused-component-combobox-label focused-component-combobox-trigger"',
+    );
     expect(comboboxHtml).not.toContain('aria-label="Selected component"');
     expect(contextMenuHtml).toContain('data-slot="context-menu-trigger"');
     expect(contextMenuHtml).toContain('type="button"');

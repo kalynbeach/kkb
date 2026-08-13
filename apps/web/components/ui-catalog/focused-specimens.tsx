@@ -1220,7 +1220,12 @@ function ComboboxExamples() {
       </SpecimenStage>
       <SpecimenStage title="Combobox field context">
         <Field>
-          <FieldLabel htmlFor="focused-component-combobox-trigger">Component</FieldLabel>
+          <FieldLabel
+            id="focused-component-combobox-label"
+            htmlFor="focused-component-combobox-trigger"
+          >
+            Component
+          </FieldLabel>
           <Combobox
             items={["alert", "badge", "button", "audio waveform"]}
             value={selectedComponent}
@@ -1231,6 +1236,7 @@ function ComboboxExamples() {
           >
             <ComboboxTrigger
               id="focused-component-combobox-trigger"
+              aria-labelledby="focused-component-combobox-label focused-component-combobox-trigger"
               render={<Button variant="outline" />}
             >
               {selectedComponent}
