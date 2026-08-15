@@ -2,7 +2,6 @@
 
 import { type ChartConfig, ChartContainer } from "@kkb/ui/components/chart";
 import { cn } from "@kkb/ui/lib/utils";
-import * as React from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 import { chartData } from "./catalog-preview-data";
@@ -23,18 +22,13 @@ export function CatalogCoverageChart({
   className?: string;
   showValueTable?: boolean;
 }) {
-  const descriptionId = React.useId();
-
   return (
     <figure
-      aria-describedby={descriptionId}
       data-chart-semantics={showValueTable ? "named-figure-with-value-table" : "named-figure"}
       className={cn("min-w-0", className)}
     >
       <figcaption className="sr-only">{accessibleTitle}</figcaption>
-      <p id={descriptionId} className="sr-only">
-        Bar chart comparing monthly component coverage.
-      </p>
+      <p className="sr-only">Bar chart comparing monthly component coverage.</p>
       <ChartContainer
         config={chartConfig}
         aria-hidden="true"

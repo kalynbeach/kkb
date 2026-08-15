@@ -189,6 +189,7 @@ describe("ui catalog focused surfaces", () => {
     expect(chartHtml).not.toContain('role="img"');
     expect(chartHtml).not.toContain('role="application"');
     expect(chartHtml).toContain('aria-hidden="true"');
+    expect(chartHtml).not.toContain("aria-describedby");
     expect(chartHtml).toContain('data-chart-semantics="named-figure"');
     expect(standaloneChartHtml).toContain('data-chart-semantics="named-figure-with-value-table"');
     expect(chartHtml).toContain("Bar chart comparing monthly component coverage.");
