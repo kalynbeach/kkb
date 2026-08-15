@@ -145,28 +145,9 @@ function NavigationMenuLink({ className, ...props }: NavigationMenuPrimitive.Lin
   );
 }
 
-function NavigationMenuIndicator({
-  className,
-  ...props
-}: React.ComponentPropsWithRef<typeof NavigationMenuPrimitive.Icon>) {
-  return (
-    <NavigationMenuPrimitive.Icon
-      data-slot="navigation-menu-indicator"
-      className={cn(
-        "top-full z-1 flex h-1.5 items-end justify-center overflow-hidden data-open:animate-in data-open:fade-in data-closed:animate-out data-closed:fade-out",
-        className,
-      )}
-      {...props}
-    >
-      <div className="relative top-[60%] h-2 w-2 rotate-45 bg-border shadow-md" />
-    </NavigationMenuPrimitive.Icon>
-  );
-}
-
 export {
   NavigationMenu,
   NavigationMenuContent,
-  NavigationMenuIndicator,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
