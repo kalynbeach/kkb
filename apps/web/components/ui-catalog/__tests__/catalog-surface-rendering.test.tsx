@@ -3,6 +3,7 @@ import { renderToString } from "react-dom/server";
 import { CatalogCoverageChart } from "../catalog-chart";
 import {
   type CatalogItem,
+  catalogItems,
   componentItems,
   itemFromId,
   secondaryItems,
@@ -36,6 +37,15 @@ function rangeInputLabels(html: string) {
 }
 
 describe("ui catalog focused surfaces", () => {
+  test("renders every category route without invalid component composition", () => {
+    for (const item of catalogItems.filter((candidate) => candidate.kind === "category")) {
+      const html = renderCatalogSurfaceHtml(item);
+
+      expect(html).toContain(item.label);
+      expect(html).not.toContain("Demo unavailable");
+    }
+  });
+
   test("renders focused specimens for every visual and supporting route", () => {
     for (const item of [...componentItems, ...secondaryItems]) {
       const html = renderCatalogSurfaceHtml(item);
