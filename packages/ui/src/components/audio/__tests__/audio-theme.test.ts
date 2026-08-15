@@ -11,6 +11,7 @@ describe("shared audio theme tokens", () => {
     expect(css).toContain("--audio-shell-border");
     expect(css).toContain("--audio-panel-border");
     expect(css).toContain("--audio-accent");
+    expect(css).toContain("--audio-accent-foreground");
     expect(css).toContain("--audio-status-error");
     expect(css).toContain("--color-audio-accent");
     expect(css).toContain(":root");

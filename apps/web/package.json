@@ -16,7 +16,9 @@
     "@phosphor-icons/react": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "react-hook-form": "catalog:",
+    "recharts": "catalog:"
   },
   "devDependencies": {
     "@kkb/typescript-config": "workspace:*",
@@ -25,7 +27,6 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "postcss": "catalog:",
-    "react-hook-form": "^7.84.0",
     "typescript": "catalog:"
   }
 }

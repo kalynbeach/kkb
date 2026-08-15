@@ -70,8 +70,9 @@ import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
 import { SpinnerGapIcon } from "@phosphor-icons/react/dist/csr/SpinnerGap";
 import type { ReactNode } from "react";
 
-import { chartData } from "./catalog-preview-data";
+import { CatalogCoverageChart } from "./catalog-chart";
 import { PlayerControlsDemo, WaveformDemo } from "./demos/audio-demo";
+import { PreviewInventory } from "./preview-inventory";
 
 export function PreviewWall({ onSelect }: { onSelect: (id: string) => void }) {
   return (
@@ -86,7 +87,7 @@ export function PreviewWall({ onSelect }: { onSelect: (id: string) => void }) {
         <PreviewCell className="md:col-span-5 xl:col-span-4">
           <NavigationPreview />
         </PreviewCell>
-        <PreviewCell className="md:col-span-6 xl:col-span-4">
+        <PreviewCell label="Curated form specimens" className="md:col-span-6 xl:col-span-4">
           <FormPreview />
         </PreviewCell>
         <PreviewCell className="md:col-span-6 xl:col-span-4">
@@ -95,16 +96,29 @@ export function PreviewWall({ onSelect }: { onSelect: (id: string) => void }) {
         <PreviewCell className="md:col-span-7 xl:col-span-4">
           <DataPreview />
         </PreviewCell>
-        <PreviewCell className="md:col-span-12">
+        <PreviewCell label="Curated audio specimens" className="md:col-span-12">
           <AudioPreview />
         </PreviewCell>
       </div>
+      <PreviewInventory onSelect={onSelect} />
     </div>
   );
 }
 
-function PreviewCell({ className, children }: { className?: string; children: ReactNode }) {
-  return <section className={cn("min-w-0", className)}>{children}</section>;
+function PreviewCell({
+  label,
+  className,
+  children,
+}: {
+  label?: string;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <section aria-label={label} className={cn("min-w-0", className)}>
+      {children}
+    </section>
+  );
 }
 
 function TokenTypeStrip({ onSelect }: { onSelect: (id: string) => void }) {
@@ -116,7 +130,7 @@ function TokenTypeStrip({ onSelect }: { onSelect: (id: string) => void }) {
           ["ink", "bg-foreground text-background"],
           ["rail", "bg-muted text-muted-foreground"],
           ["primary", "bg-primary text-primary-foreground"],
-          ["audio", "bg-audio-accent text-primary"],
+          ["audio", "bg-audio-accent text-audio-accent-foreground"],
           ["border", "bg-border text-foreground"],
         ].map(([label, className]) => (
           <button
@@ -354,16 +368,7 @@ function DataPreview() {
         </TableBody>
       </Table>
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-3">
-        <div className="flex h-24 items-end gap-1 border bg-muted/20 p-3" aria-label="Chart">
-          {chartData.map((bar) => (
-            <div key={bar.month} className="flex h-full flex-1 flex-col justify-end gap-1">
-              <div className="flex min-h-0 flex-1 items-end self-stretch">
-                <div className="w-full bg-foreground" style={{ height: `${bar.value}%` }} />
-              </div>
-              <span className="font-mono text-[10px] text-muted-foreground">{bar.month}</span>
-            </div>
-          ))}
-        </div>
+        <CatalogCoverageChart accessibleTitle="Curated monthly component coverage" />
         <KbdGroup>
           <Kbd>⌘</Kbd>
           <Kbd>K</Kbd>

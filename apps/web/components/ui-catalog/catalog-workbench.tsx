@@ -60,7 +60,7 @@ export function CatalogWorkbench() {
   }, []);
 
   return (
-    <main className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
+    <main className="flex h-dvh min-h-0 flex-col overflow-hidden bg-background text-foreground">
       <CatalogSearchDialog
         open={searchOpen}
         selectedItemId={selectedItem.id}
@@ -120,7 +120,13 @@ export function CatalogWorkbench() {
 
       <div className="grid min-h-0 flex-1 overflow-hidden lg:grid-cols-[240px_minmax(0,1fr)]">
         <CatalogRail selectedItemId={selectedItem.id} onSelect={selectItem} />
-        <section ref={contentRef} className="min-w-0 overflow-y-auto bg-background lg:border-l">
+        <section
+          ref={contentRef}
+          aria-label={`${selectedItem.label} specimens`}
+          // biome-ignore lint/a11y/noNoninteractiveTabindex: keyboard users need to reach this scrollable specimen region.
+          tabIndex={0}
+          className="min-w-0 overflow-y-auto bg-background focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-inset focus-visible:ring-ring/50 lg:border-l"
+        >
           <CatalogSurface selectedItem={selectedItem} onSelect={selectItem} />
         </section>
       </div>

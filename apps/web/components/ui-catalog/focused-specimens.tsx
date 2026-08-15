@@ -60,6 +60,7 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
+  ComboboxTrigger,
 } from "@kkb/ui/components/combobox";
 import { Command, CommandInput, CommandItem, CommandList } from "@kkb/ui/components/command";
 import {
@@ -114,6 +115,15 @@ import {
   FieldLabel,
   FieldSet,
 } from "@kkb/ui/components/field";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@kkb/ui/components/form";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@kkb/ui/components/hover-card";
 import { Input } from "@kkb/ui/components/input";
 import {
@@ -203,7 +213,7 @@ import {
 } from "@kkb/ui/components/sidebar";
 import { Skeleton } from "@kkb/ui/components/skeleton";
 import { Slider } from "@kkb/ui/components/slider";
-import { Toaster } from "@kkb/ui/components/sonner";
+import { Toaster, toast } from "@kkb/ui/components/sonner";
 import { Spinner } from "@kkb/ui/components/spinner";
 import { Switch } from "@kkb/ui/components/switch";
 import {
@@ -241,24 +251,31 @@ import { SquaresFourIcon } from "@phosphor-icons/react/dist/csr/SquaresFour";
 import { WarningCircleIcon } from "@phosphor-icons/react/dist/csr/WarningCircle";
 import { XIcon } from "@phosphor-icons/react/dist/csr/X";
 import * as React from "react";
+import { useForm } from "react-hook-form";
 
-import { type CatalogItem, componentItems, itemFromId } from "./catalog-data";
+import { CatalogCoverageChart } from "./catalog-chart";
+import {
+  type CatalogItem,
+  componentItems,
+  itemFromId,
+  type VisualCatalogId,
+  visualCatalogIds,
+} from "./catalog-data";
 import { CatalogItemIcon } from "./catalog-icons";
 import { chartData } from "./catalog-preview-data";
-import { DemoBoundary, SpecimenStage, TinyPreview } from "./catalog-surface-shared";
-import {
-  AudioCompositionDemo,
-  PlayerControlsDemo,
-  PlayheadDemo,
-  WaveformDemo,
-} from "./demos/audio-demo";
+import { DemoBoundary, SpecimenStage } from "./catalog-surface-shared";
+import { PlayerControlsDemo, PlayheadDemo, WaveformDemo } from "./demos/audio-demo";
 import { CarouselDemo } from "./demos/carousel-demo";
 import { CalendarDemo } from "./demos/select-calendar-demo";
 import { UtilitiesExamples } from "./utility-examples";
 
 export function FocusedComponentSurface({ item }: { item: CatalogItem }) {
   return (
-    <div className="min-h-full bg-background p-4 md:p-6">
+    <div
+      className="min-h-full bg-background p-4 md:p-6"
+      data-focused-component={item.entryType === "visual" ? item.id : undefined}
+      data-supporting-entry={item.entryType !== "visual" ? item.entryType : undefined}
+    >
       <div className="grid gap-x-8 gap-y-6 md:grid-cols-2">{renderFocusedExamples(item)}</div>
     </div>
   );
@@ -266,14 +283,39 @@ export function FocusedComponentSurface({ item }: { item: CatalogItem }) {
 
 function renderFocusedExamples(item: CatalogItem) {
   return (
-    <DemoBoundary resetKey={item.id}>
-      {item.category === "Audio" ? <FocusedAudioExamples item={item} /> : focusedExamplesFor(item)}
+    <DemoBoundary key={item.id}>
+      <FocusedExamplesSelection item={item} />
     </DemoBoundary>
   );
 }
 
-function focusedExamplesFor(item: CatalogItem) {
-  switch (item.id) {
+function FocusedExamplesSelection({ item }: { item: CatalogItem }) {
+  if (item.entryType !== "visual") {
+    return supportingExamplesFor(item);
+  }
+
+  const visualId = visualCatalogIds.find((id) => id === item.id);
+  if (!visualId) {
+    throw new Error(`Unknown visual catalog component: ${item.id}`);
+  }
+
+  return focusedExamplesFor(visualId, item);
+}
+
+function supportingExamplesFor(item: CatalogItem) {
+  if (item.category === "Audio") {
+    return <FocusedAudioExamples item={item} />;
+  }
+
+  if (item.entryType === "integration") {
+    return <DataExamples item={item} />;
+  }
+
+  return <UtilitiesExamples item={item} />;
+}
+
+function focusedExamplesFor(visualId: VisualCatalogId, item: CatalogItem) {
+  switch (visualId) {
     case "button":
       return <ButtonSpecimen />;
     case "button-group":
@@ -287,19 +329,25 @@ function focusedExamplesFor(item: CatalogItem) {
     case "table":
       return <TableSpecimen />;
     case "accordion":
+      return <AccordionSpecimen />;
     case "collapsible":
-      return <DisclosureExamples item={item} />;
+      return <CollapsibleSpecimen />;
     case "alert-dialog":
       return <AlertDialogSpecimen />;
     case "drawer":
+      return <DrawerSpecimen />;
     case "sheet":
+      return <SheetSpecimen />;
     case "popover":
+      return <PopoverSpecimen />;
     case "hover-card":
+      return <HoverCardSpecimen />;
     case "tooltip":
-      return <OverlayExamples item={item} />;
+      return <TooltipSpecimen />;
     case "toggle":
+      return <ToggleSpecimen />;
     case "toggle-group":
-      return <ActionExamples item={item} />;
+      return <ToggleGroupSpecimen />;
     case "calendar":
     case "input-group":
     case "input-otp":
@@ -319,9 +367,6 @@ function focusedExamplesFor(item: CatalogItem) {
     case "code":
     case "kbd":
     case "carousel":
-    case "json-render":
-    case "json-render-catalog":
-    case "json-render-registry":
       return <DataExamples item={item} />;
     case "sidebar":
     case "navigation-menu":
@@ -349,20 +394,15 @@ function focusedExamplesFor(item: CatalogItem) {
     case "dropdown-menu":
     case "menubar":
       return <MenuExamples item={item} />;
-    case "direction":
     case "mode-toggle":
-    case "theme-provider":
-    case "use-mobile":
       return <UtilitiesExamples item={item} />;
-    default:
-      return (
-        <SpecimenStage title={item.label}>
-          <div className="grid min-h-40 place-items-center">
-            <TinyPreview id={item.id} />
-          </div>
-        </SpecimenStage>
-      );
+    case "audio-player-controls":
+    case "audio-playhead":
+    case "audio-waveform":
+      return <FocusedAudioExamples item={item} />;
   }
+
+  visualId satisfies never;
 }
 
 function FocusedAudioExamples({ item }: { item: CatalogItem }) {
@@ -396,10 +436,10 @@ function FocusedAudioExamples({ item }: { item: CatalogItem }) {
         <SpecimenStage title="Audio theme tokens">
           <div className="grid gap-3 sm:grid-cols-2">
             {[
-              ["accent", "bg-audio-accent text-primary"],
+              ["accent", "bg-audio-accent text-audio-accent-foreground"],
               ["panel", "bg-audio-panel text-audio-title"],
-              ["control", "bg-audio-control text-primary"],
-              ["meta", "bg-audio-accent-softer text-audio-accent"],
+              ["control", "bg-audio-control text-audio-accent-foreground"],
+              ["meta", "bg-audio-accent-softer text-foreground"],
             ].map(([label, className]) => (
               <div key={label} className={`min-h-24 border p-3 font-mono text-xs ${className}`}>
                 {label}
@@ -414,16 +454,30 @@ function FocusedAudioExamples({ item }: { item: CatalogItem }) {
     );
   }
 
-  return (
-    <>
-      <SpecimenStage title="Waveform">
-        <WaveformDemo />
-      </SpecimenStage>
-      <SpecimenStage title="Player composition">
-        <AudioCompositionDemo />
-      </SpecimenStage>
-    </>
-  );
+  if (item.id === "audio-presenter") {
+    return (
+      <>
+        <SpecimenStage title="Audio Presenter state derivation">
+          <div className="grid gap-2 border p-3 text-sm">
+            <div className="flex items-center justify-between gap-3">
+              <span>runtime state</span>
+              <Code>playing</Code>
+            </div>
+            <Separator />
+            <div className="flex items-center justify-between gap-3">
+              <span>presentation state</span>
+              <Code>pause / 00:42</Code>
+            </div>
+          </div>
+        </SpecimenStage>
+        <SpecimenStage title="Audio Presenter source contract">
+          <Code>{item.source}</Code>
+        </SpecimenStage>
+      </>
+    );
+  }
+
+  throw new Error(`Missing focused audio specimen: ${item.id}`);
 }
 
 function ButtonSpecimen() {
@@ -545,7 +599,7 @@ function CardSpecimen() {
             <CardDescription>Smaller internal rhythm.</CardDescription>
           </CardHeader>
           <CardContent className="px-4">
-            <Progress value={68} />
+            <Progress value={68} aria-label="Review progress" />
           </CardContent>
           <CardFooter className="px-4">
             <Button variant="outline" size="sm" className="w-full">
@@ -646,18 +700,21 @@ function InputSpecimen() {
         </Field>
       </SpecimenStage>
       <SpecimenStage title="Grouped search">
-        <InputGroup>
-          <InputGroupAddon>
-            <MagnifyingGlassIcon aria-hidden="true" focusable="false" className="size-4" />
-            <InputGroupText>Filter</InputGroupText>
-          </InputGroupAddon>
-          <InputGroupInput defaultValue="button" />
-          <InputGroupAddon align="inline-end">
-            <InputGroupButton size="icon-xs" variant="ghost" aria-label="Clear filter">
-              <XIcon aria-hidden="true" focusable="false" className="size-3" />
-            </InputGroupButton>
-          </InputGroupAddon>
-        </InputGroup>
+        <Field>
+          <FieldLabel htmlFor="grouped-search">Filter components</FieldLabel>
+          <InputGroup>
+            <InputGroupAddon>
+              <MagnifyingGlassIcon aria-hidden="true" focusable="false" className="size-4" />
+              <InputGroupText>Filter</InputGroupText>
+            </InputGroupAddon>
+            <InputGroupInput id="grouped-search" defaultValue="button" />
+            <InputGroupAddon align="inline-end">
+              <InputGroupButton size="icon-xs" variant="ghost" aria-label="Clear filter">
+                <XIcon aria-hidden="true" focusable="false" className="size-3" />
+              </InputGroupButton>
+            </InputGroupAddon>
+          </InputGroup>
+        </Field>
       </SpecimenStage>
     </>
   );
@@ -750,10 +807,10 @@ function TableSpecimen() {
   );
 }
 
-function ActionExamples({ item }: { item: CatalogItem }) {
+function ToggleSpecimen() {
   return (
     <>
-      <SpecimenStage title={`${item.label} states`}>
+      <SpecimenStage title="Toggle states">
         <div className="flex flex-wrap items-center gap-2">
           <Toggle defaultPressed>
             <SquaresFourIcon aria-hidden="true" focusable="false" className="size-4" />
@@ -761,44 +818,40 @@ function ActionExamples({ item }: { item: CatalogItem }) {
           </Toggle>
           <Toggle aria-invalid>Invalid</Toggle>
           <Toggle disabled>Disabled</Toggle>
-          <ToggleGroup type="multiple" defaultValue={["labels"]}>
-            <ToggleGroupItem value="labels">Labels</ToggleGroupItem>
-            <ToggleGroupItem value="stats">Stats</ToggleGroupItem>
-          </ToggleGroup>
         </div>
       </SpecimenStage>
-      <SpecimenStage title={`${item.label} toolbar`}>
-        <ActionBench />
+      <SpecimenStage title="Toggle variants">
+        <div className="flex flex-wrap items-center gap-2">
+          <Toggle variant="default">Default</Toggle>
+          <Toggle variant="outline" defaultPressed>
+            Outline
+          </Toggle>
+          <Toggle size="sm">Small</Toggle>
+        </div>
       </SpecimenStage>
     </>
   );
 }
 
-function ActionBench() {
+function ToggleGroupSpecimen() {
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap gap-2">
-        <Button>Run checks</Button>
-        <Button variant="secondary">Save note</Button>
-        <Button variant="outline">Open route</Button>
-        <Button variant="ghost">Keep editing</Button>
-      </div>
-      <ButtonGroup>
-        <Button variant="outline">Source</Button>
-        <Button variant="outline">States</Button>
-        <Button variant="outline">Tokens</Button>
-      </ButtonGroup>
-      <div className="flex flex-wrap items-center gap-2">
-        <Toggle defaultPressed>
-          <SquaresFourIcon aria-hidden="true" focusable="false" className="size-4" />
-          Grid
-        </Toggle>
+    <>
+      <SpecimenStage title="Toggle Group single choice">
+        <ToggleGroup type="single" defaultValue="preview">
+          <ToggleGroupItem value="preview">Preview</ToggleGroupItem>
+          <ToggleGroupItem value="source">Source</ToggleGroupItem>
+        </ToggleGroup>
+      </SpecimenStage>
+      <SpecimenStage title="Toggle Group multiple choice">
         <ToggleGroup type="multiple" defaultValue={["labels"]}>
           <ToggleGroupItem value="labels">Labels</ToggleGroupItem>
           <ToggleGroupItem value="stats">Stats</ToggleGroupItem>
+          <ToggleGroupItem value="grid" disabled>
+            Grid
+          </ToggleGroupItem>
         </ToggleGroup>
-      </div>
-    </div>
+      </SpecimenStage>
+    </>
   );
 }
 
@@ -820,10 +873,10 @@ function InputExamples({ item }: { item: CatalogItem }) {
     );
   }
 
-  if (item.id === "select" || item.id === "native-select" || item.id === "combobox") {
+  if (item.id === "select") {
     return (
       <>
-        <SpecimenStage title={`${item.label} closed state`}>
+        <SpecimenStage title="Select states">
           <div className="grid gap-3">
             <Select defaultValue="preview">
               <SelectTrigger aria-label="Preview mode">
@@ -834,28 +887,62 @@ function InputExamples({ item }: { item: CatalogItem }) {
                 <SelectItem value="focused">Focused</SelectItem>
               </SelectContent>
             </Select>
+            <Select disabled>
+              <SelectTrigger aria-label="Disabled mode">
+                <SelectValue placeholder="Disabled" />
+              </SelectTrigger>
+            </Select>
+          </div>
+        </SpecimenStage>
+        <SpecimenStage title="Select field context">
+          <Field>
+            <FieldLabel>Catalog view</FieldLabel>
+            <Select defaultValue="components">
+              <SelectTrigger aria-label="Catalog view">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="components">Components</SelectItem>
+                <SelectItem value="tokens">Tokens</SelectItem>
+              </SelectContent>
+            </Select>
+            <FieldDescription>Single-choice popup selection.</FieldDescription>
+          </Field>
+        </SpecimenStage>
+      </>
+    );
+  }
+
+  if (item.id === "native-select") {
+    return (
+      <>
+        <SpecimenStage title="Native Select states">
+          <div className="grid gap-3">
             <NativeSelect defaultValue="compact" aria-label="Density">
               <NativeSelectOption value="compact">Compact</NativeSelectOption>
               <NativeSelectOption value="roomy">Roomy</NativeSelectOption>
             </NativeSelect>
+            <NativeSelect disabled aria-label="Disabled density">
+              <NativeSelectOption>Unavailable</NativeSelectOption>
+            </NativeSelect>
           </div>
         </SpecimenStage>
-        <SpecimenStage title={`${item.label} search state`}>
-          <Combobox items={["button", "input", "audio waveform"]}>
-            <ComboboxInput placeholder="Primitive or bay" />
-            <ComboboxContent>
-              <ComboboxList>
-                {["button", "input", "audio waveform"].map((value) => (
-                  <ComboboxItem key={value} value={value}>
-                    {value}
-                  </ComboboxItem>
-                ))}
-              </ComboboxList>
-            </ComboboxContent>
-          </Combobox>
+        <SpecimenStage title="Native Select field context">
+          <Field>
+            <FieldLabel htmlFor="native-density">Density</FieldLabel>
+            <NativeSelect id="native-density" defaultValue="balanced">
+              <NativeSelectOption value="compact">Compact</NativeSelectOption>
+              <NativeSelectOption value="balanced">Balanced</NativeSelectOption>
+            </NativeSelect>
+            <FieldDescription>Uses the platform selection surface.</FieldDescription>
+          </Field>
         </SpecimenStage>
       </>
     );
+  }
+
+  if (item.id === "combobox") {
+    return <ComboboxExamples />;
   }
 
   if (item.id === "checkbox") {
@@ -961,9 +1048,16 @@ function InputExamples({ item }: { item: CatalogItem }) {
       <>
         <SpecimenStage title="Textarea states">
           <div className="grid gap-3">
-            <Textarea placeholder="Write a handoff note" />
-            <Textarea defaultValue="Focused routes should show component-specific states." />
-            <Textarea disabled defaultValue="Locked after publish." />
+            <Textarea aria-label="Empty handoff note" placeholder="Write a handoff note" />
+            <Textarea
+              aria-label="Completed handoff note"
+              defaultValue="Focused routes should show component-specific states."
+            />
+            <Textarea
+              aria-label="Locked handoff note"
+              disabled
+              defaultValue="Locked after publish."
+            />
           </div>
         </SpecimenStage>
         <SpecimenStage title="Textarea review note">
@@ -977,20 +1071,20 @@ function InputExamples({ item }: { item: CatalogItem }) {
     );
   }
 
-  if (item.id === "field" || item.id === "label") {
+  if (item.id === "field") {
     return (
       <>
-        <SpecimenStage title={`${item.label} anatomy`}>
+        <SpecimenStage title="Field anatomy">
           <Field>
-            <FieldLabel htmlFor={`${item.id}-source`}>Source path</FieldLabel>
-            <Input id={`${item.id}-source`} defaultValue="@kkb/ui/components/input" />
+            <FieldLabel htmlFor="field-source">Source path</FieldLabel>
+            <Input id="field-source" defaultValue="@kkb/ui/components/input" />
             <FieldDescription>Label, control, and help text stay grouped.</FieldDescription>
           </Field>
         </SpecimenStage>
-        <SpecimenStage title={`${item.label} validation`}>
+        <SpecimenStage title="Field validation state">
           <Field data-invalid>
-            <FieldLabel htmlFor={`${item.id}-invalid`}>Import path</FieldLabel>
-            <Input id={`${item.id}-invalid`} aria-invalid defaultValue="missing" />
+            <FieldLabel htmlFor="field-invalid">Import path</FieldLabel>
+            <Input id="field-invalid" aria-invalid defaultValue="missing" />
             <FieldDescription className="text-destructive">
               Use the public package export path.
             </FieldDescription>
@@ -1000,35 +1094,29 @@ function InputExamples({ item }: { item: CatalogItem }) {
     );
   }
 
-  if (item.id === "form") {
+  if (item.id === "label") {
     return (
       <>
-        <SpecimenStage title="Form layout">
-          <div className="grid gap-4">
-            <Field>
-              <FieldLabel htmlFor="form-title">Report title</FieldLabel>
-              <Input id="form-title" defaultValue="UI catalog route audit" />
-            </Field>
-            <Field orientation="horizontal">
-              <Checkbox id="form-include" defaultChecked />
-              <FieldContent>
-                <FieldLabel htmlFor="form-include">Include screenshots</FieldLabel>
-                <FieldDescription>Submit supporting browser evidence.</FieldDescription>
-              </FieldContent>
-            </Field>
+        <SpecimenStage title="Label associations">
+          <div className="grid gap-2">
+            <Label htmlFor="label-source">Source path</Label>
+            <Input id="label-source" defaultValue="@kkb/ui/components/label" />
           </div>
         </SpecimenStage>
-        <SpecimenStage title="Form submission row">
-          <div className="flex flex-wrap items-center justify-between gap-3 border p-3">
-            <p className="text-sm text-muted-foreground">Two required fields complete.</p>
-            <div className="flex gap-2">
-              <Button variant="outline">Reset</Button>
-              <Button>Submit</Button>
-            </div>
+        <SpecimenStage title="Label with required control">
+          <div className="grid gap-2">
+            <Label htmlFor="label-required">
+              Component name <span aria-hidden="true">*</span>
+            </Label>
+            <Input id="label-required" required aria-required="true" />
           </div>
         </SpecimenStage>
       </>
     );
+  }
+
+  if (item.id === "form") {
+    return <FormSpecimen />;
   }
 
   if (item.id === "input-group") {
@@ -1040,7 +1128,7 @@ function InputExamples({ item }: { item: CatalogItem }) {
               <MagnifyingGlassIcon aria-hidden="true" focusable="false" className="size-4" />
               <InputGroupText>Filter</InputGroupText>
             </InputGroupAddon>
-            <InputGroupInput defaultValue="card" />
+            <InputGroupInput aria-label="Filter components" defaultValue="card" />
             <InputGroupAddon align="inline-end">
               <InputGroupButton size="icon-xs" variant="ghost" aria-label="Clear">
                 <XIcon aria-hidden="true" focusable="false" className="size-3" />
@@ -1064,7 +1152,7 @@ function InputExamples({ item }: { item: CatalogItem }) {
     return (
       <>
         <SpecimenStage title="Input OTP segmented code">
-          <InputOTP maxLength={6}>
+          <InputOTP maxLength={6} aria-label="Segmented verification code">
             <InputOTPGroup>
               <InputOTPSlot index={0} />
               <InputOTPSlot index={1} />
@@ -1080,7 +1168,20 @@ function InputExamples({ item }: { item: CatalogItem }) {
         </SpecimenStage>
         <SpecimenStage title="Input OTP in context">
           <Field>
-            <FieldLabel>Verification code</FieldLabel>
+            <FieldLabel htmlFor="verification-code">Verification code</FieldLabel>
+            <InputOTP id="verification-code" maxLength={6}>
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+              </InputOTPGroup>
+              <InputOTPSeparator />
+              <InputOTPGroup>
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
             <FieldDescription>Six slots with separator rhythm.</FieldDescription>
           </Field>
         </SpecimenStage>
@@ -1088,10 +1189,114 @@ function InputExamples({ item }: { item: CatalogItem }) {
     );
   }
 
+  throw new Error(`Missing focused input specimen: ${item.id}`);
+}
+
+function ComboboxExamples() {
+  const [selectedComponent, setSelectedComponent] = React.useState("button");
+
   return (
-    <SpecimenStage title={item.label} className="md:col-span-2">
-      <TinyPreview id={item.id} />
-    </SpecimenStage>
+    <>
+      <SpecimenStage title="Combobox search">
+        <Combobox items={["button", "input", "audio waveform"]} autoHighlight modal={false}>
+          <ComboboxTrigger aria-label="Open component search" render={<Button variant="outline" />}>
+            Open component search
+          </ComboboxTrigger>
+          <ComboboxContent>
+            <ComboboxInput
+              aria-label="Search components"
+              placeholder="Search components"
+              showTrigger={false}
+            />
+            <ComboboxList>
+              {(value: string) => (
+                <ComboboxItem key={value} value={value}>
+                  {value}
+                </ComboboxItem>
+              )}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
+      </SpecimenStage>
+      <SpecimenStage title="Combobox field context">
+        <Field>
+          <FieldLabel
+            id="focused-component-combobox-label"
+            htmlFor="focused-component-combobox-trigger"
+          >
+            Component
+          </FieldLabel>
+          <Combobox
+            items={["alert", "badge", "button", "audio waveform"]}
+            value={selectedComponent}
+            onValueChange={(value) => setSelectedComponent(value ?? "")}
+            autoHighlight
+            modal={false}
+            defaultOpen
+          >
+            <ComboboxTrigger
+              id="focused-component-combobox-trigger"
+              aria-labelledby="focused-component-combobox-label focused-component-combobox-trigger"
+              render={<Button variant="outline" />}
+            >
+              {selectedComponent}
+            </ComboboxTrigger>
+            <ComboboxContent>
+              <ComboboxInput
+                aria-label="Search available components"
+                placeholder="Find a component"
+                showTrigger={false}
+              />
+              <ComboboxList>
+                {(value: string) => (
+                  <ComboboxItem key={value} value={value}>
+                    {value}
+                  </ComboboxItem>
+                )}
+              </ComboboxList>
+            </ComboboxContent>
+          </Combobox>
+          <FieldDescription>Searchable single selection.</FieldDescription>
+          <p aria-live="polite" className="text-sm text-muted-foreground">
+            Selected: {selectedComponent || "none"}
+          </p>
+        </Field>
+      </SpecimenStage>
+    </>
+  );
+}
+
+function FormSpecimen() {
+  const form = useForm<{ title: string }>({ defaultValues: { title: "UI catalog route audit" } });
+
+  return (
+    <>
+      <SpecimenStage title="Form field contract">
+        <Form {...form}>
+          <FormField
+            control={form.control}
+            name="title"
+            rules={{ required: "Report title is required." }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Report title</FormLabel>
+                <FormControl render={<Input {...field} />} />
+                <FormDescription>Label and description IDs are composed by Form.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </Form>
+      </SpecimenStage>
+      <SpecimenStage title="Form provider boundary">
+        <div className="grid gap-3 border p-3 text-sm">
+          <Code>FormProvider</Code>
+          <p className="text-muted-foreground">
+            Form state and field relationships remain inside the shared provider contract.
+          </p>
+        </div>
+      </SpecimenStage>
+    </>
   );
 }
 
@@ -1295,11 +1500,7 @@ function LayoutExamples({ item }: { item: CatalogItem }) {
     );
   }
 
-  return (
-    <SpecimenStage title={item.label} className="md:col-span-2">
-      <TinyPreview id={item.id} />
-    </SpecimenStage>
-  );
+  throw new Error(`Missing focused layout specimen: ${item.id}`);
 }
 
 function NavigationExamples({ item }: { item: CatalogItem }) {
@@ -1392,132 +1593,130 @@ function NavigationExamples({ item }: { item: CatalogItem }) {
     );
   }
 
+  if (item.id === "sidebar") {
+    return (
+      <>
+        <SpecimenStage title="Sidebar expanded state" className="md:col-span-2">
+          <div className="h-64 overflow-hidden border">
+            <SidebarProvider defaultOpen className="min-h-0">
+              <Sidebar collapsible="none">
+                <SidebarContent>
+                  <SidebarGroup>
+                    <SidebarGroupLabel>Catalog</SidebarGroupLabel>
+                    <SidebarGroupContent>
+                      <SidebarMenu>
+                        {["Preview", "Tokens", "Components"].map((label) => (
+                          <SidebarMenuItem key={label}>
+                            <SidebarMenuButton>
+                              <CubeFocusIcon aria-hidden="true" focusable="false" />
+                              <span>{label}</span>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        ))}
+                      </SidebarMenu>
+                    </SidebarGroupContent>
+                  </SidebarGroup>
+                </SidebarContent>
+              </Sidebar>
+              <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
+                canvas
+              </div>
+            </SidebarProvider>
+          </div>
+        </SpecimenStage>
+        <SpecimenStage title="Sidebar navigation items">
+          <div className="grid gap-1 border p-2 font-mono text-sm">
+            <div className="bg-accent px-2 py-1.5">Preview</div>
+            <div className="px-2 py-1.5 text-muted-foreground">Tokens</div>
+            <div className="px-2 py-1.5 text-muted-foreground">Components</div>
+          </div>
+        </SpecimenStage>
+      </>
+    );
+  }
+
+  if (item.id === "navigation-menu") {
+    return (
+      <>
+        <SpecimenStage title="Navigation Menu trigger">
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Catalog</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <div className="w-64 p-3">
+                    <NavigationMenuLink className="block p-2 text-sm hover:bg-accent">
+                      Components
+                    </NavigationMenuLink>
+                    <NavigationMenuLink className="block p-2 text-sm hover:bg-accent">
+                      Tokens
+                    </NavigationMenuLink>
+                  </div>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        </SpecimenStage>
+        <SpecimenStage title="Navigation Menu links">
+          <NavigationMenu>
+            <NavigationMenuList className="grid w-64 gap-1 border bg-popover p-2 text-popover-foreground">
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  href="/ui?item=preview"
+                  className="block p-2 text-sm hover:bg-accent"
+                >
+                  Components
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuLink
+                  href="/ui?item=design-system"
+                  className="block p-2 text-sm hover:bg-accent"
+                >
+                  Tokens
+                </NavigationMenuLink>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
+        </SpecimenStage>
+      </>
+    );
+  }
+
+  throw new Error(`Missing focused navigation specimen: ${item.id}`);
+}
+
+function AccordionSpecimen() {
   return (
     <>
-      <SpecimenStage title={`${item.label} route shell`}>
-        <NavigationBench />
+      <SpecimenStage title="Accordion expanded state">
+        <Accordion type="single" collapsible defaultValue="one">
+          <AccordionItem value="one">
+            <AccordionTrigger>What does Preview show?</AccordionTrigger>
+            <AccordionContent>Every supported public visual component.</AccordionContent>
+          </AccordionItem>
+          <AccordionItem value="two">
+            <AccordionTrigger>What does search include?</AccordionTrigger>
+            <AccordionContent>Views, components, and supporting entries.</AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </SpecimenStage>
-      <SpecimenStage title={`${item.label} navigation state`}>
-        <div className="h-64 overflow-hidden border">
-          <SidebarProvider defaultOpen className="min-h-0">
-            <Sidebar collapsible="none">
-              <SidebarContent>
-                <SidebarGroup>
-                  <SidebarGroupLabel>Catalog</SidebarGroupLabel>
-                  <SidebarGroupContent>
-                    <SidebarMenu>
-                      {["Preview", "Tokens", "Components"].map((label) => (
-                        <SidebarMenuItem key={label}>
-                          <SidebarMenuButton>
-                            <CubeFocusIcon aria-hidden="true" focusable="false" />
-                            <span>{label}</span>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>
-                      ))}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              </SidebarContent>
-            </Sidebar>
-            <div className="flex flex-1 items-center justify-center text-sm text-muted-foreground">
-              canvas
-            </div>
-          </SidebarProvider>
-        </div>
+      <SpecimenStage title="Accordion collapsed state">
+        <Accordion type="single" collapsible>
+          <AccordionItem value="one">
+            <AccordionTrigger>Collapsed item</AccordionTrigger>
+            <AccordionContent>Hidden until expanded.</AccordionContent>
+          </AccordionItem>
+        </Accordion>
       </SpecimenStage>
     </>
   );
 }
 
-function NavigationBench() {
-  return (
-    <div className="space-y-4">
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="/">Home</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>UI</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
-      <Tabs defaultValue="preview">
-        <TabsList>
-          <TabsTrigger value="preview">Preview</TabsTrigger>
-          <TabsTrigger value="tokens">Tokens</TabsTrigger>
-          <TabsTrigger value="audio">Audio</TabsTrigger>
-        </TabsList>
-        <TabsContent value="preview" className="border p-3 text-sm">
-          Dense component wall.
-        </TabsContent>
-        <TabsContent value="tokens" className="border p-3 text-sm">
-          Live token specimens.
-        </TabsContent>
-        <TabsContent value="audio" className="border p-3 text-sm">
-          Instrument bay.
-        </TabsContent>
-      </Tabs>
-      <div className="flex flex-wrap items-center gap-3">
-        <NavigationMenu>
-          <NavigationMenuList>
-            <NavigationMenuItem>
-              <NavigationMenuTrigger>Catalog</NavigationMenuTrigger>
-              <NavigationMenuContent>
-                <div className="w-64 p-3">
-                  <NavigationMenuLink className="block rounded-md p-2 text-sm hover:bg-accent">
-                    Components
-                  </NavigationMenuLink>
-                  <NavigationMenuLink className="block rounded-md p-2 text-sm hover:bg-accent">
-                    Tokens
-                  </NavigationMenuLink>
-                </div>
-              </NavigationMenuContent>
-            </NavigationMenuItem>
-          </NavigationMenuList>
-        </NavigationMenu>
-        <Pagination>
-          <PaginationContent>
-            <PaginationItem>
-              <PaginationPrevious href="#" />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationLink href="#" isActive>
-                1
-              </PaginationLink>
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationEllipsis />
-            </PaginationItem>
-            <PaginationItem>
-              <PaginationNext href="#" />
-            </PaginationItem>
-          </PaginationContent>
-        </Pagination>
-      </div>
-    </div>
-  );
-}
-
-function DisclosureExamples({ item }: { item: CatalogItem }) {
+function CollapsibleSpecimen() {
   return (
     <>
-      <SpecimenStage title={`${item.label} expanded state`}>
-        <Accordion type="single" collapsible defaultValue="one">
-          <AccordionItem value="one">
-            <AccordionTrigger>What does Preview show?</AccordionTrigger>
-            <AccordionContent>Every public @kkb/ui component export.</AccordionContent>
-          </AccordionItem>
-          <AccordionItem value="two">
-            <AccordionTrigger>What does search include?</AccordionTrigger>
-            <AccordionContent>
-              Views, categories, components, utilities, and source paths.
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
-      </SpecimenStage>
-      <SpecimenStage title={`${item.label} disclosure control`}>
+      <SpecimenStage title="Collapsible open state">
         <Collapsible defaultOpen>
           <div className="flex items-center justify-between gap-4">
             <p className="font-mono text-sm">Implementation notes</p>
@@ -1530,84 +1729,30 @@ function DisclosureExamples({ item }: { item: CatalogItem }) {
           </CollapsibleContent>
         </Collapsible>
       </SpecimenStage>
+      <SpecimenStage title="Collapsible closed state">
+        <Collapsible>
+          <div className="flex items-center justify-between gap-4">
+            <p className="font-mono text-sm">Source details</p>
+            <CollapsibleTrigger render={<Button variant="outline" size="sm" />}>
+              Reveal
+            </CollapsibleTrigger>
+          </div>
+          <CollapsibleContent className="pt-3 text-sm text-muted-foreground">
+            @kkb/ui/components/collapsible
+          </CollapsibleContent>
+        </Collapsible>
+      </SpecimenStage>
     </>
   );
 }
 
-function OverlayExamples({ item }: { item: CatalogItem }) {
+function DrawerSpecimen() {
   return (
     <>
-      <SpecimenStage title={`${item.label} trigger`}>
-        <OverlayBench />
-      </SpecimenStage>
-      <SpecimenStage title={`${item.label} open-state shape`}>
-        <TooltipProvider>
-          <div className="flex flex-wrap gap-2">
-            <Popover>
-              <PopoverTrigger render={<Button variant="outline" />}>Popover</PopoverTrigger>
-              <PopoverContent className="w-64">
-                <PopoverTitle className="sr-only">Popover controls</PopoverTitle>
-                <p className="text-sm">Tune density and component state.</p>
-              </PopoverContent>
-            </Popover>
-            <Tooltip>
-              <TooltipTrigger
-                render={
-                  <Button variant="outline" size="icon" aria-label="Show notification tooltip" />
-                }
-              >
-                <BellIcon aria-hidden="true" focusable="false" className="size-4" />
-              </TooltipTrigger>
-              <TooltipContent>Notification state</TooltipContent>
-            </Tooltip>
-          </div>
-        </TooltipProvider>
-      </SpecimenStage>
-    </>
-  );
-}
-
-function OverlayBench() {
-  return (
-    <TooltipProvider>
-      <div className="flex flex-wrap gap-2">
-        <Dialog>
-          <DialogTrigger render={<Button variant="outline" />}>Dialog</DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Inspect component</DialogTitle>
-              <DialogDescription>Focused modal example.</DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button>Done</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        <AlertDialog>
-          <AlertDialogTrigger render={<Button variant="outline" />}>Alert</AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Reset demo state?</AlertDialogTitle>
-              <AlertDialogDescription>This only affects the preview.</AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction>Reset</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-        <Sheet>
-          <SheetTrigger render={<Button variant="outline" />}>Sheet</SheetTrigger>
-          <SheetContent>
-            <SheetHeader>
-              <SheetTitle>Component metadata</SheetTitle>
-              <SheetDescription>Source, category, and states.</SheetDescription>
-            </SheetHeader>
-          </SheetContent>
-        </Sheet>
+      <SpecimenStage title="Drawer trigger">
         <Drawer>
           <DrawerTrigger asChild>
-            <Button variant="outline">Drawer</Button>
+            <Button variant="outline">Open drawer</Button>
           </DrawerTrigger>
           <DrawerContent>
             <DrawerHeader>
@@ -1615,32 +1760,114 @@ function OverlayBench() {
               <DrawerDescription>Bottom-mounted support surface.</DrawerDescription>
             </DrawerHeader>
             <DrawerFooter>
-              <Button>Close</Button>
+              <Button>Done</Button>
             </DrawerFooter>
           </DrawerContent>
         </Drawer>
+      </SpecimenStage>
+      <SpecimenStage title="Drawer bottom-sheet anatomy">
+        <div className="border bg-background p-4">
+          <div className="mx-auto mb-4 h-2 w-20 rounded-full bg-muted" />
+          <p className="font-mono text-sm font-semibold">Mobile tray</p>
+          <p className="mt-1 text-sm text-muted-foreground">Drag handle and stacked content.</p>
+        </div>
+      </SpecimenStage>
+    </>
+  );
+}
+
+function SheetSpecimen() {
+  return (
+    <>
+      <SpecimenStage title="Sheet trigger">
+        <Sheet>
+          <SheetTrigger render={<Button variant="outline" />}>Open sheet</SheetTrigger>
+          <SheetContent>
+            <SheetHeader>
+              <SheetTitle>Component metadata</SheetTitle>
+              <SheetDescription>Source, category, and states.</SheetDescription>
+            </SheetHeader>
+          </SheetContent>
+        </Sheet>
+      </SpecimenStage>
+      <SpecimenStage title="Sheet side-panel anatomy">
+        <div className="ml-auto min-h-44 w-3/4 border-l bg-background p-4 shadow-sm">
+          <p className="font-mono text-sm font-semibold">Component metadata</p>
+          <p className="mt-2 text-sm text-muted-foreground">Right-aligned supporting surface.</p>
+        </div>
+      </SpecimenStage>
+    </>
+  );
+}
+
+function PopoverSpecimen() {
+  return (
+    <>
+      <SpecimenStage title="Popover trigger">
         <Popover>
-          <PopoverTrigger render={<Button variant="outline" />}>Popover</PopoverTrigger>
+          <PopoverTrigger render={<Button variant="outline" />}>Open popover</PopoverTrigger>
           <PopoverContent className="w-64">
-            <PopoverTitle className="sr-only">Popover controls</PopoverTitle>
-            <p className="text-sm">Tune density and component state.</p>
+            <PopoverTitle>Preview controls</PopoverTitle>
+            <p className="mt-2 text-sm text-muted-foreground">Tune density and component state.</p>
           </PopoverContent>
         </Popover>
+      </SpecimenStage>
+      <SpecimenStage title="Popover content anatomy">
+        <div className="w-64 border bg-popover p-4 text-popover-foreground shadow-sm">
+          <p className="font-mono text-sm font-semibold">Preview controls</p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Context stays anchored to its trigger.
+          </p>
+        </div>
+      </SpecimenStage>
+    </>
+  );
+}
+
+function HoverCardSpecimen() {
+  return (
+    <>
+      <SpecimenStage title="Hover Card trigger">
         <HoverCard>
-          <HoverCardTrigger render={<Button variant="outline" />}>Hover card</HoverCardTrigger>
+          <HoverCardTrigger render={<Button variant="outline" />}>
+            Hover for metadata
+          </HoverCardTrigger>
           <HoverCardContent>
-            <p className="text-sm">Preview metadata without leaving flow.</p>
+            <p className="font-mono text-sm">@kkb/ui/components/hover-card</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Preview metadata without leaving flow.
+            </p>
           </HoverCardContent>
         </HoverCard>
+      </SpecimenStage>
+      <SpecimenStage title="Hover Card preview anatomy">
+        <div className="w-72 border bg-popover p-4 text-popover-foreground shadow-sm">
+          <p className="font-mono text-sm">Hover Card</p>
+          <p className="mt-2 text-sm text-muted-foreground">Non-modal, pointer-adjacent detail.</p>
+        </div>
+      </SpecimenStage>
+    </>
+  );
+}
+
+function TooltipSpecimen() {
+  return (
+    <TooltipProvider>
+      <SpecimenStage title="Tooltip trigger">
         <Tooltip>
           <TooltipTrigger
-            render={<Button variant="outline" size="icon" aria-label="Show notification tooltip" />}
+            render={<Button variant="outline" size="icon" aria-label="Show status tooltip" />}
           >
             <BellIcon aria-hidden="true" focusable="false" className="size-4" />
           </TooltipTrigger>
-          <TooltipContent>Notification state</TooltipContent>
+          <TooltipContent>Catalog status</TooltipContent>
         </Tooltip>
-      </div>
+      </SpecimenStage>
+      <SpecimenStage title="Tooltip content anatomy">
+        <div className="inline-flex bg-primary px-3 py-1.5 text-xs text-primary-foreground">
+          Catalog status
+        </div>
+      </SpecimenStage>
     </TooltipProvider>
   );
 }
@@ -1648,7 +1875,7 @@ function OverlayBench() {
 function AlertDialogSpecimen() {
   return (
     <>
-      <SpecimenStage title="Trigger and modal">
+      <SpecimenStage title="Destructive confirmation">
         <AlertDialog>
           <AlertDialogTrigger render={<Button variant="destructive" />}>
             Delete capture
@@ -1667,7 +1894,7 @@ function AlertDialogSpecimen() {
           </AlertDialogContent>
         </AlertDialog>
       </SpecimenStage>
-      <SpecimenStage title="Open-state anatomy">
+      <SpecimenStage title="Decision anatomy">
         <div className="max-w-sm border bg-background p-4 shadow-sm">
           <p className="font-mono text-sm font-semibold">Delete capture?</p>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -1858,9 +2085,9 @@ function FeedbackExamples({ item }: { item: CatalogItem }) {
     return (
       <SpecimenStage title="Progress values" className="md:col-span-2">
         <div className="grid gap-4">
-          <Progress value={28} />
-          <Progress value={64} />
-          <Progress value={92} />
+          <Progress value={28} aria-label="Initial progress" />
+          <Progress value={64} aria-label="Current progress" />
+          <Progress value={92} aria-label="Near-complete progress" />
         </div>
       </SpecimenStage>
     );
@@ -1882,28 +2109,37 @@ function FeedbackExamples({ item }: { item: CatalogItem }) {
     );
   }
 
-  if (item.id === "spinner" || item.id === "sonner") {
+  if (item.id === "spinner") {
     return (
-      <SpecimenStage
-        title={item.id === "spinner" ? "Spinner state" : "Sonner state"}
-        className="md:col-span-2"
-      >
+      <SpecimenStage title="Spinner state" className="md:col-span-2">
         <div className="flex items-center gap-3">
           <Spinner />
-          <span className="text-sm text-muted-foreground">
-            {item.id === "spinner" ? "Loading capture" : "Toast host mounted"}
-          </span>
-          {item.id === "sonner" ? <Toaster /> : null}
+          <span className="text-sm text-muted-foreground">Loading capture</span>
         </div>
       </SpecimenStage>
     );
   }
 
-  return (
-    <SpecimenStage title={item.label} className="md:col-span-2">
-      <TinyPreview id={item.id} />
-    </SpecimenStage>
-  );
+  if (item.id === "sonner") {
+    return (
+      <>
+        <SpecimenStage title="Sonner toast trigger">
+          <Button onClick={() => toast.success("Catalog verification complete")}>Show toast</Button>
+          <Toaster position="bottom-right" />
+        </SpecimenStage>
+        <SpecimenStage title="Sonner toast anatomy">
+          <div role="status" className="border bg-popover p-4 text-popover-foreground shadow-md">
+            <p className="font-mono text-sm font-semibold">Catalog verification complete</p>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Inventory and specimen coverage are current.
+            </p>
+          </div>
+        </SpecimenStage>
+      </>
+    );
+  }
+
+  throw new Error(`Missing focused feedback specimen: ${item.id}`);
 }
 
 function MenuExamples({ item }: { item: CatalogItem }) {
@@ -1962,8 +2198,11 @@ function MenuExamples({ item }: { item: CatalogItem }) {
       <>
         <SpecimenStage title="Context menu trigger">
           <ContextMenu>
-            <ContextMenuTrigger className="grid h-40 place-items-center border bg-muted/20 text-sm text-muted-foreground">
-              Right click surface
+            <ContextMenuTrigger
+              render={<button type="button" />}
+              className="grid h-40 w-full place-items-center border bg-muted/20 text-sm text-muted-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            >
+              Right click or press Shift+F10
             </ContextMenuTrigger>
             <ContextMenuContent>
               <ContextMenuGroup>
@@ -2042,11 +2281,7 @@ function MenuExamples({ item }: { item: CatalogItem }) {
     );
   }
 
-  return (
-    <SpecimenStage title={item.label} className="md:col-span-2">
-      <TinyPreview id={item.id} />
-    </SpecimenStage>
-  );
+  throw new Error(`Missing focused menu specimen: ${item.id}`);
 }
 
 function DataExamples({ item }: { item: CatalogItem }) {
@@ -2097,21 +2332,24 @@ function DataExamples({ item }: { item: CatalogItem }) {
 
   if (item.id === "chart") {
     return (
-      <SpecimenStage title="Chart bars" className="md:col-span-2">
-        <div
-          className="flex h-64 items-end gap-2 border bg-muted/20 p-4"
-          aria-label="Chart specimen"
-        >
-          {chartData.map((bar) => (
-            <div key={bar.month} className="flex h-full flex-1 flex-col justify-end gap-2">
-              <div className="flex min-h-0 flex-1 items-end self-stretch">
-                <div className="w-full bg-foreground" style={{ height: `${bar.value}%` }} />
-              </div>
-              <span className="font-mono text-xs text-muted-foreground">{bar.month}</span>
-            </div>
-          ))}
-        </div>
-      </SpecimenStage>
+      <>
+        <SpecimenStage title="Chart bars" className="md:col-span-2">
+          <CatalogCoverageChart showValueTable={false} />
+        </SpecimenStage>
+        <SpecimenStage title="Chart accessible values">
+          <Table>
+            <TableCaption>Monthly component coverage.</TableCaption>
+            <TableBody>
+              {chartData.map(({ month, value }) => (
+                <TableRow key={month}>
+                  <TableCell>{month}</TableCell>
+                  <TableCell>{value}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </SpecimenStage>
+      </>
     );
   }
 
@@ -2161,72 +2399,5 @@ function DataExamples({ item }: { item: CatalogItem }) {
     );
   }
 
-  return (
-    <>
-      <SpecimenStage title={`${item.label} dense values`}>
-        <DataBench />
-      </SpecimenStage>
-      <SpecimenStage title={`${item.label} visual state`}>
-        <div className="space-y-6">
-          <div
-            className="flex h-44 items-end gap-2 border bg-muted/20 p-4"
-            aria-label="Chart specimen"
-          >
-            {chartData.map((bar) => (
-              <div key={bar.month} className="flex h-full flex-1 flex-col justify-end gap-2">
-                <div className="flex min-h-0 flex-1 items-end self-stretch">
-                  <div className="w-full bg-foreground" style={{ height: `${bar.value}%` }} />
-                </div>
-                <span className="font-mono text-xs text-muted-foreground">{bar.month}</span>
-              </div>
-            ))}
-          </div>
-          <CarouselDemo />
-        </div>
-      </SpecimenStage>
-    </>
-  );
-}
-
-function DataBench() {
-  return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_180px]">
-      <Table>
-        <TableCaption>Catalog implementation matrix.</TableCaption>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Primitive</TableHead>
-            <TableHead>Status</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {["Table", "Code", "Kbd"].map((name) => (
-            <TableRow key={name}>
-              <TableCell>{name}</TableCell>
-              <TableCell>covered</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <div className="space-y-3">
-        <p className="text-sm">
-          Import <Code>@kkb/ui/components/table</Code>
-        </p>
-        <KbdGroup>
-          <Kbd>⌘</Kbd>
-          <Kbd>K</Kbd>
-        </KbdGroup>
-        <div className="flex h-24 items-end gap-1 border bg-muted/20 p-3" aria-label="Chart">
-          {chartData.map((bar) => (
-            <div key={bar.month} className="flex h-full flex-1 flex-col justify-end gap-1">
-              <div className="flex min-h-0 flex-1 items-end self-stretch">
-                <div className="w-full bg-foreground" style={{ height: `${bar.value}%` }} />
-              </div>
-              <span className="font-mono text-[10px] text-muted-foreground">{bar.month}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+  throw new Error(`Missing focused data specimen: ${item.id}`);
 }

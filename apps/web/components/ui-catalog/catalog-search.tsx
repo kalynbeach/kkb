@@ -35,11 +35,11 @@ export function CatalogSearchDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[calc(100%-2rem)] overflow-hidden rounded-lg border bg-popover p-0 shadow-none sm:max-w-xl">
+      <DialogContent className="max-w-[calc(100%-2rem)] overflow-hidden border bg-popover p-0 shadow-none sm:max-w-xl">
         <DialogHeader className="sr-only">
           <DialogTitle>Search KKB UI catalog</DialogTitle>
           <DialogDescription>
-            Jump to preview, design tokens, or an exported @kkb/ui component.
+            Jump to preview, design tokens, a visual component, or a supporting export.
           </DialogDescription>
         </DialogHeader>
         <CatalogSearchSession open={open} selectedItem={selectedItem} onSelect={onSelect} />
@@ -149,7 +149,7 @@ function CatalogCommandItem({
           <span className="sr-only">Current catalog item</span>
         </>
       ) : null}
-      <CommandShortcut className="mt-0.5">{item.kind}</CommandShortcut>
+      <CommandShortcut className="mt-0.5">{item.entryType}</CommandShortcut>
     </CommandItem>
   );
 }

@@ -98,7 +98,7 @@ Public areas currently include:
 
 ## Inventory and verification surfaces
 
-The web app's [`/ui`](http://localhost:3000/ui) route is the complete component inventory and visual acceptance workbench for this package. Its default Preview is a dense wall of live components; focused `?item=` views show each component's own variants and states. The route should stay close to the established [shadcn/create inspection model](https://ui.shadcn.com/create?preset=b1D0enCq&base=base&item=preview) and must not become a workshop index, docs site, or gallery of complete application shells.
+The web app's [`/ui`](http://localhost:3000/ui) route is the complete component inventory and visual acceptance workbench for this package. Its default Preview is a dense wall of live components; focused `?item=` views show each component's own variants and states. Catalog tests derive the supported component surface from this package's export map and matching source files, while the catalog registry explicitly keeps providers, hooks, presenters, theme constants, and experimental integrations secondary to visual components. The route follows the established [shadcn/create inspection model](https://ui.shadcn.com/create?preset=b1D0enCq&base=base&item=preview) and must not become a workshop index, docs site, or gallery of complete application shells.
 
 [`/json-render`](http://localhost:3000/json-render) is a separate adapter demo surface. Its presence does not place JSON-render inside the active design-system roadmap.
 
