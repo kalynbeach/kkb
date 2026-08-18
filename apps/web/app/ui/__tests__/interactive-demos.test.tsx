@@ -675,6 +675,12 @@ describe("interactive /ui demos", () => {
       timeline.dispatchEvent(
         new environment.window.KeyboardEvent("keydown", {
           bubbles: true,
+          key: "ArrowRight",
+        }),
+      );
+      timeline.dispatchEvent(
+        new environment.window.KeyboardEvent("keydown", {
+          bubbles: true,
           key: "Home",
         }),
       );
@@ -686,7 +692,7 @@ describe("interactive /ui demos", () => {
       );
     });
 
-    expect(seekCalls).toEqual([95, 0, 120]);
+    expect(seekCalls).toEqual([95, 100, 0, 120]);
   });
 
   test("wide tables expose a locally focusable named scroll region", async () => {

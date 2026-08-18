@@ -17,6 +17,7 @@ import { syncSeekTimelineInput } from "./seek-timeline-semantics";
 
 type PlayerShellProps = {
   player: WebPlayer | null;
+  trackId: string | null;
   title: string;
   subtitle: string;
   status: "idle" | "loading" | "ready" | "playing" | "paused" | "recovering" | "error";
@@ -93,6 +94,7 @@ const resolveDuration = (duration: number, fallbackDuration: number) =>
 
 function PlayerShell({
   player,
+  trackId,
   title,
   subtitle,
   status,
@@ -121,14 +123,15 @@ function PlayerShell({
   const seekTimelineProgressRef = useRef<HTMLDivElement>(null);
   const seekTimelinePlayheadRef = useRef<HTMLDivElement>(null);
   const seekTimelineBufferedRangesRef = useRef<HTMLDivElement>(null);
+  const seekTimelineScrubbingRef = useRef(false);
   const initialTimeline = player?.getTimeline() ?? { currentTime: 0, duration };
   const initialBufferedRanges = player?.getBufferedRanges() ?? [];
   const initialDuration = resolveDuration(initialTimeline.duration, duration);
-  const [renderedDuration, setRenderedDuration] = useState(initialDuration);
-  const presentationDuration = resolveDuration(
-    initialDuration,
-    sourceId === null ? duration : renderedDuration,
-  );
+  const [renderedTimeline, setRenderedTimeline] = useState({ trackId, duration: initialDuration });
+  const isCurrentTrack = renderedTimeline.trackId === trackId;
+  const presentationDuration = isCurrentTrack
+    ? resolveDuration(initialDuration, renderedTimeline.duration)
+    : 0;
   const presenter = createPlayerPresenter({
     status,
     currentTime: initialTimeline.currentTime,
@@ -141,12 +144,20 @@ function PlayerShell({
       return;
     }
 
+    if (renderedTimeline.trackId !== trackId) {
+      if (status === "loading" || status === "recovering") {
+        setRenderedTimeline({ trackId, duration: 0 });
+      }
+
+      return;
+    }
+
     const timeline = player.getTimeline();
     const bufferedRanges = player.getBufferedRanges();
     const effectiveDuration = resolveDuration(timeline.duration, duration);
 
-    if (!Object.is(renderedDuration, effectiveDuration)) {
-      setRenderedDuration(effectiveDuration);
+    if (!Object.is(renderedTimeline.duration, effectiveDuration)) {
+      setRenderedTimeline({ trackId, duration: effectiveDuration });
     }
 
     const nextPresenter = createPlayerPresenter({
@@ -172,12 +183,7 @@ function PlayerShell({
       bufferedLabelRef.current.textContent = `buf ${formatBufferedLabel(nextPresenter.bufferedSegments)}`;
     }
 
-    const isPointerInteracting =
-      seekTimelineInputRef.current
-        ?.closest('[data-audio-timeline="true"]')
-        ?.hasAttribute("data-pointer-interacting") ?? false;
-
-    if (!isPointerInteracting) {
+    if (!seekTimelineScrubbingRef.current) {
       if (seekTimelineInputRef.current) {
         syncSeekTimelineInput({
           target: seekTimelineInputRef.current,
@@ -283,6 +289,9 @@ function PlayerShell({
               currentTime={initialTimeline.currentTime}
               bufferedRanges={initialBufferedRanges}
               onSeek={onSeek}
+              onScrubbingChange={(scrubbing) => {
+                seekTimelineScrubbingRef.current = scrubbing;
+              }}
             />
           </div>
 

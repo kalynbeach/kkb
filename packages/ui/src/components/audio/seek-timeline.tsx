@@ -8,7 +8,7 @@ import {
   SliderTrack,
 } from "@kkb/ui/components/slider";
 import { cn } from "@kkb/ui/lib/utils";
-import { type Ref, useEffect, useRef, useState } from "react";
+import { type Ref, useEffect, useState } from "react";
 
 import { Playhead } from "./playhead";
 import { type BufferedRange, formatAccessibleTime } from "./presenter";
@@ -23,6 +23,7 @@ type SeekTimelineProps = {
   bufferedRanges?: BufferedRange[];
   className?: string;
   onSeek?: (seconds: number) => void;
+  onScrubbingChange?: (scrubbing: boolean) => void;
   inputRef?: Ref<HTMLInputElement>;
   progressIndicatorRef?: Ref<HTMLDivElement>;
   playheadRef?: Ref<HTMLDivElement>;
@@ -35,6 +36,7 @@ function SeekTimeline({
   bufferedRanges = [],
   className,
   onSeek,
+  onScrubbingChange,
   inputRef,
   progressIndicatorRef,
   playheadRef,
@@ -50,14 +52,19 @@ function SeekTimeline({
   const isSeekable = onSeek !== undefined && safeDuration > 0;
   const hasLiveBufferedRangesLayer = bufferedRangesRef !== undefined;
   const [interactionTime, setInteractionTime] = useState(safeCurrentTime);
-  const isPointerInteractingRef = useRef(false);
-  const timelineRootRef = useRef<HTMLDivElement>(null);
+  const [isPointerInteracting, setIsPointerInteracting] = useState(false);
 
   useEffect(() => {
-    if (!isPointerInteractingRef.current) {
+    if (!isSeekable && isPointerInteracting) {
+      setIsPointerInteracting(false);
+      onScrubbingChange?.(false);
+      return;
+    }
+
+    if (!isPointerInteracting) {
       setInteractionTime(safeCurrentTime);
     }
-  }, [safeCurrentTime]);
+  }, [isPointerInteracting, isSeekable, onScrubbingChange, safeCurrentTime]);
 
   const syncInteractionTime = (root: HTMLDivElement) => {
     const input = root.querySelector<HTMLInputElement>('input[type="range"]');
@@ -69,8 +76,8 @@ function SeekTimeline({
   };
 
   const setPointerInteracting = (interacting: boolean) => {
-    isPointerInteractingRef.current = interacting;
-    timelineRootRef.current?.toggleAttribute("data-pointer-interacting", interacting);
+    setIsPointerInteracting(interacting);
+    onScrubbingChange?.(interacting);
   };
 
   const handleKeyDownCapture = (event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -80,7 +87,7 @@ function SeekTimeline({
     }
 
     if (event.key === "PageUp" || event.key === "PageDown") {
-      // Preserve the existing audio seek contract instead of inheriting Slider's page-key steps.
+      // Page keys intentionally remain inert; issue #37 preserves Arrow/Home/End seeking.
       event.preventDefault();
       event.stopPropagation();
       return;
@@ -99,14 +106,13 @@ function SeekTimeline({
     event.preventDefault();
     event.stopPropagation();
     setInteractionTime(nextTime);
-    syncTimelineValue(event.currentTarget, event.target, nextTime, Number(event.target.max));
+    syncTimelineInputValue(event.target, nextTime);
     onSeek(nextTime);
   };
 
   if (isSeekable) {
     return (
       <SliderRoot
-        ref={timelineRootRef}
         className={cn("group relative h-14 w-full cursor-pointer", className)}
         data-audio-timeline="true"
         max={safeDuration}
@@ -223,30 +229,9 @@ function SeekTimeline({
   );
 }
 
-function syncTimelineValue(
-  root: HTMLDivElement,
-  input: HTMLInputElement,
-  currentTime: number,
-  duration: number,
-) {
-  // Keep consecutive captured key events on the latest DOM value before React commits the batch.
-  const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+// Keep consecutive relative key events on the latest input value before React commits the batch.
+function syncTimelineInputValue(input: HTMLInputElement, currentTime: number) {
   input.value = `${currentTime}`;
-  input.setAttribute("aria-valuenow", `${currentTime}`);
-  input.setAttribute(
-    "aria-valuetext",
-    `${formatAccessibleTime(currentTime)} of ${formatAccessibleTime(duration)}`,
-  );
-
-  const progress = root.querySelector<HTMLElement>('[data-slot="seek-timeline-progress"]');
-  if (progress) {
-    progress.style.width = `${progressPercent}%`;
-  }
-
-  const playhead = root.querySelector<HTMLElement>('[data-slot="seek-timeline-playhead"]');
-  if (playhead) {
-    playhead.style.insetInlineStart = `${progressPercent}%`;
-  }
 }
 
 function TimelineRuler() {

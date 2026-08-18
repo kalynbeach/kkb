@@ -79,6 +79,7 @@ describe("PlayerShell", () => {
     expect(() =>
       renderToString(
         <PlayerShell
+          trackId="test-tone"
           player={createPlayerStub()}
           title="Test Tone"
           subtitle="Local AAC fixture routed through the current media-element path."
@@ -101,6 +102,7 @@ describe("PlayerShell", () => {
   test("shows buffered progress using the buffered extent", () => {
     const html = renderToString(
       <PlayerShell
+        trackId="test-tone"
         player={{
           ...createPlayerStub(),
           getBufferedRanges: () => [{ start: 10, end: 30 }],
@@ -129,6 +131,7 @@ describe("PlayerShell", () => {
   test("renders previous, stop, and next controls from transport state", () => {
     const html = renderToString(
       <PlayerShell
+        trackId="test-tone"
         player={createPlayerStub()}
         title="Test Tone"
         subtitle="Local AAC fixture routed through the current media-element path."
@@ -160,6 +163,7 @@ describe("PlayerShell", () => {
   test("does not render fake diagnostics when no real track metadata exists", () => {
     const html = renderToString(
       <PlayerShell
+        trackId="test-tone"
         player={createPlayerStub()}
         title="Test Tone"
         subtitle="Local AAC fixture routed through the current media-element path."
@@ -186,6 +190,7 @@ describe("PlayerShell", () => {
   test("announces coarse status and exposes complete errors", () => {
     const loadingHtml = renderToString(
       <PlayerShell
+        trackId="test-tone"
         player={createPlayerStub()}
         title="Test Tone"
         subtitle="Local AAC fixture routed through the current media-element path."
@@ -204,6 +209,7 @@ describe("PlayerShell", () => {
     ).replaceAll("<!-- -->", "");
     const errorHtml = renderToString(
       <PlayerShell
+        trackId="test-tone"
         player={createPlayerStub()}
         title="Test Tone"
         subtitle="Local AAC fixture routed through the current media-element path."
@@ -231,6 +237,7 @@ describe("PlayerShell", () => {
   test("clamps buffered progress display to 100 percent", () => {
     const html = renderToString(
       <PlayerShell
+        trackId="test-tone"
         player={{
           ...createPlayerStub(),
           getBufferedRanges: () => [{ start: 80, end: 140 }],
@@ -259,6 +266,7 @@ describe("PlayerShell", () => {
   test("renders playback rate and volume controls", () => {
     const html = renderToString(
       <PlayerShell
+        trackId="test-tone"
         player={createPlayerStub()}
         title="Test Tone"
         subtitle="Local AAC fixture routed through the current media-element path."
