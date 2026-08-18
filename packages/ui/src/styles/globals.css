@@ -80,6 +80,7 @@
   --color-audio-window-dot-muted: var(--audio-window-dot-muted);
   --color-audio-window-dot-faint: var(--audio-window-dot-faint);
   --color-audio-buffered: var(--audio-buffered);
+  --color-audio-timeline-buffered: var(--audio-timeline-buffered);
   --color-audio-timeline-played: var(--audio-timeline-played);
   --color-audio-timeline-idle: var(--audio-timeline-idle);
   --color-audio-timeline-idle-hover: var(--audio-timeline-idle-hover);
@@ -173,7 +174,8 @@
   --audio-accent-dim: oklch(0.768 0.122 252.001 / 0.35);
   --audio-accent-soft: oklch(0.768 0.122 252.001 / 0.12);
   --audio-accent-softer: oklch(0.768 0.122 252.001 / 0.08);
-  --audio-buffered: oklch(0.768 0.122 252.001 / 0.4);
+  --audio-buffered: oklch(0.768 0.122 252.001 / 0.06);
+  --audio-timeline-buffered: oklch(0.768 0.122 252.001 / 0.4);
   --audio-timeline-played: oklch(0.786 0.112 251.282 / 0.95);
   --audio-timeline-idle: oklch(0.69 0.109 249.664 / 0.25);
   --audio-timeline-idle-hover: oklch(0.69 0.109 249.664 / 0.35);
@@ -271,7 +273,8 @@
   --audio-accent-dim: oklch(0.8 0.122 252.001 / 0.4);
   --audio-accent-soft: oklch(0.8 0.122 252.001 / 0.15);
   --audio-accent-softer: oklch(0.8 0.122 252.001 / 0.1);
-  --audio-buffered: oklch(0.8 0.122 252.001 / 0.45);
+  --audio-buffered: oklch(0.8 0.122 252.001 / 0.08);
+  --audio-timeline-buffered: oklch(0.8 0.122 252.001 / 0.45);
   --audio-timeline-played: oklch(0.82 0.11 251.282 / 0.97);
   --audio-timeline-idle: oklch(0.73 0.108 249.664 / 0.3);
   --audio-timeline-idle-hover: oklch(0.73 0.108 249.664 / 0.4);
@@ -362,7 +365,7 @@
   }
 
   .audio-buffered-segment {
-    @apply absolute inset-y-0 bg-audio-buffered;
+    @apply absolute inset-y-0 bg-audio-timeline-buffered;
   }
 
   .audio-transport-button {

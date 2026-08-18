@@ -145,6 +145,7 @@ function PlayerShell({
     }
 
     if (renderedTimeline.trackId !== trackId) {
+      // Engine track changes null sourceId before the new timeline can safely be adopted.
       if (sourceId === null) {
         setRenderedTimeline({ trackId, duration: 0 });
       }
