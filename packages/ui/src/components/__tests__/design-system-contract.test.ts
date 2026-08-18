@@ -164,7 +164,7 @@ describe("design-system style contracts", () => {
       navigationMenu,
       slider,
       tooltip,
-      waveform,
+      seekTimeline,
     ] = await Promise.all([
       componentSource("dialog.tsx"),
       componentSource("sheet.tsx"),
@@ -179,7 +179,7 @@ describe("design-system style contracts", () => {
       componentSource("navigation-menu.tsx"),
       componentSource("slider.tsx"),
       componentSource("tooltip.tsx"),
-      componentSource("audio/waveform.tsx"),
+      componentSource("audio/seek-timeline.tsx"),
     ]);
 
     for (const overlay of [dialog, sheet, alertDialog, drawer]) {
@@ -194,7 +194,7 @@ describe("design-system style contracts", () => {
     expect(inputOtp).not.toMatch(/rounded-[lr]-md/);
     expect(navigationMenu).not.toContain("rounded-tl-sm");
     expect(tooltip).not.toContain("rounded-[2px]");
-    expect(waveform).not.toContain("rounded-[2px]");
+    expect(seekTimeline).not.toContain("rounded-[2px]");
 
     expect(combobox).toContain('data-slot="combobox-chip"');
     expect(combobox).toContain("rounded-full");

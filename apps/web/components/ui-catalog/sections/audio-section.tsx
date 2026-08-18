@@ -3,7 +3,7 @@ import {
   AudioCompositionDemo,
   PlayerControlsDemo,
   PlayheadDemo,
-  WaveformDemo,
+  SeekTimelineDemo,
 } from "../demos/audio-demo";
 
 export function AudioSection() {
@@ -11,12 +11,12 @@ export function AudioSection() {
     <>
       <ComponentCard
         title="Audio bay contract"
-        description="Scoped signal UI for waveform, transport, and presenter composition."
+        description="Scoped signal UI for timeline, transport, and presenter composition."
         className="md:col-span-2 xl:col-span-3"
       >
         <div className="grid gap-px bg-audio-panel-border text-sm md:grid-cols-3">
           {[
-            ["scope", "audio blue stays inside playback and waveform surfaces"],
+            ["scope", "audio blue stays inside playback and timeline surfaces"],
             ["state", "idle, playing, buffering, and error states need separate feedback"],
             ["composition", "presenter owns app wiring without mutating shared product chrome"],
           ].map(([label, copy]) => (
@@ -29,10 +29,10 @@ export function AudioSection() {
       </ComponentCard>
 
       <ComponentCard
-        title="Waveform"
-        description="Buffered seek surface with the shared audio styling and interactive progress."
+        title="Seek Timeline"
+        description="Buffered time ruler with the shared audio styling and interactive progress."
       >
-        <WaveformDemo />
+        <SeekTimelineDemo />
       </ComponentCard>
 
       <ComponentCard

@@ -33,10 +33,10 @@ flowchart TB
     subgraph UI["packages/ui (Shared Components)"]
         Presenter["createPlayerPresenter()"]
         Controls["PlayerControls"]
-        Waveform["Waveform"]
+        SeekTimeline["SeekTimeline"]
         Playhead["Playhead"]
 
-        Waveform --> Playhead
+        SeekTimeline --> Playhead
     end
 
     subgraph Audio["packages/audio (Runtime Engine)"]
@@ -63,7 +63,7 @@ flowchart TB
     PS -->|"rAF loop"| CWP
     PS --> Presenter
     PS --> Controls
-    PS --> Waveform
+    PS --> SeekTimeline
     TS -->|"selectTrack(trackId)"| CTRL
 ```
 

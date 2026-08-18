@@ -254,7 +254,7 @@ The initial KKB theme uses a neutral structural foundation with a cool audio spe
 - **Secondary / Muted / Accent:** Quiet neutral fills for secondary actions, hover states, grouped controls, inactive areas, and selected surfaces. Their foreground partners are mandatory whenever the fill is used.
 - **Success / Success Foreground:** Confirmed completion and healthy status. The initial light mapping uses a deep green with light text; dark mode uses a lighter green with dark text. Visible copy or iconography must accompany the color.
 - **Warning / Warning Foreground:** Recoverable risk or attention state. The initial light mapping uses a deep amber-brown with light text; dark mode uses a brighter amber with dark text. Visible copy or iconography must accompany the color.
-- **Audio Spectrum:** Cool blue and blue-violet values currently carry waveform state, progress, buffer state, signal emphasis, and instrument telemetry. Filled audio-accent surfaces use their dedicated dark foreground role in both modes; translucent audio surfaces use the surrounding semantic foreground. The role is stable; exact values may change by theme and color mode.
+- **Audio Spectrum:** Cool blue and blue-violet values currently carry seek timeline state, progress, buffer state, signal emphasis, and instrument telemetry. A future analyzed waveform may reuse this spectrum while keeping its visualization role distinct from timeline interaction. Filled audio-accent surfaces use their dedicated dark foreground role in both modes; translucent audio surfaces use the surrounding semantic foreground. The role is stable; exact values may change by theme and color mode.
 
 ### Tertiary
 
@@ -410,7 +410,7 @@ Components are compact, predictable, keyboard-first, and built from semantic tok
 
 ### Audio Presentation
 
-Audio components may use the dedicated shell, titlebar, panel, control, scanline, waveform, and telemetry roles implemented in `globals.css`. Their tactile depth is a domain treatment, not permission to make the general product UI glossy. Each future theme should provide intentional light and dark audio mappings rather than treating the instrument as permanently dark.
+Audio components may use the dedicated shell, titlebar, panel, control, scanline, seek timeline, and telemetry roles implemented in `globals.css`. The waveform role is reserved for a future visualization derived from analyzed audio. Their tactile depth is a domain treatment, not permission to make the general product UI glossy. Each future theme should provide intentional light and dark audio mappings rather than treating the instrument as permanently dark.
 
 ### Dynamic Media and Visualizations
 

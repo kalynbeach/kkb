@@ -128,7 +128,7 @@
   <text class="box-title" x="367" y="943">Imperative live timeline path</text>
   <text class="box-text" x="367" y="969">While status is playing, PlayerShell uses requestAnimationFrame to call</text>
   <text class="box-text" x="367" y="991">getTimeline() and getBufferedRanges(). It updates refs for labels, progress,</text>
-  <text class="box-text" x="367" y="1013">waveform playhead, aria values, and buffered segments without per-frame React state.</text>
+  <text class="box-text" x="367" y="1013">seek timeline playhead, aria values, and buffered segments without per-frame React state.</text>
   <path class="return-line thin" d="M967 890 C967 908, 930 916, 892 922" />
   <path class="return-line thin" d="M345 969 C292 969, 225 940, 195 890" />
 

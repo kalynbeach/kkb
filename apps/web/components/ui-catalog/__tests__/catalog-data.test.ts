@@ -152,7 +152,7 @@ describe("ui catalog data", () => {
   test("keeps visual audio components primary and support contracts secondary", () => {
     const audioItems = itemsForCategory("Audio");
 
-    expect(audioItems.find((item) => item.id === "audio-waveform")?.entryType).toBe("visual");
+    expect(audioItems.find((item) => item.id === "audio-seek-timeline")?.entryType).toBe("visual");
     expect(audioItems.find((item) => item.id === "audio-presenter")?.entryType).toBe("presenter");
     expect(audioItems.find((item) => item.id === "audio-theme")?.entryType).toBe("theme");
   });
@@ -175,7 +175,7 @@ describe("ui catalog data", () => {
   test("keeps secondary exact matches searchable without promoting them by default", () => {
     expect(searchCatalogItems("audio presenter")[0]?.id).toBe("audio-presenter");
     expect(searchCatalogItems("").indexOf(itemFromId("audio-presenter"))).toBeGreaterThan(
-      searchCatalogItems("").indexOf(itemFromId("audio-waveform")),
+      searchCatalogItems("").indexOf(itemFromId("audio-seek-timeline")),
     );
   });
 

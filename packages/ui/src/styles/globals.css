@@ -80,9 +80,10 @@
   --color-audio-window-dot-muted: var(--audio-window-dot-muted);
   --color-audio-window-dot-faint: var(--audio-window-dot-faint);
   --color-audio-buffered: var(--audio-buffered);
-  --color-audio-waveform-played: var(--audio-waveform-played);
-  --color-audio-waveform-idle: var(--audio-waveform-idle);
-  --color-audio-waveform-idle-hover: var(--audio-waveform-idle-hover);
+  --color-audio-timeline-buffered: var(--audio-timeline-buffered);
+  --color-audio-timeline-played: var(--audio-timeline-played);
+  --color-audio-timeline-idle: var(--audio-timeline-idle);
+  --color-audio-timeline-idle-hover: var(--audio-timeline-idle-hover);
   --color-audio-control-border: var(--audio-control-border);
   --color-audio-control-icon: var(--audio-control-icon);
   --color-audio-control-icon-muted: var(--audio-control-icon-muted);
@@ -174,10 +175,10 @@
   --audio-accent-soft: oklch(0.768 0.122 252.001 / 0.12);
   --audio-accent-softer: oklch(0.768 0.122 252.001 / 0.08);
   --audio-buffered: oklch(0.768 0.122 252.001 / 0.06);
-  --audio-waveform-progress-end: oklch(0.69 0.109 249.664 / 0.12);
-  --audio-waveform-played: oklch(0.786 0.112 251.282 / 0.95);
-  --audio-waveform-idle: oklch(0.69 0.109 249.664 / 0.25);
-  --audio-waveform-idle-hover: oklch(0.69 0.109 249.664 / 0.35);
+  --audio-timeline-buffered: oklch(0.768 0.122 252.001 / 0.4);
+  --audio-timeline-played: oklch(0.786 0.112 251.282 / 0.95);
+  --audio-timeline-idle: oklch(0.69 0.109 249.664 / 0.25);
+  --audio-timeline-idle-hover: oklch(0.69 0.109 249.664 / 0.35);
   --audio-progress-end: oklch(0.807 0.096 263.53 / 0.7);
   --audio-control-border: oklch(0.784 0.035 270.937);
   --audio-control-start: oklch(0.883 0.032 269.793);
@@ -273,10 +274,10 @@
   --audio-accent-soft: oklch(0.8 0.122 252.001 / 0.15);
   --audio-accent-softer: oklch(0.8 0.122 252.001 / 0.1);
   --audio-buffered: oklch(0.8 0.122 252.001 / 0.08);
-  --audio-waveform-progress-end: oklch(0.75 0.11 249.664 / 0.16);
-  --audio-waveform-played: oklch(0.82 0.11 251.282 / 0.97);
-  --audio-waveform-idle: oklch(0.73 0.108 249.664 / 0.3);
-  --audio-waveform-idle-hover: oklch(0.73 0.108 249.664 / 0.4);
+  --audio-timeline-buffered: oklch(0.8 0.122 252.001 / 0.45);
+  --audio-timeline-played: oklch(0.82 0.11 251.282 / 0.97);
+  --audio-timeline-idle: oklch(0.73 0.108 249.664 / 0.3);
+  --audio-timeline-idle-hover: oklch(0.73 0.108 249.664 / 0.4);
   --audio-progress-end: oklch(0.84 0.096 263.53 / 0.76);
   --audio-control-border: oklch(0.55 0.027 268.8);
   --audio-control-start: oklch(0.66 0.03 268.4);
@@ -364,7 +365,7 @@
   }
 
   .audio-buffered-segment {
-    @apply absolute inset-y-0 bg-audio-buffered;
+    @apply absolute inset-y-0 bg-audio-timeline-buffered;
   }
 
   .audio-transport-button {

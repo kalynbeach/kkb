@@ -55,7 +55,7 @@ export function InputSection() {
         description="Straight fields plus richer grouped input affordances."
       >
         <div className="space-y-4 p-6">
-          <Input placeholder="Search primitives" defaultValue="audio waveform" />
+          <Input placeholder="Search primitives" defaultValue="audio seek timeline" />
           <InputGroup>
             <InputGroupAddon>
               <MagnifyingGlassIcon aria-hidden="true" focusable="false" className="size-4" />

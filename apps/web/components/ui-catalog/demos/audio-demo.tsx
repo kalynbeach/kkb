@@ -4,7 +4,7 @@ import { PlayerControls } from "@kkb/ui/components/audio/player-controls";
 
 import { Playhead } from "@kkb/ui/components/audio/playhead";
 import { createPlayerPresenter } from "@kkb/ui/components/audio/presenter";
-import { Waveform } from "@kkb/ui/components/audio/waveform";
+import { SeekTimeline } from "@kkb/ui/components/audio/seek-timeline";
 import { Badge } from "@kkb/ui/components/badge";
 import { useState } from "react";
 
@@ -53,7 +53,7 @@ function AudioDemoFrame({ title, meta, children, footer }: AudioDemoFrameProps) 
   );
 }
 
-export function WaveformDemo() {
+export function SeekTimelineDemo() {
   const [currentTime, setCurrentTime] = useState(14);
   const presenter = createPlayerPresenter({
     status: "playing",
@@ -66,7 +66,7 @@ export function WaveformDemo() {
     <AudioDemoFrame
       title="Seek Surface"
       meta={presenter.currentTimeLabel}
-      footer="click waveform or use arrow keys"
+      footer="click timeline or use arrow keys"
     >
       <div className="flex items-center justify-between gap-3">
         <div className="space-y-1">
@@ -79,7 +79,7 @@ export function WaveformDemo() {
           live seek
         </Badge>
       </div>
-      <Waveform
+      <SeekTimeline
         duration={demoDurationSeconds}
         currentTime={currentTime}
         bufferedRanges={demoBufferedRanges.slice()}

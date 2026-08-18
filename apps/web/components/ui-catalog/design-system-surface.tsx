@@ -37,7 +37,7 @@ export function DesignSystemSurface() {
           <TokenPanel
             title="Scoped color"
             rows={[
-              ["audio blue", "audio and waveform only"],
+              ["audio blue", "audio and seek timeline only"],
               ["P31 green", "oscilloscope traces only"],
               ["accent", "neutral product interaction"],
             ]}

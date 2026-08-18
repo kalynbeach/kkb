@@ -100,6 +100,8 @@ describe("ui catalog focused surfaces", () => {
     expect(rangeInputLabels(previewWall).toSorted()).toEqual([
       "Density",
       "Preview density",
+      "Seek timeline",
+      "Seek timeline",
       "Volume",
       "Volume",
     ]);

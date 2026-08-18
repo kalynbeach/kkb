@@ -108,8 +108,8 @@ sequenceDiagram
     Shell-->>User: UI updates (LED, button states)
 
     Note over User,Audio: Seek
-    User->>Shell: click Waveform at 60%
-    Shell->>Shell: calculate seconds from position
+    User->>Shell: click or drag SeekTimeline to 60%
+    Shell->>Shell: calculate seconds from slider value
     Shell->>Controller: seek(seconds)
     Controller->>WP: seek(seconds)
     WP->>Engine: seek(seconds)
@@ -169,7 +169,7 @@ flowchart TB
         P["createPlayerPresenter()"]
         subgraph Views["UI Components"]
             LCD["LCD Display<br/>time, title, status"]
-            WF["Waveform<br/>bars, progress, buffered"]
+            WF["SeekTimeline<br/>played, buffered, playhead"]
             PH["Playhead<br/>position"]
             CTL["PlayerControls<br/>play, pause"]
             LED["Status LEDs<br/>green/amber/red"]

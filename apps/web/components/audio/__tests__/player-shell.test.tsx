@@ -3,7 +3,7 @@ import { renderToString } from "react-dom/server";
 
 import { PlayerShell } from "../player-shell";
 import { shouldPollPlayerTimeline } from "../player-timeline";
-import { syncWaveformSemantics } from "../waveform-semantics";
+import { syncSeekTimelineInput } from "../seek-timeline-semantics";
 
 const createPlayerStub = () => ({
   defaultTrack: {
@@ -41,43 +41,37 @@ describe("PlayerShell", () => {
     expect(shouldPollPlayerTimeline("error")).toBe(false);
   });
 
-  test("synchronizes live waveform semantics across valid and invalid durations", () => {
-    const attributes = new Map<string, string>([["role", "img"]]);
+  test("synchronizes live seek values only while the React-owned duration is valid", () => {
+    const attributes = new Map<string, string>();
     const target = {
-      getAttribute: (name: string) => attributes.get(name) ?? null,
-      removeAttribute: (name: string) => {
-        attributes.delete(name);
-      },
+      value: "",
       setAttribute: (name: string, value: string) => {
         attributes.set(name, value);
       },
     };
 
-    syncWaveformSemantics({
+    syncSeekTimelineInput({
       target,
       currentTime: 150,
       duration: 120,
     });
 
+    expect(target.value).toBe("120");
     expect(Object.fromEntries(attributes)).toEqual({
-      role: "slider",
-      tabindex: "0",
-      "aria-label": "Seek",
-      "aria-valuemax": "120",
-      "aria-valuemin": "0",
       "aria-valuenow": "120",
       "aria-valuetext": "2:00 of 2:00",
     });
 
-    syncWaveformSemantics({
+    syncSeekTimelineInput({
       target,
       currentTime: 0,
       duration: Number.NaN,
     });
 
+    expect(target.value).toBe("120");
     expect(Object.fromEntries(attributes)).toEqual({
-      role: "img",
-      "aria-label": "Audio waveform unavailable",
+      "aria-valuenow": "120",
+      "aria-valuetext": "2:00 of 2:00",
     });
   });
 
@@ -85,6 +79,7 @@ describe("PlayerShell", () => {
     expect(() =>
       renderToString(
         <PlayerShell
+          trackId="test-tone"
           player={createPlayerStub()}
           title="Test Tone"
           subtitle="Local AAC fixture routed through the current media-element path."
@@ -107,6 +102,7 @@ describe("PlayerShell", () => {
   test("shows buffered progress using the buffered extent", () => {
     const html = renderToString(
       <PlayerShell
+        trackId="test-tone"
         player={{
           ...createPlayerStub(),
           getBufferedRanges: () => [{ start: 10, end: 30 }],
@@ -135,6 +131,7 @@ describe("PlayerShell", () => {
   test("renders previous, stop, and next controls from transport state", () => {
     const html = renderToString(
       <PlayerShell
+        trackId="test-tone"
         player={createPlayerStub()}
         title="Test Tone"
         subtitle="Local AAC fixture routed through the current media-element path."
@@ -166,6 +163,7 @@ describe("PlayerShell", () => {
   test("does not render fake diagnostics when no real track metadata exists", () => {
     const html = renderToString(
       <PlayerShell
+        trackId="test-tone"
         player={createPlayerStub()}
         title="Test Tone"
         subtitle="Local AAC fixture routed through the current media-element path."
@@ -192,6 +190,7 @@ describe("PlayerShell", () => {
   test("announces coarse status and exposes complete errors", () => {
     const loadingHtml = renderToString(
       <PlayerShell
+        trackId="test-tone"
         player={createPlayerStub()}
         title="Test Tone"
         subtitle="Local AAC fixture routed through the current media-element path."
@@ -210,6 +209,7 @@ describe("PlayerShell", () => {
     ).replaceAll("<!-- -->", "");
     const errorHtml = renderToString(
       <PlayerShell
+        trackId="test-tone"
         player={createPlayerStub()}
         title="Test Tone"
         subtitle="Local AAC fixture routed through the current media-element path."
@@ -237,6 +237,7 @@ describe("PlayerShell", () => {
   test("clamps buffered progress display to 100 percent", () => {
     const html = renderToString(
       <PlayerShell
+        trackId="test-tone"
         player={{
           ...createPlayerStub(),
           getBufferedRanges: () => [{ start: 80, end: 140 }],
@@ -265,6 +266,7 @@ describe("PlayerShell", () => {
   test("renders playback rate and volume controls", () => {
     const html = renderToString(
       <PlayerShell
+        trackId="test-tone"
         player={createPlayerStub()}
         title="Test Tone"
         subtitle="Local AAC fixture routed through the current media-element path."

@@ -2,21 +2,22 @@
 
 import { PlayerControls } from "@kkb/ui/components/audio/player-controls";
 import { createPlayerPresenter } from "@kkb/ui/components/audio/presenter";
+import { SeekTimeline } from "@kkb/ui/components/audio/seek-timeline";
 import {
   AUDIO_BUFFERED_SEGMENT_CLASS_NAME,
   AUDIO_SCANLINES_CLASS_NAME,
 } from "@kkb/ui/components/audio/theme";
-import { Waveform } from "@kkb/ui/components/audio/waveform";
 import { cn } from "@kkb/ui/lib/utils";
-import { useEffect, useEffectEvent, useRef } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 import type { WebPlayer } from "@/lib/audio/create-web-player";
 
 import { shouldPollPlayerTimeline } from "./player-timeline";
-import { syncWaveformSemantics } from "./waveform-semantics";
+import { syncSeekTimelineInput } from "./seek-timeline-semantics";
 
 type PlayerShellProps = {
   player: WebPlayer | null;
+  trackId: string | null;
   title: string;
   subtitle: string;
   status: "idle" | "loading" | "ready" | "playing" | "paused" | "recovering" | "error";
@@ -93,6 +94,7 @@ const resolveDuration = (duration: number, fallbackDuration: number) =>
 
 function PlayerShell({
   player,
+  trackId,
   title,
   subtitle,
   status,
@@ -117,17 +119,23 @@ function PlayerShell({
   const durationDisplayRef = useRef<HTMLSpanElement>(null);
   const progressFillRef = useRef<HTMLDivElement>(null);
   const bufferedLabelRef = useRef<HTMLSpanElement>(null);
-  const waveformRootRef = useRef<HTMLDivElement>(null);
-  const waveformProgressRef = useRef<HTMLDivElement>(null);
-  const waveformPlayheadRef = useRef<HTMLDivElement>(null);
-  const waveformBufferedRangesRef = useRef<HTMLDivElement>(null);
+  const seekTimelineInputRef = useRef<HTMLInputElement>(null);
+  const seekTimelineProgressRef = useRef<HTMLDivElement>(null);
+  const seekTimelinePlayheadRef = useRef<HTMLDivElement>(null);
+  const seekTimelineBufferedRangesRef = useRef<HTMLDivElement>(null);
+  const seekTimelineScrubbingRef = useRef(false);
   const initialTimeline = player?.getTimeline() ?? { currentTime: 0, duration };
   const initialBufferedRanges = player?.getBufferedRanges() ?? [];
   const initialDuration = resolveDuration(initialTimeline.duration, duration);
+  const [renderedTimeline, setRenderedTimeline] = useState({ trackId, duration: initialDuration });
+  const isCurrentTrack = renderedTimeline.trackId === trackId;
+  const presentationDuration = isCurrentTrack
+    ? resolveDuration(initialDuration, renderedTimeline.duration)
+    : 0;
   const presenter = createPlayerPresenter({
     status,
     currentTime: initialTimeline.currentTime,
-    duration: initialDuration,
+    duration: presentationDuration,
     bufferedRanges: initialBufferedRanges,
   });
 
@@ -136,9 +144,23 @@ function PlayerShell({
       return;
     }
 
+    if (renderedTimeline.trackId !== trackId) {
+      // Engine track changes null sourceId before the new timeline can safely be adopted.
+      if (sourceId === null) {
+        setRenderedTimeline({ trackId, duration: 0 });
+      }
+
+      return;
+    }
+
     const timeline = player.getTimeline();
     const bufferedRanges = player.getBufferedRanges();
     const effectiveDuration = resolveDuration(timeline.duration, duration);
+
+    if (!Object.is(renderedTimeline.duration, effectiveDuration)) {
+      setRenderedTimeline({ trackId, duration: effectiveDuration });
+    }
+
     const nextPresenter = createPlayerPresenter({
       status,
       currentTime: timeline.currentTime,
@@ -162,23 +184,25 @@ function PlayerShell({
       bufferedLabelRef.current.textContent = `buf ${formatBufferedLabel(nextPresenter.bufferedSegments)}`;
     }
 
-    if (waveformRootRef.current) {
-      syncWaveformSemantics({
-        target: waveformRootRef.current,
-        currentTime: timeline.currentTime,
-        duration: effectiveDuration,
-      });
+    if (!seekTimelineScrubbingRef.current) {
+      if (seekTimelineInputRef.current) {
+        syncSeekTimelineInput({
+          target: seekTimelineInputRef.current,
+          currentTime: timeline.currentTime,
+          duration: effectiveDuration,
+        });
+      }
+
+      if (seekTimelineProgressRef.current) {
+        seekTimelineProgressRef.current.style.width = `${nextPresenter.progressPercent}%`;
+      }
+
+      if (seekTimelinePlayheadRef.current) {
+        seekTimelinePlayheadRef.current.style.insetInlineStart = `${nextPresenter.progressPercent}%`;
+      }
     }
 
-    if (waveformProgressRef.current) {
-      waveformProgressRef.current.style.width = `${nextPresenter.progressPercent}%`;
-    }
-
-    if (waveformPlayheadRef.current) {
-      waveformPlayheadRef.current.style.left = `${nextPresenter.progressPercent}%`;
-    }
-
-    syncBufferedRanges(waveformBufferedRangesRef.current, effectiveDuration, bufferedRanges);
+    syncBufferedRanges(seekTimelineBufferedRangesRef.current, effectiveDuration, bufferedRanges);
   });
 
   useEffect(() => {
@@ -257,15 +281,18 @@ function PlayerShell({
           </div>
 
           <div className="mt-2">
-            <Waveform
-              rootRef={waveformRootRef}
-              progressOverlayRef={waveformProgressRef}
-              playheadRef={waveformPlayheadRef}
-              bufferedRangesRef={waveformBufferedRangesRef}
-              duration={initialDuration}
+            <SeekTimeline
+              inputRef={seekTimelineInputRef}
+              progressIndicatorRef={seekTimelineProgressRef}
+              playheadRef={seekTimelinePlayheadRef}
+              bufferedRangesRef={seekTimelineBufferedRangesRef}
+              duration={presentationDuration}
               currentTime={initialTimeline.currentTime}
               bufferedRanges={initialBufferedRanges}
               onSeek={onSeek}
+              onScrubbingChange={(scrubbing) => {
+                seekTimelineScrubbingRef.current = scrubbing;
+              }}
             />
           </div>
 

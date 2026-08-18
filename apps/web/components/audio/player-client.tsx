@@ -60,6 +60,7 @@ function MountedPlayer({
     <div className="mx-auto flex w-full max-w-lg flex-col">
       <PlayerShell
         player={player}
+        trackId={selection?.trackId ?? null}
         title={selection?.track.title ?? "Unknown Track"}
         subtitle={getTrackSubtitle(selection)}
         status={snapshot.runtime.status}
@@ -153,6 +154,7 @@ function PlayerClient({
       <div className="mx-auto flex w-full max-w-lg flex-col">
         <PlayerShell
           player={null}
+          trackId={defaultTrackId}
           title={defaultTrack?.title ?? "Unknown Track"}
           subtitle={getTrackSubtitle(
             defaultTrack && defaultAsset

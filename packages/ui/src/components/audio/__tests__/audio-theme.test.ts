@@ -21,7 +21,7 @@ describe("shared audio theme tokens", () => {
   test("does not use raw hex or rgba values in shared audio components", async () => {
     const files = await Promise.all([
       readFile("../player-controls.tsx"),
-      readFile("../waveform.tsx"),
+      readFile("../seek-timeline.tsx"),
       readFile("../playhead.tsx"),
     ]);
 

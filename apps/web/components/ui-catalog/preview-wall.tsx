@@ -71,7 +71,7 @@ import { SpinnerGapIcon } from "@phosphor-icons/react/dist/csr/SpinnerGap";
 import type { ReactNode } from "react";
 
 import { CatalogCoverageChart } from "./catalog-chart";
-import { PlayerControlsDemo, WaveformDemo } from "./demos/audio-demo";
+import { PlayerControlsDemo, SeekTimelineDemo } from "./demos/audio-demo";
 import { PreviewInventory } from "./preview-inventory";
 
 export function PreviewWall({ onSelect }: { onSelect: (id: string) => void }) {
@@ -255,7 +255,7 @@ function FormPreview() {
             <InputGroupAddon>
               <MagnifyingGlassIcon aria-hidden="true" focusable="false" className="size-4" />
             </InputGroupAddon>
-            <InputGroupInput id="catalog-filter" defaultValue="audio waveform" />
+            <InputGroupInput id="catalog-filter" defaultValue="audio seek timeline" />
           </InputGroup>
         </Field>
         <div className="grid gap-3 sm:grid-cols-2">
@@ -340,7 +340,7 @@ function MenuOverlayPreview() {
           <CommandList>
             <CommandItem>Button</CommandItem>
             <CommandItem>Input</CommandItem>
-            <CommandItem>Audio Waveform</CommandItem>
+            <CommandItem>Audio Seek Timeline</CommandItem>
           </CommandList>
         </Command>
       </div>
@@ -382,7 +382,7 @@ function AudioPreview() {
   return (
     <div className="space-y-4">
       <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_280px]">
-        <WaveformDemo />
+        <SeekTimelineDemo />
         <PlayerControlsDemo />
       </div>
     </div>

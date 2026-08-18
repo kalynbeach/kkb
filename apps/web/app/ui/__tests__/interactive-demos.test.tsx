@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@kkb/ui/components/accordion";
 import { AlertDialog, AlertDialogAction } from "@kkb/ui/components/alert-dialog";
-import { Waveform } from "@kkb/ui/components/audio/waveform";
+import { SeekTimeline } from "@kkb/ui/components/audio/seek-timeline";
 import { Button } from "@kkb/ui/components/button";
 import {
   Carousel,
@@ -35,7 +35,7 @@ import {
 } from "@kkb/ui/components/form";
 import { Table, TableBody, TableCaption, TableCell, TableRow } from "@kkb/ui/components/table";
 import { Window } from "happy-dom";
-import { act, type ComponentProps, createRef, Fragment, useState } from "react";
+import { act, createRef, Fragment, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { useForm } from "react-hook-form";
 
@@ -242,19 +242,6 @@ function getButtonByText(environment: DomEnvironment, text: string) {
 
 function expectBodyText(environment: DomEnvironment, text: string) {
   expect(environment.document.body.textContent).toContain(text);
-}
-
-function WaveformContractHarness({ onSeek }: { onSeek: (seconds: number) => void }) {
-  const legacyLiveProps: ComponentProps<typeof Waveform> & {
-    getTimeline: () => { currentTime: number; duration: number };
-  } = {
-    currentTime: 0,
-    duration: 0,
-    getTimeline: () => ({ currentTime: 30, duration: 120 }),
-    onSeek,
-  };
-
-  return <Waveform {...legacyLiveProps} />;
 }
 
 function OverflowingTableHarness({ direction }: { direction?: "ltr" | "rtl" }) {
@@ -639,28 +626,73 @@ describe("interactive /ui demos", () => {
     expect(label?.getAttribute("for")).toBe(trigger?.id);
   });
 
-  test("uses reactive waveform props as the only interaction contract", () => {
+  test("seeks through the composed Slider live value and keyboard contracts", () => {
     const environment = domEnvironment as DomEnvironment;
     const seekCalls: number[] = [];
     renderIntoDom(
       environment,
-      <WaveformContractHarness onSeek={(seconds) => seekCalls.push(seconds)} />,
+      <SeekTimeline
+        duration={120}
+        currentTime={30}
+        onSeek={(seconds) => seekCalls.push(seconds)}
+      />,
     );
 
-    const waveform = environment.document.querySelector<HTMLElement>('[role="img"]');
-    expect(waveform?.getAttribute("aria-label")).toBe("Audio waveform unavailable");
+    const timeline = environment.document.querySelector<HTMLInputElement>(
+      'input[type="range"][aria-label="Seek timeline"]',
+    );
+    const control = environment.document.querySelector<HTMLElement>(
+      '[data-slot="seek-timeline-control"]',
+    );
+    const playhead = environment.document.querySelector<HTMLElement>(
+      '[data-slot="seek-timeline-playhead"]',
+    );
 
-    if (waveform) {
-      waveform.getBoundingClientRect = () =>
-        ({ left: 0, width: 100 }) as ReturnType<HTMLElement["getBoundingClientRect"]>;
+    if (!timeline || !control || !playhead) {
+      throw new Error("Expected composed seek timeline slider");
     }
+
     act(() => {
-      waveform?.dispatchEvent(
-        new environment.window.PointerEvent("pointerdown", { bubbles: true, clientX: 50 }),
+      timeline.value = "90";
+      timeline.focus();
+    });
+
+    expect(timeline.value).toBe("90");
+
+    act(() => {
+      timeline.dispatchEvent(
+        new environment.window.KeyboardEvent("keydown", {
+          bubbles: true,
+          key: "PageDown",
+        }),
+      );
+      timeline.dispatchEvent(
+        new environment.window.KeyboardEvent("keydown", {
+          bubbles: true,
+          key: "ArrowRight",
+        }),
+      );
+      timeline.dispatchEvent(
+        new environment.window.KeyboardEvent("keydown", {
+          bubbles: true,
+          key: "ArrowRight",
+        }),
+      );
+      timeline.dispatchEvent(
+        new environment.window.KeyboardEvent("keydown", {
+          bubbles: true,
+          key: "Home",
+        }),
+      );
+      timeline.dispatchEvent(
+        new environment.window.KeyboardEvent("keydown", {
+          bubbles: true,
+          key: "End",
+        }),
       );
     });
 
-    expect(seekCalls).toEqual([]);
+    expect(seekCalls).toEqual([95, 100, 0, 120]);
   });
 
   test("wide tables expose a locally focusable named scroll region", async () => {
