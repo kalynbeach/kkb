@@ -125,8 +125,10 @@ function PlayerShell({
   const initialBufferedRanges = player?.getBufferedRanges() ?? [];
   const initialDuration = resolveDuration(initialTimeline.duration, duration);
   const [renderedDuration, setRenderedDuration] = useState(initialDuration);
-  const renderedDurationRef = useRef(initialDuration);
-  const presentationDuration = resolveDuration(initialDuration, renderedDuration);
+  const presentationDuration = resolveDuration(
+    initialDuration,
+    sourceId === null ? duration : renderedDuration,
+  );
   const presenter = createPlayerPresenter({
     status,
     currentTime: initialTimeline.currentTime,
@@ -143,8 +145,7 @@ function PlayerShell({
     const bufferedRanges = player.getBufferedRanges();
     const effectiveDuration = resolveDuration(timeline.duration, duration);
 
-    if (!Object.is(renderedDurationRef.current, effectiveDuration)) {
-      renderedDurationRef.current = effectiveDuration;
+    if (!Object.is(renderedDuration, effectiveDuration)) {
       setRenderedDuration(effectiveDuration);
     }
 
@@ -171,20 +172,27 @@ function PlayerShell({
       bufferedLabelRef.current.textContent = `buf ${formatBufferedLabel(nextPresenter.bufferedSegments)}`;
     }
 
-    if (seekTimelineInputRef.current) {
-      syncSeekTimelineInput({
-        target: seekTimelineInputRef.current,
-        currentTime: timeline.currentTime,
-        duration: effectiveDuration,
-      });
-    }
+    const isPointerInteracting =
+      seekTimelineInputRef.current
+        ?.closest('[data-audio-timeline="true"]')
+        ?.hasAttribute("data-pointer-interacting") ?? false;
 
-    if (seekTimelineProgressRef.current) {
-      seekTimelineProgressRef.current.style.width = `${nextPresenter.progressPercent}%`;
-    }
+    if (!isPointerInteracting) {
+      if (seekTimelineInputRef.current) {
+        syncSeekTimelineInput({
+          target: seekTimelineInputRef.current,
+          currentTime: timeline.currentTime,
+          duration: effectiveDuration,
+        });
+      }
 
-    if (seekTimelinePlayheadRef.current) {
-      seekTimelinePlayheadRef.current.style.insetInlineStart = `${nextPresenter.progressPercent}%`;
+      if (seekTimelineProgressRef.current) {
+        seekTimelineProgressRef.current.style.width = `${nextPresenter.progressPercent}%`;
+      }
+
+      if (seekTimelinePlayheadRef.current) {
+        seekTimelinePlayheadRef.current.style.insetInlineStart = `${nextPresenter.progressPercent}%`;
+      }
     }
 
     syncBufferedRanges(seekTimelineBufferedRangesRef.current, effectiveDuration, bufferedRanges);

@@ -8,7 +8,7 @@ import {
   SliderTrack,
 } from "@kkb/ui/components/slider";
 import { cn } from "@kkb/ui/lib/utils";
-import { type Ref, useEffect, useState } from "react";
+import { type Ref, useEffect, useRef, useState } from "react";
 
 import { Playhead } from "./playhead";
 import { type BufferedRange, formatAccessibleTime } from "./presenter";
@@ -50,9 +50,13 @@ function SeekTimeline({
   const isSeekable = onSeek !== undefined && safeDuration > 0;
   const hasLiveBufferedRangesLayer = bufferedRangesRef !== undefined;
   const [interactionTime, setInteractionTime] = useState(safeCurrentTime);
+  const isPointerInteractingRef = useRef(false);
+  const timelineRootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    setInteractionTime(safeCurrentTime);
+    if (!isPointerInteractingRef.current) {
+      setInteractionTime(safeCurrentTime);
+    }
   }, [safeCurrentTime]);
 
   const syncInteractionTime = (root: HTMLDivElement) => {
@@ -64,6 +68,11 @@ function SeekTimeline({
     }
   };
 
+  const setPointerInteracting = (interacting: boolean) => {
+    isPointerInteractingRef.current = interacting;
+    timelineRootRef.current?.toggleAttribute("data-pointer-interacting", interacting);
+  };
+
   const handleKeyDownCapture = (event: React.KeyboardEvent<HTMLDivElement>) => {
     const InputElement = event.currentTarget.ownerDocument.defaultView?.HTMLInputElement;
     if (!onSeek || !InputElement || !(event.target instanceof InputElement)) {
@@ -71,6 +80,7 @@ function SeekTimeline({
     }
 
     if (event.key === "PageUp" || event.key === "PageDown") {
+      // Preserve the existing audio seek contract instead of inheriting Slider's page-key steps.
       event.preventDefault();
       event.stopPropagation();
       return;
@@ -96,14 +106,33 @@ function SeekTimeline({
   if (isSeekable) {
     return (
       <SliderRoot
+        ref={timelineRootRef}
         className={cn("group relative h-14 w-full cursor-pointer", className)}
         data-audio-timeline="true"
         max={safeDuration}
         onFocusCapture={(event) => syncInteractionTime(event.currentTarget)}
         min={0}
         onKeyDownCapture={handleKeyDownCapture}
-        onPointerDownCapture={(event) => syncInteractionTime(event.currentTarget)}
+        onPointerCancelCapture={() => {
+          setPointerInteracting(false);
+          setInteractionTime(safeCurrentTime);
+        }}
+        onPointerDownCapture={(event) => {
+          if (event.button !== 0) {
+            return;
+          }
+
+          setPointerInteracting(true);
+          syncInteractionTime(event.currentTarget);
+        }}
         onValueChange={(value) => {
+          const nextTime = Array.isArray(value) ? value[0] : value;
+          if (typeof nextTime === "number") {
+            setInteractionTime(nextTime);
+          }
+        }}
+        onValueCommitted={(value) => {
+          setPointerInteracting(false);
           const nextTime = Array.isArray(value) ? value[0] : value;
           if (typeof nextTime === "number") {
             setInteractionTime(nextTime);
@@ -141,8 +170,13 @@ function SeekTimeline({
             getAriaValueText={(_formattedValue, value) =>
               `${formatAccessibleTime(value)} of ${formatAccessibleTime(safeDuration)}`
             }
-            className="block h-14 w-px shrink-0 bg-audio-accent shadow-[0_0_6px_var(--audio-accent-glow),0_0_2px_var(--audio-accent)] ring-audio-accent/50 transition-shadow select-none data-focused:ring-4"
-          />
+            className="relative block h-14 w-3 shrink-0 bg-transparent ring-audio-accent/50 transition-shadow select-none data-focused:ring-4"
+          >
+            <span
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-audio-accent shadow-[0_0_6px_var(--audio-accent-glow),0_0_2px_var(--audio-accent)]"
+            />
+          </SliderThumb>
         </SliderControl>
       </SliderRoot>
     );
@@ -195,6 +229,7 @@ function syncTimelineValue(
   currentTime: number,
   duration: number,
 ) {
+  // Keep consecutive captured key events on the latest DOM value before React commits the batch.
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
   input.value = `${currentTime}`;
   input.setAttribute("aria-valuenow", `${currentTime}`);

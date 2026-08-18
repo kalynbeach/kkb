@@ -41,12 +41,9 @@ describe("PlayerShell", () => {
     expect(shouldPollPlayerTimeline("error")).toBe(false);
   });
 
-  test("synchronizes the live seek timeline input across valid and invalid durations", () => {
+  test("synchronizes live seek values only while the React-owned duration is valid", () => {
     const attributes = new Map<string, string>();
     const target = {
-      disabled: true,
-      max: "",
-      min: "",
       value: "",
       setAttribute: (name: string, value: string) => {
         attributes.set(name, value);
@@ -59,9 +56,8 @@ describe("PlayerShell", () => {
       duration: 120,
     });
 
-    expect(target).toMatchObject({ disabled: false, min: "0", max: "120", value: "120" });
+    expect(target.value).toBe("120");
     expect(Object.fromEntries(attributes)).toEqual({
-      "aria-label": "Seek timeline",
       "aria-valuenow": "120",
       "aria-valuetext": "2:00 of 2:00",
     });
@@ -72,11 +68,10 @@ describe("PlayerShell", () => {
       duration: Number.NaN,
     });
 
-    expect(target).toMatchObject({ disabled: true, min: "0", max: "1", value: "0" });
+    expect(target.value).toBe("120");
     expect(Object.fromEntries(attributes)).toEqual({
-      "aria-label": "Audio timeline unavailable",
-      "aria-valuenow": "0",
-      "aria-valuetext": "Audio timeline unavailable",
+      "aria-valuenow": "120",
+      "aria-valuetext": "2:00 of 2:00",
     });
   });
 

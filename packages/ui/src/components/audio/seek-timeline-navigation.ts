@@ -36,4 +36,4 @@ const getNextSeekTimeForKey = ({
   return null;
 };
 
-export { clampTime, getNextSeekTimeForKey };
+export { getNextSeekTimeForKey };

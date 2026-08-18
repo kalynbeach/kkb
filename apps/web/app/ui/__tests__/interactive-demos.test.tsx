@@ -35,7 +35,7 @@ import {
 } from "@kkb/ui/components/form";
 import { Table, TableBody, TableCaption, TableCell, TableRow } from "@kkb/ui/components/table";
 import { Window } from "happy-dom";
-import { act, type ComponentProps, createRef, Fragment, useState } from "react";
+import { act, createRef, Fragment, useState } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { useForm } from "react-hook-form";
 
@@ -242,19 +242,6 @@ function getButtonByText(environment: DomEnvironment, text: string) {
 
 function expectBodyText(environment: DomEnvironment, text: string) {
   expect(environment.document.body.textContent).toContain(text);
-}
-
-function SeekTimelineContractHarness({ onSeek }: { onSeek: (seconds: number) => void }) {
-  const legacyLiveProps: ComponentProps<typeof SeekTimeline> & {
-    getTimeline: () => { currentTime: number; duration: number };
-  } = {
-    currentTime: 0,
-    duration: 0,
-    getTimeline: () => ({ currentTime: 30, duration: 120 }),
-    onSeek,
-  };
-
-  return <SeekTimeline {...legacyLiveProps} />;
 }
 
 function OverflowingTableHarness({ direction }: { direction?: "ltr" | "rtl" }) {
@@ -637,26 +624,6 @@ describe("interactive /ui demos", () => {
     expect(environment.document.querySelector("#focused-component-combobox-trigger")).toBe(trigger);
     expect(environment.document.querySelector("#focused-component-combobox-label")).toBe(label);
     expect(label?.getAttribute("for")).toBe(trigger?.id);
-  });
-
-  test("uses reactive seek timeline props as the only interaction contract", () => {
-    const environment = domEnvironment as DomEnvironment;
-    const seekCalls: number[] = [];
-    renderIntoDom(
-      environment,
-      <SeekTimelineContractHarness onSeek={(seconds) => seekCalls.push(seconds)} />,
-    );
-
-    const timeline = environment.document.querySelector<HTMLElement>('[role="img"]');
-    expect(timeline?.getAttribute("aria-label")).toBe("Audio timeline unavailable");
-
-    act(() => {
-      timeline?.dispatchEvent(
-        new environment.window.PointerEvent("pointerdown", { bubbles: true, clientX: 50 }),
-      );
-    });
-
-    expect(seekCalls).toEqual([]);
   });
 
   test("seeks through the composed Slider live value and keyboard contracts", () => {

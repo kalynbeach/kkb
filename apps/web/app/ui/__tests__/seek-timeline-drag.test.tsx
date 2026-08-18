@@ -6,6 +6,9 @@ const childProcessFlag = "KKB_SEEK_TIMELINE_DRAG_CHILD";
 async function runSeekTimelineDrag() {
   const window = new Window({ url: "http://localhost/ui?item=audio-seek-timeline" });
   const originalGlobals = new Map<string, unknown>();
+  let runFramesImmediately = true;
+  let nextFrameId = 0;
+  const queuedFrames = new Map<number, FrameRequestCallback>();
   const globals = {
     document: window.document,
     window,
@@ -23,10 +26,17 @@ async function runSeekTimelineDrag() {
     ResizeObserver: window.ResizeObserver,
     getComputedStyle: window.getComputedStyle.bind(window),
     requestAnimationFrame: (callback: FrameRequestCallback) => {
-      callback(0);
-      return 1;
+      nextFrameId += 1;
+      if (runFramesImmediately) {
+        callback(0);
+      } else {
+        queuedFrames.set(nextFrameId, callback);
+      }
+      return nextFrameId;
     },
-    cancelAnimationFrame: () => {},
+    cancelAnimationFrame: (frameId: number) => {
+      queuedFrames.delete(frameId);
+    },
     IS_REACT_ACT_ENVIRONMENT: true,
   };
 
@@ -82,14 +92,33 @@ async function runSeekTimelineDrag() {
     ({
       bottom: 56,
       height: 56,
-      left: 24.5,
-      right: 25.5,
+      left: 19,
+      right: 31,
       top: 0,
-      width: 1,
-      x: 24.5,
+      width: 12,
+      x: 19,
       y: 0,
       toJSON: () => ({}),
     }) as DOMRect;
+
+  React.act(() => {
+    playhead.dispatchEvent(
+      new window.PointerEvent("pointerdown", {
+        bubbles: true,
+        button: 2,
+        buttons: 2,
+        cancelable: true,
+        clientX: 25,
+        isPrimary: true,
+        pointerId: 2,
+        pointerType: "mouse",
+      }),
+    );
+  });
+
+  expect(
+    input.closest('[data-audio-timeline="true"]')?.hasAttribute("data-pointer-interacting"),
+  ).toBe(false);
 
   React.act(() => {
     playhead.dispatchEvent(
@@ -107,21 +136,39 @@ async function runSeekTimelineDrag() {
   });
 
   expect(control.hasPointerCapture(1)).toBe(true);
+  expect(
+    input.closest('[data-audio-timeline="true"]')?.hasAttribute("data-pointer-interacting"),
+  ).toBe(true);
 
   React.act(() => {
-    for (const clientX of [50, 75]) {
-      window.document.dispatchEvent(
-        new window.PointerEvent("pointermove", {
-          bubbles: true,
-          buttons: 1,
-          cancelable: true,
-          clientX,
-          isPrimary: true,
-          pointerId: 1,
-          pointerType: "mouse",
-        }),
-      );
-    }
+    window.document.dispatchEvent(
+      new window.PointerEvent("pointermove", {
+        bubbles: true,
+        buttons: 1,
+        cancelable: true,
+        clientX: 50,
+        isPrimary: true,
+        pointerId: 1,
+        pointerType: "mouse",
+      }),
+    );
+  });
+
+  expect(input.value).toBe("60");
+  expect(seekCalls).toEqual([]);
+
+  React.act(() => {
+    window.document.dispatchEvent(
+      new window.PointerEvent("pointermove", {
+        bubbles: true,
+        buttons: 1,
+        cancelable: true,
+        clientX: 75,
+        isPrimary: true,
+        pointerId: 1,
+        pointerType: "mouse",
+      }),
+    );
     window.document.dispatchEvent(
       new window.PointerEvent("pointerup", {
         bubbles: true,
@@ -135,12 +182,137 @@ async function runSeekTimelineDrag() {
     );
   });
 
-  expect(seekCalls).toEqual([60, 90]);
+  expect(seekCalls).toEqual([90]);
   expect(input.value).toBe("90");
   expect(control.hasPointerCapture(1)).toBe(false);
+  expect(
+    input.closest('[data-audio-timeline="true"]')?.hasAttribute("data-pointer-interacting"),
+  ).toBe(false);
 
   React.act(() => root.unmount());
   container.remove();
+
+  runFramesImmediately = false;
+  const { PlayerShell } = await import("@/components/audio/player-shell");
+  const liveTimeline = { currentTime: 15, duration: 120 };
+  let bufferedRanges = [{ start: 0, end: 30 }];
+  const player = {
+    defaultTrack: {
+      src: "/audio/test-tone-aac.m4a",
+      mimeType: "audio/mp4; codecs=mp4a.40.2",
+    },
+    engine: {} as never,
+    sources: [],
+    getSnapshot: () => ({
+      status: "playing" as const,
+      currentTime: liveTimeline.currentTime,
+      duration: liveTimeline.duration,
+      sourceId: "media-element",
+      error: null,
+      rate: 1,
+      volume: 1,
+    }),
+    subscribe: () => () => {},
+    loadTrack: async () => {},
+    play: async () => {},
+    pause: async () => {},
+    seek: async () => {},
+    setRate: async () => {},
+    setVolume: async () => {},
+    destroy: async () => {},
+    getTimeline: () => liveTimeline,
+    getBufferedRanges: () => (liveTimeline.duration > 0 ? bufferedRanges : []),
+  };
+  const liveContainer = window.document.createElement("div");
+  window.document.body.append(liveContainer);
+  const liveRoot = createRoot(liveContainer);
+
+  React.act(() => {
+    liveRoot.render(
+      React.createElement(PlayerShell, {
+        player,
+        title: "Test Tone",
+        subtitle: "Local fixture",
+        status: "playing",
+        duration: 120,
+        sourceId: "media-element",
+        error: null,
+        rate: 1,
+        volume: 1,
+        onPlay: () => {},
+        onPause: () => {},
+        onSeek: () => {},
+        onSetRate: () => {},
+        onSetVolume: () => {},
+      }),
+    );
+  });
+
+  liveTimeline.currentTime = 60;
+  bufferedRanges = [{ start: 0, end: 90 }];
+  const liveInput = liveContainer.querySelector<HTMLInputElement>('input[type="range"]');
+  const liveTimelineRoot = liveInput?.closest<HTMLElement>('[data-audio-timeline="true"]');
+  liveTimelineRoot?.setAttribute("data-pointer-interacting", "");
+  const interactingFrame = queuedFrames.values().next().value;
+  queuedFrames.clear();
+  if (!interactingFrame) {
+    throw new Error("Expected PlayerShell to queue a live timeline frame");
+  }
+
+  React.act(() => interactingFrame(16));
+  expect(liveInput?.value).toBe("15");
+
+  liveTimelineRoot?.removeAttribute("data-pointer-interacting");
+  const settledFrame = queuedFrames.values().next().value;
+  queuedFrames.clear();
+  if (!settledFrame) {
+    throw new Error("Expected PlayerShell to continue polling the live timeline");
+  }
+
+  React.act(() => settledFrame(32));
+
+  const liveProgress = liveContainer.querySelector<HTMLElement>(
+    '[data-slot="seek-timeline-progress"]',
+  );
+  const livePlayhead = liveContainer.querySelector<HTMLElement>(
+    '[data-slot="seek-timeline-playhead"]',
+  );
+  const liveBuffer = liveContainer.querySelector<HTMLElement>('[data-buffered-layer="live"] > div');
+
+  expect(liveInput?.value).toBe("60");
+  expect(liveInput?.getAttribute("aria-valuenow")).toBe("60");
+  expect(liveProgress?.style.width).toBe("50%");
+  expect(livePlayhead?.style.insetInlineStart).toBe("50%");
+  expect(liveBuffer?.style.width).toBe("75%");
+
+  liveTimeline.currentTime = 0;
+  liveTimeline.duration = 0;
+  React.act(() => {
+    liveRoot.render(
+      React.createElement(PlayerShell, {
+        player,
+        title: "Next Test Tone",
+        subtitle: "Loading local fixture",
+        status: "loading",
+        duration: 0,
+        sourceId: null,
+        error: null,
+        rate: 1,
+        volume: 1,
+        onPlay: () => {},
+        onPause: () => {},
+        onSeek: () => {},
+        onSetRate: () => {},
+        onSetVolume: () => {},
+      }),
+    );
+  });
+
+  expect(liveContainer.innerHTML).not.toContain('aria-label="Seek timeline"');
+  expect(liveContainer.innerHTML).toContain('role="img" aria-label="Audio timeline unavailable"');
+
+  React.act(() => liveRoot.unmount());
+  liveContainer.remove();
   window.close();
   for (const [key, value] of originalGlobals) {
     Object.defineProperty(globalThis, key, { configurable: true, value, writable: true });
@@ -148,12 +320,13 @@ async function runSeekTimelineDrag() {
 }
 
 describe("SeekTimeline drag contract", () => {
-  test("captures the pointer and seeks continuously while dragging the playhead", async () => {
+  test("scrubs continuously, commits once, and keeps live refs synchronized", async () => {
     if (process.env[childProcessFlag] === "1") {
       await runSeekTimelineDrag();
       return;
     }
 
+    // Base UI chooses its layout-effect implementation at import time, before this suite installs DOM.
     const result = Bun.spawnSync({
       cmd: ["bun", "test", import.meta.path],
       env: { ...process.env, [childProcessFlag]: "1" },
