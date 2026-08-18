@@ -195,6 +195,32 @@ async function runSeekTimelineDrag() {
         bubbles: true,
         button: 0,
         buttons: 1,
+        clientX: 75,
+        isPrimary: true,
+        pointerId: 5,
+        pointerType: "mouse",
+      }),
+    );
+    playhead.dispatchEvent(
+      new window.PointerEvent("pointerup", {
+        bubbles: true,
+        button: 0,
+        clientX: 75,
+        isPrimary: true,
+        pointerId: 5,
+        pointerType: "mouse",
+      }),
+    );
+  });
+
+  expect(scrubbingStates).toEqual([true, false, true, false]);
+
+  React.act(() => {
+    playhead.dispatchEvent(
+      new window.PointerEvent("pointerdown", {
+        bubbles: true,
+        button: 0,
+        buttons: 1,
         cancelable: true,
         clientX: 75,
         isPrimary: true,
@@ -205,7 +231,7 @@ async function runSeekTimelineDrag() {
     root.render(renderTimeline(0, 0));
   });
 
-  expect(scrubbingStates).toEqual([true, false, true, false]);
+  expect(scrubbingStates).toEqual([true, false, true, false, true, false]);
 
   React.act(() => {
     root.render(renderTimeline(10, 120));
@@ -415,6 +441,54 @@ async function runSeekTimelineDrag() {
 
   expect(liveContainer.innerHTML).not.toContain('aria-label="Seek timeline"');
   expect(liveContainer.innerHTML).toContain('role="img" aria-label="Audio timeline unavailable"');
+
+  React.act(() => {
+    liveRoot.render(
+      React.createElement(PlayerShell, {
+        player,
+        trackId: "test-tone-a",
+        title: "Test Tone",
+        subtitle: "Restored after failed selection",
+        status: "error",
+        duration: 0,
+        sourceId: null,
+        error: "Next track failed to load",
+        rate: 1,
+        volume: 1,
+        onPlay: () => {},
+        onPause: () => {},
+        onSeek: () => {},
+        onSetRate: () => {},
+        onSetVolume: () => {},
+      }),
+    );
+  });
+
+  liveTimeline.currentTime = 30;
+  liveTimeline.duration = 120;
+  React.act(() => {
+    liveRoot.render(
+      React.createElement(PlayerShell, {
+        player,
+        trackId: "test-tone-a",
+        title: "Test Tone",
+        subtitle: "Recovered fixture",
+        status: "playing",
+        duration: 120,
+        sourceId: "media-element",
+        error: null,
+        rate: 1,
+        volume: 1,
+        onPlay: () => {},
+        onPause: () => {},
+        onSeek: () => {},
+        onSetRate: () => {},
+        onSetVolume: () => {},
+      }),
+    );
+  });
+
+  expect(liveContainer.innerHTML).toContain('aria-label="Seek timeline"');
 
   React.act(() => liveRoot.unmount());
   liveContainer.remove();

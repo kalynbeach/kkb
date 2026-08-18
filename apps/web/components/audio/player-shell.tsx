@@ -145,7 +145,7 @@ function PlayerShell({
     }
 
     if (renderedTimeline.trackId !== trackId) {
-      if (status === "loading" || status === "recovering") {
+      if (sourceId === null) {
         setRenderedTimeline({ trackId, duration: 0 });
       }
 

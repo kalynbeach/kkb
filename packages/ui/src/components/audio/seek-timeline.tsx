@@ -131,6 +131,7 @@ function SeekTimeline({
           setPointerInteracting(true);
           syncInteractionTime(event.currentTarget);
         }}
+        onPointerUpCapture={() => setPointerInteracting(false)}
         onValueChange={(value) => {
           const nextTime = Array.isArray(value) ? value[0] : value;
           if (typeof nextTime === "number") {
