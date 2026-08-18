@@ -2,13 +2,28 @@ import { describe, expect, test } from "bun:test";
 import { createElement, createRef } from "react";
 import { renderToString } from "react-dom/server";
 
-import { Waveform } from "../waveform";
-import { getNextSeekTimeForKey } from "../waveform-seek";
+import { SeekTimeline } from "../seek-timeline";
+import { getNextSeekTimeForKey } from "../seek-timeline-navigation";
 
-describe("Waveform keyboard seeking", () => {
+describe("SeekTimeline keyboard seeking", () => {
+  test("renders a uniform seek timeline without decorative amplitude bars", () => {
+    const html = renderToString(
+      createElement(SeekTimeline, {
+        duration: 100,
+        currentTime: 25,
+        bufferedRanges: [{ start: 0, end: 50 }],
+        onSeek: () => {},
+      }),
+    ).replaceAll("<!-- -->", "");
+
+    expect(html).toContain('data-audio-timeline="true"');
+    expect(html).toContain('data-audio-timeline-ruler="true"');
+    expect(html).not.toContain("bar-01");
+  });
+
   test("does not server-render buffered segments into the live-updated layer", () => {
     const html = renderToString(
-      createElement(Waveform, {
+      createElement(SeekTimeline, {
         duration: 100,
         currentTime: 0,
         bufferedRanges: [{ start: 0, end: 30 }],
@@ -20,9 +35,9 @@ describe("Waveform keyboard seeking", () => {
     expect(html).not.toContain("width:30%");
   });
 
-  test("renders an unavailable static waveform when duration is invalid", () => {
+  test("renders an unavailable static timeline when duration is invalid", () => {
     const html = renderToString(
-      createElement(Waveform, {
+      createElement(SeekTimeline, {
         duration: Number.NaN,
         currentTime: 12,
         onSeek: () => {},
@@ -30,7 +45,7 @@ describe("Waveform keyboard seeking", () => {
     ).replaceAll("<!-- -->", "");
 
     expect(html).toContain('role="img"');
-    expect(html).toContain('aria-label="Audio waveform unavailable"');
+    expect(html).toContain('aria-label="Audio timeline unavailable"');
     expect(html).not.toContain('role="slider"');
     expect(html).not.toContain('tabindex="0"');
     expect(html).not.toContain("NaN");
@@ -38,14 +53,14 @@ describe("Waveform keyboard seeking", () => {
 
   test("renders valid playback progress without interactive seek semantics", () => {
     const html = renderToString(
-      createElement(Waveform, {
+      createElement(SeekTimeline, {
         duration: 120,
         currentTime: 12,
       }),
     ).replaceAll("<!-- -->", "");
 
     expect(html).toContain('role="progressbar"');
-    expect(html).toContain('aria-label="Playback progress"');
+    expect(html).toContain('aria-label="Playback timeline"');
     expect(html).toContain('aria-valuenow="12"');
     expect(html).toContain('aria-valuemax="120"');
     expect(html).not.toContain('role="slider"');
@@ -55,23 +70,23 @@ describe("Waveform keyboard seeking", () => {
 
   test("keeps precise numeric bounds with readable time values", () => {
     const html = renderToString(
-      createElement(Waveform, {
+      createElement(SeekTimeline, {
         duration: 125.9,
         currentTime: 65.9,
         onSeek: () => {},
       }),
     ).replaceAll("<!-- -->", "");
 
-    expect(html).toContain('role="slider"');
-    expect(html).toContain('tabindex="0"');
+    expect(html).toContain('type="range"');
+    expect(html).toContain('aria-label="Seek timeline"');
     expect(html).toContain('aria-valuenow="65.9"');
-    expect(html).toContain('aria-valuemax="125.9"');
+    expect(html).toContain('max="125.9"');
     expect(html).toContain('aria-valuetext="1:05.9 of 2:05.9"');
   });
 
-  test("describes sub-second waveform bounds without collapsing them to zero", () => {
+  test("describes sub-second timeline bounds without collapsing them to zero", () => {
     const html = renderToString(
-      createElement(Waveform, {
+      createElement(SeekTimeline, {
         duration: 0.5,
         currentTime: 0.25,
         onSeek: () => {},
@@ -79,13 +94,13 @@ describe("Waveform keyboard seeking", () => {
     ).replaceAll("<!-- -->", "");
 
     expect(html).toContain('aria-valuenow="0.25"');
-    expect(html).toContain('aria-valuemax="0.5"');
+    expect(html).toContain('max="0.5"');
     expect(html).toContain('aria-valuetext="0.25 seconds of 0.5 seconds"');
   });
 
   test("clamps rendered progress semantics to the duration", () => {
     const html = renderToString(
-      createElement(Waveform, {
+      createElement(SeekTimeline, {
         duration: 120,
         currentTime: 150,
         onSeek: () => {},
@@ -110,6 +125,23 @@ describe("Waveform keyboard seeking", () => {
     expect(
       getNextSeekTimeForKey({
         key: "ArrowRight",
+        currentTime: 12,
+        duration: 120,
+      }),
+    ).toBe(17);
+  });
+
+  test("uses the same five-second step for vertical arrow keys", () => {
+    expect(
+      getNextSeekTimeForKey({
+        key: "ArrowDown",
+        currentTime: 12,
+        duration: 120,
+      }),
+    ).toBe(7);
+    expect(
+      getNextSeekTimeForKey({
+        key: "ArrowUp",
         currentTime: 12,
         duration: 120,
       }),

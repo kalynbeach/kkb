@@ -264,7 +264,7 @@ import {
 import { CatalogItemIcon } from "./catalog-icons";
 import { chartData } from "./catalog-preview-data";
 import { DemoBoundary, SpecimenStage } from "./catalog-surface-shared";
-import { PlayerControlsDemo, PlayheadDemo, WaveformDemo } from "./demos/audio-demo";
+import { PlayerControlsDemo, PlayheadDemo, SeekTimelineDemo } from "./demos/audio-demo";
 import { CarouselDemo } from "./demos/carousel-demo";
 import { CalendarDemo } from "./demos/select-calendar-demo";
 import { UtilitiesExamples } from "./utility-examples";
@@ -398,7 +398,7 @@ function focusedExamplesFor(visualId: VisualCatalogId, item: CatalogItem) {
       return <UtilitiesExamples item={item} />;
     case "audio-player-controls":
     case "audio-playhead":
-    case "audio-waveform":
+    case "audio-seek-timeline":
       return <FocusedAudioExamples item={item} />;
   }
 
@@ -422,10 +422,10 @@ function FocusedAudioExamples({ item }: { item: CatalogItem }) {
     );
   }
 
-  if (item.id === "audio-waveform") {
+  if (item.id === "audio-seek-timeline") {
     return (
-      <SpecimenStage title="Waveform">
-        <WaveformDemo />
+      <SpecimenStage title="Seek timeline">
+        <SeekTimelineDemo />
       </SpecimenStage>
     );
   }
@@ -448,7 +448,7 @@ function FocusedAudioExamples({ item }: { item: CatalogItem }) {
           </div>
         </SpecimenStage>
         <SpecimenStage title="Audio theme application">
-          <WaveformDemo />
+          <SeekTimelineDemo />
         </SpecimenStage>
       </>
     );
@@ -672,7 +672,7 @@ function InputSpecimen() {
           </Field>
           <Field>
             <FieldLabel htmlFor="input-filled">With value</FieldLabel>
-            <Input id="input-filled" defaultValue="audio-waveform" />
+            <Input id="input-filled" defaultValue="audio-seek-timeline" />
           </Field>
           <Field>
             <FieldLabel htmlFor="input-disabled">Disabled</FieldLabel>
@@ -772,7 +772,7 @@ function TableSpecimen() {
             {[
               ["Button", "Input", "ready"],
               ["Card", "Layout", "ready"],
-              ["Waveform", "Audio", "scoped"],
+              ["Seek timeline", "Audio", "scoped"],
             ].map(([component, category, status]) => (
               <TableRow key={component}>
                 <TableCell>{component}</TableCell>
@@ -1198,7 +1198,7 @@ function ComboboxExamples() {
   return (
     <>
       <SpecimenStage title="Combobox search">
-        <Combobox items={["button", "input", "audio waveform"]} autoHighlight modal={false}>
+        <Combobox items={["button", "input", "audio seek timeline"]} autoHighlight modal={false}>
           <ComboboxTrigger aria-label="Open component search" render={<Button variant="outline" />}>
             Open component search
           </ComboboxTrigger>
@@ -1227,7 +1227,7 @@ function ComboboxExamples() {
             Component
           </FieldLabel>
           <Combobox
-            items={["alert", "badge", "button", "audio waveform"]}
+            items={["alert", "badge", "button", "audio seek timeline"]}
             value={selectedComponent}
             onValueChange={(value) => setSelectedComponent(value ?? "")}
             autoHighlight
@@ -1461,8 +1461,8 @@ function LayoutExamples({ item }: { item: CatalogItem }) {
         <ItemGroup className="border">
           {[
             {
-              iconItem: itemFromId("audio-waveform"),
-              title: "Audio waveform",
+              iconItem: itemFromId("audio-seek-timeline"),
+              title: "Audio seek timeline",
               description: "High-density preview item",
               state: "ready",
             },

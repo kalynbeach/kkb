@@ -77,7 +77,7 @@ Import components and utilities through explicit package subpaths:
 
 ```tsx
 import { Button } from "@kkb/ui/components/button";
-import { Waveform } from "@kkb/ui/components/audio/waveform";
+import { SeekTimeline } from "@kkb/ui/components/audio/seek-timeline";
 import { createPlayerPresenter } from "@kkb/ui/components/audio/presenter";
 import { AUDIO_SCANLINES_CLASS_NAME } from "@kkb/ui/components/audio/theme";
 import { useIsMobile } from "@kkb/ui/hooks/use-mobile";

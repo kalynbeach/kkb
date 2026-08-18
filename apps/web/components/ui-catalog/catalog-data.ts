@@ -162,7 +162,13 @@ export const visualComponentDefinitions = [
     true,
   ],
   ["audio-playhead", "Audio Playhead", "Audio", "@kkb/ui/components/audio/playhead", false],
-  ["audio-waveform", "Audio Waveform", "Audio", "@kkb/ui/components/audio/waveform", true],
+  [
+    "audio-seek-timeline",
+    "Audio Seek Timeline",
+    "Audio",
+    "@kkb/ui/components/audio/seek-timeline",
+    true,
+  ],
 ] as const satisfies readonly VisualDefinition[];
 
 export type VisualCatalogId = (typeof visualComponentDefinitions)[number][0];
@@ -251,7 +257,7 @@ const categoryItems: readonly CatalogItem[] = (
     ["overlay", "Overlay", "Overlay", "Layered interaction primitives."],
     ["menu", "Menu", "Menu", "Command and menu primitives."],
     ["data", "Data", "Data", "Dense data-display primitives."],
-    ["audio", "Audio", "Audio", "Audio player and waveform primitives."],
+    ["audio", "Audio", "Audio", "Audio player and seek timeline primitives."],
     ["utilities", "Utilities", "Utilities", "Non-visual public utilities and providers."],
   ] as const
 ).map(([id, label, category, description]) => {

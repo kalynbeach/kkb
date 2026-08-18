@@ -1,6 +1,6 @@
 # Web Audio Player QA Matrix
 
-Last Updated: 2026-03-10
+Last Updated: 2026-08-17
 
 ## Scope
 
@@ -16,7 +16,7 @@ Validate:
 
 | Platform | Browser | Fixture | Expected Source | Checks |
 | --- | --- | --- | --- | --- |
-| macOS | Chrome latest | AAC `.m4a` | `media-element` | Load, play, pause, seek, waveform scrub |
+| macOS | Chrome latest | AAC `.m4a` | `media-element` | Load, play, pause, seek, timeline scrub |
 | macOS | Chrome latest | Opus `.webm` | `media-element` | Load, play, seek, fixture swap |
 | macOS | Firefox latest | AAC `.m4a` | `media-element` | Load, play, pause, seek |
 | macOS | Firefox latest | Opus `.webm` | `media-element` | Load, play, seek |
@@ -44,9 +44,9 @@ Before enabling `SharedArrayBuffer` in the web host:
 ## Manual Route Checklist
 
 1. Start the web app and open `/audio`.
-2. Confirm the route renders waveform, controls, and source badge.
+2. Confirm the route renders the seek timeline, controls, and source badge.
 3. Confirm the default AAC fixture loads without errors.
 4. Press play and confirm audible output.
-5. Scrub within the waveform and confirm time updates.
+5. Scrub within the timeline and confirm time updates.
 6. Pause and resume.
 7. Reload and confirm the route still initializes cleanly.

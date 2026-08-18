@@ -159,7 +159,7 @@
   <text class="box-text" x="1287" y="398">transport, rate, volume</text>
 
   <rect class="node node-amber" x="1265" y="455" width="245" height="82" rx="12" />
-  <text class="box-title" x="1287" y="484">Waveform</text>
+  <text class="box-title" x="1287" y="484">SeekTimeline</text>
   <text class="box-text" x="1287" y="508">seek target, progress refs</text>
 
   <rect class="node node-amber" x="1265" y="565" width="245" height="62" rx="12" />
@@ -174,7 +174,7 @@
   <path class="line-amber" d="M495 421 C820 421, 1000 386, 1265 386" />
   <text class="small" x="1085" y="372">shared controls</text>
   <path class="line-amber" d="M495 438 C820 465, 1000 496, 1265 496" />
-  <text class="small" x="1095" y="482">waveform</text>
+  <text class="small" x="1095" y="482">seek timeline</text>
   <path class="line-green" d="M850 695 L900 695" />
   <path class="line-green" d="M850 306 L900 306" />
   <path class="line-green" d="M1025 367 L1025 402" />

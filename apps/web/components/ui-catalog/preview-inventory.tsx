@@ -167,7 +167,7 @@ import { MagnifyingGlassIcon } from "@phosphor-icons/react/dist/csr/MagnifyingGl
 import { useForm } from "react-hook-form";
 import { CatalogCoverageChart } from "./catalog-chart";
 import { itemFromId, type VisualCatalogId, visualCatalogIds } from "./catalog-data";
-import { PlayerControlsDemo, PlayheadDemo, WaveformDemo } from "./demos/audio-demo";
+import { PlayerControlsDemo, PlayheadDemo, SeekTimelineDemo } from "./demos/audio-demo";
 import { CarouselDemo } from "./demos/carousel-demo";
 import { CalendarDemo } from "./demos/select-calendar-demo";
 
@@ -507,7 +507,7 @@ function previewFor(id: VisualCatalogId) {
       return (
         <Item className="border">
           <ItemContent>
-            <ItemTitle>Audio waveform</ItemTitle>
+            <ItemTitle>Audio seek timeline</ItemTitle>
             <ItemDescription>Focused specimen ready.</ItemDescription>
           </ItemContent>
         </Item>
@@ -772,8 +772,8 @@ function previewFor(id: VisualCatalogId) {
       return <PlayerControlsDemo />;
     case "audio-playhead":
       return <PlayheadDemo />;
-    case "audio-waveform":
-      return <WaveformDemo />;
+    case "audio-seek-timeline":
+      return <SeekTimelineDemo />;
     default:
       return assertNever(id);
   }

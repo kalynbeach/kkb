@@ -3,7 +3,7 @@ import { renderToString } from "react-dom/server";
 
 import { PlayerShell } from "../player-shell";
 import { shouldPollPlayerTimeline } from "../player-timeline";
-import { syncWaveformSemantics } from "../waveform-semantics";
+import { syncSeekTimelineInput } from "../seek-timeline-semantics";
 
 const createPlayerStub = () => ({
   defaultTrack: {
@@ -41,43 +41,42 @@ describe("PlayerShell", () => {
     expect(shouldPollPlayerTimeline("error")).toBe(false);
   });
 
-  test("synchronizes live waveform semantics across valid and invalid durations", () => {
-    const attributes = new Map<string, string>([["role", "img"]]);
+  test("synchronizes the live seek timeline input across valid and invalid durations", () => {
+    const attributes = new Map<string, string>();
     const target = {
-      getAttribute: (name: string) => attributes.get(name) ?? null,
-      removeAttribute: (name: string) => {
-        attributes.delete(name);
-      },
+      disabled: true,
+      max: "",
+      min: "",
+      value: "",
       setAttribute: (name: string, value: string) => {
         attributes.set(name, value);
       },
     };
 
-    syncWaveformSemantics({
+    syncSeekTimelineInput({
       target,
       currentTime: 150,
       duration: 120,
     });
 
+    expect(target).toMatchObject({ disabled: false, min: "0", max: "120", value: "120" });
     expect(Object.fromEntries(attributes)).toEqual({
-      role: "slider",
-      tabindex: "0",
-      "aria-label": "Seek",
-      "aria-valuemax": "120",
-      "aria-valuemin": "0",
+      "aria-label": "Seek timeline",
       "aria-valuenow": "120",
       "aria-valuetext": "2:00 of 2:00",
     });
 
-    syncWaveformSemantics({
+    syncSeekTimelineInput({
       target,
       currentTime: 0,
       duration: Number.NaN,
     });
 
+    expect(target).toMatchObject({ disabled: true, min: "0", max: "1", value: "0" });
     expect(Object.fromEntries(attributes)).toEqual({
-      role: "img",
-      "aria-label": "Audio waveform unavailable",
+      "aria-label": "Audio timeline unavailable",
+      "aria-valuenow": "0",
+      "aria-valuetext": "Audio timeline unavailable",
     });
   });
 

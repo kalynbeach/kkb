@@ -1,6 +1,8 @@
 # Dogfood Report: `/audio` Page
 
 **Date:** 2026-04-02
+
+**Updated:** 2026-08-17
 **URL:** `http://localhost:3000/audio`
 **App:** `@kkb/web`
 
@@ -16,12 +18,12 @@
 - `Stop` is wired through the controller and resets playback to `0`
 - Server-render coverage now checks disabled/enabled transport states directly
 
-### 2. Initial waveform slider no longer renders `aria-valuemax="NaN"`
+### 2. Initial seek timeline no longer renders `aria-valuemax="NaN"`
 
-**Files:** `packages/ui/src/components/audio/waveform.tsx`, `apps/web/lib/audio/catalog/static-track-catalog-data.ts`
+**Files:** `packages/ui/src/components/audio/seek-timeline.tsx`, `apps/web/lib/audio/catalog/static-track-catalog-data.ts`
 
 - Fixture tracks now provide stable `duration: 2`
-- `Waveform` now exposes invalid duration input as an unavailable image without range attributes
+- `SeekTimeline` now exposes invalid duration input as an unavailable image without range attributes
 - Server-render coverage checks that invalid durations do not expose slider focusability or invalid numeric values
 
 ### 3. Fake diagnostics removed from the shell
@@ -33,17 +35,20 @@
 - Removed the status-derived `stereo` label
 - The shell now relies on real source, status, and buffered-state affordances only
 
+### 4. Static waveform replaced with an explicit seek timeline
+
+**Files:** `packages/ui/src/components/audio/seek-timeline.tsx`, `apps/web/components/ui-catalog/demos/audio-demo.tsx`
+
+- Removed the identical hardcoded amplitude bars shown for every track
+- Replaced them with a uniform time ruler that does not imply track-derived analysis
+- Preserved buffered ranges, played progress, the playhead, pointer seeking, keyboard seeking, and slider semantics
+- Updated the `/ui` specimen to describe the control as a seek timeline
+
 ---
 
 ## Remaining Limitations
 
-### 1. Waveform is still static / decorative
-
-**File:** `packages/ui/src/components/audio/waveform.tsx` (`DEFAULT_BARS`)
-
-Same 32 hardcoded bars rendered for all tracks — not derived from actual audio data. By design (no `waveformUrl` in catalog data), but could be misleading.
-
-### 2. Track diagnostics remain intentionally unavailable
+### 1. Track diagnostics remain intentionally unavailable
 
 - The player still does not detect real bitrate, sample rate, or channel count
 - This pass intentionally removed misleading placeholders instead of inventing approximate values
@@ -60,14 +65,14 @@ Same 32 hardcoded bars rendered for all tracks — not derived from actual audio
 - Mobile responsive — player fits 375px viewport with proper truncation
 - Status LED color coding (blue=normal, amber=loading, red=error)
 - Progress bar and buffering percentage update after metadata loads
-- Initial seek slider render is now accessibility-safe
+- Initial seek timeline render is accessibility-safe
 - Clean architecture — external store pattern with `useSyncExternalStore`, DI for testability
 
 ---
 
 ## Notes
 
-- This refresh is based on the current verified render/test output after the 2026-04-02 audio UX follow-up changes
-- Browser-level playback QA is still useful later, but the core regressions in this report now have focused automated coverage
+- This report was refreshed against the current render, focused tests, and `/audio` and `/ui` browser output on 2026-08-17
+- Pointer and keyboard seeking were browser-checked on `/audio`; the focused `/ui` specimen was checked at desktop and mobile widths
 - The player uses a multi-source audio engine: WebCodecs → Worklet → MediaElement → Fallback (HTMLAudioElement)
 - The active source is "media-element" as shown in the title bar

@@ -17,11 +17,11 @@ const getNextSeekTimeForKey = ({
 
   const safeCurrentTime = Number.isFinite(currentTime) ? currentTime : 0;
 
-  if (key === "ArrowLeft") {
+  if (key === "ArrowLeft" || key === "ArrowDown") {
     return clampTime(safeCurrentTime - SEEK_STEP_SECONDS, duration);
   }
 
-  if (key === "ArrowRight") {
+  if (key === "ArrowRight" || key === "ArrowUp") {
     return clampTime(safeCurrentTime + SEEK_STEP_SECONDS, duration);
   }
 
