@@ -1,0 +1,7 @@
+interface:
+  display_name: "Supervise PR"
+  short_description: "Drive a PR to evidence-backed review readiness"
+  default_prompt: "Use $supervise-pr to supervise this pull request through CI, automated review, and in-scope repair."
+
+policy:
+  allow_implicit_invocation: true

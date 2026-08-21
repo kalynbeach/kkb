@@ -1,0 +1,7 @@
+interface:
+  display_name: "Improve Agent Context"
+  short_description: "Turn repeated failures into focused context fixes"
+  default_prompt: "Use $improve-agent-context to propose a focused agent-context improvement from these selected runs."
+
+policy:
+  allow_implicit_invocation: true

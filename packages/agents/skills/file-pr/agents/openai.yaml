@@ -1,0 +1,7 @@
+interface:
+  display_name: "File PR"
+  short_description: "Publish a human-readable review-ready PR"
+  default_prompt: "Use $file-pr to publish the current branch as a ready-for-review pull request."
+
+policy:
+  allow_implicit_invocation: true

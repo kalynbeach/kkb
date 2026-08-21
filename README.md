@@ -10,6 +10,7 @@ This repo is a Bun-workspace Turborepo with Next.js 16, React 19, TypeScript 6, 
 - `apps/docs` is a lightweight docs shell; canonical planning and research docs currently live under `docs/`.
 - `packages/audio` contains headless audio playback, Web Audio source, metrics, worklet, oscilloscope runtime, and WebGPU renderer code.
 - `packages/ableton` contains Ableton Live extension experiments and related utilities.
+- `packages/agents` is the canonical source for KKB agent context, skills, tools, and workflows.
 - `packages/ui` contains shared UI primitives, audio presentation pieces, and `json-render` integration.
 
 ## Workspace inventory
@@ -18,6 +19,7 @@ This repo is a Bun-workspace Turborepo with Next.js 16, React 19, TypeScript 6, 
 - `apps/docs` (`@kkb/docs`) — early-stage Next.js docs shell on port 3001.
 - `packages/audio` (`@kkb/audio`) — headless browser audio runtime, source contracts, worklet helpers, metrics, oscilloscope runtime, signal providers, and WebGPU renderer.
 - `packages/ableton` (`@kkb/ableton`) — Ableton Live extension experiments, packaged `.ablx` artifacts, and shared Live utilities.
+- `packages/agents` (`@kkb/agents`) — canonical KKB agent context, independently addressable skills, package research, and integrity validation.
 - `packages/ui` (`@kkb/ui`) — private, source-consumed React UI package with Base UI-backed primitives, shared tokens and hooks, audio presentation, and json-render adapters.
 - `packages/typescript-config` (`@kkb/typescript-config`) — shared TypeScript configs used by all workspaces.
 
@@ -98,6 +100,7 @@ For design-system direction, start with `docs/design/kkb-design.md`; dated plans
 - `apps/docs` owns the Next.js docs shell; long-form planning, reports, research, specs, and diagrams stay under root `docs/` until the docs app has an explicit content pipeline.
 - `packages/audio` owns headless runtime behavior: playback engine, source contracts, metrics, worklet utilities, oscilloscope runtime, signal providers, XY mode, and renderer code.
 - `packages/ableton` owns Ableton Live extension code, vendor SDK/CLI tarball references, extension builds, and `.ablx` packaging.
+- `packages/agents` owns canonical KKB agent context, skills, tools, workflows, and future installation and synchronization tooling. Installed harness state remains separate from package source.
 - `packages/ui` owns reusable UI primitives, tokens, hooks, and presentation components. Feature/session orchestration and complete route composition stay in apps; promote presentation only after a reusable contract is demonstrated by real consumers.
 - `packages/typescript-config` owns shared TypeScript configuration only.
 

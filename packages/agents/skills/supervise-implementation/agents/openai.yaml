@@ -1,0 +1,7 @@
+interface:
+  display_name: "Supervise Implementation"
+  short_description: "Coordinate one writer with independent supervision"
+  default_prompt: "Use $supervise-implementation to implement this change with one writer and an independent read-only supervisor."
+
+policy:
+  allow_implicit_invocation: true
