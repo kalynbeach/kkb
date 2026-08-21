@@ -86,6 +86,26 @@
         font-size: 0.9em;
       }
 
+      pre {
+        max-width: 100%;
+        overflow-x: auto;
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface-raised);
+        font-size: 0.86rem;
+      }
+
+      pre code {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        font-size: inherit;
+      }
+
+      pre:focus-visible { outline: 3px solid var(--accent-soft); outline-offset: 2px; }
+
       .artifact-shell {
         width: min(1180px, calc(100% - 32px));
         margin: 0 auto;
@@ -219,7 +239,7 @@
     <main class="artifact-shell">
       <div class="artifact-toolbar">
         <span class="artifact-mark">KKB / artifact</span>
-        <button class="theme-toggle" type="button" aria-label="Change color mode">Mode: system</button>
+        <button class="theme-toggle" type="button">Mode: system</button>
       </div>
 
       <!-- Replace the example content while preserving the semantic shell. -->
@@ -254,11 +274,17 @@
       const toggle = document.querySelector(".theme-toggle");
       const modes = ["system", "light", "dark"];
 
+      for (const codeBlock of document.querySelectorAll("pre")) {
+        codeBlock.tabIndex = 0;
+      }
+
       function setMode(mode) {
         root.dataset.theme = mode;
         toggle.textContent = `Mode: ${mode}`;
         toggle.setAttribute("aria-label", `Color mode: ${mode}. Activate to change.`);
       }
+
+      setMode(root.dataset.theme);
 
       toggle.addEventListener("click", () => {
         const next = modes[(modes.indexOf(root.dataset.theme) + 1) % modes.length];

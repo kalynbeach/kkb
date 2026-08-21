@@ -1,15 +1,17 @@
 import { describe, expect, test } from "bun:test";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { dirname, extname, join, resolve } from "node:path";
+import { dirname, extname, join, relative, resolve } from "node:path";
 
-const skillsDirectory = resolve(import.meta.dir, "../skills");
+const packageDirectory = resolve(import.meta.dir, "..");
+const skillsDirectory = join(packageDirectory, "skills");
+const ignoredMarkdownDirectories = new Set([".turbo", "node_modules"]);
 
 function markdownFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const path = join(directory, entry.name);
 
     if (entry.isDirectory()) {
-      return markdownFiles(path);
+      return ignoredMarkdownDirectories.has(entry.name) ? [] : markdownFiles(path);
     }
 
     return extname(entry.name) === ".md" ? [path] : [];
@@ -17,10 +19,21 @@ function markdownFiles(directory: string): string[] {
 }
 
 function localMarkdownTargets(markdown: string): string[] {
-  return [...markdown.matchAll(/\[[^\]]*\]\(([^)]+)\)/g)]
-    .map((match) => match[1]?.trim())
-    .filter((target): target is string => Boolean(target))
-    .map((target) => target.replace(/^<|>$/g, "").split(/\s+["']/)[0] ?? "")
+  const targets: string[] = [];
+
+  Bun.markdown.render(markdown, {
+    link: (children, { href }) => {
+      targets.push(href);
+      return children;
+    },
+    image: (children, { src }) => {
+      targets.push(src);
+      return children;
+    },
+  });
+
+  return targets
+    .map((target) => target.trim())
     .filter(
       (target) =>
         target.length > 0 &&
@@ -36,6 +49,59 @@ const skillNames = readdirSync(skillsDirectory, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
   .map((entry) => entry.name)
   .sort();
+
+describe("Markdown links", () => {
+  test("finds local links and images outside code", () => {
+    const markdown = [
+      '[inline](./inline.md "Inline title")',
+      "[reference][reference]",
+      "![image](./image.png)",
+      "`[inline code](./ignored-inline.md)`",
+      "",
+      "```markdown",
+      "[fenced code](./ignored-fenced.md)",
+      "```",
+      "",
+      "    [indented code](./ignored-indented.md)",
+      "",
+      "[reference]: ./reference.md",
+    ].join("\n");
+
+    expect(localMarkdownTargets(markdown)).toEqual([
+      "./inline.md",
+      "./reference.md",
+      "./image.png",
+    ]);
+  });
+
+  test("keeps local paths while ignoring anchors and external targets", () => {
+    const markdown = [
+      "[section](./document.md#section)",
+      "[anchor](#section)",
+      "[absolute](/document.md)",
+      "[external](https://example.com)",
+    ].join("\n");
+
+    expect(localMarkdownTargets(markdown)).toEqual(["./document.md"]);
+  });
+});
+
+describe("KKB agents package", () => {
+  test("has no broken local Markdown links", () => {
+    const brokenLinks = markdownFiles(packageDirectory).flatMap((markdownFile) => {
+      const markdown = readFileSync(markdownFile, "utf8");
+
+      return localMarkdownTargets(markdown)
+        .filter((target) => !existsSync(resolve(dirname(markdownFile), target)))
+        .map((target) => ({
+          source: relative(packageDirectory, markdownFile),
+          target,
+        }));
+    });
+
+    expect(brokenLinks).toEqual([]);
+  });
+});
 
 describe("KKB skills", () => {
   test("the package contains at least one skill", () => {
@@ -76,16 +142,6 @@ describe("KKB skills", () => {
             allow_implicit_invocation: expect.any(Boolean),
           },
         });
-      });
-
-      test("has no broken local Markdown links", () => {
-        for (const markdownFile of markdownFiles(skillDirectory)) {
-          const markdown = readFileSync(markdownFile, "utf8");
-
-          for (const target of localMarkdownTargets(markdown)) {
-            expect(existsSync(resolve(dirname(markdownFile), target))).toBe(true);
-          }
-        }
       });
     });
   }
