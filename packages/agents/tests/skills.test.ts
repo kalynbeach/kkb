@@ -294,6 +294,10 @@ describe("HTML communication artifact shell", () => {
     codeBlock.clientWidth = 320;
     codeBlock.scrollWidth = 640;
     observers.triggerResize(codeBlock);
+    observers.triggerResize(codeBlock);
+    expect(observers.animationFrames).toHaveLength(1);
+    expect(codeBlock.tabIndex).toBe(-1);
+    observers.runAnimationFrames();
     expect(codeBlock.tabIndex).toBe(0);
 
     const addedTableWrap = { clientWidth: 320, scrollWidth: 640, tabIndex: -1 };

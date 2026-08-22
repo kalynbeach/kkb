@@ -290,7 +290,9 @@
 
         const observedScrollRegions = new Set();
         const scrollRegionObserver =
-          typeof ResizeObserver === "function" ? new ResizeObserver(syncScrollableRegions) : null;
+          typeof ResizeObserver === "function"
+            ? new ResizeObserver(scheduleScrollableRegionSync)
+            : null;
         let scrollSyncFrame = null;
 
         function syncScrollableRegions() {
