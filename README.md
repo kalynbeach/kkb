@@ -7,9 +7,10 @@
 This repo is a Bun-workspace Turborepo with Next.js 16, React 19, TypeScript 6, Tailwind CSS 4, and Biome.
 
 - `apps/web` is the active integration host for audio, oscilloscope, binaural beats, the `@kkb/ui` inventory, and JSON rendering work.
-- `apps/docs` is a lightweight docs shell; canonical planning and research docs currently live under `docs/`.
+- `apps/docs` is a lightweight docs shell; existing repository documentation remains under `docs/` while the documentation approach described below evolves.
 - `packages/audio` contains headless audio playback, Web Audio source, metrics, worklet, oscilloscope runtime, and WebGPU renderer code.
 - `packages/ableton` contains Ableton Live extension experiments and related utilities.
+- `packages/agents` is the canonical source for KKB agent context, skills, tools, and workflows.
 - `packages/ui` contains shared UI primitives, audio presentation pieces, and `json-render` integration.
 
 ## Workspace inventory
@@ -18,6 +19,7 @@ This repo is a Bun-workspace Turborepo with Next.js 16, React 19, TypeScript 6, 
 - `apps/docs` (`@kkb/docs`) — early-stage Next.js docs shell on port 3001.
 - `packages/audio` (`@kkb/audio`) — headless browser audio runtime, source contracts, worklet helpers, metrics, oscilloscope runtime, signal providers, and WebGPU renderer.
 - `packages/ableton` (`@kkb/ableton`) — Ableton Live extension experiments, packaged `.ablx` artifacts, and shared Live utilities.
+- `packages/agents` (`@kkb/agents`) — canonical KKB agent context, independently addressable skills, package decision and provenance records, and integrity validation.
 - `packages/ui` (`@kkb/ui`) — private, source-consumed React UI package with Base UI-backed primitives, shared tokens and hooks, audio presentation, and json-render adapters.
 - `packages/typescript-config` (`@kkb/typescript-config`) — shared TypeScript configs used by all workspaces.
 
@@ -82,7 +84,7 @@ bun run format-and-lint
 
 ## Documentation map
 
-Substantive repository docs live under `docs/`:
+Existing substantive repository docs live under `docs/`:
 
 - `docs/plans/` — implementation plans and follow-up work.
 - `docs/specs/` — specs, RFCs, QA matrices, and runbooks.
@@ -90,14 +92,19 @@ Substantive repository docs live under `docs/`:
 - `docs/reports/` — architecture reviews, codebase reports, and recommendations.
 - `docs/diagrams/` — diagrams, generated visual reports, and architecture references.
 
-For design-system direction, start with `docs/design/kkb-design.md`; dated plans and reports are implementation history unless the current design document explicitly carries them forward. For other architecture, roadmap, or product work, start with the latest relevant document in `docs/reports/` or `docs/plans/`.
+This layout describes the current repository, not a default requirement to preserve every work artifact. The documentation approach is evolving toward keeping repository context limited to durable, current truth. Active state belongs primarily in the request, session, issue, PR, and diff; generated plans, reports, research, audits, and evidence should remain external reopenable artifacts unless explicitly requested, required by an established repository convention, or essential to a durable product or package contract.
+
+Existing dated documents may preserve useful history without reflecting the latest intent or project state. Start with the current request, source and diff, repository instructions, and directly relevant stable context rather than broadly scanning `docs/` for the newest plan or report. For design-system direction, `docs/design/kkb-design.md` remains the current stable entrypoint; dated plans and reports are implementation history unless a current source explicitly carries them forward.
+
+Package-local documentation is appropriate when a package explicitly owns and maps a durable decision, provenance record, or user-facing contract. Broader README, agent-guideline, and context-document conventions will be revised together as this direction is clarified.
 
 ## Architectural boundaries
 
 - `apps/web` owns browser/session orchestration: routes, React lifecycle, `/ui` catalog fixtures, `Audio`, `AudioContext`, `getUserMedia`, URL/hash state, and app-owned demo composition. `/ui` inventories and verifies `@kkb/ui`; it is not a gallery for complete application shells.
-- `apps/docs` owns the Next.js docs shell; long-form planning, reports, research, specs, and diagrams stay under root `docs/` until the docs app has an explicit content pipeline.
+- `apps/docs` owns the Next.js docs shell. It does not make repository `docs/` the default store for active work artifacts; existing root documentation remains in place until it is deliberately revised or given an explicit content pipeline.
 - `packages/audio` owns headless runtime behavior: playback engine, source contracts, metrics, worklet utilities, oscilloscope runtime, signal providers, XY mode, and renderer code.
 - `packages/ableton` owns Ableton Live extension code, vendor SDK/CLI tarball references, extension builds, and `.ablx` packaging.
+- `packages/agents` owns canonical KKB agent context, skills, tools, workflows, and future installation and synchronization tooling. Installed harness state remains separate from package source.
 - `packages/ui` owns reusable UI primitives, tokens, hooks, and presentation components. Feature/session orchestration and complete route composition stay in apps; promote presentation only after a reusable contract is demonstrated by real consumers.
 - `packages/typescript-config` owns shared TypeScript configuration only.
 
@@ -105,4 +112,4 @@ For design-system direction, start with `docs/design/kkb-design.md`; dated plans
 
 - Internal namespace: `@kkb/*` with `workspace:*` dependencies.
 - Shared packages are currently consumed from source rather than emitted build artifacts.
-- Prefer keeping root docs concise and linking into `docs/` for deeper plans, reports, and decisions.
+- Prefer concise, durable repository context. Do not create or link a deeper repository document when the work is better represented by current source, an active work surface, or an external reopenable artifact.

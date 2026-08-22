@@ -1,0 +1,7 @@
+interface:
+  display_name: "HTML Communication"
+  short_description: "Create a verified KKB HTML communication artifact"
+  default_prompt: "Use $html-communication to present this work as a verified, reopenable HTML artifact."
+
+policy:
+  allow_implicit_invocation: true

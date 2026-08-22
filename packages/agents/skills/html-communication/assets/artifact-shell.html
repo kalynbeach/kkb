@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="system">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <title>KKB artifact</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        --font-sans: "Geist", "Inter", ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --font-mono: "Geist Mono", "SFMono-Regular", Consolas, monospace;
+        --bg: #f7f7f5;
+        --surface: #ffffff;
+        --surface-raised: #fbfbfa;
+        --text: #191918;
+        --muted: #696966;
+        --border: #deded9;
+        --accent: #315dca;
+        --accent-soft: #e9efff;
+        --positive: #167451;
+        --warning: #9a5a00;
+        --negative: #b43b39;
+        --shadow: 0 14px 40px rgb(24 24 22 / 8%);
+        --radius: 14px;
+        --measure: 72ch;
+      }
+
+      :root[data-theme="light"] { color-scheme: light; }
+
+      :root[data-theme="dark"] {
+        color-scheme: dark;
+        --bg: #111210;
+        --surface: #191a18;
+        --surface-raised: #1f201e;
+        --text: #f0f0eb;
+        --muted: #aaa9a2;
+        --border: #353632;
+        --accent: #8eabff;
+        --accent-soft: #202d52;
+        --positive: #6fd0a6;
+        --warning: #f0b968;
+        --negative: #f28b88;
+        --shadow: 0 18px 50px rgb(0 0 0 / 28%);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root[data-theme="system"] {
+          --bg: #111210;
+          --surface: #191a18;
+          --surface-raised: #1f201e;
+          --text: #f0f0eb;
+          --muted: #aaa9a2;
+          --border: #353632;
+          --accent: #8eabff;
+          --accent-soft: #202d52;
+          --positive: #6fd0a6;
+          --warning: #f0b968;
+          --negative: #f28b88;
+          --shadow: 0 18px 50px rgb(0 0 0 / 28%);
+        }
+      }
+
+      * { box-sizing: border-box; }
+
+      html {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-sans);
+        line-height: 1.55;
+        overflow-wrap: break-word;
+        scroll-behavior: smooth;
+      }
+
+      body { margin: 0; min-width: 0; }
+
+      a { color: var(--accent); text-underline-offset: 0.18em; }
+      a:hover { text-decoration-thickness: 2px; }
+
+      code, pre { font-family: var(--font-mono); }
+
+      code {
+        padding: 0.12rem 0.34rem;
+        border: 1px solid var(--border);
+        border-radius: 0.35rem;
+        background: var(--surface-raised);
+        font-size: 0.9em;
+      }
+
+      pre {
+        max-width: 100%;
+        overflow-x: auto;
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface-raised);
+        font-size: 0.86rem;
+      }
+
+      pre code {
+        padding: 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        font-size: inherit;
+      }
+
+      /* Mermaid uses <pre> as its source container; diagrams are not code blocks. */
+      pre.mermaid {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        font-family: var(--font-sans);
+        font-size: inherit;
+      }
+
+      pre.mermaid > svg { display: block; margin-inline: auto; }
+
+      pre:focus-visible,
+      .table-wrap:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+      .artifact-shell {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 24px 0 64px;
+      }
+
+      .artifact-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 52px;
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+
+      .artifact-mark {
+        color: var(--text);
+        font-weight: 650;
+        letter-spacing: -0.01em;
+      }
+
+      .theme-toggle {
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        background: var(--surface);
+        color: var(--text);
+        padding: 0.46rem 0.72rem;
+        font: inherit;
+        cursor: pointer;
+      }
+
+      .theme-toggle:hover { border-color: var(--accent); }
+      .theme-toggle:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+      .artifact-header {
+        max-width: 880px;
+        margin-bottom: 48px;
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        color: var(--accent);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      h1, h2, h3 {
+        margin: 0;
+        line-height: 1.12;
+        letter-spacing: -0.035em;
+        text-wrap: balance;
+      }
+
+      h1 { max-width: 18ch; font-size: clamp(2.45rem, 7vw, 5.75rem); }
+      h2 { margin-bottom: 18px; font-size: clamp(1.65rem, 3.2vw, 2.7rem); }
+      h3 { font-size: 1.08rem; letter-spacing: -0.018em; }
+
+      .lede {
+        max-width: var(--measure);
+        margin: 22px 0 0;
+        color: var(--muted);
+        font-size: clamp(1.06rem, 1.7vw, 1.3rem);
+      }
+
+      .artifact-section {
+        padding: 40px 0;
+        border-top: 1px solid var(--border);
+      }
+
+      .prose { max-width: var(--measure); }
+      .prose p:first-child { margin-top: 0; }
+      .prose p:last-child { margin-bottom: 0; }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 16px;
+      }
+
+      .card {
+        grid-column: span 4;
+        min-width: 0;
+        padding: 20px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: var(--shadow);
+      }
+
+      .card p { margin-bottom: 0; color: var(--muted); }
+
+      .table-wrap {
+        max-width: 100%;
+        overflow-x: auto;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--surface);
+      }
+
+      table { width: 100%; border-collapse: collapse; }
+      th, td { padding: 12px 14px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+      th { color: var(--muted); font-size: 0.78rem; letter-spacing: 0.06em; text-transform: uppercase; }
+      tr:last-child td { border-bottom: 0; }
+
+      .artifact-footer {
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 0.86rem;
+      }
+
+      @media (max-width: 760px) {
+        .artifact-shell { width: min(100% - 24px, 1180px); padding-top: 16px; }
+        .artifact-toolbar { margin-bottom: 36px; }
+        .artifact-header { margin-bottom: 36px; }
+        .artifact-section { padding: 30px 0; }
+        .card { grid-column: 1 / -1; }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+      }
+
+      /* Add artifact-specific styles below. Preserve the base token roles. */
+    </style>
+  </head>
+  <body>
+    <main class="artifact-shell">
+      <div class="artifact-toolbar">
+        <span class="artifact-mark">KKB / artifact</span>
+        <button class="theme-toggle" type="button">Mode: system</button>
+      </div>
+
+      <!-- Replace the example content while preserving the semantic shell. -->
+      <header class="artifact-header">
+        <p class="eyebrow">Artifact type · YYYY-MM-DD</p>
+        <h1>Outcome-led artifact title</h1>
+        <p class="lede">State the central result, intuition, or decision in plain language.</p>
+      </header>
+
+      <section class="artifact-section" aria-labelledby="overview-heading">
+        <h2 id="overview-heading">Overview</h2>
+        <div class="prose">
+          <p>Use prose when the reader needs a coherent explanation rather than a visual inventory.</p>
+        </div>
+      </section>
+
+      <section class="artifact-section" aria-labelledby="details-heading">
+        <h2 id="details-heading">Details</h2>
+        <div class="grid">
+          <article class="card">
+            <h3>Focused unit</h3>
+            <p>Cards are for independently scannable findings, components, or decisions.</p>
+          </article>
+        </div>
+      </section>
+
+      <footer class="artifact-footer">Private · Local single-file artifact · Verified YYYY-MM-DD</footer>
+    </main>
+
+    <script>
+      (() => {
+        const root = document.documentElement;
+        const toggle = document.querySelector(".theme-toggle");
+        const modes = ["system", "light", "dark"];
+
+        const observedScrollRegions = new Set();
+        const scrollRegionObserver =
+          typeof ResizeObserver === "function"
+            ? new ResizeObserver(scheduleScrollableRegionSync)
+            : null;
+        let scrollSyncFrame = null;
+
+        function syncScrollableRegions() {
+          const scrollRegions = new Set(document.querySelectorAll("pre, .table-wrap"));
+
+          if (scrollRegionObserver) {
+            for (const region of observedScrollRegions) {
+              if (!scrollRegions.has(region)) {
+                scrollRegionObserver.unobserve(region);
+                observedScrollRegions.delete(region);
+              }
+            }
+          }
+
+          for (const region of scrollRegions) {
+            region.tabIndex = region.scrollWidth > region.clientWidth ? 0 : -1;
+
+            if (scrollRegionObserver && !observedScrollRegions.has(region)) {
+              scrollRegionObserver.observe(region);
+              observedScrollRegions.add(region);
+            }
+          }
+        }
+
+        function scheduleScrollableRegionSync() {
+          if (scrollSyncFrame !== null) return;
+
+          scrollSyncFrame = window.requestAnimationFrame(() => {
+            scrollSyncFrame = null;
+            syncScrollableRegions();
+          });
+        }
+
+        syncScrollableRegions();
+        window.addEventListener("resize", scheduleScrollableRegionSync);
+
+        if (typeof MutationObserver === "function") {
+          new MutationObserver(scheduleScrollableRegionSync).observe(document.body, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+          });
+        }
+
+        function setMode(mode) {
+          root.dataset.theme = mode;
+
+          if (toggle) {
+            toggle.textContent = `Mode: ${mode}`;
+            toggle.setAttribute("aria-label", `Color mode: ${mode}. Activate to change.`);
+          }
+        }
+
+        setMode(modes.includes(root.dataset.theme) ? root.dataset.theme : "system");
+
+        toggle?.addEventListener("click", () => {
+          const next = modes[(modes.indexOf(root.dataset.theme) + 1) % modes.length];
+          setMode(next);
+        });
+      })();
+    </script>
+  </body>
+</html>
