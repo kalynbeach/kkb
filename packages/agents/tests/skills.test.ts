@@ -18,24 +18,35 @@ function runArtifactShellScript(
   {
     codeBlocks = [],
     tableWraps = [],
-  }: { codeBlocks?: ScrollRegion[]; tableWraps?: ScrollRegion[] } = {},
+    withToggle = true,
+  }: { codeBlocks?: ScrollRegion[]; tableWraps?: ScrollRegion[]; withToggle?: boolean } = {},
 ) {
   const eventListeners = new Map<string, () => void>();
-  const root = { dataset: {} as { theme?: string } };
-  const toggle = {
-    textContent: "",
-    ariaLabel: "",
-    setAttribute(name: string, value: string) {
-      if (name === "aria-label") this.ariaLabel = value;
-    },
-    addEventListener(name: string, listener: () => void) {
-      eventListeners.set(name, listener);
-    },
+  const resizeObservedTargets = new Set<ScrollRegion>();
+  const mutationObservation = {
+    target: null as object | null,
+    options: null as { childList?: boolean; subtree?: boolean; characterData?: boolean } | null,
   };
+  let resizeObserverCallback: (() => void) | undefined;
+  let mutationObserverCallback: (() => void) | undefined;
+  const root = { dataset: {} as { theme?: string } };
+  const toggle = withToggle
+    ? {
+        textContent: "",
+        ariaLabel: "",
+        setAttribute(name: string, value: string) {
+          if (name === "aria-label") this.ariaLabel = value;
+        },
+        addEventListener(name: string, listener: () => void) {
+          eventListeners.set(name, listener);
+        },
+      }
+    : null;
 
   if (theme !== undefined) root.dataset.theme = theme;
 
   const documentStub = {
+    body: {},
     documentElement: root,
     querySelector: () => toggle,
     querySelectorAll(selector: string) {
@@ -52,13 +63,59 @@ function runArtifactShellScript(
       eventListeners.set(name, listener);
     },
   };
+  class ResizeObserverStub {
+    constructor(listener: () => void) {
+      resizeObserverCallback = listener;
+    }
+
+    observe(target: ScrollRegion) {
+      resizeObservedTargets.add(target);
+    }
+
+    unobserve(target: ScrollRegion) {
+      resizeObservedTargets.delete(target);
+    }
+  }
+  class MutationObserverStub {
+    constructor(listener: () => void) {
+      mutationObserverCallback = listener;
+    }
+
+    observe(
+      target: object,
+      options: { childList?: boolean; subtree?: boolean; characterData?: boolean },
+    ) {
+      mutationObservation.target = target;
+      mutationObservation.options = options;
+    }
+  }
   const artifactShell = readFileSync(artifactShellFile, "utf8");
   const script = artifactShell.match(/<script>([\s\S]*?)<\/script>/)?.[1];
 
   expect(script).toBeDefined();
-  Function("document", "window", script ?? "")(documentStub, windowStub);
+  Function(
+    "document",
+    "window",
+    "ResizeObserver",
+    "MutationObserver",
+    script ?? "",
+  )(documentStub, windowStub, ResizeObserverStub, MutationObserverStub);
 
-  return { eventListeners, root, toggle };
+  return {
+    eventListeners,
+    observers: {
+      mutationObservation,
+      resizeObservedTargets,
+      triggerMutation() {
+        if (mutationObservation.target) mutationObserverCallback?.();
+      },
+      triggerResize(target: ScrollRegion) {
+        if (resizeObservedTargets.has(target)) resizeObserverCallback?.();
+      },
+    },
+    root,
+    toggle,
+  };
 }
 
 function markdownFiles(directory: string): string[] {
@@ -147,9 +204,16 @@ describe("HTML communication artifact shell", () => {
       const { root, toggle } = runArtifactShellScript(theme);
 
       expect(root.dataset.theme).toBe("system");
-      expect(toggle.textContent).toBe("Mode: system");
-      expect(toggle.ariaLabel).toBe("Color mode: system. Activate to change.");
+      expect(toggle?.textContent).toBe("Mode: system");
+      expect(toggle?.ariaLabel).toBe("Color mode: system. Activate to change.");
     }
+  });
+
+  test("initializes the theme without the optional mode control", () => {
+    const { root, toggle } = runArtifactShellScript(undefined, { withToggle: false });
+
+    expect(root.dataset.theme).toBe("system");
+    expect(toggle).toBeNull();
   });
 
   test("keeps only horizontally overflowing regions in the tab order", () => {
@@ -169,6 +233,34 @@ describe("HTML communication artifact shell", () => {
 
     expect(codeBlock.tabIndex).toBe(-1);
     expect(tableWrap.tabIndex).toBe(0);
+  });
+
+  test("resynchronizes regions after layout and content changes", () => {
+    const codeBlock = { clientWidth: 0, scrollWidth: 0, tabIndex: -1 };
+    const codeBlocks = [codeBlock];
+    const tableWraps: ScrollRegion[] = [];
+    const { observers } = runArtifactShellScript("system", { codeBlocks, tableWraps });
+
+    expect(observers.resizeObservedTargets.has(codeBlock)).toBe(true);
+    expect(observers.mutationObservation).toMatchObject({
+      target: expect.any(Object),
+      options: { childList: true, subtree: true, characterData: true },
+    });
+
+    codeBlock.clientWidth = 320;
+    codeBlock.scrollWidth = 640;
+    observers.triggerResize(codeBlock);
+    expect(codeBlock.tabIndex).toBe(0);
+
+    const addedTableWrap = { clientWidth: 320, scrollWidth: 640, tabIndex: -1 };
+    tableWraps.push(addedTableWrap);
+    observers.triggerMutation();
+    expect(addedTableWrap.tabIndex).toBe(0);
+    expect(observers.resizeObservedTargets.has(addedTableWrap)).toBe(true);
+
+    codeBlocks.splice(0, 1);
+    observers.triggerMutation();
+    expect(observers.resizeObservedTargets.has(codeBlock)).toBe(false);
   });
 });
 

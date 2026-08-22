@@ -275,26 +275,55 @@
       const toggle = document.querySelector(".theme-toggle");
       const modes = ["system", "light", "dark"];
 
-      const scrollRegions = document.querySelectorAll("pre, .table-wrap");
+      const observedScrollRegions = new Set();
+      const scrollRegionObserver =
+        typeof ResizeObserver === "function" ? new ResizeObserver(syncScrollableRegions) : null;
 
       function syncScrollableRegions() {
+        const scrollRegions = new Set(document.querySelectorAll("pre, .table-wrap"));
+
+        if (scrollRegionObserver) {
+          for (const region of observedScrollRegions) {
+            if (!scrollRegions.has(region)) {
+              scrollRegionObserver.unobserve(region);
+              observedScrollRegions.delete(region);
+            }
+          }
+        }
+
         for (const region of scrollRegions) {
           region.tabIndex = region.scrollWidth > region.clientWidth ? 0 : -1;
+
+          if (scrollRegionObserver && !observedScrollRegions.has(region)) {
+            scrollRegionObserver.observe(region);
+            observedScrollRegions.add(region);
+          }
         }
       }
 
       syncScrollableRegions();
       window.addEventListener("resize", syncScrollableRegions);
 
+      if (typeof MutationObserver === "function") {
+        new MutationObserver(syncScrollableRegions).observe(document.body, {
+          childList: true,
+          subtree: true,
+          characterData: true,
+        });
+      }
+
       function setMode(mode) {
         root.dataset.theme = mode;
-        toggle.textContent = `Mode: ${mode}`;
-        toggle.setAttribute("aria-label", `Color mode: ${mode}. Activate to change.`);
+
+        if (toggle) {
+          toggle.textContent = `Mode: ${mode}`;
+          toggle.setAttribute("aria-label", `Color mode: ${mode}. Activate to change.`);
+        }
       }
 
       setMode(modes.includes(root.dataset.theme) ? root.dataset.theme : "system");
 
-      toggle.addEventListener("click", () => {
+      toggle?.addEventListener("click", () => {
         const next = modes[(modes.indexOf(root.dataset.theme) + 1) % modes.length];
         setMode(next);
       });

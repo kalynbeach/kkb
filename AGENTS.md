@@ -42,10 +42,10 @@ Read `README.md` for workspace structure, routes, commands, validation, document
 
 ## Documentation
 
-- Keep docs and code aligned. If implementation changes behavior, plans, architecture notes, reports, or follow-up docs, update the relevant docs in the same pass.
-- Reuse existing docs directories and naming conventions. Do not invent new top-level docs folders when an existing location already fits. Date-stamp new docs consistently with the repo's existing format.
-- Before touching architecture, planning, or roadmap material, inspect `docs/` for the latest related documents.
-- Add reference links to existing documentation when relevant.
+- Keep docs and code aligned. If implementation changes behavior or makes an existing durable document inaccurate, update the relevant docs in the same pass.
+- Keep repository context limited to durable, current truth. Active plans, reports, research, and evidence belong in requests, sessions, issues, PRs, diffs, or external reopenable artifacts unless explicitly requested, required by repository convention, or essential to a durable contract.
+- Before architecture, planning, or roadmap work, start with the current request, source and diff, `README.md`, and directly relevant stable context rather than scanning `docs/` for the newest artifact.
+- When a repository document is warranted, reuse existing directories and naming conventions, date-stamp consistently, and add relevant reference links.
 
 ## Git
 
