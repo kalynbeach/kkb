@@ -105,6 +105,16 @@
         font-size: inherit;
       }
 
+      /* Mermaid uses <pre> as its source container; diagrams are not code blocks. */
+      pre.mermaid {
+        padding: 0;
+        border: 0;
+        background: transparent;
+        font-family: var(--font-sans);
+        font-size: inherit;
+        text-align: center;
+      }
+
       pre:focus-visible,
       .table-wrap:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
 
