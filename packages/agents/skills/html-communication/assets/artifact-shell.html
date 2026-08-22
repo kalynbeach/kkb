@@ -313,7 +313,7 @@
         }
 
         syncScrollableRegions();
-        window.addEventListener("resize", syncScrollableRegions);
+        window.addEventListener("resize", scheduleScrollableRegionSync);
 
         if (typeof MutationObserver === "function") {
           new MutationObserver(scheduleScrollableRegionSync).observe(document.body, {

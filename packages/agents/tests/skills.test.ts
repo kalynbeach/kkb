@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, extname, join, relative, resolve } from "node:path";
+import { createContext, runInContext } from "node:vm";
 
 const packageDirectory = resolve(import.meta.dir, "..");
 const skillsDirectory = join(packageDirectory, "skills");
@@ -98,16 +99,24 @@ function runArtifactShellScript(
   const script = artifactShell.match(/<script>([\s\S]*?)<\/script>/)?.[1];
 
   expect(script).toBeDefined();
-  Function(
-    "document",
-    "window",
-    "ResizeObserver",
-    "MutationObserver",
-    script ?? "",
-  )(documentStub, windowStub, ResizeObserverStub, MutationObserverStub);
+
+  const sandbox = {
+    document: documentStub,
+    window: windowStub,
+    ResizeObserver: ResizeObserverStub,
+    MutationObserver: MutationObserverStub,
+  };
+  const initialGlobals = new Set(Object.keys(sandbox));
+  const context = createContext(sandbox);
+
+  runInContext(script ?? "", context);
 
   return {
+    evaluate(source: string) {
+      return runInContext(source, context);
+    },
     eventListeners,
+    globals: Object.keys(sandbox).filter((key) => !initialGlobals.has(key)),
     observers: {
       animationFrames,
       mutationObservation,
@@ -209,11 +218,12 @@ describe("Markdown links", () => {
 
 describe("HTML communication artifact shell", () => {
   test("keeps its implementation bindings out of the global scope", () => {
-    const artifactShell = readFileSync(artifactShellFile, "utf8");
-    const script = artifactShell.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+    const { evaluate, globals } = runArtifactShellScript("system");
 
-    expect(script).toBeDefined();
-    expect(() => Function(`${script}\n${script}`)).not.toThrow();
+    expect(globals).toEqual([]);
+    expect(() =>
+      evaluate("const root = document.documentElement; const toggle = null; function setMode() {}"),
+    ).not.toThrow();
   });
 
   test("falls back to system mode when the configured theme is missing or invalid", () => {
@@ -250,7 +260,7 @@ describe("HTML communication artifact shell", () => {
   test("keeps only horizontally overflowing regions in the tab order", () => {
     const codeBlock = { clientWidth: 320, scrollWidth: 640, tabIndex: -1 };
     const tableWrap = { clientWidth: 320, scrollWidth: 320, tabIndex: -1 };
-    const { eventListeners } = runArtifactShellScript("system", {
+    const { eventListeners, observers } = runArtifactShellScript("system", {
       codeBlocks: [codeBlock],
       tableWraps: [tableWrap],
     });
@@ -262,6 +272,9 @@ describe("HTML communication artifact shell", () => {
     tableWrap.scrollWidth = 640;
     eventListeners.get("resize")?.();
 
+    expect(codeBlock.tabIndex).toBe(0);
+    expect(tableWrap.tabIndex).toBe(-1);
+    observers.runAnimationFrames();
     expect(codeBlock.tabIndex).toBe(-1);
     expect(tableWrap.tabIndex).toBe(0);
   });
