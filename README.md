@@ -19,7 +19,7 @@ This repo is a Bun-workspace Turborepo with Next.js 16, React 19, TypeScript 6, 
 - `apps/docs` (`@kkb/docs`) — early-stage Next.js docs shell on port 3001.
 - `packages/audio` (`@kkb/audio`) — headless browser audio runtime, source contracts, worklet helpers, metrics, oscilloscope runtime, signal providers, and WebGPU renderer.
 - `packages/ableton` (`@kkb/ableton`) — Ableton Live extension experiments, packaged `.ablx` artifacts, and shared Live utilities.
-- `packages/agents` (`@kkb/agents`) — canonical KKB agent context, independently addressable skills, package research, and integrity validation.
+- `packages/agents` (`@kkb/agents`) — canonical KKB agent context, independently addressable skills, package decision and provenance records, and integrity validation.
 - `packages/ui` (`@kkb/ui`) — private, source-consumed React UI package with Base UI-backed primitives, shared tokens and hooks, audio presentation, and json-render adapters.
 - `packages/typescript-config` (`@kkb/typescript-config`) — shared TypeScript configs used by all workspaces.
 

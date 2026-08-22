@@ -41,7 +41,7 @@ Do not turn every fact into a card. Do not use a diagram when one sentence or a 
 
 - Preserve the narrative order at narrow widths.
 - Collapse multi-column cards to one column before text becomes cramped.
-- Contain wide tables in their own horizontal scroller; never make the page itself overflow.
+- Contain wide tables in a `<div class="table-wrap">` horizontal scroller; never make the page itself overflow.
 - Avoid fixed heights for prose and evidence.
 - Add compact section navigation when four or more substantial sections make orientation difficult; verify every anchor.
 
