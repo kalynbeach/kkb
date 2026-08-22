@@ -21,6 +21,7 @@ function runArtifactShellScript(
     withToggle = true,
   }: { codeBlocks?: ScrollRegion[]; tableWraps?: ScrollRegion[]; withToggle?: boolean } = {},
 ) {
+  const animationFrames: (() => void)[] = [];
   const eventListeners = new Map<string, () => void>();
   const resizeObservedTargets = new Set<ScrollRegion>();
   const mutationObservation = {
@@ -61,6 +62,10 @@ function runArtifactShellScript(
   const windowStub = {
     addEventListener(name: string, listener: () => void) {
       eventListeners.set(name, listener);
+    },
+    requestAnimationFrame(listener: () => void) {
+      animationFrames.push(listener);
+      return animationFrames.length;
     },
   };
   class ResizeObserverStub {
@@ -104,8 +109,12 @@ function runArtifactShellScript(
   return {
     eventListeners,
     observers: {
+      animationFrames,
       mutationObservation,
       resizeObservedTargets,
+      runAnimationFrames() {
+        for (const callback of animationFrames.splice(0)) callback();
+      },
       triggerMutation() {
         if (mutationObservation.target) mutationObserverCallback?.();
       },
@@ -199,6 +208,14 @@ describe("Markdown links", () => {
 });
 
 describe("HTML communication artifact shell", () => {
+  test("keeps its implementation bindings out of the global scope", () => {
+    const artifactShell = readFileSync(artifactShellFile, "utf8");
+    const script = artifactShell.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+
+    expect(script).toBeDefined();
+    expect(() => Function(`${script}\n${script}`)).not.toThrow();
+  });
+
   test("falls back to system mode when the configured theme is missing or invalid", () => {
     for (const theme of [undefined, "sepia"]) {
       const { root, toggle } = runArtifactShellScript(theme);
@@ -214,6 +231,20 @@ describe("HTML communication artifact shell", () => {
 
     expect(root.dataset.theme).toBe("system");
     expect(toggle).toBeNull();
+  });
+
+  test("cycles the mode control through every mode", () => {
+    const { eventListeners, root, toggle } = runArtifactShellScript("system");
+    const click = eventListeners.get("click");
+
+    click?.();
+    expect(root.dataset.theme).toBe("light");
+    click?.();
+    expect(root.dataset.theme).toBe("dark");
+    click?.();
+    expect(root.dataset.theme).toBe("system");
+    expect(toggle?.textContent).toBe("Mode: system");
+    expect(toggle?.ariaLabel).toBe("Color mode: system. Activate to change.");
   });
 
   test("keeps only horizontally overflowing regions in the tab order", () => {
@@ -255,11 +286,17 @@ describe("HTML communication artifact shell", () => {
     const addedTableWrap = { clientWidth: 320, scrollWidth: 640, tabIndex: -1 };
     tableWraps.push(addedTableWrap);
     observers.triggerMutation();
+    observers.triggerMutation();
+    expect(observers.animationFrames).toHaveLength(1);
+    expect(addedTableWrap.tabIndex).toBe(-1);
+
+    observers.runAnimationFrames();
     expect(addedTableWrap.tabIndex).toBe(0);
     expect(observers.resizeObservedTargets.has(addedTableWrap)).toBe(true);
 
     codeBlocks.splice(0, 1);
     observers.triggerMutation();
+    observers.runAnimationFrames();
     expect(observers.resizeObservedTargets.has(codeBlock)).toBe(false);
   });
 });
