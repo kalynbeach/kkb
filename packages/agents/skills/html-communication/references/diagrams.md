@@ -15,7 +15,7 @@ For dense systems, show a small overview first and move detailed contracts into 
 
 ## Mermaid policy
 
-Mermaid is the default for durable relationships and state because its source remains editable. Keep labels short, group only meaningful boundaries, and use shapes consistently. Include the Mermaid source with the artifact when the artifact is intended to preserve the full result.
+Mermaid is the default for durable relationships and state because its source remains editable. Render each diagram into a `<pre class="mermaid">` container so the packaged shell's diagram styling and scroll behavior apply. Keep labels short, group only meaningful boundaries, and use shapes consistently. Include the Mermaid source with the artifact when the artifact is intended to preserve the full result.
 
 Dependency handling follows the artifact privacy contract:
 
